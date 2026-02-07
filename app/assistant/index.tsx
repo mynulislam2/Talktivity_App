@@ -2,12 +2,11 @@ import {
   Animated,
   Dimensions,
   StyleSheet,
-  useAnimatedValue,
   View,
   ViewStyle,
 } from 'react-native';
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   AudioSession,
   useIOSAudioManagement,
@@ -15,7 +14,7 @@ import {
   useParticipantTracks,
   useRoomContext,
   VideoTrack,
-} from '@livekit/react-native';
+} from '@/hooks/livekit-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useRouter } from 'expo-router';
 import ControlBar from './ui/ControlBar';
@@ -252,12 +251,12 @@ const useAgentVisualizationPosition = (
   isChatVisible: boolean,
   hasLocalVideo: boolean
 ) => {
-  const width = useAnimatedValue(
-    isChatVisible ? collapsedWidth : expandedAgentWidth
-  );
-  const height = useAnimatedValue(
-    isChatVisible ? collapsedHeight : expandedAgentHeight
-  );
+  const width = useRef(
+    new Animated.Value(isChatVisible ? collapsedWidth : expandedAgentWidth)
+  ).current;
+  const height = useRef(
+    new Animated.Value(isChatVisible ? collapsedHeight : expandedAgentHeight)
+  ).current;
 
   useEffect(() => {
     const widthAnim = Animated.spring(
@@ -278,8 +277,8 @@ const useAgentVisualizationPosition = (
     };
   }, [width, height, isChatVisible]);
 
-  const x = useAnimatedValue(0);
-  const y = useAnimatedValue(0);
+  const x = useRef(new Animated.Value(0)).current;
+  const y = useRef(new Animated.Value(0)).current;
   useEffect(() => {
     let targetX: number;
     let targetY: number;
@@ -332,12 +331,12 @@ const useLocalVideoPosition = (
   isChatVisible: boolean,
   containerDimens: { width: number; height: number }
 ): ViewStyle => {
-  const width = useAnimatedValue(
-    isChatVisible ? collapsedWidth : expandedLocalWidth
-  );
-  const height = useAnimatedValue(
-    isChatVisible ? collapsedHeight : expandedLocalHeight
-  );
+  const width = useRef(
+    new Animated.Value(isChatVisible ? collapsedWidth : expandedLocalWidth)
+  ).current;
+  const height = useRef(
+    new Animated.Value(isChatVisible ? collapsedHeight : expandedLocalHeight)
+  ).current;
 
   useEffect(() => {
     const widthAnim = Animated.spring(

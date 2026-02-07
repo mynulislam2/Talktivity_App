@@ -13,7 +13,7 @@ const agentName = undefined
 // and using one of your API Keys to generate a token with custom TTL and permissions.
 
 // For use without a token server.
-const hardcodedUrl = '';
+const hardcodedUrl = 'ws://localhost:7880';
 const hardcodedToken = '';
 
 interface ConnectionContextType {
@@ -44,17 +44,21 @@ export function ConnectionProvider({ children }: ConnectionProviderProps) {
   const [isConnectionActive, setIsConnectionActive] = useState(false);
 
   const tokenSource = useMemo(() => {
-    if (sandboxID) {
-      return TokenSource.sandboxTokenServer(sandboxID)
-    } else {
-      return TokenSource.literal(
-        {
-          serverUrl: hardcodedUrl,
-          participantToken: hardcodedToken,
-        } satisfies TokenSourceResponseObject
-      )
+    if (sandboxID && sandboxID.trim() !== '') {
+      return TokenSource.sandboxTokenServer(sandboxID);
     }
-  }, [sandboxID, hardcodedUrl, hardcodedToken])
+
+    if (hardcodedToken && hardcodedToken.trim() !== '') {
+      return TokenSource.literal({
+        serverUrl: hardcodedUrl,
+        participantToken: hardcodedToken,
+      } satisfies TokenSourceResponseObject);
+    }
+
+    // Default to a sandbox server with an empty ID if nothing is configured.
+    // This avoids "Invalid JWT" errors from TokenSource.literal with an empty token.
+    return TokenSource.sandboxTokenServer('');
+  }, [sandboxID, hardcodedUrl, hardcodedToken]);
 
   const session = useSession(
     tokenSource,

@@ -3,6 +3,9 @@
   "compilerOptions": {
     "strict": true,
     "moduleResolution": "bundler",
+    "jsx": "react-jsx",
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
     "paths": {
       "@/*": [
         "./*"

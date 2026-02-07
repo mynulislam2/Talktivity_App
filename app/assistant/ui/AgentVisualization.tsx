@@ -1,5 +1,5 @@
 import { useAgent } from '@livekit/components-react';
-import { BarVisualizer, VideoTrack } from '@livekit/react-native';
+import { BarVisualizer, VideoTrack } from '@/hooks/livekit-native';
 import React, { useCallback, useState } from 'react';
 import {
   LayoutChangeEvent,

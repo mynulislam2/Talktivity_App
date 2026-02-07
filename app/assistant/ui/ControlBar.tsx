@@ -1,5 +1,5 @@
 import { TrackReference, useLocalParticipant } from '@livekit/components-react';
-import { BarVisualizer } from '@livekit/react-native';
+import { BarVisualizer } from '@/hooks/livekit-native';
 import { useEffect, useState } from 'react';
 import {
   ViewStyle,

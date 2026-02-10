@@ -180,32 +180,11 @@ const authSlice = createSlice({
       state.googleAuthLoading = false;
     },
     /**
-     * Initializes auth state from localStorage on app start
+     * Initializes auth state - Placeholder for backward compatibility
      */
     initializeAuth: (state) => {
-      const token = authService.getToken();
-      const user = authService.getUser();
-      const isAuthenticated = authService.isAuthenticated();
-
-      if (token && user && isAuthenticated) {
-        state.accessToken = token;
-        state.user = user;
-        state.isAuthenticated = true;
-        
-        // Try to get refresh token from localStorage
-        if (typeof window !== 'undefined') {
-          const refreshToken = localStorage.getItem('refreshToken');
-          if (refreshToken) {
-            state.refreshToken = refreshToken;
-          }
-        }
-      } else {
-        // Clear state if not authenticated
-        state.user = null;
-        state.accessToken = null;
-        state.refreshToken = null;
-        state.isAuthenticated = false;
-      }
+      // In React Native with Redux Persist, initialization is handled by PersistGate.
+      // Direct storage access is asynchronous and cannot be done in a synchronous reducer.
     },
   },
   extraReducers: (builder) => {

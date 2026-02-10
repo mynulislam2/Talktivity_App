@@ -17,7 +17,17 @@ import {
   selectCallStatusError,
 } from '@/store/slices/callSlice';
 
-export function useCallStatus() {
+export interface CallStatusReturn {
+  callStatus: ReturnType<typeof selectCallStatus>;
+  isLoading: boolean;
+  error: string | null;
+  canStartCall: boolean;
+  remainingTime: string;
+  totalDuration: number;
+  refreshStatus: () => void;
+}
+
+export function useCallStatus(): CallStatusReturn {
   const dispatch = useAppDispatch();
   const callStatus = useAppSelector(selectCallStatus);
   const isLoading = useAppSelector(selectCallStatusLoading);

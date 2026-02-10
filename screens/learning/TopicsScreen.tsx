@@ -1,209 +1,201 @@
 /**
  * Topics Screen
  * 
- * Browse and select learning topics
+ * Browse and select learning topics - matches Next.js /topics page
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
-  ActivityIndicator,
-  Pressable,
-  Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loadTopics, selectTopics, selectTopicsLoading, selectTopicsError } from '../../store/slices/topicsSlice';
-import TopicCard, { Topic } from '../../components/learning/TopicCard';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import {
+  useTopics,
+  useTopicCategories,
+  useRolePlayGeneration,
+  useTopicSelectionNative,
+  useUserRoleplays,
+} from '@/hooks/topics';
+import { Header } from '@/components/home';
+import { TopicCategory } from '@/components/topics/TopicCategory';
+import { RolePlayModal } from '@/components/topics/RolePlayModal';
+import { TopicsLoadingState } from '@/components/topics/TopicsLoadingState';
+import { TopicsErrorState } from '@/components/topics/TopicsErrorState';
+import type { Topic } from '@/types/topics';
+import { CUSTOM_ROLE_PLAY_TOPIC } from '@/lib/topics/processCategories';
+import { TopicsScreenProps } from '@/navigation/types';
+import { spacing } from '@/styles/spacing';
 
-interface TopicsScreenProps {
-  navigation: any;
-}
+const TopicsScreen: React.FC<TopicsScreenProps> = () => {
+  const navigation = useNavigation();
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
-const TopicsScreen: React.FC<TopicsScreenProps> = ({ navigation }) => {
-  const dispatch = useAppDispatch();
-
-  // Redux selectors
-  const topics = useAppSelector(selectTopics);
-  const loading = useAppSelector(selectTopicsLoading);
-  const error = useAppSelector(selectTopicsError);
+  // Custom hooks
+  const { categories, isLoading, error, refreshTopics } = useTopics();
+  const { roleplays, refreshRoleplays } = useUserRoleplays();
   
-  const [selectedLevel, setSelectedLevel] = useState<'all' | 'beginner' | 'intermediate' | 'advanced'>('all');
+  const mergedCategories = useMemo(() => {
+    const filtered = (categories || []).filter(
+      (c) => c.category_name !== 'Role Play Scenarios' && c.category_name !== 'Custom Category'
+    );
 
-  // Load topics from API on component mount
-  useEffect(() => {
-    dispatch(loadTopics());
-  }, [dispatch]);
+    const roleplayTopics: Topic[] = [
+      CUSTOM_ROLE_PLAY_TOPIC,
+      ...(roleplays || []).map((rp) => ({
+        id: String(rp.id),
+        title: rp.title,
+        imageUrl: rp.image_url || undefined,
+        prompt: rp.prompt,
+        firstPrompt: rp.first_prompt,
+        isCustom: false,
+        customScenarioDetails: {
+          myRole: rp.my_role,
+          otherRole: rp.other_role,
+          situation: rp.situation,
+        },
+        created_at: rp.created_at,
+        updated_at: rp.updated_at,
+        categoryName: 'Role Play Scenarios',
+      })),
+    ];
 
-  // Show error alert if loading fails
-  useEffect(() => {
-    if (error) {
-      Alert.alert('Error', error);
-    }
-  }, [error]);
+    const roleplayCategory = {
+      id: 'role-play-user',
+      category_name: 'Role Play Scenarios',
+      topics: roleplayTopics,
+      totalTopics: roleplayTopics.length,
+      displayedTopics: roleplayTopics.length,
+      planType: 'user-specific',
+      restricted: false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
 
-  const handleTopicPress = (topic: Topic) => {
-    // Navigate to PracticeScreen within learning stack
-    navigation.navigate('PracticeScreen', { topicId: topic.id, topicName: topic.title });
-  };
+    return [roleplayCategory, ...filtered];
+  }, [categories, roleplays]);
 
-  const filteredTopics = selectedLevel === 'all'
-    ? topics
-    : topics.filter((t) => t.level === selectedLevel);
+  const { processedCategories, expandedCategories, toggleCategory } = useTopicCategories(mergedCategories);
+  const { isGenerating, generateRolePlay } = useRolePlayGeneration();
+  const { handleTopicSelect } = useTopicSelectionNative();
 
-  const levelButtons = [
-    { label: 'All', value: 'all' as const },
-    { label: 'Beginner', value: 'beginner' as const },
-    { label: 'Intermediate', value: 'intermediate' as const },
-    { label: 'Advanced', value: 'advanced' as const },
-  ];
+  // Handle topic selection
+  const handleDiscussClick = useCallback(
+    (topic: Topic, categoryName: string) => {
+      handleTopicSelect(topic, categoryName);
+    },
+    [handleTopicSelect]
+  );
+
+  // Handle custom roleplay creation
+  const handleStartCustomRolePlay = useCallback(
+    async (data: { myRole: string; otherRole: string; situation: string }) => {
+      try {
+        const createdTopic = await generateRolePlay(data);
+        
+        // Mark this as a roleplay session
+        await AsyncStorage.setItem('isRoleplaySession', 'true');
+        await AsyncStorage.setItem('selectedRoleplayTopic', JSON.stringify(createdTopic));
+        
+        setIsModalOpen(false);
+        await refreshRoleplays();
+        
+        // Navigate to Practice page to start the roleplay session
+        navigation.dispatch(
+          CommonActions.navigate({
+            name: 'LearningStack',
+            params: {
+              screen: 'PracticeScreen',
+            },
+          })
+        );
+      } catch (err: any) {
+        const errorMessage = err.message || 'Failed to create custom topic.';
+        // Show error alert
+        // In a real app, you might want to use a toast library
+        console.error(errorMessage);
+      }
+    },
+    [generateRolePlay, refreshRoleplays, navigation]
+  );
+
+  const handleCustomRolePlayClick = useCallback(() => {
+    setIsModalOpen(true);
+  }, []);
+
+  if (isLoading) {
+    return <TopicsLoadingState />;
+  }
+
+  if (error) {
+    return <TopicsErrorState error={error} onRetry={refreshTopics} />;
+  }
 
   return (
-    <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Topics</Text>
-        <Text style={styles.subtitle}>Choose a topic to practice</Text>
-      </View>
-
-      {/* Level Filter */}
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
+      <Header />
       <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={styles.filterScroll}
-        contentContainerStyle={styles.filterContent}
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
       >
-        {levelButtons.map((btn) => (
-          <Pressable
-            key={btn.value}
-            style={[
-              styles.filterButton,
-              selectedLevel === btn.value && styles.filterButtonActive,
-            ]}
-            onPress={() => setSelectedLevel(btn.value)}
-          >
-            <Text
-              style={[
-                styles.filterButtonText,
-                selectedLevel === btn.value && styles.filterButtonTextActive,
-              ]}
-            >
-              {btn.label}
-            </Text>
-          </Pressable>
-        ))}
-      </ScrollView>
-
-      {/* Topics List */}
-      {loading ? (
-        <View style={styles.centerContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      ) : error ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.errorText}>{error}</Text>
-        </View>
-      ) : filteredTopics.length === 0 ? (
-        <View style={styles.centerContainer}>
-          <Text style={styles.emptyText}>No topics available</Text>
-        </View>
-      ) : (
-        <ScrollView
-          style={styles.topicsScroll}
-          contentContainerStyle={styles.topicsContent}
-          showsVerticalScrollIndicator={false}
-        >
-          {filteredTopics.map((topic) => (
-            <TopicCard
-              key={topic.id}
-              topic={topic}
-              onPress={handleTopicPress}
+        {processedCategories.length > 0 ? (
+          processedCategories.map((category) => (
+            <TopicCategory
+              key={category.id || category.category_name}
+              category={category}
+              onDiscuss={handleDiscussClick}
+              onCustomClick={handleCustomRolePlayClick}
+              isExpanded={expandedCategories.has(category.id)}
+              onToggleExpand={() => toggleCategory(category.id)}
             />
-          ))}
-        </ScrollView>
-      )}
+          ))
+        ) : (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>No topic categories found from the server.</Text>
+            {/* Retry button could be added here */}
+          </View>
+        )}
+      </ScrollView>
+      
+      <RolePlayModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onStart={handleStartCustomRolePlay}
+        isGenerating={isGenerating}
+      />
     </SafeAreaView>
   );
 };
 
-// Pressable import needed
-import { Pressable } from 'react-native';
-
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#050110',
   },
-  header: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#999',
-  },
-  filterScroll: {
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  filterContent: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    gap: spacing.sm,
-  },
-  filterButton: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.sm,
-    borderRadius: 20,
-    backgroundColor: '#f0f0f0',
-    marginRight: spacing.sm,
-  },
-  filterButtonActive: {
-    backgroundColor: colors.primary,
-  },
-  filterButtonText: {
-    fontSize: 14,
-    color: '#666',
-    fontWeight: '500',
-  },
-  filterButtonTextActive: {
-    color: '#fff',
-  },
-  topicsScroll: {
+  scrollView: {
     flex: 1,
   },
-  topicsContent: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
+  scrollContent: {
+    paddingHorizontal: 16,
+    paddingTop: spacing.lg,
+    paddingBottom: spacing['3xl'],
   },
-  centerContainer: {
+  emptyContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  errorText: {
-    fontSize: 16,
-    color: colors.error,
-    textAlign: 'center',
+    padding: spacing.xl,
   },
   emptyText: {
+    color: '#fff',
     fontSize: 16,
-    color: '#999',
     textAlign: 'center',
   },
 });

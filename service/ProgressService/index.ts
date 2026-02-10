@@ -139,7 +139,7 @@ class ProgressService {
    */
   async getTodayProgress(): Promise<DailyProgressResponse> {
     // Use UTC date for API calls (business logic)
-    const { getUtcToday } = require('@/Utils/timezoneUtils');
+    const { getUtcToday } = require('@/utils/timezoneUtils');
     const utcDate = getUtcToday();
     
     return this.getDailyProgress(utcDate);

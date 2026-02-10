@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { TimeLimitStatus } from '../service/TimeLimitService';
+import type { TimeLimitStatus } from '@/service/TimeLimitService';
 
 /**
  * @deprecated

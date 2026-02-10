@@ -10,45 +10,61 @@ import { CompositeScreenProps } from '@react-navigation/native';
 
 // Auth Stack
 export type AuthStackParamList = {
+  WelcomeOnboarding: undefined;
   Login: undefined;
   Signup: undefined;
   ForgotPassword: undefined;
+  Onboarding: undefined;
+  CallScreen: { CallStart?: boolean } | undefined;
+  ReportScreen: { sessionId: string; sessionType: 'practice' | 'call'; reportData: any } | undefined;
+  SubscriptionScreen: undefined; // For onboarding flow (no bottom tabs)
   FreeTrial: undefined;
   FreeTrialSuccess: undefined;
+  Checkout: { plan: 'Basic' | 'Pro' };
+  PaymentSuccess: { plan: any; amount: string };
+  PaymentFailure: { reason: string; plan: any };
+  PaymentCancel: { orderId?: string; tranId?: string; response?: any };
+  Privacy: undefined;
+  Terms: undefined;
 };
 
-// Learning Stack (Topics, Practice, Call, Roleplay, Progress, Report, Quiz)
+// Learning Stack (Topics, Practice, Call, Progress, Report, Quiz)
 export type LearningStackParamList = {
   TopicsScreen: undefined;
   PracticeScreen: { topicId?: string; topicName?: string };
   CallScreen: { topicId?: string };
-  RoleplayScreen: { scenarioId?: string };
   ProgressScreen: undefined;
-  ReportScreen: { sessionId: string; sessionType: 'practice' | 'call' | 'roleplay'; reportData: any };
+  ReportScreen: { sessionId: string; sessionType: 'practice' | 'call'; reportData: any };
+  TodaysReportScreen: undefined;
   QuizScreen: { topicId?: string; topicName?: string };
   ListeningQuizScreen: { topicId?: string; topicName?: string };
 };
 
 // Social Stack (Chat, Community, Leaderboard)
 export type SocialStackParamList = {
-  ChatScreen: { contactId?: string };
+  ChatScreen: { contactId?: string; dmId?: number };
   CommunityScreen: undefined;
+  DMChatScreen: { dmId: number };
+  GroupChatScreen: { groupId: number };
   LeaderboardScreen: undefined;
 };
 
-// Profile Stack (Profile, Edit, Settings, Subscription, Payment)
+// Profile Stack (Profile, Edit, Settings, Subscription, Payment, Free Trial)
 export type ProfileStackParamList = {
   ProfileScreen: undefined;
   EditProfileScreen: undefined;
   SettingsScreen: undefined;
   SubscriptionScreen: undefined;
   SubscriptionPlans: undefined;
-  Checkout: { plan: any };
+  Checkout: { plan: 'Basic' | 'Pro' };
   PaymentSuccess: { plan: any; amount: string };
   PaymentFailure: { reason: string; plan: any };
-  PaymentCancel: { plan: any; amount: string };
+  PaymentCancel: { orderId?: string; tranId?: string; response?: any };
+  FreeTrial: undefined;
+  FreeTrialSuccess: undefined;
   Terms: undefined;
   Privacy: undefined;
+  Refund: undefined;
   About: undefined;
 };
 
@@ -70,9 +86,7 @@ export type RootStackParamList = {
 export type LoginScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login'>;
 export type SignupScreenProps = NativeStackScreenProps<AuthStackParamList, 'Signup'>;
 export type ForgotPasswordScreenProps = NativeStackScreenProps<AuthStackParamList, 'ForgotPassword'>;
-export type FreeTrialScreenProps = NativeStackScreenProps<AuthStackParamList, 'FreeTrial'>;
-export type FreeTrialSuccessScreenProps = NativeStackScreenProps<AuthStackParamList, 'FreeTrialSuccess'>;
-export type AuthScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login' | 'Signup' | 'ForgotPassword' | 'FreeTrial' | 'FreeTrialSuccess'>;
+export type AuthScreenProps = NativeStackScreenProps<AuthStackParamList, 'Login' | 'Signup' | 'ForgotPassword'>;
 
 // Main Screen Props (with both stack and tab navigation)
 export type HomeScreenProps = CompositeScreenProps<
@@ -80,18 +94,9 @@ export type HomeScreenProps = CompositeScreenProps<
   NativeStackScreenProps<RootStackParamList>
 >;
 
-export type LearningScreenProps = CompositeScreenProps<
-  BottomTabScreenProps<MainStackParamList, 'Learning'>,
-  NativeStackScreenProps<RootStackParamList>
->;
-
-export type SocialScreenProps = CompositeScreenProps<
-  BottomTabScreenProps<MainStackParamList, 'Social'>,
-  NativeStackScreenProps<RootStackParamList>
->;
 
 export type ProfileScreenProps = CompositeScreenProps<
-  BottomTabScreenProps<MainStackParamList, 'Profile'>,
+  BottomTabScreenProps<MainStackParamList, 'ProfileStack'>,
   NativeStackScreenProps<RootStackParamList>
 >;
 
@@ -99,7 +104,6 @@ export type ProfileScreenProps = CompositeScreenProps<
 export type TopicsScreenProps = NativeStackScreenProps<LearningStackParamList, 'TopicsScreen'>;
 export type PracticeScreenProps = NativeStackScreenProps<LearningStackParamList, 'PracticeScreen'>;
 export type CallScreenProps = NativeStackScreenProps<LearningStackParamList, 'CallScreen'>;
-export type RoleplayScreenProps = NativeStackScreenProps<LearningStackParamList, 'RoleplayScreen'>;
 export type ProgressScreenProps = NativeStackScreenProps<LearningStackParamList, 'ProgressScreen'>;
 export type ReportScreenProps = NativeStackScreenProps<LearningStackParamList, 'ReportScreen'>;
 export type QuizScreenProps = NativeStackScreenProps<LearningStackParamList, 'QuizScreen'>;
@@ -112,6 +116,8 @@ export type LearningStackProps = CompositeScreenProps<
 // Social Stack Screen Props
 export type ChatScreenProps = NativeStackScreenProps<SocialStackParamList, 'ChatScreen'>;
 export type CommunityScreenProps = NativeStackScreenProps<SocialStackParamList, 'CommunityScreen'>;
+export type DMChatScreenProps = NativeStackScreenProps<SocialStackParamList, 'DMChatScreen'>;
+export type GroupChatScreenProps = NativeStackScreenProps<SocialStackParamList, 'GroupChatScreen'>;
 export type LeaderboardScreenProps = NativeStackScreenProps<SocialStackParamList, 'LeaderboardScreen'>;
 export type SocialStackProps = CompositeScreenProps<
   BottomTabScreenProps<MainStackParamList, 'SocialStack'>,
@@ -128,8 +134,11 @@ export type CheckoutScreenProps = NativeStackScreenProps<ProfileStackParamList, 
 export type PaymentSuccessScreenProps = NativeStackScreenProps<ProfileStackParamList, 'PaymentSuccess'>;
 export type PaymentFailureScreenProps = NativeStackScreenProps<ProfileStackParamList, 'PaymentFailure'>;
 export type PaymentCancelScreenProps = NativeStackScreenProps<ProfileStackParamList, 'PaymentCancel'>;
+export type FreeTrialScreenProps = NativeStackScreenProps<ProfileStackParamList, 'FreeTrial'>;
+export type FreeTrialSuccessScreenProps = NativeStackScreenProps<ProfileStackParamList, 'FreeTrialSuccess'>;
 export type TermsScreenProps = NativeStackScreenProps<ProfileStackParamList, 'Terms'>;
 export type PrivacyScreenProps = NativeStackScreenProps<ProfileStackParamList, 'Privacy'>;
+export type RefundScreenProps = NativeStackScreenProps<ProfileStackParamList, 'Refund'>;
 export type AboutScreenProps = NativeStackScreenProps<ProfileStackParamList, 'About'>;
 export type ProfileStackProps = CompositeScreenProps<
   BottomTabScreenProps<MainStackParamList, 'ProfileStack'>,

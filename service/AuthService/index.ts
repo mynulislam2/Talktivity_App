@@ -20,10 +20,11 @@ import {
   AuthResponseData,
 } from '@/types/auth';
 import { toAuthError } from '@/lib/auth/errorHandler';
+import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
 
 class AuthService {
-  // Storage keys
-  private readonly ACCESS_TOKEN_KEY = 'token'; // Changed to match backend response
+  // Storage keys - keeping them for reference but using asyncStorageManager mostly
+  private readonly ACCESS_TOKEN_KEY = 'token';
   private readonly REFRESH_TOKEN_KEY = 'refreshToken';
   private readonly TOKEN_EXPIRY_KEY = 'tokenExpiry';
   private readonly USER_KEY = 'user';
@@ -32,31 +33,12 @@ class AuthService {
   private isLoggingOut = false;
 
   /**
-   * Stores authentication data in localStorage
+   * Stores authentication data
    * @private
    */
-  private storeAuthData(data: AuthResponseData): void {
-    if (typeof window === 'undefined') return;
-
+  private async storeAuthData(data: AuthResponseData): Promise<void> {
     try {
-      // Prefer canonical accessToken, fall back to token for backward compatibility
-      const token = data.accessToken || data.token;
-      if (!token) {
-        throw new Error('No access token provided in auth data');
-      }
-
-      localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
-      
-      if (data.refreshToken) {
-        localStorage.setItem(this.REFRESH_TOKEN_KEY, data.refreshToken);
-      }
-
-      // Calculate and store expiry time in seconds (default 7 days if not provided)
-      const expiryTime = Math.floor(Date.now() / 1000) + (data.expiresIn || 7 * 24 * 60 * 60);
-      localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-
-      // Store user data
-      localStorage.setItem(this.USER_KEY, JSON.stringify(data.user));
+      await asyncStorageManager.storeAuthData(data);
     } catch (error) {
       // Failed to store auth data
       throw new Error('Failed to store authentication data');
@@ -64,60 +46,42 @@ class AuthService {
   }
 
   /**
-   * Clears all authentication data from localStorage
+   * Clears all authentication data
    * @private
    */
-  private clearAuthData(): void {
-    if (typeof window === 'undefined') return;
-
+  private async clearAuthData(): Promise<void> {
     try {
-      localStorage.removeItem(this.ACCESS_TOKEN_KEY);
-      localStorage.removeItem(this.REFRESH_TOKEN_KEY);
-      localStorage.removeItem(this.TOKEN_EXPIRY_KEY);
-      localStorage.removeItem(this.USER_KEY);
+      await asyncStorageManager.clearAuthData();
     } catch (error) {
       // Failed to clear auth data
     }
   }
 
   /**
-   * Gets stored access token from localStorage
+   * Gets stored access token
    * @private
    */
-  private getStoredToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem(this.ACCESS_TOKEN_KEY);
+  private async getStoredToken(): Promise<string | null> {
+    return await asyncStorageManager.getToken();
   }
 
   /**
-   * Gets stored user from localStorage
+   * Gets stored user
    * @private
    */
-  private getStoredUser(): User | null {
-    if (typeof window === 'undefined') return null;
-
-    try {
-      const userStr = localStorage.getItem(this.USER_KEY);
-      if (!userStr) return null;
-      return JSON.parse(userStr) as User;
-    } catch (error) {
-      // Failed to parse user data
-      return null;
-    }
+  private async getStoredUser(): Promise<User | null> {
+    return await asyncStorageManager.getUser();
   }
 
   /**
    * Checks if the stored token is valid (not expired)
    * @private
    */
-  private isTokenValid(): boolean {
-    if (typeof window === 'undefined') return false;
-
+  private async isTokenValid(): Promise<boolean> {
     try {
-      const expiryStr = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
-      if (!expiryStr) return false;
+      const expiryTime = await asyncStorageManager.getTokenExpiry();
+      if (!expiryTime) return false;
 
-      const expiryTime = parseInt(expiryStr, 10);
       const currentTime = Math.floor(Date.now() / 1000);
       
       return currentTime < expiryTime;
@@ -167,7 +131,7 @@ class AuthService {
         };
 
         // Store tokens and user data
-        this.storeAuthData(authData);
+        await this.storeAuthData(authData);
 
         return {
           success: true,
@@ -218,7 +182,7 @@ class AuthService {
         };
 
         // Store tokens and user data
-        this.storeAuthData(authData);
+        await this.storeAuthData(authData);
 
         return {
           success: true,
@@ -263,7 +227,7 @@ class AuthService {
         };
 
         // Store tokens and user data
-        this.storeAuthData(authData);
+        await this.storeAuthData(authData);
 
         return {
           success: true,
@@ -291,19 +255,16 @@ class AuthService {
       const refreshResponse = response.data as RefreshTokenResponse;
 
       if (refreshResponse.success && refreshResponse.data) {
-        if (typeof window !== 'undefined') {
-          const token = refreshResponse.data.accessToken;
-          if (token) {
-            localStorage.setItem(this.ACCESS_TOKEN_KEY, token);
-          }
+        const token = refreshResponse.data.accessToken;
+        const refreshToken = refreshResponse.data.refreshToken;
+        const expiresIn = refreshResponse.data.expiresIn;
 
-          if (refreshResponse.data.refreshToken) {
-            localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshResponse.data.refreshToken);
-          }
-
-          const expiryTime = Math.floor(Date.now() / 1000) + refreshResponse.data.expiresIn;
-          localStorage.setItem(this.TOKEN_EXPIRY_KEY, expiryTime.toString());
-        }
+        await asyncStorageManager.storeAuthData({
+          accessToken: token,
+          refreshToken: refreshToken,
+          expiresIn: expiresIn,
+          user: await this.getStoredUser() as User // Preserve current user
+        });
       }
 
       return refreshResponse;
@@ -325,9 +286,11 @@ class AuthService {
 
       if (userData.success && userData.data) {
         // Update stored user data
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(this.USER_KEY, JSON.stringify(userData.data));
-        }
+        await asyncStorageManager.storeAuthData({
+          user: userData.data,
+          accessToken: await this.getStoredToken() || '',
+          refreshToken: await this.getRefreshToken() || undefined,
+        });
         return userData.data;
       }
 
@@ -356,7 +319,7 @@ class AuthService {
     
     try {
       // Get token BEFORE clearing anything
-      const token = this.getStoredToken();
+      const token = await this.getStoredToken();
       
       // Try to notify server (optional - may fail if already logged out)
       // Only attempt if we have a token
@@ -370,10 +333,10 @@ class AuthService {
       }
 
       // Always clear local data
-      this.clearAuthData();
+      await this.clearAuthData();
     } catch (error) {
       // Even if there's an error, clear local data
-      this.clearAuthData();
+      await this.clearAuthData();
       throw toAuthError(error);
     } finally {
       this.isLoggingOut = false;
@@ -381,31 +344,30 @@ class AuthService {
   }
 
   /**
-   * Gets the current user from localStorage
+   * Gets the current user from storage
    * 
    * @returns User object if authenticated, null otherwise
    */
-  getUser(): User | null {
-    return this.getStoredUser();
+  async getUser(): Promise<User | null> {
+    return await this.getStoredUser();
   }
 
   /**
-   * Gets the current access token from localStorage
+   * Gets the current access token from storage
    * 
    * @returns Access token if available, null otherwise
    */
-  getToken(): string | null {
-    return this.getStoredToken();
+  async getToken(): Promise<string | null> {
+    return await this.getStoredToken();
   }
 
   /**
-   * Gets the stored refresh token from localStorage
+   * Gets the stored refresh token from storage
    * 
    * @returns Refresh token if available, null otherwise
    */
-  getRefreshToken(): string | null {
-    if (typeof window === 'undefined') return null;
-    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  async getRefreshToken(): Promise<string | null> {
+    return await asyncStorageManager.getRefreshToken();
   }
 
   /**
@@ -413,10 +375,8 @@ class AuthService {
    * 
    * @returns Token expiry timestamp in seconds, or null if not set
    */
-  getTokenExpiry(): number | null {
-    if (typeof window === 'undefined') return null;
-    const expStr = localStorage.getItem(this.TOKEN_EXPIRY_KEY);
-    return expStr ? parseInt(expStr, 10) : null;
+  async getTokenExpiry(): Promise<number | null> {
+    return await asyncStorageManager.getTokenExpiry();
   }
 
   /**
@@ -424,10 +384,10 @@ class AuthService {
    * 
    * @returns true if user has a valid token and user data, false otherwise
    */
-  isAuthenticated(): boolean {
-    const token = this.getStoredToken();
-    const user = this.getStoredUser();
-    const isValid = this.isTokenValid();
+  async isAuthenticated(): Promise<boolean> {
+    const token = await this.getStoredToken();
+    const user = await this.getStoredUser();
+    const isValid = await this.isTokenValid();
 
     return !!(token && user && isValid);
   }

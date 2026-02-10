@@ -21,7 +21,14 @@ export function useSessionStateEvents(options: UseSessionStateEventsOptions): vo
   useEffect(() => {
     // Connect socket if not connected
     if (!socket.connected) {
-      connectSocket();
+      // Use IIFE to handle async connectSocket
+      (async () => {
+        try {
+          await connectSocket();
+        } catch (error) {
+          console.error('Failed to connect socket:', error);
+        }
+      })();
     }
 
     const handleSessionState = (payload: SessionStatePayload) => {

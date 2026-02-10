@@ -59,12 +59,6 @@ const theme = {
     },
   },
   
-  spacing: {
-    screenPadding: spacing.lg,
-    screenPaddingVertical: spacing.lg,
-    screenPaddingHorizontal: spacing.lg,
-  },
-  
   dimensions: {
     headerHeight: 56,
     tabBarHeight: 60,

@@ -13,6 +13,7 @@ import {
   ViewStyle,
   TextStyle,
 } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
@@ -35,8 +36,10 @@ const Header: React.FC<HeaderProps> = ({
   style,
   titleStyle,
 }) => {
+  const insets = useSafeAreaInsets();
+
   return (
-    <View style={[styles.header, style]}>
+    <View style={[styles.header, { paddingTop: Math.max(insets.top, spacing.sm) + spacing.sm }, style]}>
       <View style={styles.leftSection}>
         {onBackPress && (
           <TouchableOpacity
@@ -68,7 +71,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
+    paddingBottom: spacing.sm,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: colors.border,

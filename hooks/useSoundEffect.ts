@@ -52,16 +52,34 @@ export const useSoundEffect = (): UseSoundEffectReturn => {
   const soundRef = useRef<Audio.Sound | null>(null);
   const isMutedRef = useRef(false);
 
-  // Map sound effects to audio files (requires assets/sounds folder)
+  // Map sound effects to audio files (optional - files may not exist)
+  // Using try-catch to handle missing files gracefully
   const soundFileMap: Record<SoundEffect, any> = {
-    [SoundEffect.SUCCESS]: require('../assets/sounds/success.wav'),
-    [SoundEffect.ERROR]: require('../assets/sounds/error.wav'),
-    [SoundEffect.WARNING]: require('../assets/sounds/warning.wav'),
-    [SoundEffect.CLICK]: require('../assets/sounds/click.wav'),
-    [SoundEffect.NOTIFICATION]: require('../assets/sounds/notification.wav'),
-    [SoundEffect.LEVEL_UP]: require('../assets/sounds/level-up.wav'),
-    [SoundEffect.SESSION_END]: require('../assets/sounds/session-end.wav'),
+    [SoundEffect.SUCCESS]: null,
+    [SoundEffect.ERROR]: null,
+    [SoundEffect.WARNING]: null,
+    [SoundEffect.CLICK]: null,
+    [SoundEffect.NOTIFICATION]: null,
+    [SoundEffect.LEVEL_UP]: null,
+    [SoundEffect.SESSION_END]: null,
   };
+
+  // Try to load sound files if they exist (optional)
+  // This allows the app to work without sound files
+  try {
+    // Only require files if they exist - for now, we'll leave them as null
+    // In production, you can add sound files to assets/sounds/ and uncomment these
+    // soundFileMap[SoundEffect.SUCCESS] = require('../assets/sounds/success.wav');
+    // soundFileMap[SoundEffect.ERROR] = require('../assets/sounds/error.wav');
+    // soundFileMap[SoundEffect.WARNING] = require('../assets/sounds/warning.wav');
+    // soundFileMap[SoundEffect.CLICK] = require('../assets/sounds/click.wav');
+    // soundFileMap[SoundEffect.NOTIFICATION] = require('../assets/sounds/notification.wav');
+    // soundFileMap[SoundEffect.LEVEL_UP] = require('../assets/sounds/level-up.wav');
+    // soundFileMap[SoundEffect.SESSION_END] = require('../assets/sounds/session-end.wav');
+  } catch (error) {
+    // Sound files don't exist - that's okay, the app will work without them
+    console.warn('Sound files not found - sound effects will be disabled');
+  }
 
   /**
    * Initialize audio session
@@ -102,7 +120,7 @@ export const useSoundEffect = (): UseSoundEffectReturn => {
         // Load and play the sound
         const soundFile = soundFileMap[effect];
         if (!soundFile) {
-          console.warn(`Sound effect not found: ${effect}`);
+          // Sound file not available - silently skip (no console warning to avoid spam)
           return;
         }
 

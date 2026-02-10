@@ -6,20 +6,21 @@
  * Integrates socket for real-time message updates
  */
 
-import React, { useEffect, useState, useCallback } from 'react';
+import React, { useEffect, useState, useCallback, useMemo } from 'react';
 import {
   View,
   Text,
   StyleSheet,
-  SafeAreaView,
   ScrollView,
   TouchableOpacity,
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
+import { createSelector } from '@reduxjs/toolkit';
 
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   loadDMs,
   loadDMMessages,
@@ -28,16 +29,16 @@ import {
   selectDMMessages,
   selectDMLoading,
   selectMessagesLoading,
-} from '../../store/slices/communitySlice';
+} from '@/store/slices/communitySlice';
 import {
   selectRealtimeDMMessages,
   selectDMTypingUser,
-} from '../../store/slices/chatSlice';
-import { communityService } from '../../service/CommunityService';
-import ChatBubble from '../../components/social/ChatBubble';
-import MessageInput from '../../components/social/MessageInput';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+} from '@/store/slices/chatSlice';
+import { communityService } from '@/service/CommunityService';
+import ChatBubble from '@/components/social/ChatBubble';
+import MessageInput from '@/components/social/MessageInput';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
 interface ChatScreenProps {
   navigation: any;
@@ -52,19 +53,108 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   const [isSending, setIsSending] = useState(false);
   const [sendError, setError] = useState<string | null>(null);
 
-  // Get messages for the selected DM
-  const messages = useAppSelector((state) =>
-    selectedDmId ? selectDMMessages(selectedDmId)(state) : []
+  // Create memoized selectors using createSelector to prevent unnecessary rerenders
+  const messagesSelector = useMemo(
+    () => {
+      if (!selectedDmId) {
+        return createSelector(
+          [(state: any) => state],
+          () => []
+        );
+      }
+      const baseSelector = selectDMMessages(selectedDmId);
+      return createSelector(
+        [(state: any) => state],
+        (state) => {
+          try {
+            return baseSelector(state);
+          } catch (error) {
+            console.error('Error selecting DM messages:', error);
+            return [];
+          }
+        }
+      );
+    },
+    [selectedDmId]
   );
-  const messagesLoading = useAppSelector((state) =>
-    selectedDmId ? selectMessagesLoading(selectedDmId)(state) : false
+
+  const messagesLoadingSelector = useMemo(
+    () => {
+      if (!selectedDmId) {
+        return createSelector(
+          [(state: any) => state],
+          () => false
+        );
+      }
+      const baseSelector = selectMessagesLoading(selectedDmId);
+      return createSelector(
+        [(state: any) => state],
+        (state) => {
+          try {
+            return baseSelector(state);
+          } catch (error) {
+            console.error('Error selecting messages loading:', error);
+            return false;
+          }
+        }
+      );
+    },
+    [selectedDmId]
   );
-  const realtimeMessages = useAppSelector((state) =>
-    selectedDmId ? selectRealtimeDMMessages(selectedDmId)(state) : []
+
+  const realtimeMessagesSelector = useMemo(
+    () => {
+      if (!selectedDmId) {
+        return createSelector(
+          [(state: any) => state],
+          () => []
+        );
+      }
+      const baseSelector = selectRealtimeDMMessages(selectedDmId);
+      return createSelector(
+        [(state: any) => state],
+        (state) => {
+          try {
+            return baseSelector(state);
+          } catch (error) {
+            console.error('Error selecting realtime messages:', error);
+            return [];
+          }
+        }
+      );
+    },
+    [selectedDmId]
   );
-  const typingUserId = useAppSelector((state) =>
-    selectedDmId ? selectDMTypingUser(selectedDmId)(state) : null
+
+  const typingUserIdSelector = useMemo(
+    () => {
+      if (!selectedDmId) {
+        return createSelector(
+          [(state: any) => state],
+          () => null
+        );
+      }
+      const baseSelector = selectDMTypingUser(selectedDmId);
+      return createSelector(
+        [(state: any) => state],
+        (state) => {
+          try {
+            return baseSelector(state);
+          } catch (error) {
+            console.error('Error selecting typing user:', error);
+            return null;
+          }
+        }
+      );
+    },
+    [selectedDmId]
   );
+
+  // Get messages for the selected DM using memoized selectors
+  const messages = useAppSelector(messagesSelector);
+  const messagesLoading = useAppSelector(messagesLoadingSelector);
+  const realtimeMessages = useAppSelector(realtimeMessagesSelector);
+  const typingUserId = useAppSelector(typingUserIdSelector);
 
   // Combine server-fetched and real-time messages
   const allMessages = [...messages, ...realtimeMessages];
@@ -127,7 +217,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
   // Contact List View
   if (!selectedDmId) {
     return (
-      <SafeAreaView style={styles.container}>
+      <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
         <View style={styles.header}>
           <Text style={styles.title}>Messages</Text>
           <TouchableOpacity style={styles.newChatButton}>
@@ -183,7 +273,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
 
   // Chat View
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles.container} edges={['top', 'bottom']}>
       <View style={styles.chatHeader}>
         <TouchableOpacity
           onPress={() => setSelectedDmId(null)}

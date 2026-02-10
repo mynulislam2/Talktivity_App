@@ -2,416 +2,196 @@
  * Call Screen
  * 
  * Direct call session with AI agent
+ * Matches Next.js implementation exactly with proper hooks and components
  */
 
-import React, { useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  SafeAreaView,
-  ScrollView,
-  TouchableOpacity,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-
-import { useCallSession } from '../../Hooks/useCallSession';
-import SessionControls from '../../components/learning/SessionControls';
-import StatsDisplay, { StatItem } from '../../components/learning/StatsDisplay';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import React, { useCallback } from 'react';
+import { View, Alert } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { useAppDispatch } from '@/store/hooks';
-import { checkRoleplayLimit, recordRoleplaySession } from '@/store/slices/usageSlice';
-import { generateCallReport } from '@/store/slices/reportSlice';
+import { loadLifecycle } from '@/store/slices/lifecycleSlice';
+import {
+  useCallStatus,
+  useCallSession,
+  useCallLifecycle,
+  useSessionSaving,
+  useSessionStateEvents,
+  useCallDerivedState,
+} from '@/hooks/call';
+import { performGlobalLogout } from '@/utils/logoutClient';
+import { handleDeviceFailure } from '@/lib/call/deviceFailureHandler';
+import type { CallScreenProps } from '@/navigation/types';
 
-interface CallScreenProps {
+// Import components (to be created)
+import { SessionSavingOverlay } from '@/components/call/SessionSavingOverlay';
+import { CallHeader } from '@/components/call/CallHeader';
+import { CallContent } from '@/components/call/CallContent';
+import { CallVisualizerLayout } from '@/components/call/CallVisualizerLayout';
+
+export interface CallScreenContentProps {
   navigation: any;
   route: any;
 }
 
-const CallScreen: React.FC<CallScreenProps> = ({ navigation, route }) => {
+export function CallScreenContent({ navigation, route }: CallScreenContentProps) {
   const dispatch = useAppDispatch();
-  const topic = route.params?.topic || 'General Conversation';
-  const sessionType = route.params?.type || 'practice'; // 'practice' or 'roleplay'
-  const { roomToken, isConnecting, isConnected, error, callTime, isMuted, startCall, endCall, toggleMute } =
-    useCallSession();
+  const isExam = route.params?.exam === true;
 
-  const [transcript, setTranscript] = useState<string>('');
-  const [showTranscript, setShowTranscript] = useState(false);
-  const [callStarted, setCallStarted] = useState(false);
-  const [callEnded, setCallEnded] = useState(false);
+  // Custom hooks (matches Next.js exactly)
+  const { 
+    canStartCall, 
+    totalDuration,
+    isLoading: statusLoading,
+    refreshStatus 
+  } = useCallStatus();
+  
+  const {
+    sessionState,
+    connectionDetails,
+    startSession,
+    endSession,
+    updateAgentState,
+  } = useCallSession();
+  
+  const { callCompleted } = useCallLifecycle();
 
-  // Check roleplay limit on mount
-  useEffect(() => {
-    const checkLimit = async () => {
-      try {
-        const result = await dispatch(checkRoleplayLimit(sessionType)).unwrap();
-        if (!result.canPlay) {
-          Alert.alert(
-            'Daily Limit Reached',
-            `You've used all your ${sessionType} time for today. Come back tomorrow!`,
-            [{ text: 'OK', onPress: () => navigation.goBack() }]
-          );
-        }
-      } catch (err) {
-        console.log('Limit check error:', err);
-        // Continue anyway - server will enforce limits
-      }
-    };
-    checkLimit();
-  }, [dispatch, sessionType, navigation]);
+  // Session saving state
+  const {
+    isSavingSession,
+    sessionSaveState,
+    sessionSaveMessage,
+    setSaving,
+    setSaved,
+    setFailed,
+    dismissError,
+  } = useSessionSaving();
 
-  // Record session and generate report when call ends
-  useEffect(() => {
-    return () => {
-      // Component is unmounting
-      if (callEnded && transcript && isConnected === false) {
-        // Save session to backend
-        dispatch(recordRoleplaySession(sessionType)).catch(err => {
-          console.log('Failed to record session:', err);
-        });
-        
-        // Generate call report if transcript exists
-        if (transcript.trim().length > 0) {
-          dispatch(generateCallReport()).catch(err => {
-            console.log('Failed to generate report:', err);
-          });
-        }
-      }
-    };
-  }, [dispatch, callEnded, transcript, sessionType, isConnected]);
+  // Derived states
+  const {
+    stateText,
+    stateColor,
+    sessionTitle,
+    hasCompletedLongCall,
+  } = useCallDerivedState({
+    sessionState,
+    totalDuration,
+    isExam,
+  });
 
-  const handleStartCall = async () => {
-    const success = await startCall(topic);
-    if (success) {
-      setCallStarted(true);
-    } else {
-      Alert.alert('Error', error || 'Failed to start call');
+  // Handle connect
+  const handleConnect = useCallback(async () => {
+    try {
+      await startSession();
+    } catch (error) {
+      Alert.alert('Error', 'Failed to start call session. Please try again.');
     }
-  };
+  }, [startSession]);
 
-  const handleEndCall = async () => {
-    Alert.alert('End Call?', 'Are you sure you want to end this call?', [
-      { text: 'Cancel', onPress: () => {} },
-      {
-        text: 'End',
-        onPress: async () => {
-          // Mark call as ended so cleanup hook can save session
-          setCallEnded(true);
-          
-          const result = await endCall(transcript);
-          // Navigate to report screen with session data
-          if (result && result.sessionId) {
-            navigation.navigate('ReportScreen', {
-              sessionId: result.sessionId,
-              sessionType: 'call',
-              reportData: result.reportMetrics || {
-                sessionId: result.sessionId,
-                sessionType: 'call',
-                timestamp: new Date().toISOString(),
-                duration: callTime,
-                wordCount: transcript.split(/\s+/).filter((w) => w).length,
-                overallScore: 75,
-                fluency: { score: 75, wpm: 140, clarity: 80, pace: 'normal' },
-                grammar: { score: 75, totalErrors: 2, commonErrors: [], suggestions: [] },
-                vocabulary: { score: 75, totalWords: transcript.split(/\s+/).length, uniqueWords: 30, newWords: [], vocabulary_level: 'intermediate' },
-                discourse: { score: 75, coherence: 75, organization: 75, feedback: [] },
-              },
-            });
-          } else {
-            navigation.goBack();
-          }
-        },
-        style: 'destructive',
-      },
-    ]);
-  };
+  // Handle disconnect
+  const handleDisconnect = useCallback(() => {
+    endSession();
+    setSaving("Please wait a moment, we are saving your conversation for analysis…");
+  }, [endSession, setSaving]);
 
-  const stats: StatItem[] = [
-    {
-      label: 'Call Duration',
-      value: `${Math.floor(callTime / 60)}:${(callTime % 60).toString().padStart(2, '0')}`,
-      icon: 'call',
-      color: colors.primary,
+  // Handle session saved
+  const handleSessionSaved = useCallback(async () => {
+    setSaved();
+    
+    // Refresh call status to get updated lifetime duration
+    await refreshStatus();
+    
+    // Refresh lifecycle state (Python agent updated call_completed in DB)
+    const lifecycleResult = await dispatch(loadLifecycle());
+    
+    // Check if this was the first call completion (flow: onboarding → call → report)
+    // If call was just completed (was false, now true), automatically navigate to report
+    if (loadLifecycle.fulfilled.match(lifecycleResult)) {
+      const lifecycle = lifecycleResult.payload;
+      const callCompleted = lifecycle?.milestones?.callCompleted || false;
+      const reportCompleted = lifecycle?.milestones?.reportCompleted || false;
+      
+      // If call is completed but report is not, navigate to report (first-time flow)
+      if (callCompleted && !reportCompleted) {
+        // Small delay to show "saved" message before navigation
+        setTimeout(() => {
+          navigation.navigate('ReportScreen', {
+            sessionId: 'current',
+            sessionType: 'call',
+          });
+        }, 1500);
+        return;
+      }
+    }
+    
+    // For subsequent calls, stay on call screen. User can manually go to report via the View Report button.
+  }, [setSaved, refreshStatus, dispatch, navigation]);
+
+  // Handle session state events from backend
+  useSessionStateEvents({
+    onSaving: (message) => {
+      setSaving(message || "Saving your conversation for analysis…");
+      endSession();
     },
-    {
-      label: 'Muted',
-      value: isMuted ? 'Yes' : 'No',
-      icon: isMuted ? 'mic-off' : 'mic',
-      color: isMuted ? colors.error : '#4CAF50',
+    onSaved: handleSessionSaved,
+    onFailed: (message) => {
+      setFailed(message || "Failed to save conversation.");
+      Alert.alert('Error', message || "Failed to save conversation");
     },
-  ];
+    onEndSession: endSession,
+  });
+
+  const handleViewReport = useCallback(() => {
+    navigation.navigate('ReportScreen', {
+      sessionId: 'current',
+      sessionType: 'call',
+      reportData: null, // Will be loaded from Redux
+    });
+  }, [navigation]);
+
+  const handleLogout = useCallback(async () => {
+    await performGlobalLogout();
+  }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity
-            onPress={() => navigation.goBack()}
-            style={styles.backButton}
-          >
-            <Ionicons name="chevron-back" size={28} color="#000" />
-          </TouchableOpacity>
-          <View style={styles.headerContent}>
-            <Text style={styles.title}>Voice Call</Text>
-            <Text style={styles.subtitle}>
-              {typeof topic === 'string' ? topic : topic.title}
-            </Text>
-          </View>
-        </View>
+    <SafeAreaView style={{ flex: 1, backgroundColor: '#0f0f23' }} edges={['top', 'bottom']}>
+      <CallVisualizerLayout>
+        <View style={{ flex: 1 }}>
+          <SessionSavingOverlay
+            isVisible={isSavingSession}
+            state={sessionSaveState}
+            message={sessionSaveMessage || undefined}
+            onDismiss={sessionSaveState === 'SESSION_SAVE_FAILED' ? dismissError : undefined}
+          />
 
-        {/* Agent Avatar */}
-        <View style={styles.agentCard}>
-          <View style={styles.avatarContainer}>
-            <View style={styles.avatar}>
-              <Ionicons name="person" size={48} color="#fff" />
-            </View>
-            {isConnected && <View style={styles.onlineIndicator} />}
-          </View>
-          <Text style={styles.agentName}>AI Assistant</Text>
-          <Text style={styles.agentStatus}>
-            {isConnecting ? 'Connecting...' : isConnected ? 'Connected' : 'Ready to call'}
-          </Text>
-        </View>
+          <CallHeader
+            stateText={stateText}
+            stateColor={stateColor}
+            onLogout={handleLogout}
+          />
 
-        {/* Connection Status */}
-        {isConnecting && (
-          <View style={styles.statusCard}>
-            <ActivityIndicator size="large" color={colors.primary} />
-            <Text style={styles.statusText}>Dialing...</Text>
-          </View>
-        )}
-
-        {isConnected && (
-          <View style={styles.statusCard}>
-            <View style={[styles.statusIndicator, styles.activeIndicator]} />
-            <Text style={styles.statusText}>Call in Progress</Text>
-          </View>
-        )}
-
-        {error && (
-          <View style={styles.errorCard}>
-            <Ionicons name="alert-circle" size={20} color={colors.error} />
-            <Text style={styles.errorText}>{error}</Text>
-          </View>
-        )}
-
-        {/* Session Controls */}
-        <SessionControls
-          isActive={isConnected}
-          timer={callTime}
-          isMuted={isMuted}
-          onStart={handleStartCall}
-          onStop={handleEndCall}
-          onToggleMute={toggleMute}
-          style={styles.controls}
-        />
-
-        {/* Statistics */}
-        {isConnected && (
-          <View style={styles.statsSection}>
-            <Text style={styles.sectionTitle}>Call Stats</Text>
-            <StatsDisplay stats={stats} />
-          </View>
-        )}
-
-        {/* Transcript Toggle */}
-        {isConnected && (
-          <TouchableOpacity
-            style={styles.transcriptButton}
-            onPress={() => setShowTranscript(!showTranscript)}
-          >
-            <Ionicons name="document-text" size={20} color={colors.primary} />
-            <Text style={styles.transcriptButtonText}>
-              {showTranscript ? 'Hide' : 'Show'} Conversation
-            </Text>
-            <Ionicons
-              name={showTranscript ? 'chevron-up' : 'chevron-down'}
-              size={20}
-              color={colors.primary}
+          {!isSavingSession && (
+            <CallContent
+              sessionTitle={sessionTitle}
+              sessionState={sessionState}
+              connectionDetails={connectionDetails}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+              onStateChange={updateAgentState}
+              canStartCall={canStartCall}
+              timeLoading={statusLoading}
+              onViewReport={handleViewReport}
+              hasCompletedLongCall={hasCompletedLongCall}
+              onDeviceFailure={handleDeviceFailure}
             />
-          </TouchableOpacity>
-        )}
-
-        {/* Transcript Display */}
-        {showTranscript && isConnected && (
-          <View style={styles.transcriptCard}>
-            <Text style={styles.transcriptLabel}>Conversation</Text>
-            <Text style={styles.transcriptText}>
-              {transcript || 'Waiting for conversation...'}
-            </Text>
-          </View>
-        )}
-      </ScrollView>
+          )}
+        </View>
+      </CallVisualizerLayout>
     </SafeAreaView>
   );
-};
+}
 
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#f5f5f5',
-  },
-  scrollContent: {
-    paddingBottom: spacing.xl,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    backgroundColor: '#fff',
-    borderBottomWidth: 1,
-    borderBottomColor: '#eee',
-  },
-  backButton: {
-    marginRight: spacing.md,
-  },
-  headerContent: {
-    flex: 1,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: '#999',
-  },
-  agentCard: {
-    marginVertical: spacing.xl,
-    alignItems: 'center',
-  },
-  avatarContainer: {
-    position: 'relative',
-    marginBottom: spacing.lg,
-  },
-  avatar: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  onlineIndicator: {
-    position: 'absolute',
-    bottom: 0,
-    right: 0,
-    width: 24,
-    height: 24,
-    borderRadius: 12,
-    backgroundColor: '#4CAF50',
-    borderWidth: 3,
-    borderColor: '#fff',
-  },
-  agentName: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: '#000',
-    marginBottom: spacing.xs,
-  },
-  agentStatus: {
-    fontSize: 14,
-    color: '#999',
-  },
-  statusCard: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  statusIndicator: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    marginRight: spacing.sm,
-    marginBottom: spacing.md,
-  },
-  activeIndicator: {
-    backgroundColor: '#4CAF50',
-    animation: 'pulse',
-  },
-  statusText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  errorCard: {
-    flexDirection: 'row',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: '#fee',
-    borderRadius: 12,
-    alignItems: 'center',
-  },
-  errorText: {
-    fontSize: 13,
-    color: colors.error,
-    marginLeft: spacing.md,
-    flex: 1,
-  },
-  controls: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  statsSection: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: '#000',
-    marginBottom: spacing.md,
-  },
-  transcriptButton: {
-    flexDirection: 'row',
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    paddingVertical: spacing.md,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  transcriptButtonText: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: '600',
-    color: colors.primary,
-    marginLeft: spacing.md,
-  },
-  transcriptCard: {
-    marginHorizontal: spacing.lg,
-    marginBottom: spacing.lg,
-    paddingVertical: spacing.lg,
-    paddingHorizontal: spacing.lg,
-    backgroundColor: '#fff',
-    borderRadius: 12,
-  },
-  transcriptLabel: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#999',
-    marginBottom: spacing.md,
-  },
-  transcriptText: {
-    fontSize: 14,
-    color: '#000',
-    lineHeight: 20,
-  },
-});
+const CallScreen: React.FC<CallScreenProps> = ({ navigation, route }) => {
+  return <CallScreenContent navigation={navigation} route={route} />;
+};
 
 export default CallScreen;

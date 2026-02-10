@@ -1,54 +1,74 @@
 import axios from 'axios';
-import { authService } from './AuthService';
-import { adminAuthService } from './AdminAuthService';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PUBLIC_ROUTES } from '@/config/routes';
 
 // Logger removed - no console logging
 
-// API configuration - lazy load to avoid SSR issues
-const getApiBaseURL = (serviceType: 'standard' | 'admin' = 'standard') => {
-  // Always return default during SSR
-  if (typeof window === 'undefined') {
-    return serviceType === 'admin' ? 'http://localhost:8082/api/admin' : 'http://localhost:8082/api';
+// Lazy imports to break circular dependencies
+let authServiceInstance: any = null;
+let adminAuthServiceInstance: any = null;
+
+const getAuthService = () => {
+  if (!authServiceInstance) {
+    const { authService } = require('./AuthService');
+    authServiceInstance = authService;
   }
-  
+  return authServiceInstance;
+};
+
+const getAdminAuthService = () => {
+  if (!adminAuthServiceInstance) {
+    const { adminAuthService } = require('./AdminAuthService');
+    adminAuthServiceInstance = adminAuthService;
+  }
+  return adminAuthServiceInstance;
+};
+
+// API configuration
+const getApiBaseURL = (serviceType: 'standard' | 'admin' = 'standard') => {
   // Get env vars
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
-  const adminEnvUrl = process.env.NEXT_PUBLIC_ADMIN_API_URL;
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.EXPO_PUBLIC_API_URL;
+  const adminEnvUrl = process.env.NEXT_PUBLIC_ADMIN_API_URL || process.env.EXPO_PUBLIC_ADMIN_API_URL;
   
+  // Import URL normalizer for consistent localhost handling
+  const { normalizeUrl } = require('@/lib/network/urlNormalizer');
+  
+  // Normalize localhost for emulator or real device
+  const fixLocalhost = (url: string) => {
+    return normalizeUrl(url);
+  };
+
   if (serviceType === 'admin') {
     if (adminEnvUrl && adminEnvUrl !== 'null' && adminEnvUrl !== 'undefined' && String(adminEnvUrl).trim() !== '') {
-      return String(adminEnvUrl).replace(/\/$/, '').trim();
+      return fixLocalhost(String(adminEnvUrl).replace(/\/$/, '').trim());
     }
-    // Fallback if admin URL not set but base URL is
-    if (envUrl && envUrl !== 'null' && envUrl !== 'undefined' && String(envUrl).trim() !== '') {
-      return `${String(envUrl).replace(/\/$/, '').trim()}/api/admin`;
-    }
-    return 'http://localhost:8082/api/admin';
+    // Use localhost so normalizeUrl can map it correctly for emulator/real device
+    return fixLocalhost('http://localhost:8082/api/admin');
   }
   
-  
-  // Check for null, undefined, or string 'null'/'undefined'
   if (!envUrl || envUrl === 'null' || envUrl === 'undefined' || String(envUrl).trim() === '') {
+    // Use localhost so normalizeUrl can map it correctly for emulator/real device
+    // normalizeUrl will convert localhost -> 10.0.2.2 (emulator) or -> 192.168.0.105 (real device)
     const defaultUrl = 'http://localhost:8082/api';
-    return defaultUrl;
+    console.log('🔧 [HttpService] No EXPO_PUBLIC_API_URL set, using default:', defaultUrl);
+    return fixLocalhost(defaultUrl);
   }
   
-  // Clean URL
-  const cleanUrl = String(envUrl).replace(/\/$/, '').trim();
+  const cleanUrl = fixLocalhost(String(envUrl).replace(/\/$/, '').trim());
   
-  // Validate URL format safely
-  if (!cleanUrl || cleanUrl === 'null' || cleanUrl === 'undefined') {
-    return 'http://localhost:8082/api';
-  }
-  
-  // Basic validation - check if it looks like a URL
   if (!cleanUrl.startsWith('http://') && !cleanUrl.startsWith('https://')) {
-    return 'http://localhost:8082/api';
+    // Invalid URL format, use default with normalization
+    const defaultUrl = 'http://localhost:8082/api';
+    console.warn('⚠️ [HttpService] Invalid URL format, using default:', { envUrl, defaultUrl });
+    return fixLocalhost(defaultUrl);
   }
   
-  const finalUrl = `${cleanUrl}/api`;
-  return finalUrl;
+  // Only append /api if it's not already there
+  if (cleanUrl.endsWith('/api')) {
+    return cleanUrl;
+  }
+  
+  return `${cleanUrl}/api`;
 };
 
 export class HttpService {
@@ -91,26 +111,9 @@ export class HttpService {
   };
 
   getHeaders = (serviceType: 'standard' | 'admin' = 'standard') => {
-    let accessToken: string | null = null;
-    
-    // Use AuthService abstraction instead of direct localStorage access
-    if (typeof window !== 'undefined') {
-      if (serviceType === 'admin') {
-        // Use AdminAuthService.getToken() - single source of truth
-        accessToken = adminAuthService.getToken();
-      } else {
-        // Use AuthService.getToken() - single source of truth
-        accessToken = authService.getToken();
-      }
-    }
-    
     const headers: { [key: string]: string } = {
       'Content-Type': 'application/json',
     };
-    
-    if (accessToken) {
-      headers['Authorization'] = `Bearer ${accessToken}`;
-    }
     
     return headers;
   };
@@ -120,37 +123,103 @@ export class HttpService {
   };
 
   getAxios = (api: string, skipAuth = false, serviceType: 'standard' | 'admin' = 'standard') => {
-    // Ensure we're on client-side before creating axios instance
-    if (typeof window === 'undefined') {
-      throw new Error('HttpService can only be used on the client side');
-    }
-    
     const baseURL = this.getHostUrl(serviceType);
     const relativePath = this.getRelativePath(api);
     
     // Get headers - skip auth if requested
-    const headers = skipAuth 
-      ? { 'Content-Type': 'application/json' }
-      : this.getHeaders(serviceType);
+    const headers = this.getHeaders(serviceType);
     
-    const axio = axios.create({
+    const instance = axios.create({
       baseURL: baseURL,
       timeout: this.getTimeoutTime(api),
       headers: headers,
     });
     
-    // Request interceptor
-    axio.interceptors.request.use(config => {
+    // Request interceptor to add token asynchronously
+    instance.interceptors.request.use(async config => {
+      const fullUrl = `${config.baseURL}${config.url}`;
+      console.log('📤 [HttpService] Making request:', {
+        method: config.method?.toUpperCase(),
+        url: config.url,
+        baseURL: config.baseURL,
+        fullUrl: fullUrl,
+        serviceType: serviceType,
+        skipAuth: skipAuth,
+      });
+
+      if (!skipAuth) {
+        let accessToken: string | null = null;
+        if (serviceType === 'admin') {
+          const adminAuthService = getAdminAuthService();
+          accessToken = await adminAuthService?.getToken?.() || null;
+        } else {
+          const authService = getAuthService();
+          accessToken = await authService?.getToken?.() || null;
+        }
+        
+        if (accessToken) {
+          config.headers['Authorization'] = `Bearer ${accessToken}`;
+          console.log('🔑 [HttpService] Added auth token to request:', {
+            tokenLength: accessToken.length,
+            tokenPreview: accessToken.substring(0, 20) + '...',
+          });
+        } else {
+          console.warn('⚠️ [HttpService] No auth token available for request');
+        }
+      }
       return config;
     });
 
     // Response interceptor for token refresh
-    axio.interceptors.response.use(
+    instance.interceptors.response.use(
       (response) => {
+        console.log('✅ [HttpService] Request successful:', {
+          method: response.config.method?.toUpperCase(),
+          url: response.config.url,
+          status: response.status,
+          fullUrl: `${response.config.baseURL}${response.config.url}`,
+        });
         return response;
       }, 
       async (error) => {
         const originalRequest = error.config;
+        
+        // Log all errors with full details
+        const fullUrl = originalRequest?.baseURL && originalRequest?.url
+          ? `${originalRequest.baseURL}${originalRequest.url}` 
+          : originalRequest?.url || 'unknown';
+        
+        // Check if this is an expected 404 (e.g., no active course)
+        const isExpected404 = error.response?.status === 404 && 
+          (originalRequest?.url?.includes('/courses/get-active') || 
+           originalRequest?.url?.includes('/courses/initialize')) &&
+          (error.response?.data?.code === 'NO_ACTIVE_COURSE' || 
+           error.response?.data?.error?.includes('No active course'));
+        
+        // Log expected 404s as warnings, not errors
+        if (isExpected404) {
+          console.log('ℹ️ [HttpService] Expected response (no active course):', {
+            method: originalRequest?.method?.toUpperCase(),
+            url: originalRequest?.url,
+            fullUrl: fullUrl,
+            status: error.response?.status,
+            responseData: error.response?.data,
+          });
+        } else {
+          console.error('❌ [HttpService] Request failed:', {
+            method: originalRequest?.method?.toUpperCase(),
+            url: originalRequest?.url,
+            baseURL: originalRequest?.baseURL,
+            fullUrl: fullUrl,
+            status: error.response?.status,
+            statusText: error.response?.statusText,
+            errorCode: error.code,
+            errorMessage: error.message,
+            hasResponse: !!error.response,
+            responseData: error.response?.data,
+            timeout: originalRequest?.timeout,
+          });
+        }
         
         if (error.response && error.response.status === 401 && !originalRequest._retry) {
           originalRequest._retry = true;
@@ -161,28 +230,29 @@ export class HttpService {
           
           try {
             // Check if token is actually expired
-            if (typeof window !== 'undefined') {
-              let tokenExp: number | null = null;
-              
-              if (serviceType === 'admin') {
-                tokenExp = adminAuthService.getTokenExpiry();
-              } else {
-                // Use AuthService.getTokenExpiry() - single source of truth
-                tokenExp = authService.getTokenExpiry();
-              }
-              
-              const currentTime = Math.floor(Date.now() / 1000);
-              
-              if (tokenExp && currentTime < tokenExp) {
-                // Token hasn't expired yet - some other 401 issue
-                return Promise.reject(error);
-              }
+            let tokenExp: number | null = null;
+            
+            if (serviceType === 'admin') {
+              const adminAuthService = getAdminAuthService();
+              tokenExp = await adminAuthService?.getTokenExpiry?.() || null;
+            } else {
+              // Use AuthService.getTokenExpiry() - single source of truth
+              const authService = getAuthService();
+              tokenExp = await authService?.getTokenExpiry?.() || null;
+            }
+            
+            const currentTime = Math.floor(Date.now() / 1000);
+            
+            if (tokenExp && currentTime < tokenExp) {
+              // Token hasn't expired yet - some other 401 issue
+              return Promise.reject(error);
             }
 
             // Only refresh for standard service for now
             if (serviceType === 'standard') {
               // Use AuthService.refreshToken() - single source of truth
-              const refreshToken = authService.getRefreshToken();
+              const authService = getAuthService();
+              const refreshToken = await authService?.getRefreshToken?.();
               if (refreshToken) {
                 try {
                   const refreshResponse = await authService.refreshToken({ refreshToken });
@@ -191,7 +261,7 @@ export class HttpService {
                     originalRequest.headers['Authorization'] = `Bearer ${refreshResponse.data.accessToken}`;
                     
                     // Retry original request
-                    return axios(originalRequest);
+                    return instance(originalRequest);
                   }
                 } catch (refreshError) {
                   // Fall through to handleAuthFailure
@@ -211,7 +281,7 @@ export class HttpService {
       }
     );
     
-    return axio;
+    return instance;
   };
 
   // Method to refresh the token
@@ -220,7 +290,8 @@ export class HttpService {
   async refreshToken() {
     try {
       // Delegate to AuthService - single source of truth for token refresh
-      const refreshToken = authService.getRefreshToken();
+      const authService = getAuthService();
+      const refreshToken = authService?.getRefreshToken?.();
       if (!refreshToken) {
         throw new Error('No refresh token available');
       }
@@ -238,31 +309,24 @@ export class HttpService {
   }
   
   // Handle authentication failure
-  handleAuthFailure(serviceType: 'standard' | 'admin' = 'standard') {
-    if (typeof window !== 'undefined') {
-      const currentPath = window.location.pathname;
-      // Use centralized route config
-      const isPublicRoute = PUBLIC_ROUTES.includes(currentPath as any);
-      
-      if (serviceType === 'admin') {
-        localStorage.removeItem('adminAccessToken');
-        localStorage.removeItem('adminRefreshToken');
-        localStorage.removeItem('adminUser');
-        localStorage.removeItem('adminTokenExpiry');
-        if (currentPath !== '/admin/login') {
-          window.location.href = '/admin/login';
-        }
-      } else {
-        // Use AuthService to clear auth data
-        authService.logout().catch(() => {
-          // Ignore errors during logout - we still want to redirect
-        });
-        
-        // Redirect to login if not already on a public route
-        if (!isPublicRoute && currentPath !== '/login') {
-          window.location.href = '/login';
-        }
+  async handleAuthFailure(serviceType: 'standard' | 'admin' = 'standard') {
+    if (serviceType === 'admin') {
+      try {
+        await AsyncStorage.multiRemove([
+          'adminAccessToken',
+          'adminRefreshToken',
+          'adminUser',
+          'adminTokenExpiry'
+        ]);
+      } catch (e) {
+        // failed to clear
       }
+    } else {
+      // Use AuthService to clear auth data
+      const authService = getAuthService();
+      authService?.logout?.().catch(() => {
+        // Ignore errors during logout
+      });
     }
   }
 
@@ -309,16 +373,31 @@ export class HttpService {
       });
     }
     
-    const axio = axios.create({
+    const instance = axios.create({
       baseURL: this.getHostUrl(serviceType),
       timeout: this.getTimeoutTime(api),
       headers: {
-        ...this.getHeaders(serviceType),
         'Content-Type': 'multipart/form-data'
       },
     });
+
+    instance.interceptors.request.use(async config => {
+      let accessToken: string | null = null;
+      if (serviceType === 'admin') {
+        const adminAuthService = getAdminAuthService();
+        accessToken = await adminAuthService?.getToken?.() || null;
+      } else {
+        const authService = getAuthService();
+        accessToken = await authService?.getToken?.() || null;
+      }
+      
+      if (accessToken) {
+        config.headers['Authorization'] = `Bearer ${accessToken}`;
+      }
+      return config;
+    });
     
-    return axio.post(this.getRelativePath(api), formData);
+    return instance.post(this.getRelativePath(api), formData);
   };
 }
 

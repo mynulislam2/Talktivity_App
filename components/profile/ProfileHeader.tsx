@@ -129,7 +129,7 @@ const styles = StyleSheet.create({
     padding: spacing.sm,
   },
   name: {
-    fontSize: 20,
+    fontSize: 16,
     fontWeight: 'bold',
     color: '#000',
     marginBottom: spacing.xs,

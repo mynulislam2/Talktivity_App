@@ -19,8 +19,8 @@ import {
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loadProfile, updateProfile, selectProfile, selectProfileLoading, selectProfileError } from '../../store/slices/profileSlice';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { loadProfile, updateProfile, selectProfile, selectProfileLoading, selectProfileError } from '@/store/slices/profileSlice';
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
 
@@ -385,7 +385,7 @@ const styles = StyleSheet.create({
     width: 36,
     height: 36,
     borderRadius: 18,
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.primary, // Updated to brand purple
     justifyContent: 'center',
     alignItems: 'center',
     borderWidth: 3,

@@ -1,3 +1,5 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 export type SessionType = "call" | "practice" | "roleplay";
 
 export interface SessionInfo {
@@ -8,7 +10,7 @@ export interface SessionInfo {
 
 const STORAGE_KEY = "active_session";
 
-function nowIso() {
+function nowIso(): string {
   return new Date().toISOString();
 }
 
@@ -25,39 +27,34 @@ function parseSession(raw: string | null): SessionInfo | null {
 
 class SessionTrackingService {
   startSession = async (sessionType: SessionType): Promise<SessionInfo> => {
-    if (typeof window === 'undefined') {
-      throw new Error('localStorage is not available');
-    }
     const session: SessionInfo = {
       sessionType,
       startedAt: nowIso(),
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session));
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(session));
     return session;
   };
 
   endSession = async (): Promise<void> => {
-    if (typeof window === 'undefined') return;
-    const session = this.getCurrentSession();
+    const session = await this.getCurrentSession();
     if (!session) return;
     const ended: SessionInfo = { ...session, endedAt: nowIso() };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(ended));
+    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(ended));
   };
 
-  getCurrentSession = (): SessionInfo | null => {
-    if (typeof window === 'undefined') return null;
-    return parseSession(localStorage.getItem(STORAGE_KEY));
+  getCurrentSession = async (): Promise<SessionInfo | null> => {
+    const raw = await AsyncStorage.getItem(STORAGE_KEY);
+    return parseSession(raw);
   };
 
-  isSessionActive = (): boolean => {
-    if (typeof window === 'undefined') return false;
-    const session = this.getCurrentSession();
+  isSessionActive = async (): Promise<boolean> => {
+    const session = await this.getCurrentSession();
     return Boolean(session && !session.endedAt);
   };
+// ...
 
-  getSessionDuration = (): number => {
-    if (typeof window === 'undefined') return 0;
-    const session = this.getCurrentSession();
+  getSessionDuration = async (): Promise<number> => {
+    const session = await this.getCurrentSession();
     if (!session?.startedAt) return 0;
     const start = new Date(session.startedAt).getTime();
     const end = session.endedAt ? new Date(session.endedAt).getTime() : Date.now();

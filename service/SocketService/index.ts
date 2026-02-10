@@ -7,19 +7,23 @@
 
 import { io, Socket } from 'socket.io-client';
 import { authService } from '../AuthService';
+import { normalizeUrl } from '@/lib/network/urlNormalizer';
 
 // Get WebSocket server URL
 const getSocketURL = (): string => {
-  if (typeof window === 'undefined') {
-    return 'http://localhost:8082';
-  }
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || process.env.EXPO_PUBLIC_API_URL;
   
-  const envUrl = process.env.NEXT_PUBLIC_API_URL;
+  const fixLocalhost = (url: string) => {
+    return normalizeUrl(url);
+  };
+
   if (!envUrl || envUrl === 'null' || envUrl === 'undefined' || String(envUrl).trim() === '') {
-    return 'http://localhost:8082';
+    // Use localhost so normalizeUrl can map it correctly for emulator/real device
+    const defaultUrl = 'http://localhost:8082';
+    return fixLocalhost(defaultUrl);
   }
   
-  const cleanUrl = String(envUrl).replace(/\/$/, '').trim();
+  const cleanUrl = fixLocalhost(String(envUrl).replace(/\/$/, '').trim());
   // Remove /api if present (Socket.IO runs on root)
   return cleanUrl.replace(/\/api$/, '');
 };
@@ -39,14 +43,14 @@ export interface SessionStatePayload {
 /**
  * Connect to Socket.IO server
  */
-export function connectSocket(): Socket {
+export async function connectSocket(): Promise<Socket> {
   // Return existing connection if available and connected
   if (socketInstance && socketInstance.connected) {
     return socketInstance;
   }
 
-  // Get authentication token
-  const token = authService.getToken();
+  // Get authentication token (async operation)
+  const token = await authService.getToken();
   if (!token) {
     // Socket connection: No authentication token found
     throw new Error('Authentication required to connect socket');
@@ -102,9 +106,12 @@ export function connectSocket(): Socket {
 export function subscribeToSessionState(
   handler: (payload: SessionStatePayload) => void
 ): () => void {
-  // Ensure socket is initialized
+  // Ensure socket is initialized and connecting
   if (!socketInstance) {
-    connectSocket();
+    // Start connection without waiting
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -147,9 +154,9 @@ export function disconnectSocket(): void {
 
 // Get socket instance (lazy connection)
 // This ensures socket is connected when accessed
-const getSocket = (): Socket => {
+const getSocket = async (): Promise<Socket> => {
   if (!socketInstance || !socketInstance.connected) {
-    return connectSocket();
+    return await connectSocket();
   }
   return socketInstance;
 };
@@ -197,9 +204,11 @@ export function getOnlineUsers(): Set<number> {
 export function subscribeToPresence(
   handler: (userId: number, online: boolean, lastSeen?: string) => void
 ): () => void {
-  // Ensure socket is initialized
+  // Ensure socket is initialized and connecting
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -238,9 +247,11 @@ export function subscribeToPresence(
  * Join a group room for real-time group chat
  */
 export function joinGroupRoom(groupId: number, userId: number): void {
-  // Ensure socket is initialized
+  // Ensure socket is initialized and connecting
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -268,7 +279,9 @@ export function leaveGroupRoom(groupId: number, userId: number): void {
  */
 export function sendGroupMessage(groupId: number, content: string): void {
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -284,7 +297,9 @@ export function sendGroupMessage(groupId: number, content: string): void {
  */
 export function groupTyping(groupId: number, userId: number, typing: boolean): void {
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -300,7 +315,9 @@ export function groupTyping(groupId: number, userId: number, typing: boolean): v
  */
 export function joinDMRoom(userId: number, otherUserId: number): void {
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -327,7 +344,9 @@ export function leaveDMRoom(userId: number, otherUserId: number): void {
  */
 export function sendDMMessage(dmId: number, senderId: number, receiverId: number, content: string): void {
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {
@@ -343,7 +362,9 @@ export function sendDMMessage(dmId: number, senderId: number, receiverId: number
  */
 export function dmTyping(userId: number, otherUserId: number, typing: boolean): void {
   if (!socketInstance) {
-    connectSocket();
+    connectSocket().catch((err) => {
+      console.error('❌ [SocketService] Failed to connect socket:', err);
+    });
   }
 
   if (!socketInstance) {

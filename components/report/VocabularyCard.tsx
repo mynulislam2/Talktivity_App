@@ -1,291 +1,204 @@
 /**
- * Vocabulary Card
+ * VocabularyCard Component (React Native)
  * 
- * Displays vocabulary usage and progress
+ * Displays vocabulary analysis.
+ * Matches Next.js implementation.
  */
 
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import type { VocabularyReport } from '@/types/report';
 
-interface VocabularyData {
-  score: number;
-  totalWords: number;
-  uniqueWords: number;
-  newWords: string[];
-  vocabulary_level: string;
+export interface VocabularyCardProps {
+  vocabulary: VocabularyReport;
+  onContinue: () => void;
 }
 
-interface VocabularyCardProps {
-  data: VocabularyData;
-}
-
-const VocabularyCard: React.FC<VocabularyCardProps> = ({ data }) => {
-  const uniquePercentage = Math.round(
-    (data.uniqueWords / Math.max(data.totalWords, 1)) * 100
-  );
-
-  const getLevelColor = (level: string): string => {
-    switch (level?.toLowerCase()) {
-      case 'advanced':
-        return '#4CAF50';
-      case 'intermediate':
-        return '#2196F3';
-      case 'beginner':
-        return '#FF9800';
-      default:
-        return colors.primary;
-    }
-  };
-
+export function VocabularyCard({ vocabulary, onContinue }: VocabularyCardProps) {
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <Ionicons name="language" size={24} color={colors.primary} />
-        <Text style={styles.title}>Vocabulary Usage</Text>
-      </View>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="layers" size={24} color="#f97316" />
+          </View>
+          <View>
+            <Text style={styles.title}>Vocabulary Analysis</Text>
+            <Text style={styles.subtitle}>Level {vocabulary.vocabularyLevel}</Text>
+          </View>
+        </View>
 
-      {/* Stats Grid */}
-      <View style={styles.statsGrid}>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{data.totalWords}</Text>
-          <Text style={styles.statLabel}>Total Words</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{data.uniqueWords}</Text>
-          <Text style={styles.statLabel}>Unique Words</Text>
-        </View>
-        <View style={styles.statBox}>
-          <Text style={styles.statNumber}>{uniquePercentage}%</Text>
-          <Text style={styles.statLabel}>Variety</Text>
-        </View>
-      </View>
+        <View style={styles.statsContainer}>
+          {/* Vocabulary Score */}
+          <View style={styles.statCard}>
+            <Text style={styles.statTitle}>Vocabulary Score</Text>
+            <Text style={styles.statValue}>{vocabulary.vocabularyScore}%</Text>
+            {vocabulary.improvementTarget ? (
+              <Text style={styles.statDescription}>
+                You're {vocabulary.improvementTarget.percentToNextLevel}% away from {vocabulary.improvementTarget.nextLevel}
+              </Text>
+            ) : (
+              <Text style={styles.statDescription}>Improvement target not available</Text>
+            )}
+          </View>
 
-      {/* Level Indicator */}
-      <View
-        style={[
-          styles.levelBox,
-          { borderLeftColor: getLevelColor(data.vocabulary_level) },
-        ]}
-      >
-        <View>
-          <Text style={styles.levelLabel}>Vocabulary Level</Text>
-          <Text
-            style={[
-              styles.levelValue,
-              { color: getLevelColor(data.vocabulary_level) },
-            ]}
-          >
-            {data.vocabulary_level?.charAt(0).toUpperCase() +
-              data.vocabulary_level?.slice(1)}
-          </Text>
-        </View>
-        <Text style={styles.levelDescription}>
-          {data.vocabulary_level?.toLowerCase() === 'advanced'
-            ? 'Using sophisticated and varied vocabulary'
-            : data.vocabulary_level?.toLowerCase() === 'intermediate'
-            ? 'Using appropriate vocabulary for your level'
-            : 'Building foundational vocabulary'}
-        </Text>
-      </View>
+          {/* Word Usage */}
+          {vocabulary.lexicalDiversity && (
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>Word Usage</Text>
+              <Text style={styles.statValue}>{vocabulary.activeVocabulary || 0} words</Text>
+              <Text style={styles.statDescription}>{vocabulary.uniqueWords || 0} unique words</Text>
+              {typeof vocabulary.lexicalDiversity.score === 'number' && (
+                <Text style={styles.statDescription}>Diversity: {vocabulary.lexicalDiversity.score}</Text>
+              )}
+              {vocabulary.lexicalDiversity.feedback && (
+                <Text style={styles.statDescription}>{vocabulary.lexicalDiversity.feedback}</Text>
+              )}
+            </View>
+          )}
 
-      {/* Score Display */}
-      <View style={styles.scoreContainer}>
-        <View style={styles.scoreCircle}>
-          <Text style={styles.scoreValue}>{data.score}</Text>
-        </View>
-        <View style={styles.scoreInfo}>
-          <Text style={styles.scoreLabel}>Vocabulary Score</Text>
-          <Text style={styles.scoreInterpretation}>
-            {data.score >= 80
-              ? 'Excellent vocabulary control'
-              : data.score >= 70
-              ? 'Good vocabulary range'
-              : 'Developing vocabulary base'}
-          </Text>
-        </View>
-      </View>
+          {/* Level Breakdown */}
+          {vocabulary.levelBreakdown && (
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>Level Breakdown</Text>
+              {Object.entries(vocabulary.levelBreakdown).map(([level, count]) => (
+                <View key={level} style={styles.levelRow}>
+                  <Text style={styles.levelLabel}>{level}</Text>
+                  <Text style={styles.levelValue}>{count || 0}</Text>
+                </View>
+              ))}
+            </View>
+          )}
 
-      {/* New Words Learned */}
-      {data.newWords && data.newWords.length > 0 && (
-        <View style={styles.newWordsSection}>
-          <Text style={styles.sectionTitle}>New Words You Used</Text>
-          <ScrollView
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            style={styles.wordList}
-          >
-            {data.newWords.slice(0, 5).map((word, index) => (
-              <View key={index} style={styles.wordTag}>
-                <Ionicons name="star" size={12} color={colors.primary} />
-                <Text style={styles.wordText}>{word}</Text>
+          {/* New Words */}
+          {vocabulary.newWords && vocabulary.newWords.length > 0 && (
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>New Words</Text>
+              <View style={styles.wordsContainer}>
+                {vocabulary.newWords.slice(0, 10).map((word, idx) => (
+                  <View key={idx} style={styles.wordTag}>
+                    <Text style={styles.wordText}>{word}</Text>
+                  </View>
+                ))}
               </View>
-            ))}
-          </ScrollView>
+            </View>
+          )}
         </View>
-      )}
 
-      {/* Recommendations */}
-      <View style={styles.tipsContainer}>
-        <Ionicons name="bulb" size={20} color={colors.primary} />
-        <Text style={styles.tipsText}>
-          Create flashcards for new vocabulary and practice using them in sentences
-          daily.
-        </Text>
+        <TouchableOpacity
+          style={styles.continueButton}
+          onPress={onContinue}
+        >
+          <Text style={styles.continueButtonText}>Continue to Discourse</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#050110',
+  },
   card: {
-    backgroundColor: '#fff',
+    width: '100%',
+    backgroundColor: 'rgba(17, 24, 39, 0.5)',
     borderRadius: 16,
-    padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    padding: 20,
+    borderWidth: 1,
+    borderColor: 'rgba(55, 65, 81, 0.5)',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.lg,
-    gap: spacing.md,
+    gap: 12,
+    marginBottom: 20,
+  },
+  iconContainer: {
+    padding: 8,
+    backgroundColor: 'rgba(249, 115, 22, 0.2)',
+    borderRadius: 8,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
-  },
-  statsGrid: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  statBox: {
-    flex: 1,
-    backgroundColor: '#f0f0f0',
-    borderRadius: 12,
-    padding: spacing.md,
-    alignItems: 'center',
-  },
-  statNumber: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  statLabel: {
-    fontSize: 11,
-    color: colors.text.secondary,
+    fontSize: 16,
     fontWeight: '600',
-    marginTop: spacing.xs,
-    textAlign: 'center',
+    color: '#fff',
   },
-  levelBox: {
-    backgroundColor: '#f9f9f9',
+  subtitle: {
+    fontSize: 13,
+    color: 'rgba(156, 163, 175, 1)',
+  },
+  statsContainer: {
+    gap: 14,
+    marginBottom: 20,
+  },
+  statCard: {
+    backgroundColor: 'rgba(31, 41, 55, 0.5)',
     borderRadius: 12,
-    borderLeftWidth: 4,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
+    padding: 14,
+  },
+  statTitle: {
+    fontSize: 13,
+    color: '#cbd5e1',
+    marginBottom: 6,
+    fontWeight: '600',
+  },
+  statValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#ffffff',
+    marginBottom: 6,
+  },
+  statDescription: {
+    fontSize: 13,
+    color: '#9ca3af',
+    lineHeight: 18,
+  },
+  levelRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 4,
   },
   levelLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
+    fontSize: 13,
+    color: '#cbd5e1',
+    fontWeight: '500',
   },
   levelValue: {
-    fontSize: 16,
+    fontSize: 14,
+    color: '#ffffff',
     fontWeight: '700',
-    marginBottom: spacing.sm,
   },
-  levelDescription: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-  },
-  scoreContainer: {
+  wordsContainer: {
     flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    gap: spacing.lg,
-  },
-  scoreCircle: {
-    width: 70,
-    height: 70,
-    borderRadius: 35,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scoreValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: colors.white,
-  },
-  scoreInfo: {
-    flex: 1,
-  },
-  scoreLabel: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  scoreInterpretation: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  newWordsSection: {
-    marginBottom: spacing.lg,
-  },
-  sectionTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md,
-  },
-  wordList: {
-    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 8,
   },
   wordTag: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.primaryLight,
+    backgroundColor: 'rgba(59, 130, 246, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
     borderRadius: 12,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    marginRight: spacing.md,
-    gap: spacing.xs,
   },
   wordText: {
-    fontSize: 12,
+    fontSize: 13,
+    color: '#7B70FF',
     fontWeight: '600',
-    color: colors.primary,
   },
-  tipsContainer: {
-    flexDirection: 'row',
-    backgroundColor: '#E3F2FD',
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.md,
-    alignItems: 'flex-start',
+  continueButton: {
+    backgroundColor: '#6A5AE0',
+    paddingVertical: 11,
+    borderRadius: 24,
+    alignItems: 'center',
   },
-  tipsText: {
-    flex: 1,
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-    lineHeight: 16,
+  continueButtonText: {
+    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
   },
 });
-
-export default VocabularyCard;

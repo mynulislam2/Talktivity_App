@@ -1,23 +1,25 @@
 /**
  * Root App Layout
- * 
+ *
  * Main entry point that sets up:
  * - Redux store and persistence
  * - Navigation
  * - LiveKit
  * - Status bar
+ * - Premium animated splash screen
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { StatusBar, Platform } from 'react-native';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
-import { ActivityIndicator, View } from 'react-native';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 import 'react-native-reanimated';
 
-import { store, persistor } from '../store';
-import RootNavigator from '../navigation/RootNavigator';
-import ErrorBoundary from '../components/common/ErrorBoundary';
+import { store, persistor } from '@/store';
+import RootNavigator from '@/navigation/RootNavigator';
+import ErrorBoundary from '@/components/common/ErrorBoundary';
+import { AnimatedSplashScreen } from '@/components/common/AnimatedSplashScreen';
 
 // Setup LiveKit for React Native
 if (Platform.OS !== 'web') {
@@ -29,36 +31,51 @@ if (Platform.OS !== 'web') {
 }
 
 /**
- * Loading screen shown while Redux state is rehydrating
- */
-const LoadingScreen = () => (
-  <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-    <ActivityIndicator size="large" color="#007AFF" />
-  </View>
-);
-
-/**
  * Root Layout Component
- * 
+ *
  * Wraps the entire app with Redux and Navigation providers
+ * Shows custom animated splash screen while app initializes
  */
 export default function RootLayout() {
+  const [isAppReady, setIsAppReady] = useState(false);
+  const [showSplash, setShowSplash] = useState(true);
+
   useEffect(() => {
-    // Setup status bar styling
-    StatusBar.setBarStyle('dark-content', true);
+    // Setup status bar styling for dark theme
+    StatusBar.setBarStyle('light-content', true);
     if (Platform.OS === 'android') {
-      StatusBar.setBackgroundColor('#ffffff', true);
+      StatusBar.setBackgroundColor('#161823', true);
     }
   }, []);
 
+  const handlePersistorReady = useCallback(() => {
+    // Mark app as ready once Redux store is rehydrated
+    setIsAppReady(true);
+  }, []);
+
+  const handleSplashFinish = useCallback(() => {
+    // Hide splash screen after animation completes
+    setShowSplash(false);
+  }, []);
+
   return (
-    <Provider store={store}>
-      <PersistGate loading={<LoadingScreen />} persistor={persistor}>
-        <ErrorBoundary>
-          <RootNavigator />
-        </ErrorBoundary>
-        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-      </PersistGate>
-    </Provider>
+    <SafeAreaProvider>
+      <Provider store={store}>
+        <PersistGate loading={null} persistor={persistor} onBeforeLift={handlePersistorReady}>
+          <ErrorBoundary>
+            <RootNavigator />
+          </ErrorBoundary>
+          <StatusBar barStyle="light-content" backgroundColor="#161823" />
+        </PersistGate>
+      </Provider>
+
+      {/* Premium animated splash screen */}
+      {showSplash && (
+        <AnimatedSplashScreen
+          isAppReady={isAppReady}
+          onFinish={handleSplashFinish}
+        />
+      )}
+    </SafeAreaProvider>
   );
 }

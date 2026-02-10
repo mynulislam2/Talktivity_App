@@ -7,11 +7,11 @@
  */
 
 import { useEffect } from 'react';
-import { toast } from 'react-toastify';
+import { Alert } from 'react-native';
 import { connectSocket, subscribeToSessionState, SessionStatePayload } from '@/service/SocketService';
 import socket from '@/service/SocketService';
 import { updateDailyProgressAfterSession } from '@/lib/practice/updateDailyProgress';
-import { useSessionTracking } from '@/Hooks/useSessionTracking';
+import { useSessionTracking } from '@/hooks/useSessionTracking';
 import { useAppSelector } from '@/store/hooks';
 import { selectCurrentSubscription } from '@/store/slices/subscriptionSlice';
 import type { PracticeSessionType } from '@/types/practice';
@@ -35,7 +35,14 @@ export function usePracticeSessionStateEvents(
   useEffect(() => {
     // Connect socket if not connected
     if (!socket.connected) {
-      connectSocket();
+      // Use IIFE to handle async connectSocket
+      (async () => {
+        try {
+          await connectSocket();
+        } catch (error) {
+          console.error('Failed to connect socket:', error);
+        }
+      })();
     }
 
     const handleSessionState = async (payload: SessionStatePayload) => {
@@ -69,7 +76,8 @@ export function usePracticeSessionStateEvents(
           }
 
           onSaved();
-          toast.success('Session saved successfully!', { autoClose: 2000 });
+          // Show success message (using Alert for React Native)
+          Alert.alert('Success', 'Session saved successfully!');
           
           // Refresh time limits after session
           await refreshStatus();
@@ -77,7 +85,7 @@ export function usePracticeSessionStateEvents(
 
         case 'SESSION_SAVE_FAILED':
           onFailed(payload.message || 'Failed to save conversation.');
-          toast.error(payload.message || 'Failed to save conversation', { autoClose: 5000 });
+          Alert.alert('Error', payload.message || 'Failed to save conversation');
           break;
       }
     };

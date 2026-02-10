@@ -5,9 +5,9 @@
  */
 
 import { describe, it, expect, beforeEach, jest } from '@jest/globals';
-import { httpService } from '../service/httpService';
+import { httpService } from '../service/httpservice';
 
-jest.mock('../service/httpService');
+jest.mock('../service/httpservice');
 
 describe('AuthService', () => {
   beforeEach(() => {

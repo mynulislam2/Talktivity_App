@@ -21,8 +21,8 @@ import { Ionicons } from '@expo/vector-icons';
 import SettingsItem from '../../components/profile/SettingsItem';
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
-import { useAppDispatch } from '../../store/hooks';
-import { logoutUser } from '../../store/slices/authSlice';
+import { useAppDispatch } from '@/store/hooks';
+import { logoutUser } from '@/store/slices/authSlice';
 
 interface SettingsScreenProps {
   navigation: any;

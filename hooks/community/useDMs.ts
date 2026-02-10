@@ -7,9 +7,21 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useAppSelector } from '@/store/hooks';
 import { selectDMs } from '@/store/slices/communitySlice';
-import { getOnlineUsers, subscribeToPresence } from '@/service/SocketService';
 import { authService } from '@/service/AuthService';
 import type { DM } from '@/types/community';
+
+// SocketService imports - handle gracefully if not available
+let getOnlineUsers: () => Set<number>;
+let subscribeToPresence: (handler: (userId: number, online: boolean, lastSeen?: string) => void) => () => void;
+
+try {
+  const socketService = require('@/service/SocketService');
+  getOnlineUsers = socketService.getOnlineUsers || (() => new Set<number>());
+  subscribeToPresence = socketService.subscribeToPresence || (() => () => {});
+} catch {
+  getOnlineUsers = () => new Set<number>();
+  subscribeToPresence = () => () => {};
+}
 
 export interface UseDMsReturn {
   dms: DM[];

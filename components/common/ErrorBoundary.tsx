@@ -15,9 +15,9 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { logError, AppError, ErrorType } from '../lib/errorHandler';
-import { colors } from '../styles/colors';
-import { spacing } from '../styles/spacing';
+import { logError, AppError, ErrorType } from '@/lib/errorHandler';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
 interface ErrorBoundaryProps {
   children: ReactNode;

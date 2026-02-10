@@ -10,9 +10,9 @@
 
 import { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../store';
-import { callService } from '../../service/CallService';
-import { asyncStorageManager } from '../../lib/auth/asyncStorageManager';
+import { AppDispatch } from '@/store';
+import { callService } from '@/service/CallService';
+import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
 
 interface SessionConfig {
   sessionType: 'practice' | 'roleplay';

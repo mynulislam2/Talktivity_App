@@ -63,7 +63,7 @@ export const completeTodayReport = createAsyncThunk(
     try {
       // Use UTC date for API calls (business logic)
       // eslint-disable-next-line @typescript-eslint/no-require-imports
-      const { getUtcToday } = require('@/Utils/timezoneUtils');
+      const { getUtcToday } = require('@/utils/timezoneUtils');
       const today = getUtcToday();
       const response = await httpService.post('/progress/weekly-exam/complete', { date: today });
       if (response.data?.success) {

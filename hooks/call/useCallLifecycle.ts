@@ -14,7 +14,14 @@ import {
   selectLifecycleLoading,
 } from '@/store/slices/lifecycleSlice';
 
-export function useCallLifecycle() {
+export interface UseCallLifecycleReturn {
+  lifecycle: ReturnType<typeof selectLifecycleData> | null;
+  callCompleted: boolean;
+  isLoading: boolean;
+  refreshLifecycle: () => void;
+}
+
+export function useCallLifecycle(): UseCallLifecycleReturn {
   const dispatch = useAppDispatch();
   const lifecycle = useAppSelector(selectLifecycleData);
   const callCompleted = useAppSelector(selectCallCompleted);

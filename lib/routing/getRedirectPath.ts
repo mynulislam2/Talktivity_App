@@ -37,23 +37,33 @@ export function getRedirectPath(lifecycle: LifecycleResponseData | null): string
   const callCompleted = lifecycle?.milestones?.callCompleted || false;
   const reportCompleted = lifecycle?.milestones?.reportCompleted || false;
 
+  console.log('[RouteGuard:getRedirectPath] lifecycle milestones:', {
+    onboardingCompleted,
+    callCompleted,
+    reportCompleted,
+  });
+
   // Rule 1: Onboarding not completed
   if (!onboardingCompleted) {
+    console.log('[RouteGuard:getRedirectPath] redirect → /onboarding');
     return '/onboarding';
   }
 
   // Rule 2: Call not completed
   if (!callCompleted) {
+    console.log('[RouteGuard:getRedirectPath] redirect → /call?CallStart=true');
     return '/call?CallStart=true';
   }
 
   // Rule 3: Report not completed
   if (!reportCompleted) {
+    console.log('[RouteGuard:getRedirectPath] redirect → /call');
     return '/call';
   }
 
-  // Rule 4: All milestones complete - redirect to home
-  // NOTE: /home page itself has RouteGuard with requireSubscription=true
-  // which will handle the actual subscription check and redirect to /upgrade if needed
-  return '/home';
+  // Rule 4: All milestones complete - redirect to upgrade page
+  // User must complete subscription/payment before accessing home
+  // SubscriptionScreen will check subscription status and navigate to home if active
+  console.log('[RouteGuard:getRedirectPath] redirect → /upgrade');
+  return '/upgrade';
 }

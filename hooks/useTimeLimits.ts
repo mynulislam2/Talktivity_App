@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { timeLimitService, TimeLimitStatus } from '../service/TimeLimitService';
+import { timeLimitService, TimeLimitStatus } from '@/service/TimeLimitService';
 
 export interface TimeLimitHook {
   timeStatus: TimeLimitStatus | null;

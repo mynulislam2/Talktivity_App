@@ -11,7 +11,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { useSelector } from 'react-redux';
-import type { RootState } from '../store';
+import type { RootState } from '@/store';
 
 const TestComponent: React.FC = () => {
   // Test Redux selector
@@ -73,7 +73,7 @@ const styles = StyleSheet.create({
     marginBottom: 15,
     borderRadius: 8,
     borderLeftWidth: 4,
-    borderLeftColor: '#007AFF',
+    borderLeftColor: '#6A5AE0', // Updated to brand purple
   },
   text: {
     fontSize: 14,

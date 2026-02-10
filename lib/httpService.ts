@@ -9,7 +9,7 @@
 
 import axios, { AxiosInstance, AxiosError, AxiosResponse } from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import AppConfig from '../config/appConfig';
+import AppConfig from '@/config/appConfig';
 
 /**
  * Create and configure axios instance

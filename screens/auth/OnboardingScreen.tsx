@@ -21,7 +21,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   loadOnboarding,
   saveOnboarding,
@@ -35,16 +35,17 @@ import {
   updateSelection,
   updateTempSelections,
   clearTempSelections,
-} from '../../store/slices/onboardingSlice';
+} from '@/store/slices/onboardingSlice';
 
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
-import { STEP_DEFINITIONS } from '../../lib/onboarding/stepDefinitions';
-import { StepRouter } from '../../components/onboarding/StepRouter';
-
-interface OnboardingScreenProps {
-  navigation: any;
-}
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
+import { STEP_DEFINITIONS } from '@/lib/onboarding/stepDefinitions';
+import { StepRouter } from '@/components/onboarding/StepRouter';
+import { loadLifecycle, updateLifecycle } from '@/store/slices/lifecycleSlice';
+import { CommonActions } from '@react-navigation/native';
+import { selectTempSelections } from '@/store/slices/onboardingSlice';
+import { hasStepSelection, getNextStep } from '@/lib/onboarding/stepHelpers';
+import type { OnboardingScreenProps } from '@/navigation/types';
 
 const TOTAL_STEPS = 15;
 
@@ -98,69 +99,85 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
     return stepDef.validation(value);
   }, [selections]);
 
-  // Handle single selection
+
+  // Get tempSelections from Redux
+  const tempSelections = useAppSelector(selectTempSelections);
+
+  // Handle single selection (just updates selection, no auto-advance) - matches Next.js
   const handleSingleSelect = useCallback(
-    (value: string) => {
-      dispatch(updateSelection({ field: currentStepDef.field, value }));
+    (field: keyof typeof selections, value: any) => {
+      // Update selection in Redux only
+      dispatch(updateSelection({ field: field as string, value }));
     },
-    [dispatch, currentStepDef.field]
+    [dispatch]
   );
 
-  // Handle multi-selection toggle
-  const handleMultiSelect = useCallback(
-    (optionId: string) => {
-      const currentValue = (selections[currentStepDef.field] as string[]) || [];
-      const newValue = currentValue.includes(optionId)
-        ? currentValue.filter((id) => id !== optionId)
-        : [...currentValue, optionId];
+  // Handle multi-select toggle (doesn't advance) - matches Next.js
+  const handleMultiToggle = useCallback(
+    (field: keyof typeof selections, value: any) => {
+      const currentArray = tempSelections[field] || selections[field] || [];
+      const newArray = Array.isArray(currentArray)
+        ? currentArray.includes(value)
+          ? currentArray.filter((i: any) => i !== value)
+          : [...currentArray, value]
+        : [value];
       
-      dispatch(updateSelection({ field: currentStepDef.field, value: newValue }));
+      dispatch(updateTempSelections({ field: field as string, value: newArray }));
     },
-    [dispatch, currentStepDef.field, selections]
+    [tempSelections, selections, dispatch]
   );
 
-  // Navigate to next step
-  const handleNext = useCallback(() => {
-    if (!validateStep(currentStep)) {
-      Alert.alert('Incomplete', 'Please complete this step to continue');
-      return;
+  // Handle Continue button - works for both single and multi-select (matches Next.js)
+  const handleContinue = useCallback(() => {
+    if (!currentStepDef) return;
+
+    // For multi-select, save temp selections first
+    if (currentStepDef.type === 'multi-select') {
+      const tempValue = tempSelections[currentStepDef.field];
+      if (tempValue !== undefined) {
+        dispatch(updateSelection({ field: currentStepDef.field, value: tempValue }));
+        dispatch(clearTempSelections());
+      }
     }
-    
-    if (currentStep < TOTAL_STEPS - 1) {
-      dispatch(setCurrentStep(currentStep + 1));
+
+    // Navigate to next step or complete
+    const nextStep = getNextStep(currentStep, TOTAL_STEPS);
+    if (nextStep === null) {
+      handleComplete();
+    } else {
+      dispatch(setCurrentStep(nextStep));
     }
-  }, [currentStep, validateStep, dispatch]);
+  }, [currentStep, currentStepDef, tempSelections, dispatch, handleComplete]);
 
   // Navigate to previous step
-  const handlePrevious = useCallback(() => {
+  const goToPreviousStep = useCallback(() => {
     if (currentStep > 0) {
       dispatch(setCurrentStep(currentStep - 1));
     }
   }, [currentStep, dispatch]);
 
-  // Handle finish/save
-  const handleFinish = useCallback(async () => {
-    // Validate final step
-    if (!validateStep(currentStep)) {
-      Alert.alert('Incomplete', 'Please complete the final step');
-      return;
-    }
 
-    try {
-      // Save all selections
-      const result = await dispatch(saveOnboarding());
+  // Handle completion - save all data when last step is done (matches Next.js)
+  const handleComplete = useCallback(async () => {
+    // Save all onboarding data to backend
+    const result = await dispatch(saveOnboarding());
+    
+    if (saveOnboarding.fulfilled.match(result)) {
+      // Update lifecycle: mark onboarding as completed
+      const updateResult = await dispatch(updateLifecycle({ onboarding_completed: true }));
       
-      if (saveOnboarding.fulfilled.match(result)) {
-        // Navigate to main app
-        navigation.reset({
-          index: 0,
-          routes: [{ name: 'MainNavigator' }],
-        });
+      if (updateLifecycle.rejected.match(updateResult)) {
+        // Failed to update onboarding_completed
+        // Continue with navigation even if update fails
       }
-    } catch (err) {
-      Alert.alert('Error', 'Failed to save preferences. Please try again.');
+
+      // Refresh lifecycle state for consistency across the app
+      await dispatch(loadLifecycle());
+
+      // Navigate directly to Call screen inside Auth stack so user does NOT see bottom tabs
+      navigation.navigate('CallScreen' as any, { CallStart: true } as any);
     }
-  }, [currentStep, validateStep, dispatch, navigation]);
+  }, [dispatch, navigation]);
 
   // Handle skip (with confirmation)
   const handleSkip = useCallback(() => {
@@ -251,8 +268,9 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
         <StepRouter
           step={currentStepDef}
           selections={selections}
-          onSingleSelect={handleSingleSelect}
-          onMultiSelect={handleMultiSelect}
+          tempSelections={tempSelections}
+          onSingleSelect={(value: any) => handleSingleSelect(currentStepDef.field, value)}
+          onMultiToggle={(value: any) => handleMultiToggle(currentStepDef.field, value)}
         />
       </ScrollView>
 
@@ -261,7 +279,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
         {currentStep > 0 && (
           <TouchableOpacity
             style={[styles.button, styles.secondaryButton]}
-            onPress={handlePrevious}
+            onPress={goToPreviousStep}
           >
             <Ionicons name="chevron-back" size={20} color={colors.primary} />
             <Text style={styles.secondaryButtonText}>Back</Text>
@@ -274,7 +292,8 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
             styles.primaryButton,
             currentStep === 0 ? { flex: 1 } : {},
           ]}
-          onPress={currentStep === TOTAL_STEPS - 1 ? handleFinish : handleNext}
+          onPress={handleContinue}
+          disabled={!hasStepSelection(currentStepDef, selections, tempSelections || {})}
         >
           <Text style={styles.primaryButtonText}>
             {currentStep === TOTAL_STEPS - 1 ? 'Complete' : 'Next'}
@@ -300,7 +319,7 @@ const OnboardingScreen: React.FC<OnboardingScreenProps> = ({ navigation }) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#050110', // Match Next.js bg-[#050110]
   },
   loadingContainer: {
     flex: 1,
@@ -310,7 +329,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 16,
-    color: colors.text.primary,
+    color: '#FFFFFF', // White text
     fontWeight: '600',
   },
   errorContainer: {
@@ -322,12 +341,12 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
-    color: colors.error || '#ef4444',
+    color: '#ef4444', // Red error text
     fontWeight: '500',
     textAlign: 'center',
   },
   retryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#6A5AE0', // Blue-600 (approximation of gradient)
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: 8,
@@ -339,23 +358,25 @@ const styles = StyleSheet.create({
   },
   progressContainer: {
     height: 4,
-    backgroundColor: '#e0e0e0',
+    backgroundColor: 'rgba(255, 255, 255, 0.1)', // Match Next.js bg-white/10
     overflow: 'hidden',
+    borderRadius: 2,
   },
   progressBar: {
     height: '100%',
-    backgroundColor: colors.primary,
+    backgroundColor: '#8b5cf6', // Purple-500 (approximation of gradient from-purple-500 to-blue-500)
+    borderRadius: 2,
   },
   stepHeader: {
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
+    borderBottomColor: 'rgba(51, 65, 85, 0.5)', // slate-800/50
   },
   stepText: {
     fontSize: 12,
     fontWeight: '600',
-    color: colors.text.secondary,
+    color: 'rgba(148, 163, 184, 1)', // slate-400
   },
   titleContainer: {
     paddingHorizontal: spacing.lg,
@@ -364,13 +385,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: '#FFFFFF', // White text
     lineHeight: 32,
     marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: 'rgba(203, 213, 225, 1)', // slate-300
     fontWeight: '500',
     lineHeight: 20,
     fontStyle: 'italic',
@@ -386,7 +407,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     gap: spacing.md,
     borderTopWidth: 1,
-    borderTopColor: '#f0f0f0',
+    borderTopColor: 'rgba(51, 65, 85, 0.5)', // slate-800/50
   },
   button: {
     flex: 1,
@@ -398,23 +419,25 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   primaryButton: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#6A5AE0', // Blue-600 (approximation of gradient from-blue-600 to-purple-600)
+    borderWidth: 1,
+    borderColor: '#5A4BC0', // blue-500
   },
   primaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.white,
+    color: '#FFFFFF', // White text
   },
   secondaryButton: {
     flex: 0.5,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     borderWidth: 1,
-    borderColor: '#e0e0e0',
+    borderColor: 'rgba(51, 65, 85, 1)', // slate-700
   },
   secondaryButtonText: {
     fontSize: 16,
     fontWeight: '600',
-    color: colors.primary,
+    color: '#FFFFFF', // White text
   },
   skipContainer: {
     alignItems: 'center',
@@ -423,7 +446,7 @@ const styles = StyleSheet.create({
   },
   skipText: {
     fontSize: 14,
-    color: colors.text.secondary,
+    color: 'rgba(203, 213, 225, 1)', // slate-300
     fontWeight: '500',
     textDecorationLine: 'underline',
   },

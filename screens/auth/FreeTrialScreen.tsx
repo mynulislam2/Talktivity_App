@@ -19,31 +19,46 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useAppDispatch } from '@/store/hooks';
+import { startFreeTrial, loadSubscriptionStatus } from '@/store/slices/subscriptionSlice';
+import { FreeTrialScreenProps } from '../../navigation/types';
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
 
-interface FreeTrialScreenProps {
-  navigation: any;
-}
-
 const FreeTrialScreen: React.FC<FreeTrialScreenProps> = ({ navigation }) => {
+  const dispatch = useAppDispatch();
   const [loading, setLoading] = useState(false);
 
   const handleActivateTrial = async () => {
+    if (loading) return;
     setLoading(true);
 
     try {
-      // TODO: Call API to activate free trial
-      // const response = await subscriptionService.startFreeTrial();
-
-      // Simulate API call
-      setTimeout(() => {
-        setLoading(false);
+      console.log('[FreeTrialScreen] Starting free trial...');
+      
+      // Call API to activate free trial
+      const result = await dispatch(startFreeTrial());
+      
+      if (startFreeTrial.fulfilled.match(result)) {
+        console.log('[FreeTrialScreen] Free trial started successfully:', result.payload);
+        
+        // Reload subscription status to get updated trial information
+        await dispatch(loadSubscriptionStatus());
+        
+        // Navigate to success screen
         navigation.replace('FreeTrialSuccess');
-      }, 1500);
-    } catch (error) {
+      } else {
+        // Failed to start free trial
+        const errorMessage = result.payload as string || 'Failed to activate free trial. Please try again.';
+        console.error('[FreeTrialScreen] Failed to start free trial:', errorMessage);
+        Alert.alert('Error', errorMessage);
+        setLoading(false);
+      }
+    } catch (error: any) {
+      console.error('[FreeTrialScreen] Error activating free trial:', error);
+      const errorMessage = error?.message || 'Failed to activate free trial. Please try again.';
+      Alert.alert('Error', errorMessage);
       setLoading(false);
-      Alert.alert('Error', 'Failed to activate free trial. Please try again.');
     }
   };
 

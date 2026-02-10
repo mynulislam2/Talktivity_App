@@ -18,15 +18,17 @@ import { StepSpeakingFeelings } from './steps/StepSpeakingFeelings';
 interface StepRouterProps {
   step: StepDefinition;
   selections: UserSelections;
+  tempSelections?: Record<string, any>;
   onSingleSelect: (value: string) => void;
-  onMultiSelect: (value: string) => void;
+  onMultiToggle: (value: string) => void;
 }
 
 export const StepRouter: React.FC<StepRouterProps> = ({
   step,
   selections,
+  tempSelections,
   onSingleSelect,
-  onMultiSelect,
+  onMultiToggle,
 }) => {
   // Get current value for this step
   const currentValue = useMemo(() => {
@@ -82,12 +84,14 @@ export const StepRouter: React.FC<StepRouterProps> = ({
 
   // Handle multi-select steps
   if (step.type === 'multi-select') {
+    // For multi-select, use tempSelections if available, otherwise use selections
+    const multiValue = tempSelections?.[step.field] || currentValue;
     return (
       <StepOptions
         type="multi-select"
         options={step.options || []}
-        selectedIds={(currentValue as string[]) || []}
-        onSelectChange={onMultiSelect}
+        selectedIds={(multiValue as string[]) || []}
+        onSelectChange={onMultiToggle}
       />
     );
   }

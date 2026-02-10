@@ -32,9 +32,14 @@ class LifecycleService {
   async getLifecycle(): Promise<LifecycleResponse> {
     try {
       const response = await httpService.get('/lifecycle');
+      console.log('📡 [LifecycleService] /lifecycle raw response:', {
+        status: response?.status,
+        data: response?.data,
+      });
       
       // Backend returns { success: true, data: { ... }, meta: { ... } }
       if (response.data && response.data.success && response.data.data) {
+        console.log('✅ [LifecycleService] Parsed lifecycle data (wrapped):', response.data.data);
         return {
           success: true,
           data: response.data.data as LifecycleResponseData,
@@ -43,6 +48,7 @@ class LifecycleService {
 
       // Fallback: if response structure is different (direct data)
       if (response.data && typeof response.data === 'object' && !response.data.success) {
+        console.log('✅ [LifecycleService] Parsed lifecycle data (direct):', response.data);
         return {
           success: true,
           data: response.data as LifecycleResponseData,

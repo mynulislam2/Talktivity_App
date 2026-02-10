@@ -65,7 +65,7 @@ export const StepSpeakingFeelings: React.FC<StepSpeakingFeelingsProps> = ({
                   <Ionicons
                     name="checkmark-circle"
                     size={20}
-                    color={colors.primary}
+                    color="#6A5AE0" // blue-600
                   />
                 </View>
               )}
@@ -75,7 +75,7 @@ export const StepSpeakingFeelings: React.FC<StepSpeakingFeelingsProps> = ({
       </View>
 
       <View style={styles.explanation}>
-        <Ionicons name="information-circle" size={16} color={colors.primary} />
+        <Ionicons name="information-circle" size={16} color="rgba(203, 213, 225, 1)" />
         <Text style={styles.explanationText}>
           Your answer helps us tailor conversations to build your confidence
         </Text>
@@ -92,10 +92,10 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   card: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: 'rgba(51, 65, 85, 1)', // slate-700
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     flexDirection: 'row',
@@ -103,33 +103,34 @@ const styles = StyleSheet.create({
     gap: spacing.md,
   },
   cardSelected: {
-    borderColor: colors.primary,
-    backgroundColor: '#f0f8ff',
+    borderColor: '#6A5AE0', // blue-500
+    backgroundColor: 'rgba(37, 99, 235, 0.3)', // blue-600/30
   },
   iconCircle: {
     width: 50,
     height: 50,
     borderRadius: 25,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     justifyContent: 'center',
     alignItems: 'center',
     flexShrink: 0,
   },
   iconCircleSelected: {
-    backgroundColor: colors.primary,
+    backgroundColor: '#6A5AE0', // blue-600
   },
   emotionIcon: {
     fontSize: 24,
+    color: '#FFFFFF', // White icon
   },
   cardText: {
     flex: 1,
     fontSize: 15,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: '#FFFFFF', // White text
     lineHeight: 20,
   },
   cardTextSelected: {
-    color: colors.primary,
+    color: '#FFFFFF', // Keep white for selected
   },
   checkmarkContainer: {
     marginLeft: spacing.md,
@@ -138,14 +139,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     borderRadius: 12,
     padding: spacing.md,
   },
   explanationText: {
     flex: 1,
     fontSize: 12,
-    color: colors.primary,
+    color: 'rgba(203, 213, 225, 1)', // slate-300
     fontWeight: '500',
     lineHeight: 18,
   },

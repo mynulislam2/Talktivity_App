@@ -1,327 +1,174 @@
 /**
- * Discourse Card
+ * DiscourseCard Component (React Native)
  * 
- * Displays discourse/communication analysis
+ * Displays discourse analysis.
+ * Matches Next.js implementation.
  */
 
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import type { DiscourseReport } from '@/types/report';
 
-interface DiscourseData {
-  score: number;
-  coherence: number;
-  organization: number;
-  feedback: string[];
+export interface DiscourseCardProps {
+  discourse: DiscourseReport;
+  onFinish: () => void;
+  onContinue?: () => void;
 }
 
-interface DiscourseCardProps {
-  data: DiscourseData;
-}
+export function DiscourseCard({ discourse, onFinish, onContinue }: DiscourseCardProps) {
+  const handleAction = onFinish || onContinue;
 
-const DiscourseCard: React.FC<DiscourseCardProps> = ({ data }) => {
   return (
-    <View style={styles.card}>
-      <View style={styles.header}>
-        <Ionicons name="chatbubbles" size={24} color={colors.primary} />
-        <Text style={styles.title}>Discourse Analysis</Text>
-      </View>
-
-      {/* Score Display */}
-      <View style={styles.scoreContainer}>
-        <View style={styles.scoreCircle}>
-          <Text style={styles.scoreValue}>{data.score}</Text>
-        </View>
-        <View style={styles.scoreInfo}>
-          <Text style={styles.scoreLabel}>Discourse Score</Text>
-          <Text style={styles.scoreInterpretation}>
-            {data.score >= 80
-              ? 'Excellent communication clarity'
-              : data.score >= 70
-              ? 'Good message delivery'
-              : 'Developing communication skills'}
-          </Text>
-        </View>
-      </View>
-
-      {/* Metrics */}
-      <View style={styles.metricsContainer}>
-        {/* Coherence */}
-        <View style={styles.metricBox}>
-          <View style={styles.metricHeader}>
-            <Text style={styles.metricLabel}>Coherence</Text>
-            <Text style={styles.metricValue}>{data.coherence}%</Text>
+    <ScrollView contentContainerStyle={styles.container}>
+      <View style={styles.card}>
+        <View style={styles.header}>
+          <View style={styles.iconContainer}>
+            <Ionicons name="link" size={24} color="#6366f1" />
           </View>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${data.coherence}%` },
-              ]}
-            />
+          <View>
+            <Text style={styles.title}>Discourse Analysis</Text>
+            <Text style={styles.subtitle}>Level {discourse.discourseLevel}</Text>
           </View>
-          <Text style={styles.metricDescription}>
-            How well your ideas connect and flow together
-          </Text>
         </View>
 
-        {/* Organization */}
-        <View style={styles.metricBox}>
-          <View style={styles.metricHeader}>
-            <Text style={styles.metricLabel}>Organization</Text>
-            <Text style={styles.metricValue}>{data.organization}%</Text>
+        <View style={styles.statsContainer}>
+          {/* Discourse Score */}
+          <View style={styles.statCard}>
+            <Text style={styles.statTitle}>Discourse Score</Text>
+            <Text style={styles.statValue}>{discourse.discourseScore}%</Text>
+            {discourse.improvementTarget ? (
+              <Text style={styles.statDescription}>
+                You're {discourse.improvementTarget.percentToNextLevel}% away from {discourse.improvementTarget.nextLevel}
+              </Text>
+            ) : (
+              <Text style={styles.statDescription}>Improvement target not available</Text>
+            )}
           </View>
-          <View style={styles.progressBar}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${data.organization}%` },
-              ]}
-            />
-          </View>
-          <Text style={styles.metricDescription}>
-            Clarity of structure and logical sequence
-          </Text>
-        </View>
-      </View>
 
-      {/* Feedback */}
-      {data.feedback && data.feedback.length > 0 && (
-        <View style={styles.feedbackSection}>
-          <Text style={styles.feedbackTitle}>Detailed Feedback</Text>
-          {data.feedback.map((item, index) => (
-            <View key={index} style={styles.feedbackItem}>
-              <View style={styles.feedbackNumber}>
-                <Text style={styles.feedbackNumberText}>{index + 1}</Text>
-              </View>
-              <View style={styles.feedbackContent}>
-                <Text style={styles.feedbackText}>{item}</Text>
-              </View>
+          {/* Cohesion */}
+          {discourse.cohesion && (
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>Cohesion</Text>
+              <Text style={styles.statValue}>{discourse.cohesion.score || 0}%</Text>
+              {discourse.cohesion.feedback && (
+                <Text style={styles.statDescription}>{discourse.cohesion.feedback}</Text>
+              )}
             </View>
-          ))}
-        </View>
-      )}
+          )}
 
-      {/* Tips */}
-      <View style={styles.tipsContainer}>
-        <Ionicons name="lightbulb" size={20} color={colors.primary} />
-        <View style={styles.tipsContent}>
-          <Text style={styles.tipsTitle}>Improvement Tips</Text>
-          <Text style={styles.tipsText}>
-            Use transition words like "firstly", "also", "in conclusion" to improve
-            coherence and guide your listener through your thoughts.
-          </Text>
-        </View>
-      </View>
+          {/* Organization */}
+          {discourse.organization && (
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>Organization</Text>
+              <Text style={styles.statValue}>{discourse.organization.score || 0}%</Text>
+              {discourse.organization.feedback && (
+                <Text style={styles.statDescription}>{discourse.organization.feedback}</Text>
+              )}
+            </View>
+          )}
 
-      {/* Practice Suggestion */}
-      <View style={styles.practiceBox}>
-        <View style={styles.practiceIcon}>
-          <Ionicons name="play-circle" size={24} color={colors.primary} />
+          {/* Feedback */}
+          {discourse.feedback && discourse.feedback.length > 0 && (
+            <View style={styles.statCard}>
+              <Text style={styles.statTitle}>Feedback</Text>
+              {discourse.feedback.map((item, idx) => (
+                <View key={idx} style={styles.feedbackItem}>
+                  <Text style={styles.feedbackText}>• {item}</Text>
+                </View>
+              ))}
+            </View>
+          )}
         </View>
-        <View style={styles.practiceContent}>
-          <Text style={styles.practiceTitle}>Practice Suggestion</Text>
-          <Text style={styles.practiceText}>
-            Record a 1-2 minute monologue on a familiar topic and transcribe it to
-            self-evaluate your discourse.
-          </Text>
-        </View>
+
+        <TouchableOpacity
+          style={styles.finishButton}
+          onPress={handleAction}
+        >
+          <Text style={styles.finishButtonText}>Complete Report</Text>
+        </TouchableOpacity>
       </View>
-    </View>
+    </ScrollView>
   );
-};
+}
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    alignItems: 'center',
+    padding: 16,
+    backgroundColor: '#050110',
+  },
   card: {
-    backgroundColor: '#fff',
+    width: '100%',
+    backgroundColor: 'rgba(17, 24, 39, 0.5)',
     borderRadius: 16,
-    padding: spacing.lg,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 8,
-    elevation: 3,
+    padding: 24,
+    borderWidth: 1,
+    borderColor: 'rgba(55, 65, 81, 0.5)',
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: spacing.lg,
-    gap: spacing.md,
+    gap: 12,
+    marginBottom: 24,
+  },
+  iconContainer: {
+    padding: 8,
+    backgroundColor: 'rgba(99, 102, 241, 0.2)',
+    borderRadius: 8,
   },
   title: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.text.primary,
+    fontSize: 16,
+    fontWeight: '600',
+    color: '#fff',
   },
-  scoreContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.successLight || '#E8F5E9',
+  subtitle: {
+    fontSize: 14,
+    color: 'rgba(156, 163, 175, 1)',
+  },
+  statsContainer: {
+    gap: 16,
+    marginBottom: 24,
+  },
+  statCard: {
+    backgroundColor: 'rgba(31, 41, 55, 0.5)',
     borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    gap: spacing.lg,
+    padding: 16,
   },
-  scoreCircle: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
+  statTitle: {
+    fontSize: 14,
+    color: 'rgba(203, 213, 225, 1)',
+    marginBottom: 8,
   },
-  scoreValue: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: colors.white,
+  statValue: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#fff',
+    marginBottom: 8,
   },
-  scoreInfo: {
-    flex: 1,
-  },
-  scoreLabel: {
+  statDescription: {
     fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    marginBottom: spacing.xs,
-  },
-  scoreInterpretation: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.primary,
-  },
-  metricsContainer: {
-    gap: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  metricBox: {
-    backgroundColor: '#F5F5F5',
-    borderRadius: 12,
-    padding: spacing.md,
-  },
-  metricHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: spacing.md,
-  },
-  metricLabel: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text.secondary,
-  },
-  metricValue: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  progressBar: {
-    height: 8,
-    backgroundColor: '#E0E0E0',
-    borderRadius: 4,
-    overflow: 'hidden',
-    marginBottom: spacing.md,
-  },
-  progressFill: {
-    height: '100%',
-    backgroundColor: colors.primary,
-    borderRadius: 4,
-  },
-  metricDescription: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-  },
-  feedbackSection: {
-    backgroundColor: '#f0f0f0',
-    borderRadius: 12,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-  },
-  feedbackTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.md,
+    color: 'rgba(156, 163, 175, 1)',
+    lineHeight: 16,
   },
   feedbackItem: {
-    flexDirection: 'row',
-    marginBottom: spacing.md,
-    gap: spacing.md,
-  },
-  feedbackNumber: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  feedbackNumberText: {
-    color: colors.white,
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  feedbackContent: {
-    flex: 1,
-    justifyContent: 'center',
+    marginBottom: 8,
   },
   feedbackText: {
     fontSize: 12,
-    color: colors.text.primary,
-    lineHeight: 16,
-    fontWeight: '500',
+    color: 'rgba(203, 213, 225, 1)',
+    lineHeight: 18,
   },
-  tipsContainer: {
-    flexDirection: 'row',
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.md,
-    marginBottom: spacing.lg,
+  finishButton: {
+    backgroundColor: '#6A5AE0',
+    paddingVertical: 12,
+    borderRadius: 24,
+    alignItems: 'center',
   },
-  tipsContent: {
-    flex: 1,
-  },
-  tipsTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: spacing.xs,
-  },
-  tipsText: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-  practiceBox: {
-    flexDirection: 'row',
-    backgroundColor: '#FFF3E0',
-    borderRadius: 12,
-    padding: spacing.md,
-    gap: spacing.md,
-    alignItems: 'flex-start',
-  },
-  practiceIcon: {
-    marginTop: spacing.xs,
-  },
-  practiceContent: {
-    flex: 1,
-  },
-  practiceTitle: {
-    fontSize: 12,
-    fontWeight: '700',
-    color: colors.secondary,
-    marginBottom: spacing.xs,
-  },
-  practiceText: {
-    fontSize: 12,
-    color: colors.secondaryDark,
-    fontWeight: '500',
-    lineHeight: 16,
+  finishButtonText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '600',
   },
 });
-
-export default DiscourseCard;

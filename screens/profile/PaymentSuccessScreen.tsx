@@ -1,20 +1,35 @@
 /**
  * Payment Success Screen - Confirmation after successful payment
- * 
- * Shows:
- * - Confirmation message
- * - Plan details
- * - Duration
- * - Next steps
+ * Displays complete AamarPay transaction details matching Next.js implementation
  */
 
-import React, { useEffect } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { useAppDispatch } from '../../store/hooks';
-import { loadSubscriptionStatus } from '../../store/slices/subscriptionSlice';
+import React, { useEffect, useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
+import { CommonActions } from '@react-navigation/native';
+import { useAppDispatch } from '@/store/hooks';
+import { loadSubscriptionStatus } from '@/store/slices/subscriptionSlice';
+import { updateLifecycle, loadLifecycle } from '@/store/slices/lifecycleSlice';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
+
+interface TransactionData {
+  orderId?: string;
+  transactionId?: string;
+  amount?: number;
+  currency?: string;
+  status?: string;
+  date?: string;
+  paymentMethod?: string;
+  bankTxn?: string;
+  storeAmount?: number;
+  serviceCharge?: number;
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  plan?: string;
+  subscriptionActivated?: boolean;
+}
 
 interface PaymentSuccessScreenProps {
   navigation: any;
@@ -23,155 +38,184 @@ interface PaymentSuccessScreenProps {
 
 const PaymentSuccessScreen: React.FC<PaymentSuccessScreenProps> = ({ navigation, route }) => {
   const dispatch = useAppDispatch();
-  const plan = route.params?.plan || 'Pro';
-  const amount = route.params?.amount || 0;
+  const [transactionData, setTransactionData] = useState<TransactionData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
 
   useEffect(() => {
-    // Refresh subscription status to confirm purchase
-    dispatch(loadSubscriptionStatus());
+    // Parse AamarPay response from route params
+    const aamarpayResponse = route.params?.aamarpayResponse;
+    const orderId = route.params?.orderId;
 
-    // Could set a timeout to auto-navigate after few seconds
-    const timer = setTimeout(() => {
-      // auto-navigate if desired
-    }, 5000);
+    if (aamarpayResponse) {
+      const planType = aamarpayResponse.desc?.toLowerCase().includes('pro') ? 'Pro' : 'Basic';
+      
+      const data: TransactionData = {
+        orderId: aamarpayResponse.mer_txnid || orderId,
+        transactionId: aamarpayResponse.pg_txnid || aamarpayResponse.epw_txnid,
+        amount: parseFloat(aamarpayResponse.amount) || parseFloat(aamarpayResponse.amount_original),
+        currency: aamarpayResponse.currency || 'BDT',
+        status: 'Success',
+        date: aamarpayResponse.pay_time || new Date().toISOString(),
+        paymentMethod: aamarpayResponse.card_type || 'AamarPay',
+        bankTxn: aamarpayResponse.bank_txn,
+        storeAmount: aamarpayResponse.store_amount,
+        serviceCharge: aamarpayResponse.pg_service_charge_bdt,
+        customerName: aamarpayResponse.cus_name,
+        customerEmail: aamarpayResponse.cus_email,
+        customerPhone: aamarpayResponse.cus_phone,
+        plan: planType,
+      };
 
-    return () => clearTimeout(timer);
-  }, [dispatch]);
+      setTransactionData(data);
+
+      // Refresh subscription status with retry logic
+      let retryCount = 0;
+      const maxRetries = 3;
+      
+      const refreshSubscription = async () => {
+        try {
+          const result = await dispatch(loadSubscriptionStatus()).unwrap();
+          const isActive = result?.active || false;
+
+          if (isActive) {
+            setTransactionData((prev) => ({
+              ...prev!,
+              subscriptionActivated: true,
+              plan: result?.subscription?.plan_type || prev?.plan || '—',
+            }));
+            await dispatch(loadLifecycle());
+          } else if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(refreshSubscription, 1000 * retryCount);
+          } else {
+            await dispatch(loadLifecycle());
+          }
+        } catch (error) {
+          if (retryCount < maxRetries) {
+            retryCount++;
+            setTimeout(refreshSubscription, 1000 * retryCount);
+          } else {
+            await dispatch(loadLifecycle());
+          }
+        }
+      };
+
+      refreshSubscription();
+    }
+
+    setLoading(false);
+  }, [route.params, dispatch]);
+
+  const handleStartLearning = async () => {
+    if (isRefreshing) return;
+    setIsRefreshing(true);
+
+    try {
+      const rootState = navigation.getParent()?.getState();
+      const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+
+      if (isInAuthStack) {
+        await dispatch(updateLifecycle({ upgrade_completed: true }));
+        await dispatch(loadLifecycle());
+      }
+    } catch (error) {
+      console.error('[PaymentSuccess] Error:', error);
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return 'N/A';
+    return new Date(dateString).toLocaleString();
+  };
+
+  if (loading) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+      </View>
+    );
+  }
+
+  if (!transactionData) {
+    return (
+      <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
+        <View style={styles.errorCard}>
+          <Ionicons name="alert-circle" size={50} color={colors.error || '#ef4444'} />
+          <Text style={styles.errorTitle}>Payment Information Not Available</Text>
+          <Text style={styles.errorMessage}>We couldn't load your transaction details. Please contact support.</Text>
+        </View>
+      </ScrollView>
+    );
+  }
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Success Animation */}
-      <View style={styles.successContainer}>
-        <View style={styles.checkCircle}>
-          <Ionicons name="checkmark-done-sharp" size={60} color={colors.primary} />
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      {/* Success Header */}
+      <View style={styles.successHeader}>
+        <View style={styles.checkmarkCircle}>
+          <Ionicons name="checkmark" size={40} color="#fff" />
         </View>
         <Text style={styles.successTitle}>Payment Successful!</Text>
-        <Text style={styles.successSubtitle}>
-          Your subscription is now active
-        </Text>
+        <Text style={styles.successMessage}>Thank you for your purchase. Your transaction has been completed.</Text>
       </View>
 
-      {/* Order Details */}
+      {/* Subscription Confirmation Banner */}
+      {transactionData.subscriptionActivated && (
+        <View style={styles.confirmationBanner}>
+          <Ionicons name="checkmark-circle" size={20} color="#10b981" />
+          <Text style={styles.confirmationText}>✅ Your subscription has been activated! You now have full access to all plan features.</Text>
+        </View>
+      )}
+
+      {/* Transaction Details Card */}
       <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>Order Details</Text>
+        <Text style={styles.sectionTitle}>Transaction Details</Text>
 
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Plan</Text>
-          <Text style={styles.detailValue}>{plan}</Text>
-        </View>
-
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Amount Paid</Text>
-          <Text style={styles.detailValue}>৳{amount.toLocaleString()}</Text>
-        </View>
-
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Duration</Text>
-          <Text style={styles.detailValue}>12 weeks</Text>
-        </View>
-
-        <View style={styles.detailItem}>
-          <Text style={styles.detailLabel}>Status</Text>
-          <View style={styles.statusBadge}>
-            <Ionicons name="checkmark-circle" size={16} color="#10b981" />
-            <Text style={styles.statusText}>Active</Text>
-          </View>
-        </View>
+        <DetailRow label="Order ID" value={transactionData.orderId || '—'} />
+        {transactionData.transactionId && <DetailRow label="Transaction ID" value={transactionData.transactionId} />}
+        <DetailRow label="Amount" value={`${transactionData.currency} ${Number(transactionData.amount || 0).toFixed(2)}`} />
+        <DetailRow label="Status" value={transactionData.status || '—'} valueColor={colors.success} />
+        <DetailRow label="Plan" value={transactionData.plan || '—'} />
+        {transactionData.bankTxn && <DetailRow label="Bank Transaction" value={transactionData.bankTxn} />}
+        {transactionData.serviceCharge && <DetailRow label="Gateway Charge" value={`${transactionData.currency} ${transactionData.serviceCharge}`} />}
+        {transactionData.storeAmount && <DetailRow label="Net Amount" value={`${transactionData.currency} ${Number(transactionData.storeAmount).toFixed(2)}`} />}
+        {transactionData.customerName && <DetailRow label="Customer" value={transactionData.customerName} />}
+        {transactionData.customerEmail && <DetailRow label="Email" value={transactionData.customerEmail} />}
+        <DetailRow label="Payment Method" value={transactionData.paymentMethod || '—'} />
+        <DetailRow label="Date" value={formatDate(transactionData.date)} />
       </View>
 
-      {/* What's Next */}
-      <View style={styles.nextStepsCard}>
-        <Text style={styles.sectionTitle}>What's Next?</Text>
-
-        <View style={styles.stepItem}>
-          <View style={styles.stepNumber}>
-            <Text style={styles.stepNumberText}>1</Text>
-          </View>
-          <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Start Learning</Text>
-            <Text style={styles.stepDescription}>
-              Access all learning materials and start your AI conversations
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.stepItem}>
-          <View style={styles.stepNumber}>
-            <Text style={styles.stepNumberText}>2</Text>
-          </View>
-          <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Practice Daily</Text>
-            <Text style={styles.stepDescription}>
-              Follow your personalized learning path for best results
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.stepItem}>
-          <View style={styles.stepNumber}>
-            <Text style={styles.stepNumberText}>3</Text>
-          </View>
-          <View style={styles.stepContent}>
-            <Text style={styles.stepTitle}>Track Progress</Text>
-            <Text style={styles.stepDescription}>
-              Check your reports and analytics to see improvement
-            </Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Benefits */}
-      <View style={styles.benefitsCard}>
-        <Text style={styles.sectionTitle}>Your Plan Includes</Text>
-
-        <View style={styles.benefitItem}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-          <Text style={styles.benefitText}>Unlimited AI conversations</Text>
-        </View>
-
-        <View style={styles.benefitItem}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-          <Text style={styles.benefitText}>Access to 500+ scenarios</Text>
-        </View>
-
-        <View style={styles.benefitItem}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-          <Text style={styles.benefitText}>Advanced analytics dashboard</Text>
-        </View>
-
-        <View style={styles.benefitItem}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-          <Text style={styles.benefitText}>Priority support</Text>
-        </View>
-
-        <View style={styles.benefitItem}>
-          <Ionicons name="checkmark-circle" size={18} color={colors.primary} />
-          <Text style={styles.benefitText}>Personalized learning path</Text>
-        </View>
-      </View>
-
-      {/* Buttons */}
-      <TouchableOpacity
-        style={styles.continueButton}
-        onPress={() => navigation.replace('Main')}
-      >
-        <Text style={styles.continueButtonText}>Start Learning</Text>
-        <Ionicons name="arrow-forward" size={18} color="#fff" />
+      {/* Action Buttons */}
+      <TouchableOpacity style={styles.startButton} onPress={handleStartLearning} disabled={isRefreshing}>
+        {isRefreshing ? (
+          <ActivityIndicator color="#fff" />
+        ) : (
+          <Text style={styles.startButtonText}>Start Learning</Text>
+        )}
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.secondaryButton}
-        onPress={() => navigation.navigate('Profile')}
-      >
+      <TouchableOpacity style={styles.secondaryButton} onPress={() => navigation.navigate('Profile' as any)}>
         <Text style={styles.secondaryButtonText}>View Account</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
+
+interface DetailRowProps {
+  label: string;
+  value: string;
+  valueColor?: string;
+}
+
+const DetailRow: React.FC<DetailRowProps> = ({ label, value, valueColor }) => (
+  <View style={styles.detailRow}>
+    <Text style={styles.detailLabel}>{label}:</Text>
+    <Text style={[styles.detailValue, valueColor && { color: valueColor }]}>{value}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -183,159 +227,119 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     gap: spacing.lg,
   },
-  successContainer: {
+  successHeader: {
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.lg,
   },
-  checkCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: colors.primaryLight,
+  checkmarkCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.success,
     justifyContent: 'center',
     alignItems: 'center',
   },
   successTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
-    color: colors.primary,
+    color: colors.text.primary,
     textAlign: 'center',
   },
-  successSubtitle: {
+  successMessage: {
     fontSize: 14,
     color: colors.text.secondary,
     fontWeight: '500',
     textAlign: 'center',
   },
+  confirmationBanner: {
+    backgroundColor: '#d1fae5',
+    borderRadius: 12,
+    padding: spacing.md,
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    gap: spacing.md,
+  },
+  confirmationText: {
+    flex: 1,
+    fontSize: 12,
+    color: '#065f46',
+    fontWeight: '500',
+    lineHeight: 16,
+  },
   detailsCard: {
-    backgroundColor: '#f9f9f9',
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: spacing.lg,
-    gap: spacing.md,
+    gap: spacing.sm,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '700',
     color: colors.text.primary,
-    marginBottom: spacing.sm,
+    marginBottom: spacing.md,
   },
-  detailItem: {
+  detailRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingVertical: spacing.md,
+    paddingVertical: spacing.sm,
     borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
+    borderBottomColor: colors.inputBackground,
   },
   detailLabel: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text.secondary,
     fontWeight: '500',
   },
   detailValue: {
-    fontSize: 14,
+    fontSize: 12,
     color: colors.text.primary,
     fontWeight: '700',
   },
-  statusBadge: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.sm,
-    backgroundColor: '#d1fae5',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 20,
-  },
-  statusText: {
-    fontSize: 12,
-    color: '#059669',
-    fontWeight: '700',
-  },
-  nextStepsCard: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  stepNumber: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
+  startButton: {
     backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    flexShrink: 0,
-  },
-  stepNumberText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '700',
-  },
-  stepContent: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  stepTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: spacing.xs,
-  },
-  stepDescription: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-  benefitsCard: {
-    backgroundColor: '#f9f9f9',
     borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  benefitText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  continueButton: {
-    backgroundColor: colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: spacing.lg,
-    borderRadius: 12,
-    gap: spacing.md,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  continueButtonText: {
+  startButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },
   secondaryButton: {
-    borderWidth: 2,
-    borderColor: colors.primary,
-    paddingVertical: spacing.lg,
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
+    paddingVertical: spacing.lg,
     alignItems: 'center',
     marginBottom: spacing.lg,
   },
   secondaryButtonText: {
+    color: colors.text.primary,
     fontSize: 16,
     fontWeight: '700',
-    color: colors.primary,
+  },
+  errorCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: spacing.xl,
+    alignItems: 'center',
+    gap: spacing.md,
+  },
+  errorTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text.primary,
+    textAlign: 'center',
+  },
+  errorMessage: {
+    fontSize: 14,
+    color: colors.text.secondary,
+    fontWeight: '500',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });
 

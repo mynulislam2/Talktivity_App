@@ -5,7 +5,7 @@
  * and last read status.
  */
 
-import { createSlice, createAsyncThunk, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, createAsyncThunk, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import { communityService } from '@/service/CommunityService';
 import type { DM, DMMessage, Group, GroupMember, GroupMessage, LastReadStatus } from '@/types/community';
 
@@ -232,6 +232,24 @@ export const loadGroupMembers = createAsyncThunk(
 );
 
 /**
+ * Async thunk: Send group message
+ */
+export const sendGroupMessage = createAsyncThunk(
+  'community/sendGroupMessage',
+  async ({ groupId, content }: { groupId: number; content: string }, { rejectWithValue }) => {
+    try {
+      const response = await communityService.sendGroupMessage(groupId, { content });
+      if (response.success && response.data) {
+        return { groupId, message: response.data.message };
+      }
+      return rejectWithValue(response.error || 'Failed to send message');
+    } catch (error: any) {
+      return rejectWithValue(error.message || 'Failed to send message');
+    }
+  }
+);
+
+/**
  * Community slice
  */
 const communitySlice = createSlice({
@@ -382,6 +400,22 @@ const communitySlice = createSlice({
         state.membersLoading[action.meta.arg] = false;
         state.error = action.payload as string;
       });
+
+    // Send group message
+    builder
+      .addCase(sendGroupMessage.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(sendGroupMessage.fulfilled, (state, action) => {
+        const { groupId, message } = action.payload;
+        if (!state.groupMessages[groupId]) {
+          state.groupMessages[groupId] = [];
+        }
+        state.groupMessages[groupId].push(message);
+      })
+      .addCase(sendGroupMessage.rejected, (state, action) => {
+        state.error = action.payload as string;
+      });
   },
 });
 
@@ -402,17 +436,46 @@ export const selectGroupsLoading = (state: { community: CommunityState }) => sta
 
 /**
  * Selectors for messages and members
+ * Using createSelector to memoize and prevent unnecessary re-renders
  */
-export const selectDMMessages = (dmId: number) => (state: { community: CommunityState }) => 
-  state.community.dmMessages[dmId] || [];
-export const selectGroupMessages = (groupId: number) => (state: { community: CommunityState }) => 
-  state.community.groupMessages[groupId] || [];
-export const selectGroupMembers = (groupId: number) => (state: { community: CommunityState }) => 
-  state.community.groupMembers[groupId] || [];
-export const selectMessagesLoading = (id: number) => (state: { community: CommunityState }) => 
-  state.community.messagesLoading[id] || false;
-export const selectMembersLoading = (groupId: number) => (state: { community: CommunityState }) => 
-  state.community.membersLoading[groupId] || false;
+const selectDMMessagesMap = (state: { community: CommunityState }) => state.community.dmMessages;
+const selectGroupMessagesMap = (state: { community: CommunityState }) => state.community.groupMessages;
+const selectGroupMembersMap = (state: { community: CommunityState }) => state.community.groupMembers;
+const selectMessagesLoadingMap = (state: { community: CommunityState }) => state.community.messagesLoading;
+const selectMembersLoadingMap = (state: { community: CommunityState }) => state.community.membersLoading;
+
+// Empty array constant to reuse (same reference)
+const EMPTY_ARRAY: any[] = [];
+
+export const selectDMMessages = (dmId: number) => 
+  createSelector(
+    [selectDMMessagesMap],
+    (messagesMap) => messagesMap[dmId] || EMPTY_ARRAY
+  );
+
+export const selectGroupMessages = (groupId: number) => 
+  createSelector(
+    [selectGroupMessagesMap],
+    (messagesMap) => messagesMap[groupId] || EMPTY_ARRAY
+  );
+
+export const selectGroupMembers = (groupId: number) => 
+  createSelector(
+    [selectGroupMembersMap],
+    (membersMap) => membersMap[groupId] || EMPTY_ARRAY
+  );
+
+export const selectMessagesLoading = (id: number) => 
+  createSelector(
+    [selectMessagesLoadingMap],
+    (loadingMap) => loadingMap[id] || false
+  );
+
+export const selectMembersLoading = (groupId: number) => 
+  createSelector(
+    [selectMembersLoadingMap],
+    (loadingMap) => loadingMap[groupId] || false
+  );
 
 /**
  * Computed selectors

@@ -34,24 +34,47 @@ class CallService {
     try {
       const response = await httpService.get('/call/status');
       
+      console.log('📡 [CallService] Raw call status response:', {
+        hasData: !!response.data,
+        hasSuccess: !!response.data?.success,
+        hasDataField: !!response.data?.data,
+        responseStructure: response.data ? Object.keys(response.data) : [],
+      });
+      
       // Backend returns { success: true, data: { ... }, meta: { ... } }
       if (response.data && response.data.success && response.data.data) {
+        const callStatusData = response.data.data as CallStatusResponse;
+        console.log('✅ [CallService] Parsed call status:', {
+          hasLifetime: !!callStatusData?.lifetime,
+          canCall: callStatusData?.lifetime?.canCall,
+          remaining: callStatusData?.lifetime?.remaining,
+          totalDuration: callStatusData?.lifetime?.totalDuration,
+          fullLifetime: callStatusData?.lifetime,
+        });
         return {
           success: true,
-          data: response.data.data as CallStatusResponse,
+          data: callStatusData,
         };
       }
 
       // Fallback: if response structure is different (direct data)
       if (response.data && typeof response.data === 'object' && !response.data.success) {
+        const callStatusData = response.data as CallStatusResponse;
+        console.log('✅ [CallService] Parsed call status (fallback):', {
+          hasLifetime: !!callStatusData?.lifetime,
+          canCall: callStatusData?.lifetime?.canCall,
+          remaining: callStatusData?.lifetime?.remaining,
+        });
         return {
           success: true,
-          data: response.data as CallStatusResponse,
+          data: callStatusData,
         };
       }
 
+      console.error('❌ [CallService] Invalid response format:', response.data);
       throw new Error('Invalid response format from call status API');
     } catch (error) {
+      console.error('❌ [CallService] Error fetching call status:', error);
       const callError = toCallError(error);
       throw callError;
     }

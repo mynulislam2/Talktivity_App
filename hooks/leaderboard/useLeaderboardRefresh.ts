@@ -29,17 +29,19 @@ export function useLeaderboardRefresh(): UseLeaderboardRefreshReturn {
   }, [dispatch]);
 
   useEffect(() => {
-    // Refresh when page becomes visible
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
+    // Refresh when app becomes active (React Native uses AppState instead of document.hidden)
+    const { AppState } = require('react-native');
+    
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active') {
         refresh();
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      subscription.remove();
     };
   }, [refresh]);
 

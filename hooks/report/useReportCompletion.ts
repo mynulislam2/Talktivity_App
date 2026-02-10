@@ -6,7 +6,8 @@
  */
 
 import { useState, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useNavigation } from '@react-navigation/native';
+import { CommonActions } from '@react-navigation/native';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loadLifecycle, updateLifecycle } from '@/store/slices/lifecycleSlice';
 import { loadSubscriptionStatus, selectCurrentSubscription } from '@/store/slices/subscriptionSlice';
@@ -17,7 +18,7 @@ export interface UseReportCompletionReturn {
 }
 
 export function useReportCompletion(): UseReportCompletionReturn {
-  const router = useRouter();
+  const navigation = useNavigation();
   const dispatch = useAppDispatch();
   const currentSubscription = useAppSelector(selectCurrentSubscription);
   const [isCompleting, setIsCompleting] = useState(false);
@@ -33,34 +34,90 @@ export function useReportCompletion(): UseReportCompletionReturn {
         // Continue with navigation even if update fails
       }
 
-      // Load subscription status to check if user has active subscription
-      const subscriptionResult = await dispatch(loadSubscriptionStatus());
+      // Always navigate to upgrade page in Auth stack after completing report
+      // SubscriptionScreen will check subscription status and navigate to home if active
+      console.log('[useReportCompletion] Navigating to SubscriptionScreen after report completion');
       
-      // Check if subscription loaded successfully
-      if (loadSubscriptionStatus.fulfilled.match(subscriptionResult)) {
-        const subscription = subscriptionResult.payload;
-        const hasActiveSubscription = subscription?.active || false;
-        const hasActiveTrial = subscription?.subscription?.is_free_trial || false;
-        const hasAccess = hasActiveSubscription || hasActiveTrial;
-
-        // Navigate based on subscription status
-        if (hasAccess) {
-          router.push('/home');
-        } else {
-          router.push('/upgrade');
+      // Get navigation state to determine which stack we're in
+      const state = navigation.getState();
+      console.log('[useReportCompletion] Current navigation state:', {
+        currentRoute: state?.routes[state.index]?.name,
+        allRoutes: state?.routes?.map((r: any) => r.name),
+      });
+      
+      // Check if we're in Auth stack
+      const rootState = navigation.getParent()?.getState();
+      const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+      console.log('[useReportCompletion] Is in Auth stack:', isInAuthStack);
+      
+      if (isInAuthStack) {
+        // We're in Auth stack - navigate directly to SubscriptionScreen
+        console.log('[useReportCompletion] Navigating to SubscriptionScreen in Auth stack');
+        try {
+          (navigation as any).navigate('SubscriptionScreen');
+        } catch (navError) {
+          console.error('[useReportCompletion] Direct navigation failed, using reset:', navError);
+          // Fallback: use reset to ensure navigation
+          navigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                { name: 'SubscriptionScreen' as any },
+              ],
+            })
+          );
         }
       } else {
-        // If subscription load failed, navigate to upgrade as fallback
-        router.push('/upgrade');
+        // We're in Main stack - need to switch to Auth stack first
+        console.log('[useReportCompletion] Switching to Auth stack and navigating to SubscriptionScreen');
+        const rootNavigation = navigation.getParent()?.getParent();
+        if (rootNavigation) {
+          rootNavigation.dispatch(
+            CommonActions.reset({
+              index: 0,
+              routes: [
+                {
+                  name: 'Auth',
+                  params: {
+                    screen: 'SubscriptionScreen',
+                  },
+                },
+              ],
+            })
+          );
+        } else {
+          console.error('[useReportCompletion] Could not find root navigation');
+          // Fallback: try direct navigation
+          (navigation as any).navigate('SubscriptionScreen');
+        }
       }
     } catch (error) {
       // Error completing report
-      // On error, navigate to upgrade page as fallback
-      router.push('/upgrade');
+      console.error('[useReportCompletion] Error completing report:', error);
+      // On error, navigate to upgrade page in Auth stack as fallback
+      console.log('[useReportCompletion] Fallback: Navigating to SubscriptionScreen');
+      const rootNavigation = navigation.getParent()?.getParent();
+      if (rootNavigation) {
+        rootNavigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [
+              {
+                name: 'Auth',
+                params: {
+                  screen: 'SubscriptionScreen',
+                },
+              },
+            ],
+          })
+        );
+      } else {
+        (navigation as any).navigate('SubscriptionScreen');
+      }
     } finally {
       setIsCompleting(false);
     }
-  }, [dispatch, router]);
+  }, [dispatch, navigation]);
 
   return {
     completeReport,

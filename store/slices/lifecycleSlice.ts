@@ -35,14 +35,22 @@ const initialState: LifecycleState = {
  */
 export const loadLifecycle = createAsyncThunk(
   'lifecycle/load',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      const userId = authService.getUser()?.id;
+      // Get user from Redux state (synchronous)
+      const state = getState() as any;
+      const userId = state?.auth?.user?.id;
       if (!userId) {
-        throw new Error('User not authenticated');
+        // Fallback: try async getUser if Redux state not available yet
+        const user = await authService.getUser();
+        if (!user?.id) {
+          throw new Error('User not authenticated');
+        }
       }
       
+      console.log('📡 Calling lifecycle API...');
       const response = await lifecycleService.getLifecycle();
+      console.log('✅ Lifecycle API response:', { success: response.success, hasData: !!response.data });
       
       if (response.success && response.data) {
         return response.data;
@@ -50,6 +58,7 @@ export const loadLifecycle = createAsyncThunk(
       
       return rejectWithValue('Failed to load lifecycle data');
     } catch (error) {
+      console.error('❌ Lifecycle API error:', error);
       const errorMessage = extractErrorMessage(error);
       return rejectWithValue(errorMessage);
     }
@@ -68,11 +77,17 @@ export const updateLifecycle = createAsyncThunk(
     onboarding_completed?: boolean;
     onboarding_steps?: number;
     call_completed?: boolean;
-  }, { rejectWithValue }) => {
+  }, { rejectWithValue, getState }) => {
     try {
-      const userId = authService.getUser()?.id;
+      // Get user from Redux state (synchronous)
+      const state = getState() as any;
+      const userId = state?.auth?.user?.id;
       if (!userId) {
-        throw new Error('User not authenticated');
+        // Fallback: try async getUser if Redux state not available yet
+        const user = await authService.getUser();
+        if (!user?.id) {
+          throw new Error('User not authenticated');
+        }
       }
       
       const response = await lifecycleService.updateLifecycle(updates);

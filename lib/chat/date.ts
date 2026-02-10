@@ -1,4 +1,4 @@
-import { formatLocalDate, formatLocalTime } from '@/Utils/timezoneUtils';
+import { formatLocalDate, formatLocalTime } from '@/utils/timezoneUtils';
 
 /**
  * Format a chat timestamp for display.
@@ -8,11 +8,11 @@ export function formatChatTimestamp(ts: string): string {
   const date = new Date(ts);
   const now = new Date();
 
-  const isToday = formatLocalDate(date) === formatLocalDate(now);
+  const isToday = formatLocalDate(date, { year: 'numeric', month: '2-digit', day: '2-digit' }) === formatLocalDate(now, { year: 'numeric', month: '2-digit', day: '2-digit' });
 
   const yesterday = new Date(now);
   yesterday.setDate(now.getDate() - 1);
-  const isYesterday = formatLocalDate(date) === formatLocalDate(yesterday);
+  const isYesterday = formatLocalDate(date, { year: 'numeric', month: '2-digit', day: '2-digit' }) === formatLocalDate(yesterday, { year: 'numeric', month: '2-digit', day: '2-digit' });
 
   if (isToday) {
     return formatLocalTime(date);
@@ -20,6 +20,5 @@ export function formatChatTimestamp(ts: string): string {
   if (isYesterday) {
     return `Yesterday ${formatLocalTime(date)}`;
   }
-  return `${formatLocalDate(date)} ${formatLocalTime(date)}`;
+  return `${formatLocalDate(date, { month: 'short', day: 'numeric' })} ${formatLocalTime(date)}`;
 }
-

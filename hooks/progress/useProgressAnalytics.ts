@@ -42,17 +42,19 @@ export function useProgressAnalytics(): UseProgressAnalyticsReturn {
   }, [dispatch]);
 
   useEffect(() => {
-    // Refresh data when page becomes visible (user returns to tab)
-    const handleVisibilityChange = () => {
-      if (!document.hidden) {
+    // Refresh data when app becomes active (React Native uses AppState instead of document.hidden)
+    const { AppState } = require('react-native');
+    
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active') {
         dispatch(loadProgressAnalytics());
       }
     };
 
-    document.addEventListener('visibilitychange', handleVisibilityChange);
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
 
     return () => {
-      document.removeEventListener('visibilitychange', handleVisibilityChange);
+      subscription.remove();
     };
   }, [dispatch]);
 

@@ -5,8 +5,9 @@
  */
 
 import { useCallback } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter } from 'expo-router';
 import type { Topic } from '@/types/topics';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface UseTopicSelectionReturn {
   handleTopicSelect: (topic: Topic, categoryName: string) => void;
@@ -17,23 +18,21 @@ export function useTopicSelection(): UseTopicSelectionReturn {
   const router = useRouter();
 
   const handleTopicSelect = useCallback(
-    (topic: Topic, categoryName: string) => {
+    async (topic: Topic, categoryName: string) => {
 
       // Mark roleplay vs practice based on category
       const isRoleplay = categoryName === 'Role Play Scenarios';
-      localStorage.setItem('isRoleplaySession', isRoleplay ? 'true' : 'false');
+      await AsyncStorage.setItem('isRoleplaySession', isRoleplay ? 'true' : 'false');
 
-      // Save topic to localStorage
-      // - Practice sessions use 'selectedTopic' (existing behavior)
-      // - Roleplay sessions use a dedicated key to avoid conflicting with practice topic
+      // Save topic to AsyncStorage
       if (isRoleplay) {
-        localStorage.setItem('selectedRoleplayTopic', JSON.stringify(topic));
+        await AsyncStorage.setItem('selectedRoleplayTopic', JSON.stringify(topic));
       } else {
-        localStorage.setItem('selectedTopic', JSON.stringify(topic));
+        await AsyncStorage.setItem('selectedTopic', JSON.stringify(topic));
       }
 
-      // Navigate to Practice page; it will initiate the correct session type
-      router.push('/Practice');
+      // Navigate to Practice page
+      router.push('/Practice' as any);
     },
     [router]
   );

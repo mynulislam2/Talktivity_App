@@ -10,8 +10,8 @@ import { callService } from '@/service/CallService';
 import {
   CallStatusResponse,
   CallSessionState,
+  ConnectionDetails,
 } from '@/types/call';
-import { ConnectionDetails } from '@/app/api/connection-details/route';
 import { AgentState } from '@livekit/components-react';
 import { extractCallErrorMessage } from '@/lib/call/errorHandler';
 
@@ -93,17 +93,17 @@ const callSlice = createSlice({
     setAgentState: (state, action: PayloadAction<AgentState>) => {
       const agentState = action.payload;
       state.sessionState.agentState = agentState;
-      state.sessionState.isConnecting = agentState === 'connecting';
-      state.sessionState.isConnected = agentState === 'connected';
-      state.sessionState.isDisconnected = agentState === 'disconnected';
+      state.sessionState.isConnecting = (agentState as any) === 'connecting';
+      state.sessionState.isConnected = (agentState as any) === 'connected';
+      state.sessionState.isDisconnected = (agentState as any) === 'disconnected';
       
       // Set session start time when connected
-      if (agentState === 'connected' && !state.sessionState.sessionStartTime) {
+      if ((agentState as any) === 'connected' && !state.sessionState.sessionStartTime) {
         state.sessionState.sessionStartTime = new Date();
       }
       
       // Clear session start time when disconnected
-      if (agentState === 'disconnected') {
+      if ((agentState as any) === 'disconnected') {
         state.sessionState.sessionStartTime = null;
       }
     },
@@ -153,10 +153,14 @@ const callSlice = createSlice({
         state.callStatusError = null;
         state.callStatusLastFetched = Date.now();
         
-        // Debug log in development
-        if (process.env.NODE_ENV === 'development') {
-          // Call status loaded
-        }
+        // Debug log call status and eligibility
+        console.log('📊 [CallSlice] Call status loaded:', {
+          hasLifetime: !!action.payload?.lifetime,
+          canCall: action.payload?.lifetime?.canCall,
+          remaining: action.payload?.lifetime?.remaining,
+          totalDuration: action.payload?.lifetime?.totalDuration,
+          fullLifetime: action.payload?.lifetime,
+        });
       })
       .addCase(loadCallStatus.rejected, (state, action) => {
         state.callStatusLoading = false;
@@ -176,8 +180,19 @@ export const {
 
 // Export selectors
 export const selectCallStatus = (state: { call: CallState }) => state.call.callStatus;
-export const selectCanStartCall = (state: { call: CallState }) => 
-  state.call.callStatus?.lifetime?.canCall ?? false;
+export const selectCanStartCall = (state: { call: CallState }) => {
+  const canCall = state.call.callStatus?.lifetime?.canCall ?? false;
+  // Log when checking eligibility
+  if (!canCall && state.call.callStatus) {
+    console.log('⚠️ [CallSlice] canStartCall is false:', {
+      hasCallStatus: !!state.call.callStatus,
+      hasLifetime: !!state.call.callStatus?.lifetime,
+      canCall: state.call.callStatus?.lifetime?.canCall,
+      lifetime: state.call.callStatus?.lifetime,
+    });
+  }
+  return canCall;
+};
 export const selectRemainingTime = (state: { call: CallState }) => 
   state.call.callStatus?.lifetime?.remaining ?? 0;
 export const selectTotalDuration = (state: { call: CallState }) => 

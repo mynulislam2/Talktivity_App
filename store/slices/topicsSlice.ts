@@ -161,6 +161,26 @@ export const { setCategories, clearError, resetTopics } = topicsSlice.actions;
  * Selectors
  */
 export const selectTopicsCategories = (state: { topics: TopicsState }) => state.topics.categories;
+
+// Added for compatibility with screens/learning/TopicsScreen.tsx and LearningScreen.tsx
+export const selectTopics = (state: { topics: TopicsState }) => {
+  if (!state.topics.categories) return [];
+  
+  // Flatten all topics from all categories into a single array
+  return state.topics.categories.reduce((allTopics, category) => {
+    // Add category info to each topic
+    const topicsWithCategory = (category.topics || []).map(topic => ({
+      ...topic,
+      categoryName: category.category_name,
+      categoryId: category.id,
+      // Map difficulty to level for compatibility with TopicsScreen.tsx and TopicCard
+      level: (topic as any).level || (topic as any).difficulty || 'beginner',
+      lessonsCount: (topic as any).lessonsCount || 0
+    }));
+    return [...allTopics, ...topicsWithCategory];
+  }, [] as any[]);
+};
+
 export const selectTopicsLoading = (state: { topics: TopicsState }) => state.topics.loading;
 export const selectTopicsError = (state: { topics: TopicsState }) => state.topics.error;
 export const selectIsCreatingTopic = (state: { topics: TopicsState }) => state.topics.creating;

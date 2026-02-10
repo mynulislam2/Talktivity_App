@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { sessionTrackingService, SessionInfo } from '../service/SessionTrackingService';
+import { sessionTrackingService, SessionInfo } from '@/service/SessionTrackingService';
 
 export interface SessionTrackingHook {
   currentSession: SessionInfo | null;
@@ -49,18 +49,13 @@ export const useSessionTracking = (): SessionTrackingHook => {
   }, []);
 
   // Handle time limit exceeded event
+  // Note: In React Native, we check time limits through the periodic state updates
+  // instead of DOM events. Time limit checks are handled by the service and
+  // will be reflected in the session state when updateSessionState is called.
   useEffect(() => {
-    const handleTimeLimitExceeded = (event: CustomEvent) => {
-      setTimeLimitExceeded(true);
-      setTimeLimitMessage(event.detail.message);
-      setCurrentSession(null);
-    };
-
-    window.addEventListener('timeLimitExceeded', handleTimeLimitExceeded as EventListener);
-    
-    return () => {
-      window.removeEventListener('timeLimitExceeded', handleTimeLimitExceeded as EventListener);
-    };
+    // Time limit exceeded state is managed through session state updates
+    // The service will mark sessions as ended when time limits are exceeded
+    // This will be reflected in currentSession state changes
   }, []);
 
   // Update session state periodically

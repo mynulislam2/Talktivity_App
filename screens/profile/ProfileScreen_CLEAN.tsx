@@ -23,8 +23,8 @@ import StatsCard, { StatItemData } from '../../components/profile/StatsCard';
 import SettingsItem from '../../components/profile/SettingsItem';
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
-import { useAppDispatch } from '../../store';
-import { logoutUser } from '../../store/slices/authSlice';
+import { useAppDispatch } from '@/store';
+import { logoutUser } from '@/store/slices/authSlice';
 
 interface ProfileScreenProps {
   navigation: any;

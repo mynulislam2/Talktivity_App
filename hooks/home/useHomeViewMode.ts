@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import type { HomeViewMode } from '@/types/home';
 import { DEFAULT_VIEW_MODE } from '@/types/home';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const STORAGE_KEY = 'home_view_mode';
 
@@ -20,25 +21,26 @@ export function useHomeViewMode() {
 
   // Load persisted view mode on mount
   useEffect(() => {
-    try {
-      const stored = localStorage.getItem(STORAGE_KEY);
-      if (stored === 'today' || stored === 'timeline') {
-        setViewModeState(stored);
+    const loadMode = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored === 'today' || stored === 'timeline') {
+          setViewModeState(stored as HomeViewMode);
+        }
+      } catch (error) {
+        // Ignore storage errors
       }
-    } catch (error) {
-      // Ignore localStorage errors (e.g., in private browsing)
-      // Failed to load view mode from localStorage
-    }
+    };
+    loadMode();
   }, []);
 
-  // Setter that persists to localStorage
-  const setViewMode = useCallback((mode: HomeViewMode) => {
+  // Setter that persists to AsyncStorage
+  const setViewMode = useCallback(async (mode: HomeViewMode) => {
     setViewModeState(mode);
     try {
-      localStorage.setItem(STORAGE_KEY, mode);
+      await AsyncStorage.setItem(STORAGE_KEY, mode);
     } catch (error) {
-      // Ignore localStorage errors
-      // Failed to save view mode to localStorage
+      // Ignore storage errors
     }
   }, []);
 

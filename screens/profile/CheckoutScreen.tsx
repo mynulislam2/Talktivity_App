@@ -1,11 +1,8 @@
 /**
- * Checkout Screen - Payment checkout flow
+ * Checkout Screen (React Native)
  * 
- * Handles:
- * - Discount token validation
- * - Price calculation with discount
- * - Terms & conditions agreement
- * - AamarPay payment initiation
+ * Payment checkout flow.
+ * Matches Next.js /checkout page implementation.
  */
 
 import React, { useState, useEffect } from 'react';
@@ -17,16 +14,16 @@ import {
   ScrollView,
   ActivityIndicator,
   Alert,
-  Switch,
   TextInput,
+  Linking,
 } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { createPayment } from '../../store/slices/paymentSlice';
-import { discountTokenService, ValidateTokenResponse } from '../../service/DiscountTokenService';
-import { SubscriptionPlan } from '../../service/SubscriptionService';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import { httpService } from '@/service/httpservice';
+import { discountTokenService } from '@/service/DiscountTokenService';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
+import type { ProfileScreenProps } from '@/navigation/types';
 
 interface Discount {
   originalPrice: number;
@@ -35,33 +32,36 @@ interface Discount {
   discountedPrice: number;
 }
 
-interface CheckoutScreenProps {
-  navigation: any;
-  route: any;
-}
+const CheckoutScreen: React.FC<ProfileScreenProps<'Checkout'>> = ({ navigation, route }) => {
+  const planType = route.params?.plan || 'Basic';
 
-const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation, route }) => {
-  const dispatch = useAppDispatch();
-  const { creating: paymentLoading, error: paymentError } = useAppSelector(
-    (state) => state.payment
-  );
-
-  const plan: SubscriptionPlan = route.params?.plan;
-
-  const [agreedToTerms, setAgreedToTerms] = useState(false);
+  const [agreedToPolicy, setAgreedToPolicy] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [discountToken, setDiscountToken] = useState('');
   const [appliedDiscount, setAppliedDiscount] = useState<Discount | null>(null);
-  const [validatingToken, setValidatingToken] = useState(false);
   const [tokenError, setTokenError] = useState<string | null>(null);
+  const [validatingToken, setValidatingToken] = useState(false);
 
+  // Get values from environment variables (matching Next.js)
+  const basicPlanPrice = parseFloat(process.env.EXPO_PUBLIC_BASIC_PLAN_PRICE || "2000");
+  const proPlanPrice = parseFloat(process.env.EXPO_PUBLIC_PRO_PLAN_PRICE || "5000");
+  const planDurationWeeks = process.env.EXPO_PUBLIC_PLAN_DURATION_WEEKS || "12";
+  const basicPlanDailyTalkTime = process.env.EXPO_PUBLIC_BASIC_PLAN_DAILY_TALK_TIME || "5";
+  const basicPlanScenarios = process.env.EXPO_PUBLIC_BASIC_PLAN_SCENARIOS || "50";
+  const proPlanScenarios = process.env.EXPO_PUBLIC_PRO_PLAN_SCENARIOS || "500";
+
+  const originalPrice = planType === 'Pro' ? proPlanPrice : basicPlanPrice;
+
+  // Redirect to pricing page if plan type is invalid
   useEffect(() => {
-    if (!plan) {
-      Alert.alert('Error', 'No plan selected');
+    if (planType !== 'Basic' && planType !== 'Pro') {
+      Alert.alert('Invalid Plan', 'Please select a valid plan');
       navigation.goBack();
     }
-  }, [plan, navigation]);
+  }, [planType, navigation]);
 
-  const handleValidateToken = async () => {
+  const handleApplyToken = async () => {
     if (!discountToken.trim()) {
       setTokenError('Please enter a discount token');
       return;
@@ -69,14 +69,11 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation, route }) =>
 
     setValidatingToken(true);
     setTokenError(null);
+    setAppliedDiscount(null);
 
     try {
-      // Call real API to validate discount token
-      const response = await discountTokenService.validateToken(
-        discountToken.trim(),
-        plan.plan_type
-      );
-
+      const response = await discountTokenService.validateToken(discountToken.trim().toUpperCase(), planType);
+      
       if (response.success && response.data) {
         setAppliedDiscount(response.data);
         setTokenError(null);
@@ -84,56 +81,76 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation, route }) =>
         setTokenError(response.error || 'Invalid discount token');
         setAppliedDiscount(null);
       }
-    } catch (err: any) {
-      setTokenError(err.message || 'Failed to validate token');
+    } catch (error: any) {
+      setTokenError(error?.message || 'Failed to validate token. Please try again.');
       setAppliedDiscount(null);
     } finally {
       setValidatingToken(false);
     }
   };
 
-  const handleRemoveDiscount = () => {
+  const handleRemoveToken = () => {
     setDiscountToken('');
     setAppliedDiscount(null);
     setTokenError(null);
   };
 
-  const finalPrice = appliedDiscount
-    ? appliedDiscount.discountedPrice
-    : plan.price_usd;
-
   const handleCheckout = async () => {
-    if (!agreedToTerms) {
-      Alert.alert('Required', 'Please agree to the terms and conditions to continue');
+    if (!agreedToPolicy) {
+      setError('Please agree to the Privacy Policy and Refund Policy to proceed.');
       return;
     }
 
-    // Dispatch payment creation thunk
-    const result = await dispatch(
-      createPayment({
-        planId: plan.id,
-        planType: plan.plan_type as 'Basic' | 'Pro',
-      })
-    );
-
-    // Check if payment was created successfully
-    if (result.payload && typeof result.payload === 'object' && 'paymentUrl' in result.payload) {
-      // In a real app, you'd redirect to the payment URL (AamarPay)
-      // For now, navigate to success screen
-      Alert.alert('Success', 'Payment initiated. In production, you would be redirected to AamarPay.');
-      navigation.replace('PaymentSuccess', {
-        plan: plan.plan_type,
-        amount: finalPrice.toString(),
+    setLoading(true);
+    setError(null);
+    try {
+      // Use the AamarPay payment API endpoint
+      const response = await httpService.post('/payments/aamarpay/payment', {
+        planType: planType,
+        amount: originalPrice,
+        currency: 'BDT',
+        desc: `Talktivity ${planType} Plan Subscription - ${planDurationWeeks} weeks`,
+        discountToken: discountToken.trim() || null,
       });
-    } else if (result.payload) {
-      // Error was returned
-      Alert.alert('Payment Error', result.payload as string);
+      
+      // Response structure: { success: true, data: { payment_url: "...", order_id: "..." } }
+      if (response.data.success && response.data.data?.payment_url) {
+        // Open payment URL in browser (React Native equivalent of window.location.href)
+        const canOpen = await Linking.canOpenURL(response.data.data.payment_url);
+        if (canOpen) {
+          await Linking.openURL(response.data.data.payment_url);
+        } else {
+          setError('Unable to open payment gateway');
+        }
+      } else {
+        setError(response.data.error || 'No payment URL received from the server.');
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || 'Could not initiate payment. Please try again.';
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
     }
   };
 
-  if (!plan) {
-    return null;
-  }
+  // Plan features data
+  const planFeatures = {
+    Basic: [
+      { icon: true, text: `Time per day: ${basicPlanDailyTalkTime}min talk` },
+      { icon: true, text: `Duration: ${planDurationWeeks} weeks` },
+      { icon: true, text: `Access to ${basicPlanScenarios} Scenarios` },
+      { icon: true, text: 'Personalized Roadmap' },
+      { icon: true, text: 'Community Section' },
+    ],
+    Pro: [
+      { icon: true, text: 'Unlimited AI Conversations' },
+      { icon: true, text: `All ${proPlanScenarios}+ Scenarios` },
+      { icon: true, text: 'Advanced Progress Analytics' },
+      { icon: true, text: `Duration: ${planDurationWeeks} weeks` },
+      { icon: true, text: 'Personalized Roadmap' },
+      { icon: true, text: 'Community Section' },
+    ],
+  };
 
   return (
     <ScrollView
@@ -141,144 +158,183 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation, route }) =>
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* Order Summary */}
-      <View style={styles.summaryCard}>
-        <Text style={styles.sectionTitle}>Order Summary</Text>
+      <View style={styles.header}>
+        <Text style={styles.headerTitle}>
+          Complete Your <Text style={styles.gradientText}>Purchase</Text>
+        </Text>
+        <Text style={styles.headerSubtitle}>
+          Review your plan details and proceed to payment
+        </Text>
+      </View>
 
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Plan</Text>
-          <Text style={styles.summaryValue}>{plan.name || plan.plan_type}</Text>
-        </View>
-
-        <View style={styles.summaryItem}>
-          <Text style={styles.summaryLabel}>Duration</Text>
-          <Text style={styles.summaryValue}>12 weeks</Text>
-        </View>
-
-        <View style={[styles.summaryItem, styles.priceItem]}>
-          <Text style={styles.priceLabel}>Price</Text>
-          <Text style={styles.priceValue}>৳{plan.price_usd.toLocaleString()}</Text>
-        </View>
-
-        {appliedDiscount && (
-          <>
-            <View style={[styles.summaryItem, styles.discountItem]}>
-              <Text style={styles.discountLabel}>
-                Discount ({appliedDiscount.discountPercent}%)
-              </Text>
-              <Text style={styles.discountValue}>
-                -৳{appliedDiscount.discountAmount.toLocaleString()}
-              </Text>
-            </View>
-
-            <View style={[styles.summaryItem, styles.finalPriceItem]}>
-              <Text style={styles.finalPriceLabel}>Total</Text>
-              <Text style={styles.finalPrice}>
-                ৳{appliedDiscount.discountedPrice.toLocaleString()}
-              </Text>
-            </View>
-          </>
+      {/* Plan Card */}
+      <View style={[styles.pricingCard, planType === 'Pro' && styles.proPlanCard]}>
+        {planType === 'Pro' && (
+          <View style={styles.proBadge}>
+            <Text style={styles.proBadgeText}>Most Popular</Text>
+          </View>
         )}
+        <Text style={styles.planName}>{planType} Plan</Text>
+        <View style={styles.priceContainer}>
+          {appliedDiscount ? (
+            <View>
+              <Text style={styles.originalPrice}>৳{originalPrice.toFixed(2)}</Text>
+              <Text style={styles.discountedPrice}>
+                ৳{appliedDiscount.discountedPrice.toFixed(2)}{' '}
+                <Text style={styles.pricePeriod}>/ {planDurationWeeks} weeks</Text>
+              </Text>
+              <Text style={styles.savingsText}>
+                You save ৳{appliedDiscount.discountAmount.toFixed(2)} ({appliedDiscount.discountPercent}% off)
+              </Text>
+            </View>
+          ) : (
+            <Text style={styles.price}>
+              ৳{originalPrice.toFixed(2)}{' '}
+              <Text style={styles.pricePeriod}>/ {planDurationWeeks} weeks</Text>
+            </Text>
+          )}
+        </View>
+
+        <View style={styles.featuresList}>
+          {planFeatures[planType as keyof typeof planFeatures].map((feature, index) => (
+            <View key={index} style={styles.featureItem}>
+              <Ionicons name="checkmark" size={20} color="#10b981" />
+              <Text style={styles.featureText}>{feature.text}</Text>
+            </View>
+          ))}
+        </View>
       </View>
 
       {/* Discount Token Section */}
-      <View style={styles.discountSection}>
-        <Text style={styles.sectionTitle}>Discount Code</Text>
-
-        {!appliedDiscount ? (
-          <>
-            <View style={styles.tokenInputContainer}>
-              <TextInput
-                style={styles.tokenInput}
-                placeholder="Enter discount code"
-                placeholderTextColor="#999"
-                value={discountToken}
-                onChangeText={setDiscountToken}
-                editable={!validatingToken}
-              />
-              <TouchableOpacity
-                style={[styles.validateButton, validatingToken && styles.validateButtonDisabled]}
-                onPress={handleValidateToken}
-                disabled={validatingToken}
-              >
-                {validatingToken ? (
-                  <ActivityIndicator size="small" color={colors.primary} />
-                ) : (
-                  <Text style={styles.validateButtonText}>Apply</Text>
-                )}
-              </TouchableOpacity>
-            </View>
-
-            {tokenError && (
-              <Text style={styles.tokenError}>{tokenError}</Text>
-            )}
-          </>
-        ) : (
-          <View style={styles.appliedDiscountBox}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-            <View style={styles.appliedDiscountText}>
-              <Text style={styles.appliedDiscountLabel}>
-                Applied: {appliedDiscount.discountPercent}% off
-              </Text>
-              <Text style={styles.appliedDiscountValue}>
-                Saving: ৳{appliedDiscount.discountAmount.toLocaleString()}
-              </Text>
-            </View>
-            <TouchableOpacity onPress={handleRemoveDiscount}>
-              <Ionicons name="close" size={20} color={colors.text.secondary} />
+      <View style={styles.discountCard}>
+        <Text style={styles.sectionTitle}>Have a discount code?</Text>
+        <View style={styles.tokenInputRow}>
+          <View style={styles.tokenInputContainer}>
+            <Ionicons name="pricetag" size={20} color="rgba(203, 213, 225, 1)" style={styles.tokenIcon} />
+            <TextInput
+              style={styles.tokenInput}
+              placeholder="Enter discount code"
+              placeholderTextColor="rgba(203, 213, 225, 0.5)"
+              value={discountToken}
+              onChangeText={(text) => {
+                setDiscountToken(text.toUpperCase());
+                setTokenError(null);
+                setAppliedDiscount(null);
+              }}
+              editable={!validatingToken}
+            />
+          </View>
+          {appliedDiscount ? (
+            <TouchableOpacity
+              onPress={handleRemoveToken}
+              style={styles.removeTokenButton}
+            >
+              <Ionicons name="close" size={20} color="#fff" />
             </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              onPress={handleApplyToken}
+              disabled={validatingToken || !discountToken.trim()}
+              style={[
+                styles.applyButton,
+                (validatingToken || !discountToken.trim()) && styles.applyButtonDisabled
+              ]}
+            >
+              {validatingToken ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Text style={styles.applyButtonText}>Apply</Text>
+              )}
+            </TouchableOpacity>
+          )}
+        </View>
+
+        {/* Token Error Display */}
+        {tokenError && (
+          <View style={styles.errorBox}>
+            <Ionicons name="alert-circle" size={20} color="#ef4444" />
+            <Text style={styles.errorText}>{tokenError}</Text>
+          </View>
+        )}
+
+        {/* Discount Applied Display */}
+        {appliedDiscount && (
+          <View style={styles.successBox}>
+            <Ionicons name="checkmark-circle" size={20} color="#10b981" />
+            <View style={styles.successContent}>
+              <Text style={styles.successTitle}>Discount applied!</Text>
+              <Text style={styles.successSubtitle}>
+                {appliedDiscount.discountPercent}% off - Save ৳{appliedDiscount.discountAmount.toFixed(2)}
+              </Text>
+            </View>
           </View>
         )}
       </View>
 
-      {/* Terms & Conditions */}
-      <View style={styles.termsSection}>
-        <View style={styles.termsCheckbox}>
-          <Switch
-            value={agreedToTerms}
-            onValueChange={setAgreedToTerms}
-            trackColor={{ false: '#e0e0e0', true: colors.primaryLight }}
-            thumbColor={agreedToTerms ? colors.primary : '#ccc'}
-          />
-          <Text style={styles.termsText}>
-            I agree to the Privacy Policy and Terms of Service
+      {/* Payment Section */}
+      <View style={styles.paymentCard}>
+        {/* Policy Agreement */}
+        <View style={styles.policyAgreement}>
+          <TouchableOpacity
+            style={styles.checkbox}
+            onPress={() => setAgreedToPolicy(!agreedToPolicy)}
+          >
+            {agreedToPolicy && <Ionicons name="checkmark" size={16} color="#fff" />}
+          </TouchableOpacity>
+          <Text style={styles.policyText}>
+            I agree to the{' '}
+            <Text style={styles.policyLink} onPress={() => navigation.navigate('Privacy')}>
+              Privacy Policy
+            </Text>{' '}
+            and{' '}
+            <Text style={styles.policyLink} onPress={() => navigation.navigate('Refund')}>
+              Refund Policy
+            </Text>
           </Text>
         </View>
 
+        {/* Error Message */}
+        {error && (
+          <Text style={styles.errorMessage}>{error}</Text>
+        )}
+
+        {/* Payment Button */}
         <TouchableOpacity
-          style={styles.policyLink}
-          onPress={() => navigation.navigate('Terms')}
+          onPress={handleCheckout}
+          disabled={loading || !agreedToPolicy}
+          style={[
+            styles.paymentButton,
+            loading && styles.paymentButtonLoading,
+            !agreedToPolicy && styles.paymentButtonDisabled
+          ]}
         >
-          <Text style={styles.policyLinkText}>View Terms →</Text>
+          {loading ? (
+            <ActivityIndicator color="#fff" />
+          ) : (
+            <Text style={styles.paymentButtonText}>Proceed to Payment</Text>
+          )}
+        </TouchableOpacity>
+
+        {/* Back to Pricing */}
+        <TouchableOpacity
+          onPress={() => {
+            // Check if we're in Auth stack or ProfileStack
+            const rootState = navigation.getParent()?.getState();
+            const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+            
+            if (isInAuthStack) {
+              // In Auth stack - navigate back to SubscriptionScreen
+              navigation.navigate('SubscriptionScreen' as any);
+            } else {
+              // In ProfileStack - navigate to Subscription
+              navigation.navigate('Subscription' as any);
+            }
+          }}
+          style={styles.backButton}
+        >
+          <Text style={styles.backButtonText}>← Back to Pricing</Text>
         </TouchableOpacity>
       </View>
-
-      {(tokenError || paymentError) && (
-        <View style={styles.errorBox}>
-          <Ionicons name="alert-circle" size={20} color={colors.error || '#ef4444'} />
-          <Text style={styles.errorText}>{tokenError || paymentError}</Text>
-        </View>
-      )}
-
-      {/* Checkout Button */}
-      <TouchableOpacity
-        style={[styles.checkoutButton, (!agreedToTerms || paymentLoading) && styles.checkoutButtonDisabled]}
-        onPress={handleCheckout}
-        disabled={paymentLoading || !agreedToTerms}
-      >
-        {paymentLoading ? (
-          <ActivityIndicator color="#fff" />
-        ) : (
-          <>
-            <Text style={styles.checkoutButtonText}>Pay ৳{finalPrice.toLocaleString()}</Text>
-            <Ionicons name="arrow-forward" size={18} color="#fff" />
-          </>
-        )}
-      </TouchableOpacity>
-
-      <Text style={styles.secureNote}>
-        🔒 Your payment is secure and encrypted
-      </Text>
     </ScrollView>
   );
 };
@@ -286,210 +342,274 @@ const CheckoutScreen: React.FC<CheckoutScreenProps> = ({ navigation, route }) =>
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: '#0A0923',
   },
   contentContainer: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    gap: spacing.lg,
+    paddingVertical: spacing.xl,
   },
-  summaryCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.md,
+  header: {
+    alignItems: 'center',
+    marginBottom: spacing.xl,
   },
-  sectionTitle: {
-    fontSize: 16,
+  headerTitle: {
+    fontSize: 28,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: '#fff',
+    textAlign: 'center',
     marginBottom: spacing.sm,
   },
-  summaryItem: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.sm,
+  gradientText: {
+    color: '#6A5AE0',
   },
-  summaryLabel: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    fontWeight: '500',
-  },
-  summaryValue: {
-    fontSize: 14,
-    color: colors.text.primary,
-    fontWeight: '600',
-  },
-  priceItem: {
-    paddingVertical: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  priceLabel: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    fontWeight: '600',
-  },
-  priceValue: {
-    fontSize: 20,
-    color: colors.primary,
-    fontWeight: '700',
-  },
-  discountItem: {
-    paddingVertical: spacing.md,
-  },
-  discountLabel: {
-    fontSize: 13,
-    color: '#10b981',
-    fontWeight: '600',
-  },
-  discountValue: {
+  headerSubtitle: {
     fontSize: 16,
+    color: 'rgba(203, 213, 225, 1)',
+    textAlign: 'center',
+  },
+  pricingCard: {
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
+    borderRadius: 16,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: spacing.lg,
+  },
+  proPlanCard: {
+    borderColor: 'rgba(59, 130, 246, 0.5)',
+    borderWidth: 2,
+  },
+  proBadge: {
+    position: 'absolute',
+    top: -12,
+    alignSelf: 'center',
+    backgroundColor: '#6A5AE0',
+    paddingHorizontal: spacing.md,
+    paddingVertical: spacing.xs,
+    paddingTop: spacing.sm,
+    borderRadius: 20,
+  },
+  proBadgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  planName: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#fff',
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  priceContainer: {
+    alignItems: 'center',
+    marginBottom: spacing.lg,
+  },
+  originalPrice: {
+    fontSize: 18,
+    color: 'rgba(203, 213, 225, 1)',
+    textDecorationLine: 'line-through',
+    marginBottom: spacing.xs,
+  },
+  discountedPrice: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  price: {
+    fontSize: 32,
+    fontWeight: '800',
+    color: '#fff',
+  },
+  pricePeriod: {
+    fontSize: 16,
+    fontWeight: '500',
+    color: 'rgba(203, 213, 225, 1)',
+  },
+  savingsText: {
+    fontSize: 14,
     color: '#10b981',
-    fontWeight: '700',
+    marginTop: spacing.xs,
   },
-  finalPriceItem: {
-    paddingVertical: spacing.md,
-    borderTopWidth: 1,
-    borderTopColor: '#10b981',
-  },
-  finalPriceLabel: {
-    fontSize: 15,
-    color: colors.text.primary,
-    fontWeight: '700',
-  },
-  finalPrice: {
-    fontSize: 24,
-    color: colors.primary,
-    fontWeight: '700',
-  },
-  discountSection: {
+  featuresList: {
     gap: spacing.md,
   },
-  tokenInputContainer: {
+  featureItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: spacing.sm,
+  },
+  featureText: {
+    fontSize: 14,
+    color: 'rgba(203, 213, 225, 1)',
+    flex: 1,
+  },
+  discountCard: {
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
+    borderRadius: 16,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+    marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: spacing.md,
+  },
+  tokenInputRow: {
     flexDirection: 'row',
     gap: spacing.sm,
+    marginBottom: spacing.md,
+  },
+  tokenInputContainer: {
+    flex: 1,
+    flexDirection: 'row',
     alignItems: 'center',
+    backgroundColor: 'rgba(15, 23, 42, 0.5)',
+    borderWidth: 1,
+    borderColor: 'rgba(55, 65, 81, 1)',
+    borderRadius: 8,
+    paddingHorizontal: spacing.md,
+  },
+  tokenIcon: {
+    marginRight: spacing.sm,
   },
   tokenInput: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+    color: 'rgba(203, 213, 225, 1)',
     fontSize: 14,
-    color: colors.text.primary,
-    backgroundColor: '#fff',
+    paddingVertical: spacing.md,
   },
-  validateButton: {
-    backgroundColor: colors.primary,
+  applyButton: {
+    backgroundColor: '#6A5AE0',
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     borderRadius: 8,
+    justifyContent: 'center',
   },
-  validateButtonDisabled: {
+  applyButtonDisabled: {
+    backgroundColor: '#4b5563',
     opacity: 0.6,
   },
-  validateButtonText: {
+  applyButtonText: {
     color: '#fff',
     fontSize: 14,
     fontWeight: '600',
   },
-  tokenError: {
-    fontSize: 12,
-    color: colors.error || '#ef4444',
-    fontWeight: '500',
-    marginTop: spacing.sm,
-  },
-  appliedDiscountBox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    backgroundColor: '#d1fae5',
-    borderRadius: 8,
+  removeTokenButton: {
+    backgroundColor: '#4b5563',
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
-  },
-  appliedDiscountText: {
-    flex: 1,
-  },
-  appliedDiscountLabel: {
-    fontSize: 13,
-    color: '#059669',
-    fontWeight: '700',
-    marginBottom: spacing.xs,
-  },
-  appliedDiscountValue: {
-    fontSize: 12,
-    color: '#047857',
-    fontWeight: '600',
-  },
-  termsSection: {
-    gap: spacing.md,
-  },
-  termsCheckbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  termsText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.text.primary,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  policyLink: {
-    paddingHorizontal: spacing.lg,
-  },
-  policyLinkText: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
+    borderRadius: 8,
+    justifyContent: 'center',
   },
   errorBox: {
     flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'flex-start',
-    backgroundColor: '#fee2e2',
+    alignItems: 'center',
+    gap: spacing.sm,
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.3)',
     borderRadius: 8,
     padding: spacing.md,
+    marginBottom: spacing.md,
   },
   errorText: {
     flex: 1,
-    fontSize: 13,
-    color: colors.error || '#991b1b',
-    fontWeight: '500',
-    lineHeight: 18,
+    fontSize: 14,
+    color: '#ef4444',
   },
-  checkoutButton: {
-    backgroundColor: colors.primary,
+  successBox: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: spacing.lg,
-    borderRadius: 12,
+    gap: spacing.sm,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.3)',
+    borderRadius: 8,
+    padding: spacing.md,
+  },
+  successContent: {
+    flex: 1,
+  },
+  successTitle: {
+    fontSize: 14,
+    color: '#10b981',
+    fontWeight: '600',
+    marginBottom: spacing.xs,
+  },
+  successSubtitle: {
+    fontSize: 12,
+    color: '#059669',
+  },
+  paymentCard: {
+    backgroundColor: 'rgba(30, 41, 59, 0.6)',
+    borderRadius: 16,
+    padding: spacing.xl,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  policyAgreement: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
     gap: spacing.md,
+    marginBottom: spacing.lg,
   },
-  checkoutButtonDisabled: {
-    opacity: 0.5,
+  checkbox: {
+    width: 20,
+    height: 20,
+    borderRadius: 4,
+    borderWidth: 2,
+    borderColor: '#4b5563',
+    backgroundColor: '#1f2937',
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 2,
   },
-  checkoutButtonText: {
+  policyText: {
+    flex: 1,
+    fontSize: 14,
+    color: 'rgba(203, 213, 225, 1)',
+    lineHeight: 20,
+  },
+  policyLink: {
+    color: '#7B70FF',
+    textDecorationLine: 'underline',
+  },
+  errorMessage: {
+    color: '#ef4444',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: spacing.md,
+  },
+  paymentButton: {
+    backgroundColor: '#6A5AE0',
+    paddingVertical: spacing.md,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: spacing.md,
+  },
+  paymentButtonLoading: {
+    backgroundColor: '#4b5563',
+  },
+  paymentButtonDisabled: {
+    backgroundColor: '#4b5563',
+    opacity: 0.6,
+  },
+  paymentButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '700',
+    fontWeight: '600',
   },
-  secureNote: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    textAlign: 'center',
-    marginBottom: spacing.lg,
+  backButton: {
+    alignItems: 'center',
+  },
+  backButtonText: {
+    color: 'rgba(203, 213, 225, 1)',
+    fontSize: 14,
   },
 });
 

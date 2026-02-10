@@ -7,19 +7,20 @@
 
 import { useEffect } from 'react';
 import { AgentState } from '@livekit/components-react';
-import { useSoundEffect } from '@/Hooks/useSoundEffect';
+import { useSoundEffect, SoundEffect } from '@/hooks/useSoundEffect';
 
 export function usePracticeSoundEffects(agentState: AgentState): void {
-  const { play: playConnectingSound, stop: stopConnectingSound } = useSoundEffect(
-    'https://www.soundjay.com/misc/sounds/bell-ringing-05.wav',
-    { volume: 0.5, loop: true }
-  );
+  const { playSound, stopSound } = useSoundEffect();
 
   useEffect(() => {
     if (agentState === 'connecting' || agentState === 'initializing') {
-      playConnectingSound();
+      // Play a notification sound when connecting (if sound files are available)
+      // For now, this will silently fail if sound files don't exist
+      playSound(SoundEffect.NOTIFICATION).catch(() => {
+        // Silently handle missing sound files
+      });
     } else {
-      stopConnectingSound();
+      stopSound();
     }
-  }, [agentState, playConnectingSound, stopConnectingSound]);
+  }, [agentState, playSound, stopSound]);
 }

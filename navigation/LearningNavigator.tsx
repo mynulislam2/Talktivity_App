@@ -15,9 +15,9 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import TopicsScreen from '../screens/learning/TopicsScreen';
 import PracticeScreen from '../screens/learning/PracticeScreen';
 import CallScreen from '../screens/learning/CallScreen';
-import RoleplayScreen from '../screens/learning/RoleplayScreen';
 import ProgressScreen from '../screens/learning/ProgressScreen';
 import ReportScreen from '../screens/learning/ReportScreen';
+import TodaysReportScreen from '../screens/learning/TodaysReportScreen';
 import QuizScreen from '../screens/learning/QuizScreen';
 import ListeningQuizScreen from '../screens/learning/ListeningQuizScreen';
 
@@ -45,16 +45,19 @@ const LearningNavigator: React.FC = () => {
         component={CallScreen}
       />
       <Stack.Screen
-        name="RoleplayScreen"
-        component={RoleplayScreen}
-      />
-      <Stack.Screen
         name="ProgressScreen"
         component={ProgressScreen}
       />
       <Stack.Screen
         name="ReportScreen"
         component={ReportScreen}
+        options={{
+          animationEnabled: true,
+        }}
+      />
+      <Stack.Screen
+        name="TodaysReportScreen"
+        component={TodaysReportScreen}
         options={{
           animationEnabled: true,
         }}

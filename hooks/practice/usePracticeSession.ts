@@ -14,7 +14,7 @@ import { courseService } from '@/service/CourseService';
 import { selectCourseStatus, loadCourseStatus } from '@/store/slices/courseSlice';
 import type { ConnectionDetails } from '@/app/api/connection-details/route';
 import type { PracticeSessionType, PracticeSessionState } from '@/types/practice';
-import { useSessionTracking } from '@/Hooks/useSessionTracking';
+import { useSessionTracking } from '@/hooks/useSessionTracking';
 
 export interface UsePracticeSessionReturn {
   sessionState: PracticeSessionState;

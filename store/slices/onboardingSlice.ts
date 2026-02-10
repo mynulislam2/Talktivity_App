@@ -59,11 +59,17 @@ const initialState: OnboardingState = {
  */
 export const loadOnboarding = createAsyncThunk(
   'onboarding/load',
-  async (_, { rejectWithValue }) => {
+  async (_, { rejectWithValue, getState }) => {
     try {
-      const userId = authService.getUser()?.id;
+      // Get user from Redux state (synchronous)
+      const state = getState() as any;
+      const userId = state?.auth?.user?.id;
       if (!userId) {
-        throw new Error('User not authenticated');
+        // Fallback: try async getUser if Redux state not available yet
+        const user = await authService.getUser();
+        if (!user?.id) {
+          throw new Error('User not authenticated');
+        }
       }
       
       // Call lifecycle API which returns:
@@ -74,7 +80,7 @@ export const loadOnboarding = createAsyncThunk(
       
       if (response.success && response.data) {
         const lifecycleData = response.data;
-        const backendData = lifecycleData.onboarding?.data;
+        const backendData = lifecycleData.onboarding?.data as any;
         
         // Map snake_case backend fields to camelCase frontend fields
         let selections: UserSelections = { ...INITIAL_USER_SELECTIONS };
@@ -135,12 +141,18 @@ export const saveOnboarding = createAsyncThunk(
   'onboarding/save',
   async (_, { getState, rejectWithValue }) => {
     try {
-      const state = getState() as { onboarding: OnboardingState };
+      const state = getState() as any;
       const selections = state.onboarding.selections;
-      const userId = authService.getUser()?.id;
       
+      // Get user from Redux state (synchronous)
+      let userId = state?.auth?.user?.id;
       if (!userId) {
-        throw new Error('User not authenticated');
+        // Fallback: try async getUser if Redux state not available yet
+        const user = await authService.getUser();
+        if (!user?.id) {
+          throw new Error('User not authenticated');
+        }
+        userId = user.id;
       }
 
       const response = await onboardingService.saveOnboarding(selections, userId);

@@ -449,6 +449,32 @@ class CommunityService {
   }
 
   /**
+   * Send a message in a group
+   */
+  async sendGroupMessage(groupId: number, data: { content: string }): Promise<{ success: boolean; data?: { messageId: number; message: GroupMessage }; error?: string }> {
+    try {
+      const response = await httpService.post(`/groups/${groupId}/messages`, data);
+      if (response.data?.success && response.data?.data) {
+        return {
+          success: true,
+          data: {
+            messageId: response.data.data.messageId || response.data.data.id,
+            message: response.data.data.message || response.data.data,
+          },
+        };
+      }
+      throw new Error(response.data?.error || 'Failed to send message');
+    } catch (error: any) {
+      return {
+        success: false,
+        error: error.response?.data?.error || error.message || 'Failed to send message',
+      };
+    }
+  }
+
+  /**
+   * Pin a message in a DM
+   */
   async pinDMMessage(dmId: number, messageId: number): Promise<{ success: boolean; error?: string }> {
     try {
       const response = await httpService.post(`/dms/${dmId}/messages/${messageId}/pin`, {});

@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { store } from '@/store';
 import { logoutUser } from '@/store/slices/authSlice';
 import { resetOnboarding } from '@/store/slices/onboardingSlice';
@@ -75,26 +76,15 @@ export async function performGlobalLogout(
     });
 
     // 3. Clear all storage
-    if (typeof window !== 'undefined') {
-      try {
-        localStorage.clear();
-      } catch (e) {
-        // Failed to clear localStorage
-      }
-      try {
-        if (typeof sessionStorage !== 'undefined') {
-          sessionStorage.clear();
-        }
-      } catch (e) {
-        // Failed to clear sessionStorage
-      }
+    try {
+      await AsyncStorage.clear();
+    } catch (e) {
+      // Failed to clear AsyncStorage
     }
 
     // 4. Navigate
     if (navigate) {
       navigate(targetPath);
-    } else if (typeof window !== 'undefined') {
-      window.location.href = targetPath;
     }
   } finally {
     // Reset the logout flag so logout can be called again if needed

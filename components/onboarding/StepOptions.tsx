@@ -79,7 +79,7 @@ export const StepOptions: React.FC<StepOptionsProps> = ({
                       <Ionicons
                         name="checkmark"
                         size={16}
-                        color={colors.primary}
+                        color="#6A5AE0" // blue-600
                       />
                     )}
                   </View>
@@ -114,29 +114,30 @@ const styles = StyleSheet.create({
   optionCard: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: 'rgba(51, 65, 85, 1)', // slate-700
     padding: spacing.md,
     gap: spacing.md,
   },
   optionCardSelected: {
-    borderColor: colors.primary,
-    backgroundColor: '#f0f8ff',
+    borderColor: '#6A5AE0', // blue-500
+    backgroundColor: 'rgba(37, 99, 235, 0.3)', // blue-600/30
   },
   optionIcon: {
     fontSize: 20,
+    color: '#FFFFFF', // White icon
   },
   optionText: {
     flex: 1,
     fontSize: 14,
     fontWeight: '600',
-    color: colors.text.primary,
+    color: '#FFFFFF', // White text
     lineHeight: 18,
   },
   optionTextSelected: {
-    color: colors.primary,
+    color: '#FFFFFF', // White text (keep white for selected)
     fontWeight: '700',
   },
   indicatorContainer: {
@@ -150,30 +151,30 @@ const styles = StyleSheet.create({
     height: 20,
     borderRadius: 4,
     borderWidth: 2,
-    borderColor: '#d0d0d0',
+    borderColor: 'rgba(100, 116, 139, 1)', // slate-500
     justifyContent: 'center',
     alignItems: 'center',
   },
   checkboxSelected: {
-    borderColor: colors.primary,
-    backgroundColor: colors.primaryLight,
+    borderColor: '#FFFFFF', // White border when selected
+    backgroundColor: '#FFFFFF', // White background when selected
   },
   radio: {
     width: 20,
     height: 20,
     borderRadius: 10,
     borderWidth: 2,
-    borderColor: '#d0d0d0',
+    borderColor: 'rgba(100, 116, 139, 1)', // slate-500
     justifyContent: 'center',
     alignItems: 'center',
   },
   radioSelected: {
-    borderColor: colors.primary,
+    borderColor: '#FFFFFF', // White border when selected
   },
   radioDot: {
     width: 10,
     height: 10,
     borderRadius: 5,
-    backgroundColor: colors.primary,
+    backgroundColor: '#6A5AE0', // blue-600
   },
 });

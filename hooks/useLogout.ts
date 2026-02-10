@@ -9,10 +9,10 @@
 
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../store';
-import { authService } from '../../service/AuthService';
-import { asyncStorageManager } from '../../lib/auth/asyncStorageManager';
-import { clearAuth } from '../../store/slices/authSlice';
+import { AppDispatch } from '@/store';
+import { authService } from '@/service/AuthService';
+import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
+import { clearAuth } from '@/store/slices/authSlice';
 
 interface UseLogoutReturn {
   logout: () => Promise<void>;

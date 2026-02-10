@@ -11,8 +11,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { RootState } from '../store';
-import { profileService } from '../service/ProfileService';
+import { RootState } from '@/store';
+import { profileService } from '@/service/ProfileService';
 
 export interface UserProfile {
   id: string;

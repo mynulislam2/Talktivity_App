@@ -1,3 +1,4 @@
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import type { QuizQuestion } from '@/types/quiz';
 import { quizService } from '@/service/QuizService';
@@ -25,7 +26,7 @@ export function useListeningQuiz() {
       setLoadingMessage('Loading listening topic...');
 
       try {
-        const storedTopic = typeof window !== 'undefined' ? localStorage.getItem('selectedListeningTopic') : null;
+        const storedTopic = await AsyncStorage.getItem('selectedListeningTopic');
         const topic = storedTopic ? JSON.parse(storedTopic) : constants[0];
         setCurrentTopic(topic);
 

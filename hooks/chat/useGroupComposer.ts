@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { groupTyping, sendGroupMessage } from '@/service/SocketService';
+import { useAppDispatch } from '@/store/hooks';
+import { sendGroupMessage } from '@/store/slices/communitySlice';
 import { createLocalMessageId } from '@/lib/chat/optimistic';
 
 export interface UseGroupComposerOptions {
@@ -17,16 +18,18 @@ export function useGroupComposer({
   userAvatar,
   onOptimisticMessage,
 }: UseGroupComposerOptions) {
+  const dispatch = useAppDispatch();
   const [input, setInput] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || !groupId || !userId) return;
 
     const tempId = createLocalMessageId();
     const now = new Date().toISOString();
 
+    // Optimistic update
     onOptimisticMessage({
       id: tempId,
       content: text,
@@ -34,27 +37,34 @@ export function useGroupComposer({
       full_name: userName || 'You',
       profile_picture: userAvatar || null,
       created_at: now,
+      is_own: true,
     });
 
-    sendGroupMessage(groupId, text);
+    // Send via Redux
+    try {
+      await dispatch(sendGroupMessage({ groupId, content: text })).unwrap();
+    } catch (error) {
+      console.error('Failed to send group message:', error);
+      // Optimistic message will be replaced by server response
+    }
+
     setInput('');
-    groupTyping(groupId, userId, false);
-  }, [groupId, input, onOptimisticMessage, userAvatar, userId, userName]);
+  }, [groupId, input, onOptimisticMessage, userAvatar, userId, userName, dispatch]);
 
   const handleChange = useCallback(
     (v: string) => {
       setInput(v);
-      if (userId && groupId) groupTyping(groupId, userId, true);
+      // Typing indicators can be added here when socket is integrated
     },
-    [groupId, userId]
+    []
   );
 
   const handleBlur = useCallback(() => {
-    if (userId && groupId) groupTyping(groupId, userId, false);
-  }, [groupId, userId]);
+    // Typing indicators can be added here when socket is integrated
+  }, []);
 
-  const handleEmojiSelect = useCallback((emoji: any) => {
-    setInput((prev) => prev + emoji.native);
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    setInput((prev) => prev + emoji);
     setShowEmoji(false);
   }, []);
 
@@ -69,4 +79,3 @@ export function useGroupComposer({
     handleEmojiSelect,
   };
 }
-

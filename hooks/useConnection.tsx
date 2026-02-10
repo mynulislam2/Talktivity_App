@@ -13,8 +13,8 @@ const agentName = undefined
 // and using one of your API Keys to generate a token with custom TTL and permissions.
 
 // For use without a token server.
-const hardcodedUrl = 'ws://localhost:7880';
-const hardcodedToken = '';
+const hardcodedUrl = 'ws://10.0.2.2:7880';
+const hardcodedToken = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3NzA2MjQ1NzcsImlzcyI6IkFQSUZ4QVV0dldWZzdybyIsIm5hbWUiOiJ1c2VyIiwibmJmIjoxNzcwNTM4MTc3LCJzdWIiOiJ1c2VyIiwidmlkZW8iOnsicm9vbSI6InZvaWNlLWNoYXQiLCJyb29tSm9pbiI6dHJ1ZX19.yQxBnpl1nfYeLmXHgt7GKsuBSD98aM7A1-mcIpm90fs';
 
 interface ConnectionContextType {
   isConnectionActive: boolean;

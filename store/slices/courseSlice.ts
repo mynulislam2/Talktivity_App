@@ -58,6 +58,11 @@ export const loadCourseStatus = createAsyncThunk(
       if (error?.status === 404 || error?.code === 'NO_ACTIVE_COURSE' || error?.message?.includes('No active course')) {
         return null;
       }
+      // Handle rate limiting (429) - don't treat as critical error, just return null to allow retry
+      if (error?.status === 429 || error?.response?.status === 429) {
+        console.warn('⚠️ Rate limited (429) - course status load skipped');
+        return null; // Return null instead of error to allow retry
+      }
       return rejectWithValue(error.message || 'Failed to load course status');
     }
   }
@@ -81,6 +86,12 @@ export const initializeCourse = createAsyncThunk(
       
       return status;
     } catch (error: any) {
+      // Handle rate limiting (429) - don't treat as critical error
+      if (error?.status === 429 || error?.response?.status === 429) {
+        console.warn('⚠️ Rate limited (429) - course initialization skipped');
+        // Return null to indicate initialization was skipped due to rate limit
+        return null;
+      }
       return rejectWithValue(error.message || 'Failed to initialize course');
     }
   }
@@ -104,6 +115,20 @@ export const checkAndCreateNextBatch = createAsyncThunk(
       
       return status;
     } catch (error: any) {
+      // Handle rate limiting (429) gracefully - don't retry immediately
+      if (error?.status === 429 || error?.response?.status === 429) {
+        console.warn('⚠️ Rate limited (429) - batch check skipped');
+        // Return current course status instead of failing
+        try {
+          const status = await courseService.getCourseStatus();
+          if (status.course && !status.course.dayType) {
+            status.course.dayType = calculateDayType(status.course.currentDay);
+          }
+          return status;
+        } catch (getStatusError) {
+          return rejectWithValue('Rate limited - please try again later');
+        }
+      }
       // Don't treat batch check errors as critical - just log and continue
       // Batch check failed
       return rejectWithValue(error.message || 'Failed to check batch progression');
@@ -156,14 +181,24 @@ const courseSlice = createSlice({
         state.error = null;
       })
       .addCase(loadCourseStatus.fulfilled, (state, action) => {
+        // Update course status (can be null if no course exists)
         state.courseStatus = action.payload;
         state.loading = false;
+        state.error = null; // Clear error on successful load
       })
       .addCase(loadCourseStatus.rejected, (state, action) => {
         state.loading = false;
-        // Only set error if it's not a 404 (no course is valid state)
-        if (action.payload !== 'No active course found') {
-          state.error = action.payload as string;
+        // Only set error if it's not a 404 (no course is valid state) and not a 429 (rate limit)
+        const errorMessage = action.payload as string;
+        if (errorMessage && 
+            !errorMessage.includes('No active course') && 
+            !errorMessage.includes('404') &&
+            !errorMessage.includes('429') &&
+            !errorMessage.includes('rate limit')) {
+          state.error = errorMessage;
+        } else {
+          // No course found or rate limit is not a blocking error
+          state.error = null;
         }
       });
 

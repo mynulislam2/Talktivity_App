@@ -50,12 +50,31 @@ export function extractErrorMessage(error: unknown): string {
       return getStatusMessage(error.response.status);
     }
 
-    // Network error
+    // Network error - add detailed logging
     if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+      console.error('⏱️ [NetworkError] Request timed out:', {
+        code: error.code,
+        message: error.message,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        fullUrl: error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url,
+        method: error.config?.method,
+        timeout: error.config?.timeout,
+      });
       return 'Request timed out. Please try again';
     }
 
     if (!error.response) {
+      console.error('🚫 [NetworkError] No response from server:', {
+        code: error.code,
+        message: error.message,
+        url: error.config?.url,
+        baseURL: error.config?.baseURL,
+        fullUrl: error.config?.baseURL ? `${error.config.baseURL}${error.config.url}` : error.config?.url,
+        method: error.config?.method,
+        requestHeaders: error.config?.headers,
+        stack: error.stack,
+      });
       return 'Network error. Please check your connection';
     }
   }

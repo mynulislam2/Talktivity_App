@@ -5,7 +5,7 @@
  * Server-fetched lists/messages remain in `communitySlice` for now.
  */
 
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, PayloadAction, createSelector } from '@reduxjs/toolkit';
 import type { RootState } from '@/store';
 
 interface ChatState {
@@ -85,17 +85,38 @@ export const {
   resetChat,
 } = chatSlice.actions;
 
-export const selectRealtimeDMMessages = (dmId: number) => (state: RootState) =>
-  state.chat.dmRealtimeMessages[dmId] || [];
+// Memoized selectors to prevent unnecessary re-renders
+const selectDMRealtimeMessagesMap = (state: RootState) => state.chat.dmRealtimeMessages;
+const selectGroupRealtimeMessagesMap = (state: RootState) => state.chat.groupRealtimeMessages;
+const selectDMTypingUserMap = (state: RootState) => state.chat.dmTypingUser;
+const selectGroupTypingUsersMap = (state: RootState) => state.chat.groupTypingUsers;
 
-export const selectRealtimeGroupMessages = (groupId: number) => (state: RootState) =>
-  state.chat.groupRealtimeMessages[groupId] || [];
+// Empty array constant to reuse (same reference)
+const EMPTY_ARRAY: any[] = [];
 
-export const selectDMTypingUser = (dmId: number) => (state: RootState) =>
-  state.chat.dmTypingUser[dmId] ?? null;
+export const selectRealtimeDMMessages = (dmId: number) => 
+  createSelector(
+    [selectDMRealtimeMessagesMap],
+    (messagesMap) => messagesMap[dmId] || EMPTY_ARRAY
+  );
 
-export const selectGroupTypingUsers = (groupId: number) => (state: RootState) =>
-  state.chat.groupTypingUsers[groupId] || [];
+export const selectRealtimeGroupMessages = (groupId: number) => 
+  createSelector(
+    [selectGroupRealtimeMessagesMap],
+    (messagesMap) => messagesMap[groupId] || EMPTY_ARRAY
+  );
+
+export const selectDMTypingUser = (dmId: number) => 
+  createSelector(
+    [selectDMTypingUserMap],
+    (typingMap) => typingMap[dmId] ?? null
+  );
+
+export const selectGroupTypingUsers = (groupId: number) => 
+  createSelector(
+    [selectGroupTypingUsersMap],
+    (typingMap) => typingMap[groupId] || EMPTY_ARRAY
+  );
 
 export default chatSlice.reducer;
 

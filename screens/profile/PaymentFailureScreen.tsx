@@ -1,17 +1,13 @@
 /**
  * Payment Failure Screen - Error handling after payment failure
- * 
- * Shows:
- * - Error message
- * - Retry option
- * - Contact support
+ * Simplified version matching Next.js implementation
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
 interface PaymentFailureScreenProps {
   navigation: any;
@@ -19,111 +15,51 @@ interface PaymentFailureScreenProps {
 }
 
 const PaymentFailureScreen: React.FC<PaymentFailureScreenProps> = ({ navigation, route }) => {
-  const reason = route.params?.reason || 'Payment was not completed';
-  const plan = route.params?.plan || 'Unknown';
+  const orderId = route.params?.orderId;
+  const reason = route.params?.reason || 'We couldn\'t process your payment.';
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Error State */}
-      <View style={styles.errorContainer}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      {/* Error Header */}
+      <View style={styles.errorHeader}>
         <View style={styles.errorCircle}>
-          <Ionicons name="close" size={60} color={colors.error || '#ef4444'} />
+          <Ionicons name="alert-circle" size={40} color="#fff" />
         </View>
         <Text style={styles.errorTitle}>Payment Failed</Text>
-        <Text style={styles.errorSubtitle}>
-          We couldn't complete your payment
-        </Text>
+        <Text style={styles.errorMessage}>{reason}</Text>
       </View>
 
-      {/* Error Details */}
-      <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>What Happened?</Text>
+      {/* Possible Reasons Card */}
+      <View style={styles.reasonsCard}>
+        <Text style={styles.sectionTitle}>Possible Reasons:</Text>
 
-        <View style={styles.reasonBox}>
-          <Ionicons
-            name="alert-circle"
-            size={20}
-            color={colors.error || '#991b1b'}
-          />
-          <Text style={styles.reasonText}>{reason}</Text>
-        </View>
-
-        <Text style={styles.explanationText}>
-          This could be due to:
-        </Text>
-
-        <View style={styles.reasonList}>
-          <View style={styles.reasonItem}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.reasonItemText}>Insufficient funds</Text>
-          </View>
-          <View style={styles.reasonItem}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.reasonItemText}>Card expired or invalid</Text>
-          </View>
-          <View style={styles.reasonItem}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.reasonItemText}>Network connectivity issue</Text>
-          </View>
-          <View style={styles.reasonItem}>
-            <Text style={styles.bullet}>•</Text>
-            <Text style={styles.reasonItemText}>Payment gateway temporarily unavailable</Text>
-          </View>
-        </View>
+        <ReasonItem text="Insufficient funds in your account" />
+        <ReasonItem text="Card expired or invalid" />
+        <ReasonItem text="Network connectivity issue" />
+        <ReasonItem text="Payment gateway temporarily unavailable" />
       </View>
 
-      {/* Plan Information */}
-      <View style={styles.planCard}>
-        <Text style={styles.sectionTitle}>Your Plan (Not Charged)</Text>
-
-        <View style={styles.planDetail}>
-          <Text style={styles.planLabel}>Plan Type</Text>
-          <Text style={styles.planValue}>{plan}</Text>
+      {/* Order Info */}
+      {orderId && (
+        <View style={styles.infoCard}>
+          <Text style={styles.infoLabel}>Order ID:</Text>
+          <Text style={styles.infoValue}>{orderId}</Text>
+          <Text style={styles.infoNote}>Your card was not charged. Please try again or contact support.</Text>
         </View>
-
-        <View style={styles.planDetail}>
-          <Text style={styles.planLabel}>Duration</Text>
-          <Text style={styles.planValue}>12 weeks</Text>
-        </View>
-
-        <Text style={styles.noteText}>
-          ℹ️ Your card was not charged. Please try again or use a different payment method.
-        </Text>
-      </View>
-
-      {/* Support Section */}
-      <View style={styles.supportCard}>
-        <Text style={styles.sectionTitle}>Need Help?</Text>
-
-        <TouchableOpacity style={styles.supportLink}>
-          <Ionicons name="mail" size={20} color={colors.primary} />
-          <View style={styles.supportLinkText}>
-            <Text style={styles.supportLinkTitle}>Contact Support</Text>
-            <Text style={styles.supportLinkDesc}>Email our support team</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.supportLink}>
-          <Ionicons name="help-circle" size={20} color={colors.primary} />
-          <View style={styles.supportLinkText}>
-            <Text style={styles.supportLinkTitle}>FAQ</Text>
-            <Text style={styles.supportLinkDesc}>Common payment issues</Text>
-          </View>
-          <Ionicons name="chevron-forward" size={20} color={colors.text.secondary} />
-        </TouchableOpacity>
-      </View>
+      )}
 
       {/* Action Buttons */}
       <TouchableOpacity
         style={styles.retryButton}
         onPress={() => {
-          // Navigate back to checkout with same plan
-          navigation.navigate('Checkout', { plan: { plan_type: plan } });
+          const rootState = navigation.getParent()?.getState();
+          const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+
+          if (isInAuthStack) {
+            navigation.navigate('Checkout' as any, { plan: 'Basic' });
+          } else {
+            navigation.navigate('SubscriptionPlans' as any);
+          }
         }}
       >
         <Ionicons name="refresh" size={18} color="#fff" />
@@ -131,21 +67,34 @@ const PaymentFailureScreen: React.FC<PaymentFailureScreenProps> = ({ navigation,
       </TouchableOpacity>
 
       <TouchableOpacity
-        style={styles.cancelButton}
-        onPress={() => navigation.navigate('SubscriptionPlans')}
-      >
-        <Text style={styles.cancelButtonText}>Back to Plans</Text>
-      </TouchableOpacity>
+        style={styles.backButton}
+        onPress={() => {
+          const rootState = navigation.getParent()?.getState();
+          const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
 
-      <TouchableOpacity
-        style={styles.continueWithoutPayment}
-        onPress={() => navigation.replace('Main')}
+          if (isInAuthStack) {
+            navigation.navigate('SubscriptionScreen' as any);
+          } else {
+            navigation.navigate('SubscriptionPlans' as any);
+          }
+        }}
       >
-        <Text style={styles.continueWithoutPaymentText}>Continue Without Payment</Text>
+        <Text style={styles.backButtonText}>Back to Plans</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
+
+interface ReasonItemProps {
+  text: string;
+}
+
+const ReasonItem: React.FC<ReasonItemProps> = ({ text }) => (
+  <View style={styles.reasonItem}>
+    <Text style={styles.bullet}>•</Text>
+    <Text style={styles.reasonText}>{text}</Text>
+  </View>
+);
 
 const styles = StyleSheet.create({
   container: {
@@ -157,141 +106,83 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.lg,
     gap: spacing.lg,
   },
-  errorContainer: {
+  errorHeader: {
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.xl,
+    paddingVertical: spacing.lg,
   },
   errorCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#fee2e2',
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#fecaca',
     justifyContent: 'center',
     alignItems: 'center',
   },
   errorTitle: {
-    fontSize: 28,
+    fontSize: 24,
     fontWeight: '700',
     color: colors.error || '#ef4444',
     textAlign: 'center',
   },
-  errorSubtitle: {
+  errorMessage: {
     fontSize: 14,
     color: colors.text.secondary,
     fontWeight: '500',
     textAlign: 'center',
   },
-  detailsCard: {
-    backgroundColor: '#f9f9f9',
+  reasonsCard: {
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: spacing.lg,
-    gap: spacing.lg,
+    gap: spacing.md,
   },
   sectionTitle: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '700',
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
-  reasonBox: {
+  reasonItem: {
     flexDirection: 'row',
     gap: spacing.md,
     alignItems: 'flex-start',
-    backgroundColor: '#fee2e2',
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
+  },
+  bullet: {
+    fontSize: 16,
+    color: colors.text.secondary,
+    fontWeight: '700',
   },
   reasonText: {
     flex: 1,
     fontSize: 13,
-    color: colors.error || '#991b1b',
-    fontWeight: '600',
+    color: colors.text.secondary,
+    fontWeight: '500',
     lineHeight: 18,
   },
-  explanationText: {
+  infoCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 12,
+    padding: spacing.lg,
+    gap: spacing.md,
+  },
+  infoLabel: {
     fontSize: 12,
     color: colors.text.secondary,
     fontWeight: '600',
-    marginTop: spacing.sm,
   },
-  reasonList: {
-    gap: spacing.sm,
-  },
-  reasonItem: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: spacing.md,
-  },
-  bullet: {
+  infoValue: {
     fontSize: 14,
-    color: colors.text.secondary,
-    fontWeight: '700',
-    width: 20,
-  },
-  reasonItemText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  planCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  planDetail: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  planLabel: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    fontWeight: '500',
-  },
-  planValue: {
-    fontSize: 13,
     color: colors.text.primary,
     fontWeight: '700',
+    fontFamily: 'monospace',
   },
-  noteText: {
+  infoNote: {
     fontSize: 12,
     color: colors.text.secondary,
     fontWeight: '500',
-    lineHeight: 18,
     fontStyle: 'italic',
-  },
-  supportCard: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.md,
-  },
-  supportLink: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-    paddingVertical: spacing.md,
-  },
-  supportLinkText: {
-    flex: 1,
-  },
-  supportLinkTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: spacing.xs,
-  },
-  supportLinkDesc: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '500',
+    marginTop: spacing.sm,
   },
   retryButton: {
     backgroundColor: colors.primary,
@@ -307,28 +198,17 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
-  cancelButton: {
-    borderWidth: 2,
-    borderColor: colors.primary,
+  backButton: {
+    backgroundColor: colors.inputBackground,
     paddingVertical: spacing.lg,
     borderRadius: 12,
     alignItems: 'center',
-  },
-  cancelButtonText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  continueWithoutPayment: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
     marginBottom: spacing.lg,
   },
-  continueWithoutPaymentText: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
+  backButtonText: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text.primary,
   },
 });
 

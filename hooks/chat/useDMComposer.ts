@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
-import { dmTyping, sendDMMessage } from '@/service/SocketService';
+import { useAppDispatch } from '@/store/hooks';
+import { sendDMMessage } from '@/store/slices/communitySlice';
 import { createLocalMessageId } from '@/lib/chat/optimistic';
 
 export interface UseDMComposerOptions {
@@ -19,16 +20,18 @@ export function useDMComposer({
   userAvatar,
   onOptimisticMessage,
 }: UseDMComposerOptions) {
+  const dispatch = useAppDispatch();
   const [input, setInput] = useState('');
   const [showEmoji, setShowEmoji] = useState(false);
 
-  const handleSend = useCallback(() => {
+  const handleSend = useCallback(async () => {
     const text = input.trim();
     if (!text || !dmId || !userId || !otherUserId) return;
 
     const tempId = createLocalMessageId();
     const now = new Date().toISOString();
 
+    // Optimistic update
     onOptimisticMessage({
       id: tempId,
       content: text,
@@ -37,27 +40,34 @@ export function useDMComposer({
       full_name: userName || 'You',
       profile_picture: userAvatar || null,
       created_at: now,
+      is_own: true,
     });
 
-    sendDMMessage(dmId, userId, otherUserId, text);
+    // Send via Redux
+    try {
+      await dispatch(sendDMMessage({ dmId, content: text })).unwrap();
+    } catch (error) {
+      console.error('Failed to send DM message:', error);
+      // Optimistic message will be replaced by server response
+    }
+
     setInput('');
-    dmTyping(userId, otherUserId, false);
-  }, [dmId, input, onOptimisticMessage, otherUserId, userAvatar, userId, userName]);
+  }, [dmId, input, onOptimisticMessage, otherUserId, userAvatar, userId, userName, dispatch]);
 
   const handleChange = useCallback(
     (v: string) => {
       setInput(v);
-      if (userId && otherUserId) dmTyping(userId, otherUserId, true);
+      // Typing indicators can be added here when socket is integrated
     },
-    [otherUserId, userId]
+    []
   );
 
   const handleBlur = useCallback(() => {
-    if (userId && otherUserId) dmTyping(userId, otherUserId, false);
-  }, [otherUserId, userId]);
+    // Typing indicators can be added here when socket is integrated
+  }, []);
 
-  const handleEmojiSelect = useCallback((emoji: any) => {
-    setInput((prev) => prev + emoji.native);
+  const handleEmojiSelect = useCallback((emoji: string) => {
+    setInput((prev) => prev + emoji);
     setShowEmoji(false);
   }, []);
 
@@ -72,4 +82,3 @@ export function useDMComposer({
     handleEmojiSelect,
   };
 }
-

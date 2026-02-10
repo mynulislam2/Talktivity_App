@@ -7,8 +7,9 @@
 export { usePracticeStatus } from './usePracticeStatus';
 export type { UsePracticeStatusReturn } from './usePracticeStatus';
 
-export { usePracticeSession } from './usePracticeSession';
-export type { UsePracticeSessionReturn } from './usePracticeSession';
+// Export React Native version as the default, with alias for convenience
+export { usePracticeSessionNative, usePracticeSessionNative as usePracticeSession } from './usePracticeSessionNative';
+export type { UsePracticeSessionReturn } from './usePracticeSessionNative';
 
 export { usePracticeSaving } from './usePracticeSaving';
 export type { UsePracticeSavingReturn, PracticeSessionSaveState } from './usePracticeSaving';

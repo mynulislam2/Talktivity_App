@@ -181,7 +181,7 @@ class CourseService {
     // Use UTC date for API calls (business logic)
     // Frontend will convert UTC to user's local timezone for display
     // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { getUtcToday } = require('@/Utils/timezoneUtils');
+    const { getUtcToday } = require('@/utils/timezoneUtils');
     let targetDate = date;
     if (!targetDate) {
       targetDate = getUtcToday();

@@ -7,19 +7,21 @@
 
 import { useState, useEffect } from 'react';
 import type { PracticeSessionType } from '@/types/practice';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export function usePracticeSessionType(): PracticeSessionType {
-  const [sessionType, setSessionType] = useState<PracticeSessionType>(() => {
-    if (typeof window === 'undefined') {
-      return 'practice';
-    }
-    const isRoleplay = localStorage.getItem('isRoleplaySession') === 'true';
-    return isRoleplay ? 'roleplay' : 'practice';
-  });
+  const [sessionType, setSessionType] = useState<PracticeSessionType>('practice');
 
   useEffect(() => {
-    const isRoleplay = localStorage.getItem('isRoleplaySession') === 'true';
-    setSessionType(isRoleplay ? 'roleplay' : 'practice');
+    const checkType = async () => {
+      try {
+        const value = await AsyncStorage.getItem('isRoleplaySession');
+        setSessionType(value === 'true' ? 'roleplay' : 'practice');
+      } catch (error) {
+        setSessionType('practice');
+      }
+    };
+    checkType();
   }, []);
 
   return sessionType;

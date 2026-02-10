@@ -17,9 +17,9 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import { useAppDispatch, useAppSelector } from '../../store/hooks';
-import { loadPlans } from '../../store/slices/subscriptionSlice';
-import { SubscriptionPlan } from '../../service/SubscriptionService';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { loadPlans } from '@/store/slices/subscriptionSlice';
+import { SubscriptionPlan } from '@/service/SubscriptionService';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';

@@ -10,11 +10,11 @@
 
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { AppDispatch } from '../../store';
-import { authService } from '../../service/AuthService';
-import { asyncStorageManager } from '../../lib/auth/asyncStorageManager';
-import { setUser, setLoading as setAuthLoading, setError as setAuthError } from '../../store/slices/authSlice';
-import { LoginRequest, RegisterRequest } from '../../types/auth';
+import { AppDispatch } from '@/store';
+import { authService } from '@/service/AuthService';
+import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
+import { setUser, setLoading as setAuthLoading, setError as setAuthError } from '@/store/slices/authSlice';
+import { LoginRequest, RegisterRequest } from '@/types/auth';
 
 interface AuthSubmitState {
   loading: boolean;

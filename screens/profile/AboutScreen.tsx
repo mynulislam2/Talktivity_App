@@ -19,8 +19,8 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
 interface AboutScreenProps {
   navigation: any;

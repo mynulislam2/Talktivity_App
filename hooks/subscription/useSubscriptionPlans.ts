@@ -35,10 +35,11 @@ export function useSubscriptionPlans(autoFetch: boolean = true): UseSubscription
 
   // Auto-fetch on mount if enabled
   useEffect(() => {
-    if (autoFetch && plans.length === 0 && !loading && !error) {
+    if (autoFetch && !loading && plans.length === 0) {
+      // Load plans if not already loading and no plans are loaded
       refreshPlans();
     }
-  }, [autoFetch, plans.length, loading, error, refreshPlans]);
+  }, [autoFetch, loading, plans.length, refreshPlans]);
 
   return {
     plans,

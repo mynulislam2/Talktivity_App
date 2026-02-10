@@ -8,20 +8,25 @@
 
 import Constants from 'expo-constants';
 
+import { Platform } from 'react-native';
+
 // Get extra config from app.json if available
 const extra = Constants.expoConfig?.extra || {};
+const isAndroid = Platform.OS === 'android';
 
 class AppConfig {
   // API Configuration
   static readonly API_BASE_URL = 
     extra.API_URL || 
+    process.env.EXPO_PUBLIC_API_URL ||
     process.env.REACT_APP_API_URL || 
-    'http://192.168.1.100:8082'; // Change to your backend URL
+    (isAndroid ? 'http://10.0.2.2:8082/api' : 'http://localhost:8082/api');
 
   static readonly LIVEKIT_URL = 
     extra.LIVEKIT_URL || 
+    process.env.EXPO_PUBLIC_LIVEKIT_URL ||
     process.env.REACT_APP_LIVEKIT_URL || 
-    'ws://localhost:7880';
+    (isAndroid ? 'ws://10.0.2.2:7880' : 'ws://localhost:7880');
 
   static readonly LIVEKIT_API_KEY = 
     extra.LIVEKIT_API_KEY || 

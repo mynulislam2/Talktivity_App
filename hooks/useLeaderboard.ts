@@ -11,8 +11,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
 
-import { RootState } from '../store';
-import { leaderboardService } from '../service/LeaderboardService';
+import { RootState } from '@/store';
+import { leaderboardService } from '@/service/LeaderboardService';
 
 export interface LeaderboardEntry {
   rank: number;

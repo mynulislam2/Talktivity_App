@@ -86,7 +86,7 @@ const TimelineView: React.FC<TimelineViewProps> = ({
   const getActivityColor = (type: string) => {
     switch (type) {
       case 'practice':
-        return '#3b82f6'; // blue
+        return '#6A5AE0'; // blue
       case 'call':
         return '#10b981'; // emerald
       case 'roleplay':

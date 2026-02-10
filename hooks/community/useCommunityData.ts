@@ -42,9 +42,11 @@ export function useCommunityData(): UseCommunityDataReturn {
     ]);
   }, [dispatch]);
 
+  // Only load data once on mount, not on every refresh change
   useEffect(() => {
     refresh();
-  }, [refresh]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty deps - only run once on mount
 
   return {
     dms,

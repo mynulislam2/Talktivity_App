@@ -1,10 +1,10 @@
 /**
  * Main Navigator
  * 
- * Bottom tab navigation for authenticated users:
+ * Bottom tab navigation for authenticated users - matches Next.js BottomTabs exactly:
  * - Home (Dashboard)
- * - Learning (via LearningNavigator stack)
- * - Social (Community, Chat, Leaderboard)
+ * - Role Play (Topics/Practice via LearningNavigator stack)
+ * - Community (Social features)
  * - Profile (User settings)
  */
 
@@ -12,6 +12,7 @@ import React from 'react';
 import { StyleSheet } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import LearningNavigator from './LearningNavigator';
@@ -38,15 +39,21 @@ const TabBarIcon = ({
 );
 
 const MainNavigator: React.FC = () => {
+  const insets = useSafeAreaInsets();
+
   return (
     <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: true,
         headerShadowVisible: false,
         headerTitleAlign: 'center',
-        tabBarActiveTintColor: '#007AFF',
-        tabBarInactiveTintColor: '#999',
-        tabBarStyle: styles.tabBar,
+        tabBarActiveTintColor: '#6A5AE0', // Brand purple - matches Next.js
+        tabBarInactiveTintColor: '#9ca3af', // gray-400 - matches Next.js
+        tabBarStyle: {
+          ...styles.tabBar,
+          height: 60 + insets.bottom,
+          paddingBottom: Math.max(insets.bottom, 8),
+        },
         tabBarLabelStyle: styles.tabBarLabel,
         headerStyle: styles.header,
         headerTitleStyle: styles.headerTitle,
@@ -59,32 +66,33 @@ const MainNavigator: React.FC = () => {
         options={{
           title: 'Home',
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="home" color={color} />
+            <TabBarIcon name="home" color={color} size={24} />
           ),
+          headerShown: false, // Hide header - Header component is inside HomeScreen
         }}
       />
 
-      {/* Learning Tab (Stack Navigator) */}
+      {/* Role Play Tab (Stack Navigator) - matches Next.js "Role Play" tab */}
       <Tab.Screen
         name="LearningStack"
         component={LearningNavigator}
         options={{
-          title: 'Learn',
+          title: 'Role Play',
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="book" color={color} />
+            <TabBarIcon name="mic" color={color} size={24} />
           ),
           headerShown: false,
         }}
       />
 
-      {/* Social Tab (Stack Navigator) */}
+      {/* Community Tab (Stack Navigator) */}
       <Tab.Screen
         name="SocialStack"
         component={SocialNavigator}
         options={{
           title: 'Community',
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="people" color={color} />
+            <TabBarIcon name="people" color={color} size={24} />
           ),
           headerShown: false,
         }}
@@ -97,7 +105,7 @@ const MainNavigator: React.FC = () => {
         options={{
           title: 'Profile',
           tabBarIcon: ({ color }) => (
-            <TabBarIcon name="person" color={color} />
+            <TabBarIcon name="person" color={color} size={24} />
           ),
           headerShown: false,
         }}
@@ -108,26 +116,28 @@ const MainNavigator: React.FC = () => {
 
 const styles = StyleSheet.create({
   tabBar: {
-    borderTopColor: '#e0e0e0',
     borderTopWidth: 1,
+    borderTopColor: 'rgba(55, 65, 81, 0.3)',
     paddingBottom: 8,
     paddingTop: 8,
     height: 60,
-    backgroundColor: '#fff',
+    backgroundColor: '#1a1b3c',
+    // Removed rounded corners for cleaner UX
   },
   tabBarLabel: {
-    fontSize: 11,
+    fontSize: 12,
     fontWeight: '500',
+    marginTop: 4,
   },
   header: {
-    backgroundColor: '#fff',
-    borderBottomColor: '#e0e0e0',
+    backgroundColor: '#0a0923',
+    borderBottomColor: 'rgba(55, 65, 81, 0.3)',
     borderBottomWidth: 1,
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '600',
-    color: '#000',
+    color: '#fff',
   },
 });
 

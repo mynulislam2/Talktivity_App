@@ -1,17 +1,13 @@
 /**
- * Payment Cancelled Screen - Shown when user cancels payment
- * 
- * Shows:
- * - Cancellation confirmation
- * - Summary of what they were trying to purchase
- * - Options to retry or go back
+ * Payment Cancel Screen - User cancelled payment
+ * Simplified version matching Next.js implementation
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
 interface PaymentCancelScreenProps {
   navigation: any;
@@ -19,155 +15,55 @@ interface PaymentCancelScreenProps {
 }
 
 const PaymentCancelScreen: React.FC<PaymentCancelScreenProps> = ({ navigation, route }) => {
-  const plan = route.params?.plan || 'Unknown';
-  const amount = route.params?.amount || '0';
+  const orderId = route.params?.orderId;
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={styles.contentContainer}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Cancellation State */}
-      <View style={styles.cancelContainer}>
-        <View style={styles.cancelCircle}>
-          <Ionicons name="arrow-back" size={60} color="#f59e0b" />
+    <ScrollView style={styles.container} contentContainerStyle={styles.contentContainer} showsVerticalScrollIndicator={false}>
+      {/* Cancel Header */}
+      <View style={styles.cancelHeader}>
+        <View style={styles.warningCircle}>
+          <Ionicons name="information-circle" size={40} color="#fff" />
         </View>
-        <Text style={styles.cancelTitle}>Payment Cancelled</Text>
-        <Text style={styles.cancelSubtitle}>
-          You cancelled the payment process
-        </Text>
+        <Text style={styles.title}>Payment Cancelled</Text>
+        <Text style={styles.message}>Your payment was cancelled. No charges were made to your account.</Text>
       </View>
 
-      {/* Cancelled Purchase Details */}
-      <View style={styles.detailsCard}>
-        <Text style={styles.sectionTitle}>What You Were Purchasing</Text>
-
-        <View style={styles.planDetail}>
-          <View>
-            <Text style={styles.planLabel}>Plan</Text>
-            <Text style={styles.planValue}>{plan} Plan</Text>
-          </View>
-          <View style={styles.priceTag}>
-            <Text style={styles.priceText}>৳{amount}</Text>
-          </View>
+      {/* Order Info */}
+      {orderId && (
+        <View style={styles.infoCard}>
+          <Text style={styles.infoLabel}>Order ID:</Text>
+          <Text style={styles.infoValue}>{orderId}</Text>
         </View>
-
-        <View style={styles.benefitsBox}>
-          <Text style={styles.benefitsTitle}>You Would Have Received:</Text>
-          <View style={styles.benefitItem}>
-            <Ionicons name="checkmark" size={18} color={colors.success || '#16a34a'} />
-            <Text style={styles.benefitText}>
-              Unlimited conversations
-            </Text>
-          </View>
-          <View style={styles.benefitItem}>
-            <Ionicons name="checkmark" size={18} color={colors.success || '#16a34a'} />
-            <Text style={styles.benefitText}>
-              500+ practice scenarios
-            </Text>
-          </View>
-          <View style={styles.benefitItem}>
-            <Ionicons name="checkmark" size={18} color={colors.success || '#16a34a'} />
-            <Text style={styles.benefitText}>
-              Detailed progress reports
-            </Text>
-          </View>
-          <View style={styles.benefitItem}>
-            <Ionicons name="checkmark" size={18} color={colors.success || '#16a34a'} />
-            <Text style={styles.benefitText}>
-              Advanced analytics
-            </Text>
-          </View>
-        </View>
-
-        <Text style={styles.noteText}>
-          ℹ️ No charges were made to your account.
-        </Text>
-      </View>
-
-      {/* Continue Learning Message */}
-      <View style={styles.offersCard}>
-        <Text style={styles.sectionTitle}>Continue Learning for Free</Text>
-
-        <Text style={styles.offersText}>
-          You can continue using Talktivity with your free plan:
-        </Text>
-
-        <View style={styles.freeFeatures}>
-          <View style={styles.freeFeature}>
-            <Ionicons name="time" size={18} color={colors.primary} />
-            <Text style={styles.freeFeatureText}>5 minutes per day</Text>
-          </View>
-          <View style={styles.freeFeature}>
-            <Ionicons name="chatbubbles" size={18} color={colors.primary} />
-            <Text style={styles.freeFeatureText}>Daily practice conversations</Text>
-          </View>
-          <View style={styles.freeFeature}>
-            <Ionicons name="trending-up" size={18} color={colors.primary} />
-            <Text style={styles.freeFeatureText}>Basic progress tracking</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Tips Section */}
-      <View style={styles.tipsCard}>
-        <Text style={styles.sectionTitle}>Why Upgrade Later?</Text>
-
-        <View style={styles.tipItem}>
-          <Text style={styles.tipNumber}>1</Text>
-          <View style={styles.tipContent}>
-            <Text style={styles.tipTitle}>More Speaking Time</Text>
-            <Text style={styles.tipDesc}>
-              Get 60 minutes per day instead of 5 minutes
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.tipItem}>
-          <Text style={styles.tipNumber}>2</Text>
-          <View style={styles.tipContent}>
-            <Text style={styles.tipTitle}>Unlock All Scenarios</Text>
-            <Text style={styles.tipDesc}>
-              Access 500+ practice scenarios across all topics
-            </Text>
-          </View>
-        </View>
-
-        <View style={styles.tipItem}>
-          <Text style={styles.tipNumber}>3</Text>
-          <View style={styles.tipContent}>
-            <Text style={styles.tipTitle}>Detailed Analytics</Text>
-            <Text style={styles.tipDesc}>
-              Track your progress with advanced reports
-            </Text>
-          </View>
-        </View>
-      </View>
+      )}
 
       {/* Action Buttons */}
       <TouchableOpacity
         style={styles.retryButton}
         onPress={() => {
-          // Navigate back to subscription plans
-          navigation.navigate('SubscriptionPlans');
+          const rootState = navigation.getParent()?.getState();
+          const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+
+          if (isInAuthStack) {
+            navigation.navigate('Checkout' as any, { plan: 'Basic' });
+          } else {
+            navigation.navigate('SubscriptionPlans' as any);
+          }
         }}
       >
-        <Ionicons name="card" size={18} color="#fff" />
-        <Text style={styles.retryButtonText}>Try Again</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.continueButton}
-        onPress={() => navigation.replace('Main')}
-      >
-        <Text style={styles.continueButtonText}>Continue with Free Plan</Text>
+        <Text style={styles.retryButtonText}>Retry Payment</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
         style={styles.backButton}
         onPress={() => {
-          navigation.navigate('SubscriptionPlans');
+          const rootState = navigation.getParent()?.getState();
+          const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+
+          if (isInAuthStack) {
+            navigation.navigate('SubscriptionScreen' as any);
+          } else {
+            navigation.navigate('SubscriptionPlans' as any);
+          }
         }}
       >
         <Text style={styles.backButtonText}>Back to Plans</Text>
@@ -185,204 +81,75 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.lg,
     gap: spacing.lg,
+    minHeight: '100%',
+    justifyContent: 'center',
   },
-  cancelContainer: {
+  cancelHeader: {
     alignItems: 'center',
     gap: spacing.md,
-    paddingVertical: spacing.xl,
+    marginBottom: spacing.xl,
   },
-  cancelCircle: {
-    width: 100,
-    height: 100,
-    borderRadius: 50,
-    backgroundColor: '#fef3c7',
+  warningCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: '#f59e0b',
     justifyContent: 'center',
     alignItems: 'center',
   },
-  cancelTitle: {
-    fontSize: 28,
+  title: {
+    fontSize: 24,
     fontWeight: '700',
-    color: '#f59e0b',
+    color: colors.text.primary,
     textAlign: 'center',
   },
-  cancelSubtitle: {
+  message: {
     fontSize: 14,
     color: colors.text.secondary,
     fontWeight: '500',
     textAlign: 'center',
+    lineHeight: 20,
   },
-  detailsCard: {
-    backgroundColor: '#f9f9f9',
+  infoCard: {
+    backgroundColor: colors.cardBackground,
     borderRadius: 12,
     padding: spacing.lg,
-    gap: spacing.lg,
+    gap: spacing.md,
+    marginBottom: spacing.lg,
   },
-  sectionTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-  },
-  planDetail: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  planLabel: {
+  infoLabel: {
     fontSize: 12,
     color: colors.text.secondary,
     fontWeight: '600',
-    marginBottom: spacing.xs,
   },
-  planValue: {
-    fontSize: 16,
-    color: colors.text.primary,
-    fontWeight: '700',
-  },
-  priceTag: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-    borderRadius: 8,
-  },
-  priceText: {
-    color: '#fff',
+  infoValue: {
     fontSize: 14,
-    fontWeight: '700',
-  },
-  benefitsBox: {
-    backgroundColor: '#e6f7ff',
-    borderRadius: 8,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.lg,
-    gap: spacing.md,
-  },
-  benefitsTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.primary,
-    marginBottom: spacing.sm,
-  },
-  benefitItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  benefitText: {
-    flex: 1,
-    fontSize: 13,
-    fontWeight: '500',
     color: colors.text.primary,
-  },
-  noteText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    fontStyle: 'italic',
-  },
-  offersCard: {
-    backgroundColor: '#f0fdf4',
-    borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.lg,
-    borderWidth: 1,
-    borderColor: '#dcfce7',
-  },
-  offersText: {
-    fontSize: 13,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  freeFeatures: {
-    gap: spacing.md,
-  },
-  freeFeature: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  freeFeatureText: {
-    fontSize: 13,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
-  tipsCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 12,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  tipItem: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  tipNumber: {
-    fontSize: 18,
     fontWeight: '700',
-    color: colors.primary,
-    width: 30,
-    height: 30,
-    borderRadius: 15,
-    backgroundColor: colors.primaryLight,
-    textAlign: 'center',
-    lineHeight: 30,
-  },
-  tipContent: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  tipTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text.primary,
-  },
-  tipDesc: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 16,
+    fontFamily: 'monospace',
   },
   retryButton: {
     backgroundColor: colors.primary,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
     paddingVertical: spacing.lg,
     borderRadius: 12,
-    gap: spacing.md,
+    alignItems: 'center',
+    marginBottom: spacing.md,
   },
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },
-  continueButton: {
-    backgroundColor: '#f0fdf4',
-    borderWidth: 2,
-    borderColor: colors.success || '#16a34a',
+  backButton: {
+    backgroundColor: colors.inputBackground,
     paddingVertical: spacing.lg,
     borderRadius: 12,
     alignItems: 'center',
   },
-  continueButtonText: {
+  backButtonText: {
+    color: colors.text.primary,
     fontSize: 16,
     fontWeight: '700',
-    color: colors.success || '#16a34a',
-  },
-  backButton: {
-    paddingVertical: spacing.lg,
-    alignItems: 'center',
-    marginBottom: spacing.lg,
-  },
-  backButtonText: {
-    fontSize: 14,
-    color: colors.text.secondary,
-    fontWeight: '600',
-    textDecorationLine: 'underline',
   },
 });
 

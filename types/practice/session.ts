@@ -5,7 +5,7 @@
  */
 
 import type { AgentState } from '@livekit/components-react';
-import type { ConnectionDetails } from '@/app/api/connection-details/route';
+import type { ConnectionDetails } from '@/types/call/session';
 
 export type PracticeSessionType = 'practice' | 'roleplay';
 

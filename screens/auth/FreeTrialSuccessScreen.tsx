@@ -1,11 +1,11 @@
 /**
  * Free Trial Success Screen - Confirmation after trial activation
+ * Simplified version matching Next.js implementation
  * 
  * Shows:
  * - Success confirmation
- * - Trial duration countdown
- * - What to do next
- * - Suggested first steps
+ * - Trial end date
+ * - Two action buttons: Start Learning, View Plans
  */
 
 import React, { useState, useEffect } from 'react';
@@ -15,33 +15,100 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
-import { useAppDispatch } from '../../store/hooks';
-import { loadSubscriptionStatus } from '../../store/slices/subscriptionSlice';
+import { CommonActions } from '@react-navigation/native';
+import { useAppDispatch, useAppSelector } from '@/store/hooks';
+import { loadSubscriptionStatus, selectCurrentSubscription } from '@/store/slices/subscriptionSlice';
+import { updateLifecycle, loadLifecycle } from '@/store/slices/lifecycleSlice';
 import { Ionicons } from '@expo/vector-icons';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
+import { colors } from '@/styles/colors';
+import { spacing } from '@/styles/spacing';
 
-interface FreeTrialSuccessScreenProps {
-  navigation: any;
-  route: any;
-}
+import { FreeTrialSuccessScreenProps } from '../../navigation/types';
 
 const FreeTrialSuccessScreen: React.FC<FreeTrialSuccessScreenProps> = ({ navigation, route }) => {
   const dispatch = useAppDispatch();
-  const [daysRemaining] = useState(7);
+  const subscription = useAppSelector(selectCurrentSubscription);
+  const [trialEndsAt, setTrialEndsAt] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
 
   useEffect(() => {
-    // Refresh subscription status
-    dispatch(loadSubscriptionStatus());
-  }, [dispatch]);
+    // Get trial end date from subscription data
+    if (subscription?.subscription?.trial_ends_at) {
+      setTrialEndsAt(subscription.subscription.trial_ends_at);
+    } else {
+      // Refresh subscription status to get trial end date
+      dispatch(loadSubscriptionStatus());
+    }
+  }, [dispatch, subscription?.subscription?.trial_ends_at]);
 
-  const handleStartLearning = () => {
-    navigation.replace('Main');
+  const formatTrialEndDate = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    });
+  };
+
+  const handleStartLearning = async () => {
+    if (isLoading) return;
+    setIsLoading(true);
+
+    try {
+      // Force refresh lifecycle and subscription status before navigating
+      await dispatch(loadLifecycle());
+      await dispatch(loadSubscriptionStatus());
+      
+      // Check if we're in Auth stack or ProfileStack
+      const rootState = navigation.getParent()?.getState();
+      const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+      
+      if (isInAuthStack) {
+        // In Auth stack - update lifecycle to mark upgrade as completed
+        console.log('[FreeTrialSuccess] Updating lifecycle...');
+        
+        // Update lifecycle to mark upgrade_completed
+        const updateResult = await dispatch(updateLifecycle({ upgrade_completed: true }));
+        console.log('[FreeTrialSuccess] Lifecycle update result:', updateResult.type);
+        
+        // Reload lifecycle to get updated state
+        const lifecycleResult = await dispatch(loadLifecycle());
+        console.log('[FreeTrialSuccess] Lifecycle reload result:', lifecycleResult.type);
+        
+        // RootNavigator will automatically switch from Auth to Main
+        console.log('[FreeTrialSuccess] All updates complete. RootNavigator should switch to Main automatically.');
+      } else {
+        // In ProfileStack - navigate to Main stack
+        navigation.dispatch(
+          CommonActions.reset({
+            index: 0,
+            routes: [{ name: 'Main' }],
+          })
+        );
+      }
+    } catch (error) {
+      console.error('[FreeTrialSuccess] Error navigating:', error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleViewPlans = () => {
-    navigation.navigate('Profile', { screen: 'SubscriptionPlans' });
+    // Check if we're in Auth stack or ProfileStack
+    const rootState = navigation.getParent()?.getState();
+    const isInAuthStack = rootState?.routes?.find((r: any) => r.name === 'Auth') !== undefined;
+    
+    if (isInAuthStack) {
+      // In Auth stack - navigate back to SubscriptionScreen
+      navigation.navigate('SubscriptionScreen' as any);
+    } else {
+      // In ProfileStack - navigate to SubscriptionPlans
+      (navigation as any).navigate('SubscriptionPlans');
+    }
   };
 
   return (
@@ -50,186 +117,53 @@ const FreeTrialSuccessScreen: React.FC<FreeTrialSuccessScreenProps> = ({ navigat
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
-      {/* Success Header */}
-      <View style={styles.successHeader}>
-        <View style={styles.successIcon}>
-          <Ionicons name="checkmark-done-sharp" size={60} color={colors.primary} />
+      {/* Success Card */}
+      <View style={styles.successCard}>
+        {/* Checkmark Icon */}
+        <View style={styles.checkmarkContainer}>
+          <View style={styles.checkmarkCircle}>
+            <Ionicons name="checkmark" size={40} color="#fff" />
+          </View>
         </View>
-        <Text style={styles.successTitle}>Trial Activated! 🎉</Text>
-        <Text style={styles.successSubtitle}>
-          You're all set to start learning English
+
+        {/* Title */}
+        <Text style={styles.title}>Welcome to Your Free Trial!</Text>
+
+        {/* Main Message */}
+        <Text style={styles.message}>
+          You now have full access to all Basic plan features for the next 7 days.
         </Text>
-      </View>
 
-      {/* Countdown Card */}
-      <View style={styles.countdownCard}>
-        <View style={styles.countdownContent}>
-          <View style={styles.timerCircle}>
-            <Text style={styles.timerDays}>{daysRemaining}</Text>
-            <Text style={styles.timerLabel}>Days Left</Text>
+        {/* Trial End Date */}
+        {trialEndsAt && (
+          <View style={styles.trialDateContainer}>
+            <Text style={styles.trialDateLabel}>Your free trial ends on:</Text>
+            <Text style={styles.trialDateValue}>{formatTrialEndDate(trialEndsAt)}</Text>
           </View>
+        )}
 
-          <View style={styles.countdownInfo}>
-            <Text style={styles.countdownTitle}>Your Free Trial</Text>
-            <Text style={styles.countdownText}>
-              You have {daysRemaining} days of unlimited access to all premium features.
-            </Text>
-          </View>
+        {/* Action Buttons */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={[styles.startButton, isLoading && styles.buttonDisabled]}
+            onPress={handleStartLearning}
+            disabled={isLoading}
+          >
+            {isLoading ? (
+              <ActivityIndicator color="#fff" />
+            ) : (
+              <Text style={styles.startButtonText}>Start Learning</Text>
+            )}
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.viewPlansButton}
+            onPress={handleViewPlans}
+            disabled={isLoading}
+          >
+            <Text style={styles.viewPlansButtonText}>View Plans</Text>
+          </TouchableOpacity>
         </View>
-
-        <View style={styles.countdownDetails}>
-          <View style={styles.detailItem}>
-            <Ionicons name="time" size={20} color={colors.primary} />
-            <View>
-              <Text style={styles.detailLabel}>Daily Limit</Text>
-              <Text style={styles.detailValue}>60 minutes</Text>
-            </View>
-          </View>
-
-          <View style={styles.detailItem}>
-            <Ionicons name="library" size={20} color={colors.primary} />
-            <View>
-              <Text style={styles.detailLabel}>Access</Text>
-              <Text style={styles.detailValue}>500+ scenarios</Text>
-            </View>
-          </View>
-
-          <View style={styles.detailItem}>
-            <Ionicons name="checkmark-circle" size={20} color={colors.primary} />
-            <View>
-              <Text style={styles.detailLabel}>Features</Text>
-              <Text style={styles.detailValue}>All premium</Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Next Steps */}
-      <View style={styles.nextStepsCard}>
-        <Text style={styles.cardTitle}>Next Steps to Get Started</Text>
-
-        <View style={styles.stepsList}>
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>1</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Complete Your Profile</Text>
-              <Text style={styles.stepDesc}>
-                Add your learning goals and preferred topics
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>2</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Choose Your First Topic</Text>
-              <Text style={styles.stepDesc}>
-                Browse topics and select what interests you
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>3</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Start Speaking</Text>
-              <Text style={styles.stepDesc}>
-                Practice with AI and get instant feedback
-              </Text>
-            </View>
-          </View>
-
-          <View style={styles.stepItem}>
-            <View style={styles.stepNumber}>
-              <Text style={styles.stepNumberText}>4</Text>
-            </View>
-            <View style={styles.stepContent}>
-              <Text style={styles.stepTitle}>Track Your Progress</Text>
-              <Text style={styles.stepDesc}>
-                View detailed reports and improvement metrics
-              </Text>
-            </View>
-          </View>
-        </View>
-      </View>
-
-      {/* Features Highlight */}
-      <View style={styles.featuresCard}>
-        <Text style={styles.cardTitle}>Your Trial Includes</Text>
-
-        <View style={styles.featuresList}>
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark" size={20} color={colors.primary} />
-            <Text style={styles.featureText}>Unlimited conversation time (60 min/day)</Text>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark" size={20} color={colors.primary} />
-            <Text style={styles.featureText}>Access to 500+ roleplay scenarios</Text>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark" size={20} color={colors.primary} />
-            <Text style={styles.featureText}>Advanced analytics and detailed reports</Text>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark" size={20} color={colors.primary} />
-            <Text style={styles.featureText}>Priority customer support</Text>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark" size={20} color={colors.primary} />
-            <Text style={styles.featureText}>Personalized learning path</Text>
-          </View>
-
-          <View style={styles.featureItem}>
-            <Ionicons name="checkmark" size={20} color={colors.primary} />
-            <Text style={styles.featureText}>Community access and networking</Text>
-          </View>
-        </View>
-      </View>
-
-      {/* Important Notice */}
-      <View style={styles.noticeCard}>
-        <View style={styles.noticeHeader}>
-          <Ionicons name="information-circle" size={20} color={colors.primary} />
-          <Text style={styles.noticeTitle}>Important</Text>
-        </View>
-        <Text style={styles.noticeText}>
-          Your trial expires in {daysRemaining} days. After that, your account will automatically downgrade to the Free plan (5 min/day). Upgrade before expiration to maintain premium access.
-        </Text>
-      </View>
-
-      {/* Action Buttons */}
-      <TouchableOpacity
-        style={styles.startButton}
-        onPress={handleStartLearning}
-      >
-        <Ionicons name="rocket" size={20} color="#fff" />
-        <Text style={styles.startButtonText}>Start Learning Now</Text>
-      </TouchableOpacity>
-
-      <TouchableOpacity
-        style={styles.exploreButton}
-        onPress={() => navigation.navigate('Profile', { screen: 'SubscriptionPlans' })}
-      >
-        <Text style={styles.exploreButtonText}>Explore Premium Plans</Text>
-        <Ionicons name="arrow-forward" size={16} color={colors.primary} />
-      </TouchableOpacity>
-
-      {/* Benefits Note */}
-      <View style={styles.benefitsNote}>
-        <Ionicons name="star" size={18} color="#f59e0b" />
-        <Text style={styles.benefitsNoteText}>
-          Upgrade within your trial for a discount on annual plans!
-        </Text>
       </View>
     </ScrollView>
   );
@@ -242,231 +176,92 @@ const styles = StyleSheet.create({
   },
   contentContainer: {
     paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.lg,
-    gap: spacing.lg,
-  },
-  successHeader: {
-    alignItems: 'center',
-    gap: spacing.md,
     paddingVertical: spacing.xl,
+    justifyContent: 'center',
+    minHeight: '100%',
   },
-  successIcon: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-    backgroundColor: colors.primaryLight,
+  successCard: {
+    backgroundColor: colors.cardBackground,
+    borderRadius: 16,
+    padding: spacing.xl,
+    gap: spacing.lg,
+    alignItems: 'center',
+  },
+  checkmarkContainer: {
+    width: 80,
+    height: 80,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  successTitle: {
-    fontSize: 28,
+  checkmarkCircle: {
+    width: 80,
+    height: 80,
+    borderRadius: 40,
+    backgroundColor: colors.success,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  title: {
+    fontSize: 24,
     fontWeight: '700',
     color: colors.text.primary,
     textAlign: 'center',
   },
-  successSubtitle: {
+  message: {
     fontSize: 14,
     color: colors.text.secondary,
     fontWeight: '500',
     textAlign: 'center',
+    lineHeight: 20,
   },
-  countdownCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 16,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  countdownContent: {
-    flexDirection: 'row',
-    gap: spacing.lg,
-    alignItems: 'center',
-  },
-  timerCircle: {
-    width: 90,
-    height: 90,
-    borderRadius: 45,
-    backgroundColor: colors.primaryLight,
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
-  timerDays: {
-    fontSize: 36,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  timerLabel: {
-    fontSize: 12,
-    color: colors.primary,
-    fontWeight: '600',
-  },
-  countdownInfo: {
-    flex: 1,
-    gap: spacing.sm,
-  },
-  countdownTitle: {
-    fontSize: 14,
-    fontWeight: '700',
-    color: colors.text.primary,
-  },
-  countdownText: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-  countdownDetails: {
-    gap: spacing.md,
-  },
-  detailItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.md,
-  },
-  detailLabel: {
-    fontSize: 11,
-    color: colors.text.secondary,
-    fontWeight: '600',
-  },
-  detailValue: {
-    fontSize: 13,
-    color: colors.text.primary,
-    fontWeight: '700',
-  },
-  nextStepsCard: {
-    backgroundColor: colors.primaryLight,
-    borderRadius: 16,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  cardTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: colors.text.primary,
-  },
-  stepsList: {
-    gap: spacing.md,
-  },
-  stepItem: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'flex-start',
-  },
-  stepNumber: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  stepNumberText: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#fff',
-  },
-  stepContent: {
-    flex: 1,
-    gap: spacing.xs,
-  },
-  stepTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.text.primary,
-  },
-  stepDesc: {
-    fontSize: 12,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 16,
-  },
-  featuresCard: {
-    backgroundColor: '#f9f9f9',
-    borderRadius: 16,
-    padding: spacing.lg,
-    gap: spacing.lg,
-  },
-  featuresList: {
-    gap: spacing.md,
-  },
-  featureItem: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'flex-start',
-  },
-  featureText: {
-    flex: 1,
-    fontSize: 13,
-    color: colors.text.secondary,
-    fontWeight: '500',
-    lineHeight: 18,
-  },
-  noticeCard: {
-    backgroundColor: colors.primaryLight,
+  trialDateContainer: {
+    backgroundColor: colors.inputBackground,
     borderRadius: 12,
     padding: spacing.lg,
-    gap: spacing.md,
-  },
-  noticeHeader: {
-    flexDirection: 'row',
+    width: '100%',
     alignItems: 'center',
     gap: spacing.sm,
   },
-  noticeTitle: {
-    fontSize: 13,
-    fontWeight: '700',
-    color: colors.primary,
-  },
-  noticeText: {
+  trialDateLabel: {
     fontSize: 12,
-    color: colors.primary,
+    color: colors.text.secondary,
     fontWeight: '500',
-    lineHeight: 16,
+  },
+  trialDateValue: {
+    fontSize: 16,
+    fontWeight: '700',
+    color: colors.text.primary,
+  },
+  buttonContainer: {
+    width: '100%',
+    gap: spacing.md,
   },
   startButton: {
-    flexDirection: 'row',
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    paddingVertical: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: colors.primary,
-    paddingVertical: spacing.lg,
-    borderRadius: 12,
-    gap: spacing.md,
   },
   startButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '700',
   },
-  exploreButton: {
-    flexDirection: 'row',
+  viewPlansButton: {
+    backgroundColor: colors.inputBackground,
+    borderRadius: 12,
+    paddingVertical: spacing.lg,
     alignItems: 'center',
     justifyContent: 'center',
-    borderWidth: 2,
-    borderColor: colors.primary,
-    paddingVertical: spacing.lg,
-    borderRadius: 12,
-    gap: spacing.sm,
   },
-  exploreButtonText: {
-    color: colors.primary,
+  viewPlansButtonText: {
+    color: colors.text.primary,
     fontSize: 16,
     fontWeight: '700',
   },
-  benefitsNote: {
-    flexDirection: 'row',
-    gap: spacing.md,
-    alignItems: 'flex-start',
-    backgroundColor: '#fef3c7',
-    borderRadius: 12,
-    padding: spacing.lg,
-    marginBottom: spacing.lg,
-  },
-  benefitsNoteText: {
-    flex: 1,
-    fontSize: 12,
-    color: '#92400e',
-    fontWeight: '600',
-    lineHeight: 16,
+  buttonDisabled: {
+    opacity: 0.6,
   },
 });
 

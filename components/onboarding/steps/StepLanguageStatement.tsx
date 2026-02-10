@@ -53,7 +53,7 @@ export const StepLanguageStatement: React.FC<StepLanguageStatementProps> = ({
                 <Ionicons
                   name="checkmark-circle"
                   size={24}
-                  color={colors.primary}
+                  color="#6A5AE0" // blue-600
                   style={styles.checkmark}
                 />
               )}
@@ -63,7 +63,7 @@ export const StepLanguageStatement: React.FC<StepLanguageStatementProps> = ({
       </View>
 
       <View style={styles.hint}>
-        <Ionicons name="bulb" size={16} color={colors.primary} />
+        <Ionicons name="bulb" size={16} color="rgba(203, 213, 225, 1)" />
         <Text style={styles.hintText}>
           This helps us understand your speaking challenges
         </Text>
@@ -82,29 +82,30 @@ const styles = StyleSheet.create({
   button: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#f9f9f9',
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     borderRadius: 12,
     borderWidth: 2,
-    borderColor: '#e0e0e0',
+    borderColor: 'rgba(51, 65, 85, 1)', // slate-700
     paddingHorizontal: spacing.lg,
     paddingVertical: spacing.md,
     gap: spacing.md,
   },
   buttonSelected: {
-    borderColor: colors.primary,
-    backgroundColor: '#f0f8ff',
+    borderColor: '#6A5AE0', // blue-500
+    backgroundColor: 'rgba(37, 99, 235, 0.3)', // blue-600/30
   },
   icon: {
     fontSize: 24,
+    color: '#FFFFFF', // White icon
   },
   buttonText: {
     flex: 1,
     fontSize: 15,
     fontWeight: '700',
-    color: colors.text.primary,
+    color: '#FFFFFF', // White text
   },
   buttonTextSelected: {
-    color: colors.primary,
+    color: '#FFFFFF', // Keep white for selected
   },
   checkmark: {
     marginLeft: spacing.sm,
@@ -113,14 +114,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'flex-start',
     gap: spacing.md,
-    backgroundColor: colors.primaryLight,
+    backgroundColor: 'rgba(30, 41, 59, 0.5)', // slate-800/50
     borderRadius: 12,
     padding: spacing.md,
   },
   hintText: {
     flex: 1,
     fontSize: 12,
-    color: colors.primary,
+    color: 'rgba(203, 213, 225, 1)', // slate-300
     fontWeight: '500',
     lineHeight: 18,
   },

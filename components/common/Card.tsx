@@ -20,11 +20,11 @@ interface CardProps {
   onPress?: () => void;
 }
 
-const Card: React.FC<CardProps> = ({ 
-  children, 
-  style, 
-  padding = spacing.lg,
-  onPress 
+const Card: React.FC<CardProps> = ({
+  children,
+  style,
+  padding = spacing.md,
+  onPress
 }) => {
   const Wrapper = onPress ? (require('react-native').TouchableOpacity) : View;
 

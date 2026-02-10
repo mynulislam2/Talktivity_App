@@ -15,5 +15,6 @@ export type { UseRolePlayGenerationReturn, RolePlayGenerationData } from './useR
 
 export { useTopicSelection } from './useTopicSelection';
 export type { UseTopicSelectionReturn } from './useTopicSelection';
+export { useTopicSelectionNative } from './useTopicSelectionNative';
 
 export { useUserRoleplays } from './useUserRoleplays';

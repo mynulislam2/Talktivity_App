@@ -5,7 +5,7 @@
  * All slices copied unchanged from Next.js version
  */
 
-import { configureStore } from '@reduxjs/toolkit';
+import { configureStore, combineReducers } from '@reduxjs/toolkit';
 import { persistStore, persistReducer } from 'redux-persist';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist';
@@ -42,14 +42,13 @@ const persistConfig = {
     'course',
     'subscription',
     'onboarding',
-    // Don't persist transient states
   ],
 };
 
 /**
- * Create root reducer
+ * Combine all reducers
  */
-const rootReducer = {
+const rootReducer = combineReducers({
   auth: authReducer,
   onboarding: onboardingReducer,
   lifecycle: lifecycleReducer,
@@ -67,23 +66,18 @@ const rootReducer = {
   todayReport: todayReportReducer,
   quiz: quizReducer,
   usage: usageReducer,
-};
+});
 
 /**
  * Create persistent reducer for AsyncStorage
  */
-const persistedReducer = persistReducer(persistConfig, (action, state) => {
-  if (action.type === PURGE) {
-    return undefined;
-  }
-  return undefined;
-});
+const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 /**
  * Configure store with middleware that handles Redux Persist actions
  */
 export const store = configureStore({
-  reducer: rootReducer,
+  reducer: persistedReducer,
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {

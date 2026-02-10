@@ -11,8 +11,8 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
-import { RootState } from '../store';
-import { dmsService } from '../service/DmsService';
+import { RootState } from '@/store';
+import { dmsService } from '@/service/DmsService';
 
 export interface ChatMessage {
   id: string;

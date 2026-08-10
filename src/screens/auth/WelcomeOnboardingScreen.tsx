@@ -15,9 +15,9 @@ import {
   FlatList,
   Dimensions,
   StatusBar,
-  Image,
   TouchableOpacity,
 } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -84,83 +84,62 @@ function scalePolygon(scale: number, count = 5) {
 /** Slide 1: Coach avatar */
 const AvatarVisual = () => (
   <View style={s1.container}>
-    <Image
-      source={require('../../assets/images/coach-avatar.png')}
+    <ExpoImage
+      source={require('../../../assets/avatar_intro.svg')}
       style={s1.avatar}
-      resizeMode="contain"
+      contentFit="contain"
     />
   </View>
 );
 
-/** Slide 2: Interactive Review — preview cards from the review screen */
-const ReviewVisual = () => {
-  const sampleItems = [
-    {
-      original: 'He go to school yesterday',
-      corrected: 'He went to school yesterday',
-      type: 'Grammar',
-    },
-    {
-      original: 'I have visited there in 2019',
-      corrected: 'I visited there in 2019',
-      type: 'Grammar',
-    },
-    {
-      original: "She don't like coffee",
-      corrected: "She doesn't like coffee",
-      type: 'Grammar',
-    },
-  ];
-
+/** Slide 2: Journey — replacing Interactive Review */
+const JourneyVisual = () => {
   return (
-    <View style={s2.container}>
-      <View style={s2.previewList}>
-        {sampleItems.map((item, index) => (
-          <View key={index} style={s2.previewCard}>
-            <View style={s2.previewNumber}>
-              <Text style={s2.previewNumberText}>
-                {String(index + 1).padStart(2, '0')}
-              </Text>
+    <View style={sJourney.container}>
+      <Text style={sJourney.title}>Three steps.{'\n'}No classrooms.</Text>
+      <Text style={sJourney.subtitle}>Here’s the whole journey, start to finish.</Text>
+
+      <View style={sJourney.timeline}>
+        {/* Step 1 */}
+        <View style={sJourney.step}>
+          <View style={sJourney.iconContainer}>
+            <View style={sJourney.circle}>
+              <Text style={sJourney.circleText}>1</Text>
             </View>
-            <View style={{ flex: 1 }}>
-              <View style={s2.previewRow}>
-                <View style={[s2.iconSmall, { borderColor: '#ff2323' }]}>
-                  <Text
-                    style={{
-                      color: '#ff2323',
-                      fontSize: 10,
-                      fontWeight: '700',
-                    }}
-                  >
-                    ✕
-                  </Text>
-                </View>
-                <Text style={s2.previewOriginal} numberOfLines={1}>
-                  {item.original}
-                </Text>
-              </View>
-              <View style={[s2.previewRow, { marginTop: 6 }]}>
-                <View style={[s2.iconSmall, { borderColor: '#07e500' }]}>
-                  <Text
-                    style={{
-                      color: '#07e500',
-                      fontSize: 10,
-                      fontWeight: '700',
-                    }}
-                  >
-                    ✓
-                  </Text>
-                </View>
-                <Text style={s2.previewCorrected} numberOfLines={1}>
-                  {item.corrected}
-                </Text>
-              </View>
+            <View style={sJourney.line} />
+          </View>
+          <View style={sJourney.content}>
+            <Text style={sJourney.stepTitle}>A 2-minute call</Text>
+            <Text style={sJourney.stepDesc}>Aleena hears how you actually speak and finds your real starting point.</Text>
+          </View>
+        </View>
+
+        {/* Step 2 */}
+        <View style={sJourney.step}>
+          <View style={sJourney.iconContainer}>
+            <View style={sJourney.circle}>
+              <Text style={sJourney.circleText}>2</Text>
             </View>
-            <View style={s2.previewBadge}>
-              <Text style={s2.previewBadgeText}>{item.type}</Text>
+            <View style={sJourney.line} />
+          </View>
+          <View style={sJourney.content}>
+            <Text style={sJourney.stepTitle}>Your 8-week plan</Text>
+            <Text style={sJourney.stepDesc}>Built around your gaps-- every session, every topic, good for you.</Text>
+          </View>
+        </View>
+
+        {/* Step 3 */}
+        <View style={sJourney.step}>
+          <View style={sJourney.iconContainer}>
+            <View style={sJourney.circle}>
+              <Text style={sJourney.circleText}>3</Text>
             </View>
           </View>
-        ))}
+          <View style={sJourney.content}>
+            <Text style={sJourney.stepTitle}>Daily coaching</Text>
+            <Text style={sJourney.stepDesc}>Aleena coaches you daily. A certified tutor verifies your progress weekly.</Text>
+          </View>
+        </View>
       </View>
     </View>
   );
@@ -320,10 +299,9 @@ const slides: SlideData[] = [
   },
   {
     id: '2',
-    headline: 'Interactive Review',
-    description:
-      'Review your practice sessions with detailed feedback on your speaking performance.',
-    visual: <ReviewVisual />,
+    headline: '',
+    description: '',
+    visual: <JourneyVisual />,
   },
   {
     id: '3',
@@ -366,8 +344,8 @@ const WelcomeOnboardingScreen: React.FC = () => {
   const renderItem = ({ item }: { item: SlideData }) => (
     <View style={styles.slide}>
       {item.visual}
-      <Text style={styles.headline}>{item.headline}</Text>
-      <Text style={styles.description}>{item.description}</Text>
+      {!!item.headline && <Text style={styles.headline}>{item.headline}</Text>}
+      {!!item.description && <Text style={styles.description}>{item.description}</Text>}
     </View>
   );
 
@@ -460,62 +438,76 @@ const s1 = StyleSheet.create({
   avatar: { width: 260, height: 300 },
 });
 
-const s2 = StyleSheet.create({
+const sJourney = StyleSheet.create({
   container: {
-    alignItems: 'center',
-    justifyContent: 'center',
     width: '100%',
-    paddingTop: 80,
+    paddingTop: 10,
+    paddingHorizontal: 10,
   },
-  previewList: { width: width - 60, maxWidth: 340, gap: 10 },
-  previewCard: {
-    position: 'relative',
+  title: {
+    fontSize: 32,
+    fontWeight: '700',
+    color: '#fff',
+    lineHeight: 38,
+    marginBottom: 16,
+  },
+  subtitle: {
+    fontSize: 16,
+    color: '#a0a0b0',
+    marginBottom: 40,
+    lineHeight: 24,
+  },
+  timeline: {
+    flexDirection: 'column',
+  },
+  step: {
     flexDirection: 'row',
-    gap: 8,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.10)',
-    padding: 12,
   },
-  previewNumber: {
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#636370',
-    backgroundColor: '#484960',
-    paddingHorizontal: 7,
-    paddingVertical: 6,
+  iconContainer: {
+    width: 30,
+    alignItems: 'center',
+    marginRight: 16,
   },
-  previewNumberText: { fontSize: 12, lineHeight: 17, color: '#fff' },
-  previewRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
-  iconSmall: {
-    width: 18,
-    height: 18,
-    borderRadius: 9,
+  circle: {
+    width: 20,
+    height: 20,
+    borderRadius: 10,
     borderWidth: 1,
+    borderColor: '#9d77ba',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: 'transparent',
+    marginTop: 2,
   },
-  previewOriginal: {
+  circleText: {
+    fontSize: 10,
+    color: '#9d77ba',
+    fontWeight: '600',
+  },
+  line: {
+    width: 1,
     flex: 1,
-    fontSize: 11,
-    lineHeight: 16,
-    color: '#ffacac',
-    textDecorationLine: 'line-through',
+    backgroundColor: '#9d77ba',
+    opacity: 0.5,
+    marginTop: 8,
+    marginBottom: 8,
+    minHeight: 40,
   },
-  previewCorrected: { flex: 1, fontSize: 11, lineHeight: 16, color: '#fdfdfd' },
-  previewBadge: {
-    position: 'absolute',
-    right: 12,
-    top: 12,
-    borderRadius: 4,
-    borderWidth: 1,
-    borderColor: '#636370',
-    backgroundColor: 'rgba(255,255,255,0.18)',
-    paddingHorizontal: 6,
-    paddingVertical: 2,
+  content: {
+    flex: 1,
+    paddingBottom: 32,
   },
-  previewBadgeText: { fontSize: 8, lineHeight: 11, color: '#fdfdfd' },
+  stepTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    color: '#fff',
+    marginBottom: 6,
+  },
+  stepDesc: {
+    fontSize: 14,
+    color: '#8c8c9c',
+    lineHeight: 20,
+  },
 });
 
 const s3 = StyleSheet.create({

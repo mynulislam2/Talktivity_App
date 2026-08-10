@@ -1,0 +1,119 @@
+export const API_URLS = {
+  AUTH: {
+    LOGIN: '/auth/login',
+    REGISTER: '/auth/register',
+    GOOGLE_OAUTH: '/auth/google',
+    REFRESH_TOKEN: '/auth/refresh-token',
+    ME: '/auth/me',
+    LOGOUT: '/auth/logout',
+    GOOGLE_TOKEN: '/auth/google-token',
+    REFRESH: '/auth/refresh',
+    AUTO_VERIFY_EMAILS: '/auth/auto-verify-emails',
+    SEND_VERIFICATION: '/auth/send-verification-email',
+    VERIFY_EMAIL: '/auth/verify-email',
+    FORGOT_PASSWORD: '/auth/forgot-password',
+    VERIFY_RESET_CODE: '/auth/verify-reset-code',
+    RESET_PASSWORD: '/auth/reset-password',
+    PROFILE: '/auth/profile',
+    PROFILE_PICTURE: '/auth/profile-picture',
+  },
+  COURSE: {
+    INITIALIZE: '/courses/initialize',
+    GET_ACTIVE: '/courses/get-active',
+    CHECK_NEXT_BATCH: '/courses/check-and-create-next-batch',
+    TIMELINE: '/courses/timeline',
+  },
+  PROGRESS: {
+    OVERVIEW: '/progress/overview',
+    DAILY: '/progress/daily',
+    WEEKLY_EXAM_COMPLETE: '/progress/weekly-exam/complete',
+  },
+  REPORT: {
+    DAILY: '/reports/daily',
+    MONTHLY: '/reports/monthly',
+    CALL: '/reports/call',
+    PROFICIENCY: '/reports/proficiency',
+  },
+  REVIEW: {
+    ITEMS: '/review/items',
+    GREET: '/review/greet',
+    FEEDBACK: '/review/feedback',
+  },
+  GEO: {
+    LOCATION: '/geo/location',
+    SUGGESTIONS: '/geo/suggestions',
+  },
+  LIVEKIT: {
+    CONNECTION_DETAILS: '/livekit/connection-details',
+    SESSION_ENDED: '/livekit/session-ended',
+  },
+  AI: {
+    GENERATE_ROLEPLAY: '/ai/generate-roleplay',
+    GENERATE_QUIZ: '/ai/generate-quiz',
+    GENERATE_LISTENING_QUIZ: '/ai/generate-listening-quiz',
+  },
+  CALL: {
+    STATUS: '/call/status',
+  },
+  COMMUNITY: {
+    DMS: '/dms',
+    DM_CREATE_OR_GET: '/dms/create-or-get',
+    DM_START: '/dms/start',
+    DM_MESSAGES: (dmId: number | string) => `/dms/${dmId}/messages`,
+    DM_READ: (dmId: number | string) => `/dms/${dmId}/read`,
+    DM_ARCHIVE: (dmId: number | string) => `/dms/${dmId}/archive`,
+    DM_MESSAGE_PIN: (dmId: number | string, messageId: number | string) =>
+      `/dms/${dmId}/messages/${messageId}/pin`,
+    DM_MESSAGES_UNPIN: (dmId: number | string) => `/dms/${dmId}/messages/unpin`,
+    GROUPS: '/groups',
+    GROUPS_JOINED: '/groups/joined',
+    GROUP: (groupId: number | string) => `/groups/${groupId}`,
+    GROUP_JOIN: (groupId: number | string) => `/groups/${groupId}/join`,
+    GROUP_LEAVE: (groupId: number | string) => `/groups/${groupId}/leave`,
+    GROUP_MEMBERS: (groupId: number | string) => `/groups/${groupId}/members`,
+    GROUP_MESSAGES: (groupId: number | string) => `/groups/${groupId}/messages`,
+    GROUP_MUTE: (groupId: number | string) => `/groups/${groupId}/mute`,
+    GROUP_READ: (groupId: number | string) => `/groups/${groupId}/read`,
+    GROUP_LAST_READ: '/groups/last-read',
+    GROUP_MESSAGE_PIN: (groupId: number | string, messageId: number | string) =>
+      `/groups/${groupId}/messages/${messageId}/pin`,
+    GROUP_MESSAGES_UNPIN: (groupId: number | string) =>
+      `/groups/${groupId}/messages/unpin`,
+  },
+  LIFECYCLE: '/lifecycle',
+  ONBOARDING: '/onboarding',
+  PAYMENT: {
+    CREATE: '/payments/create',
+  },
+  SUBSCRIPTION: {
+    PLANS: '/subscriptions/plans',
+    STATUS: '/subscriptions/status',
+    START_FREE_TRIAL: '/subscriptions/start-free-trial',
+  },
+  DISCOUNT: {
+    VALIDATE: '/discount-tokens/validate',
+  },
+  LEADERBOARD: '/leaderboard',
+  QUIZ: {
+    GENERATE: '/quizzes/generate',
+  },
+  ROLEPLAY: {
+    LIST: '/roleplays',
+    DETAIL: (roleplayId: number | string) => `/roleplays/${roleplayId}`,
+  },
+  TOPIC: {
+    LIST: '/topics',
+    DETAIL: (topicId: number | string) => `/topics/${topicId}`,
+  },
+  USAGE: {
+    START_FREE_TRIAL: '/usage/start-free-trial',
+    CHECK_SCENARIO_LIMIT: '/usage/check-scenario-limit',
+    RECORD_SCENARIO_CREATION: '/usage/record-scenario-creation',
+    CHECK_ROLEPLAY_LIMIT: '/usage/check-roleplay-limit',
+    RECORD_ROLEPLAY_SESSION: '/usage/record-roleplay-session',
+  },
+  VOCABULARY: {
+    WORDS: '/vocabulary/words',
+    COMPLETE: '/vocabulary/complete',
+  },
+};

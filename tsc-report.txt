@@ -1,0 +1,12 @@
+﻿npx : npm error code ENOSPC
+At line:1 char:1
++ npx tsc --noEmit 2>&1 | Out-File -FilePath "c:\Users\user\Talktivity\ ...
++ ~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm error code ENOSPC:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm error syscall write
+npm error errno -4055
+npm error nospc ENOSPC: no space left on device, write
+npm error nospc There appears to be insufficient space on your system to finish.
+npm error nospc Clear up some disk space and try again.

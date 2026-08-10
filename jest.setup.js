@@ -26,7 +26,7 @@ jest.mock('expo-audio', () => ({
 
 jest.mock('expo-notifications', () => ({
   requestPermissionsAsync: jest.fn(() =>
-    Promise.resolve({ status: 'granted' }),
+    Promise.resolve({ status: 'granted' })
   ),
   setNotificationHandler: jest.fn(),
   addNotificationReceivedListener: jest.fn(),

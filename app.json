@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "voice-assistant-react-native",
-    "slug": "voice-assistant-react-native",
+    "name": "Talktivity",
+    "slug": "talktivity",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
-    "scheme": "talktivity",
+    "icon": "./src/assets/images/icon.png",
+    "scheme": ["talktivity", "com.googleusercontent.apps.845075130244-6buns0pih3ihqlusmoeh25s3q0enc2t0"],
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
@@ -15,8 +15,8 @@
     },
     "android": {
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#161823"
+        "foregroundImage": "./src/assets/images/adaptive-icon.png",
+        "backgroundColor": "#09090f"
       },
       "package": "io.livekit.voiceassistantreactnative",
       "permissions": [
@@ -34,19 +34,19 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
-      "expo-router",
       "@livekit/react-native-expo-plugin",
       "@config-plugins/react-native-webrtc",
+      "@react-native-google-signin/google-signin",
       [
         "expo-splash-screen",
         {
-          "image": "./assets/images/splash-icon.png",
+          "image": "./src/assets/images/splash-icon.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#161823"
+          "backgroundColor": "#09090f"
         }
       ],
       "expo-font"

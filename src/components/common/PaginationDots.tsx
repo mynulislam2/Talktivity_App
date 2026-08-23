@@ -24,10 +24,16 @@ const PaginationDots: React.FC<PaginationDotsProps> = ({
   return (
     <View style={styles.container}>
       {Array.from({ length: totalDots }).map((_, index) => (
-        <View key={index} style={styles.dotWrapper}>
+        <View
+          key={index}
+          style={[
+            styles.dotWrapper,
+            { width: index === activeIndex ? 32 : 8 },
+          ]}
+        >
           {index === activeIndex ? (
             <LinearGradient
-              colors={[colors.purple[600], colors.blue[500]]}
+              colors={[colors.brand.gradientStart, colors.brand.gradientEnd]}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 0 }}
               style={styles.activeDot}
@@ -49,7 +55,6 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   dotWrapper: {
-    width: 32,
     height: 8,
   },
   activeDot: {
@@ -61,7 +66,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: colors.slate[700],
+    backgroundColor: '#3b3b4f',
   },
 });
 

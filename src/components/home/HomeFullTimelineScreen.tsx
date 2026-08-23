@@ -156,29 +156,26 @@ export const HomeFullTimelineScreen: React.FC<HomeFullTimelineScreenProps> = ({
   };
 
   return (
-    <ScrollView
-      style={styles.container}
-      contentContainerStyle={[
-        styles.content,
-        { paddingTop: Math.max(insets.top, 20) },
-      ]}
-      showsVerticalScrollIndicator={false}
-    >
-      {/* Header with back button */}
-      <View style={styles.header}>
+    <View style={styles.container}>
+      <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
         <ScreenBackButton onClick={onBack} />
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Full Timeline</Text>
         <View style={styles.headerSpacer} />
       </View>
 
-      {/* Mode Tabs */}
       <View style={styles.toggleContainer}>
         <HomeViewToggle
           viewMode="timeline"
           onViewModeChange={onSwitchMode as any}
         />
       </View>
+
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        showsVerticalScrollIndicator={false}
+      >
 
       {/* Learning Journey Badge */}
       <View style={styles.journeyBadge}>
@@ -294,7 +291,8 @@ export const HomeFullTimelineScreen: React.FC<HomeFullTimelineScreenProps> = ({
           </View>
         )}
       </View>
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
@@ -302,14 +300,18 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  content: {
+  scrollView: {
+    flex: 1,
+  },
+  scrollContent: {
     paddingHorizontal: 14,
-    paddingBottom: 20,
+    paddingBottom: 40,
   },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
-    minHeight: 42,
+    paddingHorizontal: 14,
+    paddingBottom: 8,
   },
   headerSpacer: {
     flex: 1,
@@ -331,7 +333,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   toggleContainer: {
-    marginTop: 24,
+    paddingHorizontal: 14,
   },
   journeyBadge: {
     flexDirection: 'row',

@@ -29,6 +29,7 @@ import { useLeaderboardData, useLeaderboardRefresh } from '@/hooks/leaderboard';
 import type { LeaderboardScreenProps } from '@/navigation/types';
 import type { LeaderboardType, LeaderboardUser } from '@/types/leaderboard';
 import { colors } from '@/styles/colors';
+import ScreenBackground from '../../components/common/ScreenBackground';
 
 const SCOPE_OPTIONS: { value: LeaderboardType; label: string }[] = [
   { value: 'overall', label: 'Global' },
@@ -67,37 +68,42 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color="#6A5AE0" />
-        </View>
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <View style={styles.loadingContainer}>
+            <ActivityIndicator size="large" color="#6A5AE0" />
+          </View>
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <ProgressPageShell
-          activeTab="leaderboard"
-          header={
-            <ProgressScreenHeader
-              onSettingsClick={() =>
-                navigation.navigate('ProfileStack', {
-                  screen: 'SettingsScreen',
-                })
-              }
-            />
-          }
-        >
-          <LeaderboardErrorState error={error} onRetry={refresh} />
-        </ProgressPageShell>
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <ProgressPageShell
+            activeTab="leaderboard"
+            header={
+              <ProgressScreenHeader
+                onSettingsClick={() =>
+                  navigation.navigate('ProfileStack', {
+                    screen: 'SettingsScreen',
+                  })
+                }
+              />
+            }
+          >
+            <LeaderboardErrorState error={error} onRetry={refresh} />
+          </ProgressPageShell>
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
       <ProgressPageShell
         activeTab="leaderboard"
         header={
@@ -228,6 +234,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
         {/* Dropdown renders inline below the trigger */}
       </ProgressPageShell>
     </SafeAreaView>
+   </ScreenBackground>
   );
 };
 
@@ -276,7 +283,7 @@ function LeaderboardRowItem({ user }: { user: LeaderboardUser }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   loadingContainer: {
     flex: 1,

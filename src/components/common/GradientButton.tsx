@@ -6,6 +6,7 @@ import {
   ViewStyle,
   TextStyle,
   ActivityIndicator,
+  View,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -13,7 +14,8 @@ import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
 
 interface GradientButtonProps {
-  label: string;
+  label?: string;
+  children?: React.ReactNode;
   onPress: () => void;
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
@@ -22,6 +24,8 @@ interface GradientButtonProps {
   textStyle?: TextStyle;
   fullWidth?: boolean;
   gradientColors?: readonly [string, string, ...string[]];
+  start?: { x: number; y: number };
+  end?: { x: number; y: number };
 }
 
 const sizeValues = { small: 36, medium: 42, large: 48 };
@@ -34,6 +38,7 @@ const sizeTextStyles: Record<string, TextStyle> = {
 
 const GradientButton: React.FC<GradientButtonProps> = ({
   label,
+  children,
   onPress,
   size = 'large',
   disabled = false,
@@ -46,6 +51,8 @@ const GradientButton: React.FC<GradientButtonProps> = ({
     colors.brand.gradientMid,
     colors.brand.gradientEnd,
   ] as const,
+  start = { x: 0, y: 0 },
+  end = { x: 1, y: 0 },
 }) => {
   return (
     <TouchableOpacity
@@ -62,12 +69,14 @@ const GradientButton: React.FC<GradientButtonProps> = ({
     >
       <LinearGradient
         colors={gradientColors}
-        start={{ x: 0, y: 0 }}
-        end={{ x: 1, y: 0 }}
+        start={start}
+        end={end}
         style={[styles.gradient, { height: sizeValues[size] }]}
       >
         {loading ? (
           <ActivityIndicator color={colors.white} size="small" />
+        ) : children ? (
+          <View style={styles.rowContent}>{children}</View>
         ) : (
           <Text style={[styles.text, sizeTextStyles[size], textStyle]}>
             {label}
@@ -80,7 +89,9 @@ const GradientButton: React.FC<GradientButtonProps> = ({
 
 const styles = StyleSheet.create({
   button: {
-    borderRadius: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
     overflow: 'hidden',
     shadowColor: colors.brand.buttonGlow,
     shadowOffset: { width: 0, height: 4 },
@@ -92,6 +103,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: spacing.xl,
+    width: '100%',
   },
   fullWidth: {
     width: '100%',
@@ -103,6 +115,12 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     color: colors.white,
     textAlign: 'center',
+  },
+  rowContent: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 6,
   },
 });
 

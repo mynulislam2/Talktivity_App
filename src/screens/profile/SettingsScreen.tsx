@@ -35,6 +35,7 @@ import {
 import { performGlobalLogout } from '@/utils/logoutClient';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
+import ScreenBackground from '../../components/common/ScreenBackground';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -138,7 +139,8 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -178,6 +180,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                 <Ionicons name="chevron-forward" size={20} color="#fff" />
               }
             />
+            {/*
             <SettingsRow
               label="Aleena Speed"
               trailing={
@@ -219,6 +222,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
                 </View>
               }
             />
+            */}
           </SettingsSection>
 
           {/* Subscription Section */}
@@ -295,7 +299,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Text style={styles.logoutText}>Log Out</Text>
-            <Ionicons name="arrow-forward" size={20} color="#ff2e2e" />
+            <Ionicons name="chevron-forward" size={20} color="#ff2e2e" />
           </TouchableOpacity>
 
           {/* Feedback */}
@@ -326,14 +330,15 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           },
         ]}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     paddingHorizontal: 20,

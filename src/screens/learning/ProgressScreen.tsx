@@ -24,6 +24,7 @@ import {
 } from '@/components/progress';
 import { ProgressPageShell, ProgressScreenHeader } from '@/components/profile';
 import { colors } from '@/styles/colors';
+import ScreenBackground from '../../components/common/ScreenBackground';
 import type { ProgressScreenProps } from '@/navigation/types';
 
 const ProgressScreen: React.FC<ProgressScreenProps> = () => {
@@ -32,22 +33,27 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <ProgressLoadingState />
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <ProgressLoadingState />
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <ProgressErrorState error={error} onRetry={refresh} />
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <ProgressErrorState error={error} onRetry={refresh} />
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
       <ProgressPageShell
         activeTab="achievements"
         header={
@@ -64,13 +70,14 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
         </View>
       </ProgressPageShell>
     </SafeAreaView>
+   </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   content: {
     gap: 16,

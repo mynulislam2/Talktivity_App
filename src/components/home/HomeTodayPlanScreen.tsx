@@ -72,27 +72,40 @@ function FigmaTimelineCard({ card }: { card: TimelineActionCardData }) {
         <Text style={styles.timelineCardDesc}>{card.description}</Text>
       </View>
 
-      {card.buttonLabel && card.action ? (
-        <FigmaPrimaryButton
-          onPress={card.action}
-          style={styles.timelineCardButton}
-        >
-          <Text style={styles.timelineCardButtonText}>{card.buttonLabel}</Text>
-        </FigmaPrimaryButton>
-      ) : null}
+      <View style={styles.cardBottomRow}>
+        {card.buttonLabel && card.action ? (
+          <FigmaPrimaryButton
+            onPress={card.action}
+            style={styles.timelineCardButton}
+          >
+            <Text style={styles.timelineCardButtonText}>{card.buttonLabel}</Text>
+          </FigmaPrimaryButton>
+        ) : null}
 
-      <View style={styles.timelineCardFooter}>
-        {isCompleted ? (
-          <>
-            <Feather name="check" size={16} color="#34d399" />
-            <Text style={styles.completedText}>Completed</Text>
-          </>
-        ) : (
-          <>
-            <Feather name="clock" size={16} color="#facc15" />
-            <Text style={styles.helperText}>{card.helper}</Text>
-          </>
-        )}
+        <View style={styles.timelineCardFooter}>
+          {isCompleted ? (
+            <>
+              <Feather name="check" size={16} color="#34d399" />
+              <Text style={styles.completedText}>Completed</Text>
+            </>
+          ) : (
+            <>
+              <Feather
+                name="clock"
+                size={16}
+                color={card.buttonLabel ? 'rgba(255,255,255,0.7)' : '#facc15'}
+              />
+              <Text
+                style={[
+                  styles.helperText,
+                  card.buttonLabel ? styles.helperTextWhite : styles.helperTextYellow,
+                ]}
+              >
+                {card.helper}
+              </Text>
+            </>
+          )}
+        </View>
       </View>
     </View>
   );
@@ -166,14 +179,14 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
             helper: !hasSpeakingTimeLeft
               ? 'Time limit reached'
               : booleans.speakingCompleted
-              ? `Ready for review (time remaining: ${remainingTime})`
-              : `Time remaining: ${remainingTime}`,
+              ? `${remainingTime} left`
+              : `${practiceMinutes} min`,
             status: !hasSpeakingTimeLeft ? 'completed' : 'active',
             buttonLabel: !hasSpeakingTimeLeft
               ? undefined
               : booleans.speakingCompleted
               ? 'Continue Speaking'
-              : `Start Speaking (${practiceMinutes} min)`,
+              : 'Start Speaking',
             action: !hasSpeakingTimeLeft ? undefined : startSpeaking,
           },
           {
@@ -184,7 +197,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
               ? 'Start your speaking review'
               : booleans.speakingCompleted
               ? 'Review is being prepared'
-              : 'Practice at least 5 minutes first',
+              : 'Complete Speaking Zone first',
             status: booleans.quizCompleted
               ? 'completed'
               : booleans.reviewUnlocked
@@ -225,14 +238,14 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
             helper: !hasSpeakingTimeLeft
               ? 'Time limit reached'
               : booleans.speakingCompleted
-              ? `Ready for review (time remaining: ${remainingTime})`
-              : `Time remaining: ${remainingTime}`,
+              ? `${remainingTime} left`
+              : `${practiceMinutes} min`,
             status: !hasSpeakingTimeLeft ? 'completed' : 'active',
             buttonLabel: !hasSpeakingTimeLeft
               ? undefined
               : booleans.speakingCompleted
               ? 'Continue Speaking'
-              : `Start Speaking (${practiceMinutes} min)`,
+              : 'Start Speaking',
             action: !hasSpeakingTimeLeft ? undefined : startSpeaking,
           },
           {
@@ -243,7 +256,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
               ? 'Start your speaking review'
               : booleans.speakingCompleted
               ? 'Review is being prepared'
-              : 'Practice at least 5 minutes first',
+              : 'Complete Speaking Zone first',
             status: booleans.quizCompleted
               ? 'completed'
               : booleans.reviewUnlocked
@@ -465,7 +478,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   timelineCard: {
-    borderRadius: 6,
+    borderRadius: 12,
     borderWidth: 1,
     borderColor: '#3d3e50',
     padding: 16,
@@ -492,9 +505,14 @@ const styles = StyleSheet.create({
     lineHeight: 19.6,
     color: '#c6c6c6',
   },
-  timelineCardButton: {
+  cardBottomRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
     marginTop: 16,
-    width: '100%',
+  },
+  timelineCardButton: {
+    marginTop: 0,
   },
   timelineCardButtonText: {
     fontSize: 14,
@@ -506,7 +524,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 4,
-    marginTop: 16,
+    marginTop: 0,
   },
   completedText: {
     fontSize: 14,
@@ -516,7 +534,12 @@ const styles = StyleSheet.create({
   helperText: {
     fontSize: 14,
     lineHeight: 19.6,
+  },
+  helperTextYellow: {
     color: '#facc15',
+  },
+  helperTextWhite: {
+    color: 'rgba(255,255,255,0.7)',
   },
   backButton: {
     width: 36,

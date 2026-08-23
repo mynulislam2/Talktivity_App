@@ -26,7 +26,8 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import ScreenBackground from '../../components/common/ScreenBackground';
+import GradientButton from '../../components/common/GradientButton';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   loginUser,
@@ -131,7 +132,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <View style={styles.root}>
+    <ScreenBackground style={styles.root}>
       <SafeAreaView style={styles.safeArea} edges={['top']} />
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
@@ -281,37 +282,27 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </TouchableOpacity>
 
             {/* Continue Button */}
-            <TouchableOpacity
-              style={[
-                styles.continueButton,
-                (isLoading || form.isSubmitting) &&
-                  styles.continueButtonDisabled,
-              ]}
+            <GradientButton
               onPress={handleFormSubmit}
               disabled={isLoading || form.isSubmitting}
-              activeOpacity={0.85}
+              loading={isLoading || form.isSubmitting}
+              style={styles.continueButton}
+              gradientColors={['#0e55ff', '#6a4bff', '#c55dfe'] as const}
+              start={{ x: 0.5, y: 0 }}
+              end={{ x: 0.5, y: 1 }}
+              size="medium"
+              fullWidth
             >
-              <LinearGradient
-                colors={['#0e55ff', '#6a4bff', '#c55dfe']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 0, y: 1 }}
-                style={styles.continueGradient}
-              >
-                {isLoading || form.isSubmitting ? (
-                  <ActivityIndicator color="#fff" size="small" />
-                ) : (
-                  <View style={styles.continueContent}>
-                    <Text style={styles.continueText}>Continue</Text>
-                    <Ionicons
-                      name="arrow-forward"
-                      size={20}
-                      color="#fff"
-                      style={styles.continueArrow}
-                    />
-                  </View>
-                )}
-              </LinearGradient>
-            </TouchableOpacity>
+              <View style={styles.continueContent}>
+                <Text style={styles.continueText}>Continue</Text>
+                <Ionicons
+                  name="arrow-forward"
+                  size={20}
+                  color="#fff"
+                  style={styles.continueArrow}
+                />
+              </View>
+            </GradientButton>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -352,21 +343,21 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           </View>
         </View>
       </Modal>
-    </View>
+    </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   root: {
     flex: 1,
-    backgroundColor: '#09090f',
+    backgroundColor: '#05030C',
   },
   safeArea: {
-    backgroundColor: '#09090f',
+    backgroundColor: 'transparent',
   },
   container: {
     flex: 1,
-    backgroundColor: '#09090f',
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,

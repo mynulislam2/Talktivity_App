@@ -429,7 +429,7 @@ const ChangePasswordScreen: React.FC = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#09090f',
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',

@@ -22,6 +22,7 @@ import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { AuthStackParamList } from '@/navigation/types';
+import ScreenBackground from '../../components/common/ScreenBackground';
 
 type AuthPrivacyScreenProps = NativeStackScreenProps<
   AuthStackParamList,
@@ -33,16 +34,17 @@ const AuthPrivacyScreen: React.FC<AuthPrivacyScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      {/* Header with Back Button */}
-      <View style={[styles.header, { paddingTop: insets.top }]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          activeOpacity={0.7}
-        >
-          <Ionicons name="chevron-back" size={28} color={colors.primary} />
-        </TouchableOpacity>
-      </View>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        {/* Header with Back Button */}
+        <View style={[styles.header, { paddingTop: insets.top }]}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={28} color="#fff" />
+          </TouchableOpacity>
+        </View>
 
       <ScrollView
         contentContainerStyle={styles.content}
@@ -206,7 +208,8 @@ const AuthPrivacyScreen: React.FC<AuthPrivacyScreenProps> = ({
 
         <Text style={styles.lastUpdated}>Last Updated: February 26, 2026</Text>
       </ScrollView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
@@ -225,7 +228,7 @@ const Section: React.FC<SectionProps> = ({ title, children }) => (
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#050110',
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',

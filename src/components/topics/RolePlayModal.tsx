@@ -17,7 +17,7 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
-import { LinearGradient } from 'expo-linear-gradient';
+import GradientButton from '../common/GradientButton';
 import type { RolePlayGenerationData } from '@/hooks/topics/useRolePlayGeneration';
 
 export interface RolePlayModalProps {
@@ -126,22 +126,14 @@ export function RolePlayModal({
             >
               <Text style={styles.cancelButtonText}>Cancel</Text>
             </Pressable>
-            <Pressable
+            <GradientButton
               onPress={handleStart}
               disabled={isGenerating}
-              style={[isGenerating && styles.buttonDisabled]}
-            >
-              <LinearGradient
-                colors={['#2949ff', '#b55cff']}
-                start={{ x: 0, y: 0 }}
-                end={{ x: 1, y: 1 }}
-                style={styles.startGradient}
-              >
-                <Text style={styles.startButtonText}>
-                  {isGenerating ? 'Generating...' : 'Start'}
-                </Text>
-              </LinearGradient>
-            </Pressable>
+              loading={isGenerating}
+              label={isGenerating ? 'Generating...' : 'Start'}
+              gradientColors={['#2949ff', '#b55cff'] as const}
+              style={{ flex: 1, height: 52, borderRadius: 6, minWidth: 120 }}
+            />
           </View>
         </View>
       </View>

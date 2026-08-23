@@ -22,6 +22,7 @@ import {
   Alert,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import ScreenBackground from '../../components/common/ScreenBackground';
 
 import type { AuthScreenProps } from '../../navigation/types';
 import { colors } from '../../styles/colors';
@@ -140,19 +141,20 @@ const ForgotPasswordScreen: React.FC<AuthScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <KeyboardAvoidingView
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      style={styles.container}
-    >
-      <ScrollView contentContainerStyle={styles.scrollContent}>
-        {/* Header with Back Button */}
-        <View style={styles.headerBar}>
-          <TouchableOpacity onPress={handleBackPress}>
-            <Ionicons name="chevron-back" size={28} color="#000" />
-          </TouchableOpacity>
-          <Text style={styles.headerTitle}>Reset Password</Text>
-          <View style={{ width: 28 }} />
-        </View>
+    <ScreenBackground>
+      <KeyboardAvoidingView
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+      >
+        <ScrollView contentContainerStyle={styles.scrollContent}>
+          {/* Header with Back Button */}
+          <View style={styles.headerBar}>
+            <TouchableOpacity onPress={handleBackPress}>
+              <Ionicons name="chevron-back" size={28} color="#fff" />
+            </TouchableOpacity>
+            <Text style={styles.headerTitle}>Reset Password</Text>
+            <View style={{ width: 28 }} />
+          </View>
 
         <View style={styles.content}>
           {/* Step 1: Email */}
@@ -312,13 +314,14 @@ const ForgotPasswordScreen: React.FC<AuthScreenProps> = ({ navigation }) => {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+   </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,

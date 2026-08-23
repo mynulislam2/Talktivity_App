@@ -27,6 +27,7 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import ScreenBackground from '../../components/common/ScreenBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -331,31 +332,45 @@ const DMChatScreen: React.FC<DMChatScreenProps> = () => {
     return allMessages.find((m: any) => m.id === pinnedMsgId) || null;
   }, [allMessages, pinnedMsgId]);
 
-  if (loading) return <ChatLoading message="Loading conversation..." />;
+  if (loading) {
+    return (
+      <ScreenBackground>
+        <ChatLoading message="Loading conversation..." />
+      </ScreenBackground>
+    );
+  }
 
-  if (!otherUser && !error)
-    return <ChatLoading message="Preparing conversation..." />;
+  if (!otherUser && !error) {
+    return (
+      <ScreenBackground>
+        <ChatLoading message="Preparing conversation..." />
+      </ScreenBackground>
+    );
+  }
 
   if (!otherUser) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons
-          name="people-outline"
-          size={40}
-          color="rgba(255,255,255,0.4)"
-        />
-        <Text style={styles.errorText}>Chat not found</Text>
-        <Text style={styles.errorSubtext}>
-          The conversation you're looking for doesn't exist
-        </Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.errorContainer}>
+          <Ionicons
+            name="people-outline"
+            size={40}
+            color="rgba(255,255,255,0.4)"
+          />
+          <Text style={styles.errorText}>Chat not found</Text>
+          <Text style={styles.errorSubtext}>
+            The conversation you're looking for doesn't exist
+          </Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   const isOnline = onlineMap[otherUser.id]?.online || false;
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+    <ScreenBackground>
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <View style={[styles.safeTop, { paddingTop: Math.max(insets.top, 0) }]} />
       <KeyboardAvoidingView
         style={styles.container}
@@ -490,21 +505,22 @@ const DMChatScreen: React.FC<DMChatScreenProps> = () => {
           onBlur={handleInputBlur}
         />
       </KeyboardAvoidingView>
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   safeTop: {
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',
@@ -643,7 +659,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
     padding: 32,
     gap: 12,
   },

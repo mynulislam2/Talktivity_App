@@ -71,7 +71,7 @@ export default function RoleplayScreen() {
   const topicTitle = topic?.title || 'General Conversation';
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#09090f' }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
       <RoleplayVisualizerLayout>
         <View style={styles.container}>
           <RoleplayContent

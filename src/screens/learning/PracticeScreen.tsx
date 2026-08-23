@@ -89,7 +89,7 @@ export default function PracticeScreen() {
 
   return (
     <SafeAreaView
-      style={{ flex: 1, backgroundColor: '#09090f' }}
+      style={{ flex: 1, backgroundColor: 'transparent' }}
       edges={['top', 'bottom']}
     >
       <PracticeVisualizerLayout>

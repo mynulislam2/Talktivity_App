@@ -12,6 +12,8 @@ import {
 } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 
+import ScreenBackground from '../../components/common/ScreenBackground';
+
 interface PrivacyScreenProps {
   navigation: any;
 }
@@ -19,40 +21,42 @@ interface PrivacyScreenProps {
 const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   return (
-    <SafeAreaView style={s.container} edges={['bottom']}>
-      <View style={[s.header, { paddingTop: Math.max(insets.top + 8, 16) }]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={s.backBtn}
-          activeOpacity={0.7}
+    <ScreenBackground>
+      <SafeAreaView style={s.container} edges={['bottom']}>
+        <View style={[s.header, { paddingTop: Math.max(insets.top + 8, 16) }]}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={s.backBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={18}
+              color="rgba(255,255,255,0.8)"
+            />
+          </TouchableOpacity>
+          <View style={s.spacer} />
+          <Text style={s.title}>Privacy Policy</Text>
+          <View style={s.spacer} />
+        </View>
+        <ScrollView
+          contentContainerStyle={s.content}
+          showsVerticalScrollIndicator={false}
         >
-          <Ionicons
-            name="chevron-back"
-            size={18}
-            color="rgba(255,255,255,0.8)"
-          />
-        </TouchableOpacity>
-        <View style={s.spacer} />
-        <Text style={s.title}>Privacy Policy</Text>
-        <View style={s.spacer} />
-      </View>
-      <ScrollView
-        contentContainerStyle={s.content}
-        showsVerticalScrollIndicator={false}
-      >
-        <Text style={s.text}>
-          Your privacy is important to us. We collect and use personal data only
-          as necessary to provide and improve our service. We do not sell your
-          personal information to third parties. For the full privacy policy,
-          please visit our website or contact support@talktivity.com.
-        </Text>
-      </ScrollView>
-    </SafeAreaView>
+          <Text style={s.text}>
+            Your privacy is important to us. We collect and use personal data only
+            as necessary to provide and improve our service. We do not sell your
+            personal information to third parties. For the full privacy policy,
+            please visit our website or contact support@talktivity.com.
+          </Text>
+        </ScrollView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
 const s = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#09090f' },
+  container: { flex: 1, backgroundColor: 'transparent' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',

@@ -27,6 +27,7 @@ import type { Topic } from '@/types/topics';
 import { TopicsScreenProps } from '@/navigation/types';
 import { spacing } from '@/styles/spacing';
 import { colors } from '@/styles/colors';
+import ScreenBackground from '../../components/common/ScreenBackground';
 
 const TopicsScreen: React.FC<TopicsScreenProps> = () => {
   const navigation = useNavigation();
@@ -137,8 +138,9 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <Header />
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <Header />
       {isLoading ? (
         <TopicsLoadingState />
       ) : error ? (
@@ -175,14 +177,15 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
         onStart={handleStartCustomRolePlay}
         isGenerating={isGenerating}
       />
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   scrollView: {
     flex: 1,

@@ -14,6 +14,7 @@ import { useHomeViewMode } from '@/hooks/home/useHomeViewMode';
 import { useDailyProgress } from '@/hooks/progress/useDailyProgress';
 import { usePracticeStatus } from '@/hooks/practice';
 import { useDailyBudgetMinutes } from '@/hooks/usePlanFeatures';
+import ScreenBackground from '../../components/common/ScreenBackground';
 import {
   HomeLoadingState,
   HomeErrorState,
@@ -83,7 +84,8 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
       requireOnboarding={true}
       requireSubscription={true}
     >
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
         {isLoading && <HomeLoadingState />}
 
         {!isLoading && error && (
@@ -124,7 +126,8 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
             )}
           </>
         )}
-      </SafeAreaView>
+        </SafeAreaView>
+      </ScreenBackground>
     </RouteGuard>
   );
 };
@@ -132,7 +135,7 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#09090f',
+    backgroundColor: 'transparent',
   },
 });
 

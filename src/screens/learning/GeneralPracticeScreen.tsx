@@ -72,7 +72,7 @@ export default function GeneralPracticeScreen() {
   const topicTitle = topic?.title || 'General Practice';
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#09090f' }} edges={[]}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
       <PracticeVisualizerLayout>
         <View style={styles.container}>
           <GeneralPracticeContent

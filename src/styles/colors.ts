@@ -105,9 +105,9 @@ export const colors = {
   },
 
   brand: {
-    gradientStart: '#2C5BFF',
-    gradientMid: '#6A4BFF',
-    gradientEnd: '#C55DFE',
+    gradientStart: '#3B52FF',
+    gradientMid: '#6242FF',
+    gradientEnd: '#8F35FF',
     buttonPrimary: '#2949ff',
     buttonGlow: 'rgba(41,73,255,0.3)',
     cardBorder: 'rgba(255,255,255,0.07)',

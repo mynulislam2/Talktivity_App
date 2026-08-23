@@ -14,6 +14,7 @@ import {
 } from '@/store/slices/communitySlice';
 import { useAppSelector } from '@/store/hooks';
 import { useNavigation } from '@react-navigation/native';
+import ScreenBackground from '../../components/common/ScreenBackground';
 import {
   CommunityHeader,
   CommunityTabs,
@@ -22,7 +23,6 @@ import {
   InboxView,
   GroupsView,
 } from '@/components/community';
-import { GradientBackground } from '@/components/community/GradientBackground';
 import {
   useCommunityData,
   useDMs,
@@ -110,34 +110,36 @@ const CommunityScreen: React.FC<CommunityScreenProps> = () => {
 
   if (showInitialLoading) {
     return (
-      <View style={styles.root}>
-        <View style={styles.bgBase} />
-        <GradientBackground />
-        <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-          <CommunityHeader title="Community" />
-          <CommunityLoadingState />
-        </SafeAreaView>
-      </View>
+      <ScreenBackground>
+        <View style={styles.root}>
+          <View style={styles.bgBase} />
+          <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+            <CommunityHeader title="Community" />
+            <CommunityLoadingState />
+          </SafeAreaView>
+        </View>
+      </ScreenBackground>
     );
   }
 
   if (error) {
     return (
-      <View style={styles.root}>
-        <View style={styles.bgBase} />
-        <GradientBackground />
-        <SafeAreaView style={styles.safeArea} edges={['bottom']}>
-          <CommunityHeader title="Community" />
-          <CommunityErrorState error={error} onRetry={refresh} />
-        </SafeAreaView>
-      </View>
+      <ScreenBackground>
+        <View style={styles.root}>
+          <View style={styles.bgBase} />
+          <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+            <CommunityHeader title="Community" />
+            <CommunityErrorState error={error} onRetry={refresh} />
+          </SafeAreaView>
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <View style={styles.root}>
+    <ScreenBackground>
+      <View style={styles.root}>
       <View style={styles.bgBase} />
-      <GradientBackground />
       <SafeAreaView style={styles.safeArea} edges={['bottom']}>
         <CommunityHeader title="Community" />
         <CommunityTabs
@@ -185,21 +187,22 @@ const CommunityScreen: React.FC<CommunityScreenProps> = () => {
         </ScrollView>
       </SafeAreaView>
     </View>
+   </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   root: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   bgBase: {
     ...StyleSheet.absoluteFillObject,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   scrollView: {
     flex: 1,

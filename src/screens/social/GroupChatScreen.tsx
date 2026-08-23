@@ -27,6 +27,7 @@ import {
   useSafeAreaInsets,
 } from 'react-native-safe-area-context';
 import { useNavigation, useRoute } from '@react-navigation/native';
+import ScreenBackground from '../../components/common/ScreenBackground';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
@@ -418,36 +419,47 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
     );
   }, [typingUsers, members, userId]);
 
-  if (loading) return <ChatLoading message="Loading group chat..." />;
+  if (loading) {
+    return (
+      <ScreenBackground>
+        <ChatLoading message="Loading group chat..." />
+      </ScreenBackground>
+    );
+  }
 
   if (error) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons name="chatbubbles-outline" size={40} color="#f87171" />
-        <Text style={styles.errorText}>{error}</Text>
-        <Text style={styles.errorSubtext}>Please try again later</Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.errorContainer}>
+          <Ionicons name="chatbubbles-outline" size={40} color="#f87171" />
+          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorSubtext}>Please try again later</Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   if (!group) {
     return (
-      <View style={styles.errorContainer}>
-        <Ionicons
-          name="people-outline"
-          size={40}
-          color="rgba(255,255,255,0.4)"
-        />
-        <Text style={styles.errorText}>Group not found</Text>
-        <Text style={styles.errorSubtext}>
-          The group you're looking for doesn't exist
-        </Text>
-      </View>
+      <ScreenBackground>
+        <View style={styles.errorContainer}>
+          <Ionicons
+            name="people-outline"
+            size={40}
+            color="rgba(255,255,255,0.4)"
+          />
+          <Text style={styles.errorText}>Group not found</Text>
+          <Text style={styles.errorSubtext}>
+            The group you're looking for doesn't exist
+          </Text>
+        </View>
+      </ScreenBackground>
     );
   }
 
   return (
-    <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+    <ScreenBackground>
+      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
       <View style={[styles.safeTop, { paddingTop: Math.max(insets.top, 0) }]} />
       <KeyboardAvoidingView
         style={styles.container}
@@ -693,14 +705,15 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
           </TouchableOpacity>
         </View>
       )}
-    </SafeAreaView>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
-  safeArea: { flex: 1, backgroundColor: colors.background },
-  safeTop: { backgroundColor: colors.background },
-  container: { flex: 1, backgroundColor: colors.background },
+  safeArea: { flex: 1, backgroundColor: 'transparent' },
+  safeTop: { backgroundColor: 'transparent' },
+  container: { flex: 1, backgroundColor: 'transparent' },
   header: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -790,7 +803,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
     padding: 32,
     gap: 12,
   },

@@ -11,6 +11,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
+import ScreenBackground from '../../components/common/ScreenBackground';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { loadProfile, loadProgressStats } from '@/store/slices/profileSlice';
 import {
@@ -109,22 +110,27 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
 
   if (isLoading) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <ProfileLoadingState />
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <ProfileLoadingState />
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['bottom']}>
-        <ProfileErrorState error={error} onRetry={refresh} />
-      </SafeAreaView>
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['bottom']}>
+          <ProfileErrorState error={error} onRetry={refresh} />
+        </SafeAreaView>
+      </ScreenBackground>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
       <ProgressPageShell
         activeTab="profile"
         header={
@@ -228,13 +234,14 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
         </View>
       </ProgressPageShell>
     </SafeAreaView>
+   </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#050110',
+    backgroundColor: 'transparent',
   },
   mb4: {
     marginBottom: 16,

@@ -22,6 +22,8 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import Svg, { Polygon, Circle, Line } from 'react-native-svg';
+import ScreenBackground from '../../components/common/ScreenBackground';
+import { LinearGradient } from 'expo-linear-gradient';
 
 import { colors } from '../../styles/colors';
 import { spacing } from '../../styles/spacing';
@@ -103,10 +105,15 @@ const JourneyVisual = () => {
         {/* Step 1 */}
         <View style={sJourney.step}>
           <View style={sJourney.iconContainer}>
-            <View style={sJourney.circle}>
-              <Text style={sJourney.circleText}>1</Text>
+            <View style={[sJourney.circle, { borderColor: '#A78BFA' }]}>
+              <Text style={[sJourney.circleText, { color: '#A78BFA' }]}>1</Text>
             </View>
-            <View style={sJourney.line} />
+            <LinearGradient
+              colors={['#A78BFA', '#C084FC']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={sJourney.line}
+            />
           </View>
           <View style={sJourney.content}>
             <Text style={sJourney.stepTitle}>A 2-minute call</Text>
@@ -117,10 +124,15 @@ const JourneyVisual = () => {
         {/* Step 2 */}
         <View style={sJourney.step}>
           <View style={sJourney.iconContainer}>
-            <View style={sJourney.circle}>
-              <Text style={sJourney.circleText}>2</Text>
+            <View style={[sJourney.circle, { borderColor: '#C084FC' }]}>
+              <Text style={[sJourney.circleText, { color: '#C084FC' }]}>2</Text>
             </View>
-            <View style={sJourney.line} />
+            <LinearGradient
+              colors={['#C084FC', '#F472B6']}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 0, y: 1 }}
+              style={sJourney.line}
+            />
           </View>
           <View style={sJourney.content}>
             <Text style={sJourney.stepTitle}>Your 8-week plan</Text>
@@ -131,8 +143,8 @@ const JourneyVisual = () => {
         {/* Step 3 */}
         <View style={sJourney.step}>
           <View style={sJourney.iconContainer}>
-            <View style={sJourney.circle}>
-              <Text style={sJourney.circleText}>3</Text>
+            <View style={[sJourney.circle, { borderColor: '#F472B6' }]}>
+              <Text style={[sJourney.circleText, { color: '#F472B6' }]}>3</Text>
             </View>
           </View>
           <View style={sJourney.content}>
@@ -292,9 +304,9 @@ interface SlideData {
 const slides: SlideData[] = [
   {
     id: '1',
-    headline: 'Speak with Confidence',
+    headline: 'This is Aleena.',
     description:
-      'Practice real conversations, get instant feedback, and improve your speaking step by step.',
+      'Your personal AI coach -- always ready to talk, never judging the pauses, the accent, or the wrong word.',
     visual: <AvatarVisual />,
   },
   {
@@ -350,57 +362,62 @@ const WelcomeOnboardingScreen: React.FC = () => {
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <StatusBar
-        barStyle="light-content"
-        backgroundColor={colors.dark.background}
-      />
-      <TouchableOpacity
-        style={styles.skipButton}
-        onPress={() => navigation.navigate('Login')}
-      >
-        <Text style={styles.skipText}>Skip</Text>
-      </TouchableOpacity>
-      <FlatList
-        ref={flatListRef}
-        data={slides}
-        renderItem={renderItem}
-        keyExtractor={(item) => item.id}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        onScroll={handleScroll}
-        scrollEventThrottle={16}
-        bounces={false}
-      />
-      <View style={styles.bottomSection}>
-        <PaginationDots totalDots={slides.length} activeIndex={currentIndex} />
-        <GradientButton
-          label={currentIndex === slides.length - 1 ? 'Get Started' : 'Next'}
-          onPress={handleNext}
-          size="large"
-          fullWidth
-          style={styles.primaryButton}
-          gradientColors={['#0e55ff', '#6a4bff', '#c55dfe'] as const}
+    <ScreenBackground>
+      <SafeAreaView style={styles.container} edges={['top']}>
+        <StatusBar
+          barStyle="light-content"
+          backgroundColor="transparent"
+          translucent
         />
-      </View>
-    </SafeAreaView>
+        <TouchableOpacity
+          style={styles.skipButton}
+          onPress={() => navigation.navigate('Login')}
+        >
+          <Text style={styles.skipText}>Skip</Text>
+        </TouchableOpacity>
+        <FlatList
+          ref={flatListRef}
+          data={slides}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          onScroll={handleScroll}
+          scrollEventThrottle={16}
+          bounces={false}
+        />
+        <View style={styles.bottomSection}>
+          <PaginationDots totalDots={slides.length} activeIndex={currentIndex} />
+          <GradientButton
+            label={currentIndex === slides.length - 1 ? 'Get Started' : 'Next →'}
+            onPress={handleNext}
+            size="large"
+            fullWidth
+            style={styles.primaryButton}
+            gradientColors={['#0e55ff', '#6a4bff', '#c55dfe'] as const}
+            start={{ x: 0.5, y: 0 }}
+            end={{ x: 0.5, y: 1 }}
+          />
+        </View>
+      </SafeAreaView>
+    </ScreenBackground>
   );
 };
 
 // ─── Styles ───────────────────────────────────────────────────────────────
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.dark.background },
+  container: { flex: 1, backgroundColor: 'transparent' },
   skipButton: {
     position: 'absolute',
-    top: 16,
+    top: 36,
     right: 20,
     zIndex: 10,
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
-  skipText: { fontSize: 14, color: '#8C8C8C', fontWeight: '400' },
+  skipText: { fontSize: 14, color: '#9B91BB', fontWeight: '400' },
   slide: {
     width,
     alignItems: 'center',
@@ -420,7 +437,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
-    color: '#8C8C8C',
+    color: '#9B91BB',
     textAlign: 'center',
     lineHeight: 22,
     maxWidth: 320,
@@ -453,7 +470,7 @@ const sJourney = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
-    color: '#a0a0b0',
+    color: '#9B91BB',
     marginBottom: 40,
     lineHeight: 24,
   },
@@ -464,38 +481,34 @@ const sJourney = StyleSheet.create({
     flexDirection: 'row',
   },
   iconContainer: {
-    width: 30,
+    width: 32,
     alignItems: 'center',
     marginRight: 16,
   },
   circle: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
+    width: 32,
+    height: 32,
+    borderRadius: 16,
     borderWidth: 1,
-    borderColor: '#9d77ba',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-    marginTop: 2,
   },
   circleText: {
-    fontSize: 10,
-    color: '#9d77ba',
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '400',
   },
   line: {
-    width: 1,
+    width: 1.8,
     flex: 1,
-    backgroundColor: '#9d77ba',
-    opacity: 0.5,
-    marginTop: 8,
-    marginBottom: 8,
+    marginTop: 6,
+    marginBottom: 6,
     minHeight: 40,
   },
   content: {
     flex: 1,
     paddingBottom: 32,
+    paddingTop: 4,
   },
   stepTitle: {
     fontSize: 18,
@@ -505,7 +518,7 @@ const sJourney = StyleSheet.create({
   },
   stepDesc: {
     fontSize: 14,
-    color: '#8c8c9c',
+    color: '#9B91BB',
     lineHeight: 20,
   },
 });
@@ -520,8 +533,8 @@ const s3 = StyleSheet.create({
     alignSelf: 'center',
   },
   radarLabel: { position: 'absolute', width: 65 },
-  radarScore: { fontSize: 18, fontWeight: '500', color: '#2879ff' },
-  radarLabelText: { fontSize: 12, fontWeight: '400', color: '#8c8c8c' },
+  radarScore: { fontSize: 18, fontWeight: '500', color: '#fff' },
+  radarLabelText: { fontSize: 12, fontWeight: '400', color: '#9B91BB' },
 });
 
 export default WelcomeOnboardingScreen;

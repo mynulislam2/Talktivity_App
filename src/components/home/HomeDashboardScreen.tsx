@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
+import { Image as ExpoImage } from 'expo-image';
 
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import { getUtcToday } from '@/utils/timezoneUtils';
@@ -113,10 +114,10 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
             <Feather name="arrow-right" size={14} color="#fff" />
           </FigmaPrimaryButton>
         </View>
-        <Image
-          source={require('../../../assets/figma/coach/aleena_coach_intro.png')}
+        <ExpoImage
+          source={require('../../../assets/avatar_intro.svg')}
           style={styles.todayPlanHero}
-          resizeMode="contain"
+          contentFit="contain"
         />
       </LinearGradient>
 
@@ -155,7 +156,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
                   !hasGeneralPractice && styles.coachCardButtonTextLocked,
                 ]}
               >
-                {hasGeneralPractice ? 'Start a chat' : 'Unlock'}
+                {hasGeneralPractice ? 'Practice Now' : 'Unlock'}
               </Text>
               <Feather
                 name="arrow-right"
@@ -335,17 +336,17 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 14,
-    borderRadius: 6,
+    paddingHorizontal: 18,
+    borderRadius: 8,
     alignSelf: 'flex-start',
-    gap: 4,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    gap: 6,
+    backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.15)',
+    borderColor: 'rgba(255,255,255,0.35)',
   },
   coachCardButtonLocked: {
     backgroundColor: 'rgba(255,255,255,0.04)',
-    borderColor: 'rgba(255,255,255,0.1)',
+    borderColor: 'rgba(255,255,255,0.2)',
   },
   coachCardButtonText: {
     fontSize: 14,

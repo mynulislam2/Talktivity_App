@@ -24,12 +24,7 @@ import { TodayReportStepHeader } from '@/components/report/TodayReportStepHeader
 
 function GradientBackground({ children }: { children: React.ReactNode }) {
   return (
-    <View style={{ flex: 1, backgroundColor: '#0f1017' }}>
-      <LinearGradient
-        colors={['rgba(255,255,255,0.03)', 'rgba(15,16,23,0.95)', '#0f1017']}
-        locations={[0, 0.4, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       {children}
     </View>
   );

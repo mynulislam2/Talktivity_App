@@ -88,12 +88,7 @@ async function playBase64Audio(
 
 function GradientBackground({ children }: { children: React.ReactNode }) {
   return (
-    <View style={{ flex: 1, backgroundColor: '#0f1017' }}>
-      <LinearGradient
-        colors={['rgba(41,73,255,0.08)', 'rgba(15,16,23,0.95)', '#0f1017']}
-        locations={[0, 0.4, 1]}
-        style={StyleSheet.absoluteFill}
-      />
+    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
       {children}
     </View>
   );

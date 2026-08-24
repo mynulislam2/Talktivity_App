@@ -26,6 +26,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { courseService } from '@/services/course';
 import { progressService } from '@/services/progress';
 import { AppBackground } from '../../components/common/AppBackground';
+import { tokens } from '../../theme/tokens';
 
 const WAVE_BARS = [12, 18, 28, 20, 34, 42, 30, 22, 36, 18, 12];
 const COACH_IMG = require('../../../assets/figma/coach/alina-intro.png');
@@ -100,7 +101,7 @@ function ListeningHeader({
     <View style={lh.container}>
       <View style={lh.inner}>
         <TouchableOpacity onPress={onBack} style={lh.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+          <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
         </TouchableOpacity>
         <View style={lh.headerSpacer} />
         <Text style={lh.title}>{title}</Text>
@@ -121,12 +122,12 @@ const lh = StyleSheet.create({
     alignItems: 'center',
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -134,7 +135,7 @@ const lh = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
-    color: '#fff',
+    color: tokens.color.text.primary,
     textAlign: 'center',
   },
 });
@@ -234,8 +235,9 @@ const sb = StyleSheet.create({
   time: {
     width: 31,
     fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 17,
-    color: '#fff',
+    color: tokens.color.text.primary,
     textAlign: 'left',
     fontVariant: ['tabular-nums'],
   } as any,
@@ -266,6 +268,29 @@ const sb = StyleSheet.create({
     elevation: 4,
   },
 });
+
+function WaveformBar({
+  height,
+  width,
+  scale,
+}: {
+  height: number;
+  width: number;
+  scale: Animated.Value;
+}) {
+  return (
+    <Animated.View
+      style={[wf.barWrap, { height, width, transform: [{ scaleY: scale }] }]}
+    >
+      <LinearGradient
+        colors={[tokens.color.accent.gradientStart, tokens.color.accent.gradientEnd]}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 0, y: 1 }}
+        style={wf.barFill}
+      />
+    </Animated.View>
+  );
+}
 
 function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
   const animValues = useRef(WAVE_BARS.map(() => new Animated.Value(1))).current;
@@ -302,16 +327,11 @@ function WaveformBars({ isPlaying }: { isPlaying: boolean }) {
       {WAVE_BARS.map((height, index) => {
         const h = Math.max(8, Math.round(height * 0.7));
         return (
-          <Animated.View
+          <WaveformBar
             key={index}
-            style={[
-              wf.bar,
-              {
-                height,
-                width: index === 5 ? 4 : 3,
-                transform: [{ scaleY: animValues[index] }],
-              },
-            ]}
+            height={h}
+            width={index === 5 ? 4 : 3}
+            scale={animValues[index]}
           />
         );
       })}
@@ -326,9 +346,12 @@ const wf = StyleSheet.create({
     gap: 4,
     height: 38,
   },
-  bar: {
+  barWrap: {
     borderRadius: 3,
-    backgroundColor: 'transparent',
+    overflow: 'hidden',
+  },
+  barFill: {
+    flex: 1,
   },
 });
 
@@ -598,10 +621,10 @@ export default function ListeningScreen() {
               const isPastLine =
                 activeLineIndex >= 0 && index < activeLineIndex;
               const tone = isActiveLine
-                ? '#fff'
+                ? tokens.color.text.primary
                 : isPastLine
-                ? '#c6c6c6'
-                : '#8c8e9c';
+                ? tokens.color.text.secondary
+                : tokens.color.text.placeholder;
               return (
                 <View
                   key={line.id}
@@ -616,7 +639,7 @@ export default function ListeningScreen() {
             })
           ) : (
             <View style={s.noTranscript}>
-              <Text style={[s.transcriptText, { color: '#c6c6c6' }]}>
+              <Text style={[s.transcriptText, { color: tokens.color.text.secondary }]}>
                 {audioError
                   ? 'Transcript unavailable.'
                   : hasStarted
@@ -704,7 +727,7 @@ export default function ListeningScreen() {
                 style={s.continueBtn}
               >
                 <LinearGradient
-                  colors={['#2949ff', '#2949ff']}
+                  colors={[tokens.color.accent.primary, tokens.color.accent.primary]}
                   start={{ x: 0, y: 0 }}
                   end={{ x: 1, y: 0 }}
                   style={s.continueGradient}
@@ -735,10 +758,11 @@ const s = StyleSheet.create({
   quote: {
     marginTop: 8,
     fontSize: 16,
+    fontWeight: '400', fontFamily: 'Poppins',
     fontStyle: 'italic',
     lineHeight: 22,
     textAlign: 'center',
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
   transcriptScroll: {
     flex: 1,
@@ -750,6 +774,7 @@ const s = StyleSheet.create({
   transcriptLine: { marginBottom: 16 },
   transcriptText: {
     fontSize: 17,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 26,
     paddingHorizontal: 0,
     borderRadius: 12,
@@ -792,7 +817,12 @@ const s = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
   },
-  rateText: { fontSize: 12, lineHeight: 17, color: '#fff' },
+  rateText: {
+    fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 17,
+    color: tokens.color.text.primary,
+  },
   errorBanner: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -807,11 +837,12 @@ const s = StyleSheet.create({
   errorBannerText: {
     flex: 1,
     fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 17,
-    color: '#ffd1d9',
+    color: tokens.color.state.errorText,
     textAlign: 'center',
   },
-  continueBtn: { width: '100%', borderRadius: 6, overflow: 'hidden' },
+  continueBtn: { width: '100%', borderRadius: tokens.radius.sm, overflow: 'hidden' },
   continueGradient: {
     flexDirection: 'row',
     height: 45,
@@ -819,9 +850,15 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
-  continueText: { color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' },
+  continueText: {
+    color: tokens.color.text.primary,
+    fontSize: 16,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+  },
   lockedText: {
     fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',

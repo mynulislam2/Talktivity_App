@@ -41,11 +41,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     color: '#9ca3af',
     marginBottom: spacing.xs,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#6b7280',
     textAlign: 'center',
   },

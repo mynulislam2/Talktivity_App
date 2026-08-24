@@ -77,6 +77,7 @@ const styles = StyleSheet.create({
     height: '100%',
     paddingHorizontal: spacing.md,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: colors.text.primary,
   },
@@ -88,11 +89,13 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.error,
     marginTop: spacing.xs,
   },
   helperText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     marginTop: spacing.xs,
   },

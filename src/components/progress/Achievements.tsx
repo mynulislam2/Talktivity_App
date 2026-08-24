@@ -156,6 +156,7 @@ const styles = StyleSheet.create({
   },
   levelSubtext: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   progressBar: {
@@ -197,6 +198,7 @@ const styles = StyleSheet.create({
   },
   streakSubtext: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   badgesSection: {
@@ -232,6 +234,7 @@ const styles = StyleSheet.create({
   },
   badgeIcon: {
     fontSize: 16,
+    fontFamily: 'Poppins',
   },
   badgeInfo: {
     flex: 1,
@@ -247,6 +250,7 @@ const styles = StyleSheet.create({
   },
   badgeDescription: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.5)',
   },
 });

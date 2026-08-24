@@ -154,10 +154,12 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.7)',
   },
   dropdownSelectedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   dropdownIcon: {
@@ -191,5 +193,6 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
 });

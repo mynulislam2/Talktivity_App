@@ -74,7 +74,7 @@ export default function GeneralPracticeScreen() {
 
   return (
     <AppBackground>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
         <PracticeVisualizerLayout>
           <View style={styles.container}>
             <GeneralPracticeContent

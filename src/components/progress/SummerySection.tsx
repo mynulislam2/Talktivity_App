@@ -227,6 +227,7 @@ const styles = StyleSheet.create({
   },
   gridLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   xpSection: {
@@ -261,6 +262,7 @@ const styles = StyleSheet.create({
   },
   xpProgressLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   progressBar: {

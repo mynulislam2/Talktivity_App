@@ -124,6 +124,7 @@ const styles = StyleSheet.create({
   },
   scoreMax: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   feedbackContainer: {
@@ -137,6 +138,7 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     lineHeight: 18,
   },

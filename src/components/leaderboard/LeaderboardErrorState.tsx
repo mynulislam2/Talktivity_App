@@ -65,6 +65,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',
     marginTop: 6,

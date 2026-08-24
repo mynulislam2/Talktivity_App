@@ -97,6 +97,7 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#fff',
     marginBottom: spacing.sm,
   },
@@ -108,10 +109,12 @@ const styles = StyleSheet.create({
   },
   senderName: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   timestamp: {
     fontSize: 12,
+    fontFamily: 'Poppins',
   },
   linkText: {
     fontSize: 12,

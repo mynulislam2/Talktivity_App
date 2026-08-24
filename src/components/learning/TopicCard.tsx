@@ -137,6 +137,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     lineHeight: 20,
     marginBottom: spacing.md,
@@ -155,6 +156,7 @@ const styles = StyleSheet.create({
   },
   lessonsText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginLeft: spacing.xs,
   },

@@ -518,6 +518,7 @@ const styles = StyleSheet.create({
   },
   legalDot: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
   },
   copyrightSection: {

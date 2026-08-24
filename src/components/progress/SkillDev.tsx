@@ -277,6 +277,7 @@ const styles = StyleSheet.create({
   skillLabel: {
     width: 80,
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   skillBar: {

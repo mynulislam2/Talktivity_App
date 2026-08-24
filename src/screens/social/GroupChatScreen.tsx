@@ -754,18 +754,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(239,68,68,0.5)',
   },
-  errorBannerText: { color: '#fff', fontSize: 14, textAlign: 'center' },
+  errorBannerText: { color: '#fff', fontSize: 14, fontFamily: 'Poppins', textAlign: 'center' },
   messagesWrapper: { flex: 1, position: 'relative' },
   messagesList: { flex: 1 },
   messagesContent: { paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   emptyState: { alignItems: 'center', paddingVertical: 48 },
   emptyTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
     marginTop: 16,
     marginBottom: 8,
   },
-  emptySubtext: { fontSize: 14, color: 'rgba(255,255,255,0.4)' },
+  emptySubtext: { fontSize: 14, fontFamily: 'Poppins', color: 'rgba(255,255,255,0.4)' },
   scrollToBottomBtn: {
     position: 'absolute',
     bottom: 16,
@@ -799,7 +800,7 @@ const styles = StyleSheet.create({
   },
   typingDot2: { opacity: 0.7 },
   typingDot3: { opacity: 0.4 },
-  typingLabel: { fontSize: 14, color: 'rgba(255,255,255,0.5)', flex: 1 },
+  typingLabel: { fontSize: 14, fontFamily: 'Poppins', color: 'rgba(255,255,255,0.5)', flex: 1 },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -815,6 +816,7 @@ const styles = StyleSheet.create({
   },
   errorSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
   },
@@ -875,6 +877,7 @@ const styles = StyleSheet.create({
   },
   groupProfileDesc: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
     marginBottom: 8,
@@ -882,6 +885,7 @@ const styles = StyleSheet.create({
   },
   groupProfileMemberCount: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
     flexDirection: 'row',
     alignItems: 'center',
@@ -907,6 +911,7 @@ const styles = StyleSheet.create({
   memberName: { fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#fff' },
   adminBadge: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: '#fbbf24',
     backgroundColor: 'rgba(251,191,36,0.15)',
     paddingHorizontal: 8,

@@ -6,13 +6,15 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { tokens } from '@/theme/tokens';
 import type { QuizQuestion } from '@/types/quiz';
 
 export interface QuestionCardProps {
   question: QuizQuestion;
+  isAnswered?: boolean;
 }
 
-export function QuestionCard({ question }: QuestionCardProps) {
+export function QuestionCard({ question, isAnswered }: QuestionCardProps) {
   const rawType = String(question.meta?.type || '').toLowerCase();
   const isPronunciation = rawType === 'pronunciation';
   const targetWord =
@@ -36,7 +38,7 @@ export function QuestionCard({ question }: QuestionCardProps) {
       ) : (
         <Text style={styles.questionText}>{question.question}</Text>
       )}
-      {question.explanation ? (
+      {isAnswered && question.explanation ? (
         <View style={styles.explanationContainer}>
           <Text style={styles.explanationLabel}>Explanation</Text>
           <Text style={styles.explanationText}>{question.explanation}</Text>
@@ -48,60 +50,64 @@ export function QuestionCard({ question }: QuestionCardProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 24,
-    backgroundColor: 'rgba(17, 24, 39, 0.3)',
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
-    padding: 24,
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
+    padding: 16,
   },
   label: {
-    fontSize: 12,
-    color: '#9ca3af',
+    fontSize: 14,
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginBottom: 8,
   },
   questionText: {
     fontSize: 20,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
-    color: '#fff',
-    lineHeight: 28,
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    color: tokens.color.text.primary,
+    lineHeight: 27,
   },
   targetWordContainer: {
     marginTop: 16,
     marginBottom: 16,
     paddingVertical: 24,
-    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+    backgroundColor: 'rgba(41,73,255,0.10)',
     borderWidth: 1,
-    borderColor: 'rgba(59, 130, 246, 0.3)',
-    borderRadius: 16,
+    borderColor: 'rgba(41,73,255,0.30)',
+    borderRadius: tokens.radius.md,
     alignItems: 'center',
   },
   targetWord: {
     fontSize: 36,
     fontWeight: 'bold', fontFamily: 'Poppins-Bold',
-    color: '#7B70FF',
+    color: tokens.color.accent.primary,
   },
   phonetic: {
     fontSize: 14,
-    color: '#9ca3af',
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     textAlign: 'center',
     marginBottom: 16,
   },
   explanationContainer: {
     marginTop: 16,
     padding: 16,
-    backgroundColor: 'rgba(31, 41, 55, 0.3)',
+    backgroundColor: tokens.color.surface.subtle,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
-    borderRadius: 16,
+    borderColor: tokens.color.border.hairline,
+    borderRadius: tokens.radius.md,
   },
   explanationLabel: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginBottom: 4,
   },
   explanationText: {
-    fontSize: 14,
-    color: '#d1d5db',
+    fontSize: 13,
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     lineHeight: 20,
   },
 });

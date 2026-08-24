@@ -200,6 +200,7 @@ const styles = StyleSheet.create({
   },
   updateText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.45)',
   },
   errorContainer: {
@@ -208,5 +209,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#f87171',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
 });

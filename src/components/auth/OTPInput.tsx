@@ -14,7 +14,7 @@ import {
   TextInputKeyPressEventData,
   ViewStyle,
 } from 'react-native';
-import { colors } from '../../styles/colors';
+import { tokens } from '../../theme/tokens';
 
 export interface OTPInputProps {
   length?: number;
@@ -147,27 +147,29 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   input: {
-    width: 44,
+    width: 42,
     height: 52,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#444',
-    backgroundColor: 'transparent',
-    color: '#fff',
+    borderColor: tokens.color.border.input,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    color: tokens.color.text.primary,
     fontSize: 22,
     fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
   },
   inputActive: {
     borderWidth: 1,
-    borderColor: colors.primary,
+    borderColor: tokens.color.accent.primary,
+    backgroundColor: 'rgba(255,255,255,0.12)',
   },
   inputError: {
-    borderColor: '#ef4444',
+    borderColor: tokens.color.state.danger,
+    backgroundColor: 'rgba(255,35,35,0.10)',
   },
   inputDisabled: {
     opacity: 0.5,
-    backgroundColor: 'transparent',
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
 });
 

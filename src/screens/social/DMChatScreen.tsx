@@ -565,10 +565,12 @@ const styles = StyleSheet.create({
   },
   statusOnlineText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
   },
   statusOfflineText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
   },
   errorBanner: {
@@ -584,6 +586,7 @@ const styles = StyleSheet.create({
   errorBannerText: {
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
     textAlign: 'center',
   },
   messagesWrapper: {
@@ -604,12 +607,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
   },
   typingContainer: {
@@ -637,6 +642,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
   },
   scrollToBottomBtn: {
@@ -671,6 +677,7 @@ const styles = StyleSheet.create({
   },
   errorSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
   },

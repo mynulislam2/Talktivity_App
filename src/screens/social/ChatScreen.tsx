@@ -388,10 +388,12 @@ const styles = StyleSheet.create({
   },
   lastMessage: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   timestamp: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   chatHeader: {
@@ -428,6 +430,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   callButton: {
@@ -459,6 +462,7 @@ const styles = StyleSheet.create({
   },
   emptySubtext: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#ccc',
     marginTop: spacing.sm,
   },
@@ -471,6 +475,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: '#f44336',
   },
   typingIndicator: {
@@ -479,6 +484,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     fontStyle: 'italic',
   },

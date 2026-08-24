@@ -114,6 +114,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#ccc',
     textAlign: 'center',
     maxWidth: 300,
@@ -128,6 +129,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
     textAlign: 'center',
   },

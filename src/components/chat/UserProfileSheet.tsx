@@ -252,6 +252,7 @@ const styles = StyleSheet.create({
   },
   statusLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#9ca3af',
   },
   actionsSection: {

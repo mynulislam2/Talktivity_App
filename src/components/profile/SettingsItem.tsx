@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   value: {

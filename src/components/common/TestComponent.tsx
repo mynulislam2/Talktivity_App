@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     marginBottom: 8,
     color: '#666',
     lineHeight: 20,

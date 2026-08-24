@@ -5,14 +5,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  ScrollView,
-  TouchableOpacity,
-  Alert,
-} from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
@@ -32,7 +25,8 @@ import {
   QuizShell,
   QuizCongratulations,
 } from '@/components/quiz';
-import { colors } from '@/styles/colors';
+import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import { tokens } from '@/theme/tokens';
 import { AppBackground } from '../../components/common/AppBackground';
 
 export default function QuizScreen() {
@@ -113,12 +107,12 @@ export default function QuizScreen() {
       <AppBackground>
         <SafeAreaView style={styles.container}>
           <View style={styles.centerContent}>
-            <Text style={styles.errorTitle}>
+            <Text style={styles.plainErrorTitle}>
               Speech Recognition Not Supported
             </Text>
-            <Text style={styles.errorText}>
-              Your device doesn't support speech recognition. Please use a device
-              with speech recognition capabilities.
+            <Text style={styles.plainErrorText}>
+              Your device doesn't support speech recognition. Please use a
+              device with speech recognition capabilities.
             </Text>
           </View>
         </SafeAreaView>
@@ -131,8 +125,8 @@ export default function QuizScreen() {
       <AppBackground>
         <SafeAreaView style={styles.container}>
           <View style={styles.centerContent}>
-            <Text style={styles.errorTitle}>Microphone Access Required</Text>
-            <Text style={styles.errorText}>
+            <Text style={styles.plainErrorTitle}>Microphone Access Required</Text>
+            <Text style={styles.plainErrorText}>
               Please allow microphone access to use the pronunciation feature.
             </Text>
           </View>
@@ -168,15 +162,15 @@ export default function QuizScreen() {
             <View style={styles.errorCard}>
               <Text style={styles.errorCardTitle}>Failed to generate quiz</Text>
               <Text style={styles.errorCardText}>{quizError}</Text>
-              <TouchableOpacity
-                style={styles.retryButton}
+              <FigmaPrimaryButton
                 onPress={() => {
                   // Retry by resetting
                   reset();
                 }}
+                style={styles.retryButton}
               >
                 <Text style={styles.retryButtonText}>Retry</Text>
-              </TouchableOpacity>
+              </FigmaPrimaryButton>
             </View>
           </View>
         </SafeAreaView>
@@ -215,7 +209,7 @@ export default function QuizScreen() {
       <AppBackground>
         <SafeAreaView style={styles.container}>
           <View style={styles.centerContent}>
-            <Text style={styles.errorText}>No questions available.</Text>
+            <Text style={styles.plainErrorText}>No questions available.</Text>
           </View>
         </SafeAreaView>
       </AppBackground>
@@ -251,35 +245,29 @@ export default function QuizScreen() {
               <AnswerFeedback show={isAnswered} correct={isCorrect} />
               <View style={styles.buttonRow}>
                 {!isAnswered ? (
-                  <TouchableOpacity
-                    style={[
-                      styles.submitButton,
-                      (isPronunciation
-                        ? !userSpeech || userSpeech.trim().length === 0
-                        : selectedOptionIds.length === 0) &&
-                        styles.submitButtonDisabled,
-                    ]}
+                  <FigmaPrimaryButton
+                    onPress={submitAnswer}
                     disabled={
                       isPronunciation
                         ? !userSpeech || userSpeech.trim().length === 0
                         : selectedOptionIds.length === 0
                     }
-                    onPress={submitAnswer}
+                    style={styles.ctaButton}
                   >
-                    <Text style={styles.submitButtonText}>Submit</Text>
-                  </TouchableOpacity>
+                    <Text style={styles.ctaButtonText}>Submit</Text>
+                  </FigmaPrimaryButton>
                 ) : (
-                  <TouchableOpacity style={styles.nextButton} onPress={goNext}>
-                    <Text style={styles.nextButtonText}>
+                  <FigmaPrimaryButton onPress={goNext} style={styles.ctaButton}>
+                    <Text style={styles.ctaButtonText}>
                       {currentIndex + 1 >= totalQuestions ? 'Finish' : 'Next'}
                     </Text>
-                  </TouchableOpacity>
+                  </FigmaPrimaryButton>
                 )}
               </View>
             </View>
           }
         >
-          <QuestionCard question={currentQuestion} />
+          <QuestionCard question={currentQuestion} isAnswered={isAnswered} />
           {!isPronunciation && (
             <OptionsList
               options={currentQuestion.options}
@@ -311,50 +299,53 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     padding: 16,
   },
-  errorTitle: {
+  plainErrorTitle: {
     fontSize: 24,
     fontWeight: 'bold', fontFamily: 'Poppins-Bold',
-    color: colors.text.primary,
+    color: tokens.color.text.primary,
     marginBottom: 16,
     textAlign: 'center',
   },
-  errorText: {
+  plainErrorText: {
     fontSize: 16,
-    color: colors.text.muted,
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     textAlign: 'center',
   },
   errorCard: {
     width: '100%',
     maxWidth: 350,
-    padding: 32,
-    borderRadius: 24,
-    backgroundColor: colors.dark.backgroundCard,
+    padding: 24,
+    borderRadius: tokens.radius.sm,
+    backgroundColor: tokens.color.surface.card,
     borderWidth: 1,
-    borderColor: colors.brand.cardBorder,
+    borderColor: tokens.color.border.card,
     alignItems: 'center',
   },
   errorCardTitle: {
     fontSize: 20,
     fontWeight: 'bold', fontFamily: 'Poppins-Bold',
-    color: colors.text.primary,
+    color: tokens.color.text.primary,
     marginBottom: 8,
+    textAlign: 'center',
   },
   errorCardText: {
-    fontSize: 16,
-    color: colors.text.tertiary,
+    fontSize: 14,
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginBottom: 24,
     textAlign: 'center',
   },
   retryButton: {
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    borderRadius: 16,
-    backgroundColor: colors.primaryDark,
+    height: 45,
+    borderRadius: tokens.radius.sm,
+    minWidth: 160,
   },
   retryButtonText: {
-    color: colors.text.primary,
+    color: tokens.color.text.primary,
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   footer: {
     gap: 12,
@@ -363,33 +354,15 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 12,
   },
-  submitButton: {
+  ctaButton: {
     flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    backgroundColor: colors.primaryDark,
-    alignItems: 'center',
+    height: 45,
+    borderRadius: tokens.radius.sm,
   },
-  submitButtonDisabled: {
-    opacity: 0.6,
-  },
-  submitButtonText: {
-    color: colors.text.primary,
+  ctaButtonText: {
+    color: tokens.color.text.primary,
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
-  },
-  nextButton: {
-    flex: 1,
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    backgroundColor: colors.primaryDark,
-    alignItems: 'center',
-  },
-  nextButtonText: {
-    color: colors.text.primary,
-    fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });

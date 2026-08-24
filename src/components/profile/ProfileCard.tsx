@@ -74,6 +74,11 @@ export function ProfileCard({
   isUploadingProfileImage = false,
 }: ProfileCardProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  // There is no working upgrade destination in this app yet, so a caller
+  // that doesn't supply onUpgradePress means "nowhere to send the user" —
+  // render the button visibly disabled rather than let it look tappable
+  // and silently do nothing.
+  const upgradeDisabled = isProActive || !onUpgradePress;
   const selfRatedLevel = getStartingLevelCefr(profile?.startingLevel);
   const ratingLine = selfRatedLevel
     ? `CEFR ${selfRatedLevel} Self Rated`
@@ -145,9 +150,9 @@ export function ProfileCard({
         </View>
 
         <TouchableOpacity
-          onPress={isProActive ? undefined : onUpgradePress}
-          disabled={isProActive}
-          style={[styles.upgradeButton, isProActive && styles.upgradeButtonDisabled]}
+          onPress={upgradeDisabled ? undefined : onUpgradePress}
+          disabled={upgradeDisabled}
+          style={[styles.upgradeButton, upgradeDisabled && styles.upgradeButtonDisabled]}
           activeOpacity={0.7}
         >
           <UpgradeMagicIcon size={16} />
@@ -239,6 +244,7 @@ const styles = StyleSheet.create({
   },
   cefrLine: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
     marginTop: 4,
@@ -250,11 +256,13 @@ const styles = StyleSheet.create({
   },
   planLabel: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
   },
   planValue: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#fff',
     marginTop: 4,

@@ -14,7 +14,7 @@ function formatTimestamp(ts: number): string {
   const ampm = h >= 12 ? 'PM' : 'AM';
   const hh = h % 12 || 12;
   const mm = String(m).padStart(2, '0');
-  return `${mon} ${day} AT ${hh}:${mm} ${ampm}`;
+  return `${day} ${mon} AT ${hh}:${mm} ${ampm}`;
 }
 
 export function TranscriptList({ messages }: { messages: TranscriptMessage[] }) {
@@ -61,23 +61,25 @@ const styles = StyleSheet.create({
   content: { paddingHorizontal: 20, paddingVertical: 12, gap: 8 },
   userRow: { alignItems: 'flex-end', marginBottom: 4 },
   userBubble: {
-    maxWidth: '70%',
+    maxWidth: 224,
     borderTopLeftRadius: 10,
     borderTopRightRadius: 10,
     borderBottomLeftRadius: 10,
     borderBottomRightRadius: 4,
     backgroundColor: '#2879ff',
     paddingHorizontal: 12,
-    paddingVertical: 8,
+    paddingVertical: 10,
   },
-  userText: { fontSize: 14, lineHeight: 20, color: '#fff' },
+  userText: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 16.8, color: '#fff' },
   agentRow: { flexDirection: 'row', gap: 8, marginBottom: 4 },
   agentAvatar: {
     width: 38,
     height: 38,
     borderRadius: 19,
     overflow: 'hidden',
-    backgroundColor: 'rgba(47,65,145,0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.15)',
+    backgroundColor: 'rgba(255,255,255,0.8)',
   },
   avatarImg: { width: '100%', height: '100%' },
   agentBubble: {
@@ -87,14 +89,14 @@ const styles = StyleSheet.create({
     borderBottomLeftRadius: 4,
     borderBottomRightRadius: 10,
     backgroundColor: 'rgba(47,65,145,0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 8,
+    padding: 12,
   },
-  agentText: { fontSize: 14, lineHeight: 20, color: '#fdfdfd' },
+  agentText: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 16.8, color: '#fdfdfd' },
   agentTime: {
     marginTop: 2,
     fontSize: 10,
+    fontFamily: 'Poppins',
     lineHeight: 14,
-    color: 'rgba(255,255,255,0.45)',
+    color: '#c6c6c6',
   },
 });

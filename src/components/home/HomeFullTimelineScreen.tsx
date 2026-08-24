@@ -368,6 +368,7 @@ const styles = StyleSheet.create({
   heroDesc: {
     marginTop: 8,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#c6c6c6',
     textAlign: 'center',
@@ -407,6 +408,7 @@ const styles = StyleSheet.create({
   statLabel: {
     marginTop: 24,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
   },
@@ -500,6 +502,7 @@ const styles = StyleSheet.create({
   },
   weekBadgeText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#fff',
   },
@@ -513,6 +516,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeCompletedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#22c55e',
   },
@@ -526,6 +530,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeTodayText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#fb7185',
   },
@@ -539,6 +544,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeMissedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#ff3a3a',
   },
@@ -552,12 +558,14 @@ const styles = StyleSheet.create({
   },
   statusBadgeUpcomingText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#2949ff',
   },
   weekCardSubtitle: {
     marginTop: 4,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
   },
@@ -574,11 +582,13 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
   },
   actionText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#fff',
   },
@@ -593,6 +603,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#c6c6c6',
   },
   errorCard: {
@@ -606,6 +617,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#fda4af',
   },
 });

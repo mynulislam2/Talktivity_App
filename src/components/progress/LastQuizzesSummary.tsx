@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
   },
   quizLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.5)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -107,6 +108,7 @@ const styles = StyleSheet.create({
   },
   quizDate: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
   },
   quizScore: {
@@ -120,6 +122,7 @@ const styles = StyleSheet.create({
   },
   scorePercent: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
   },
 });

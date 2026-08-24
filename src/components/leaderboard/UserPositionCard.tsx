@@ -118,6 +118,7 @@ const styles = StyleSheet.create({
   },
   xpSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#8c8c8c',
     marginTop: 2,
   },

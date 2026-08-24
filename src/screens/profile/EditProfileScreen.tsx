@@ -614,6 +614,7 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: '#a7f3d0',
   },
@@ -628,6 +629,7 @@ const styles = StyleSheet.create({
   },
   errorBannerText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: '#fca5a5',
   },
@@ -659,6 +661,7 @@ const styles = StyleSheet.create({
   },
   fieldCardLabel: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
   },
@@ -676,6 +679,7 @@ const styles = StyleSheet.create({
   },
   fieldCardEditText: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22,
     color: '#2879ff',
   },
@@ -718,6 +722,7 @@ const styles = StyleSheet.create({
   },
   sheetDescription: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 19,
     color: 'rgba(255,255,255,0.6)',
     marginTop: 8,
@@ -743,6 +748,7 @@ const styles = StyleSheet.create({
   },
   sheetErrorText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: '#fca5a5',
   },
@@ -751,6 +757,7 @@ const styles = StyleSheet.create({
   },
   inputLabel: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.6)',
     marginBottom: 8,
   },
@@ -762,6 +769,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   pillsContainer: {
@@ -783,6 +791,7 @@ const styles = StyleSheet.create({
   },
   pillText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: '#c6c6c6',
   },
@@ -809,6 +818,7 @@ const styles = StyleSheet.create({
   },
   optionText: {
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 21,
     color: 'rgba(255,255,255,0.8)',
   },

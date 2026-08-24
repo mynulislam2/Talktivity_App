@@ -19,6 +19,7 @@ import { setLastListeningQuiz } from '@/store/slices/quizSlice';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import type { QuizOption, QuizQuestion } from '@/types/quiz';
 import { AppBackground } from '../../components/common/AppBackground';
+import { tokens } from '../../theme/tokens';
 
 const PARTY_POPPER = require('../../../assets/figma/listening/party-popper.png');
 
@@ -33,7 +34,7 @@ function ListeningHeader({
     <View style={lh.container}>
       <View style={lh.inner}>
         <TouchableOpacity onPress={onBack} style={lh.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+          <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
         </TouchableOpacity>
         <View style={lh.headerSpacer} />
         <Text style={lh.title}>{title}</Text>
@@ -54,12 +55,12 @@ const lh = StyleSheet.create({
     alignItems: 'center',
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -67,7 +68,7 @@ const lh = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
-    color: '#fff',
+    color: tokens.color.text.primary,
     textAlign: 'center',
   },
 });
@@ -138,7 +139,7 @@ function LoadingCard({
           return (
             <View key={idx} style={[lc.taskItem, active && lc.taskItemActive]}>
               <View style={lc.taskIconWrap}>
-                <Text style={{ fontSize: 16 }}>{step.icon || '○'}</Text>
+                <Text style={{ fontSize: 16, fontFamily: 'Poppins' }}>{step.icon || '○'}</Text>
               </View>
               <View style={{ flex: 1 }}>
                 <Text
@@ -179,8 +180,18 @@ const lc = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  progressLabel: { fontSize: 12, lineHeight: 17, color: '#c6c6c6' },
-  progressValue: { fontSize: 12, lineHeight: 17, color: '#fff' },
+  progressLabel: {
+    fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 17,
+    color: tokens.color.text.secondary,
+  },
+  progressValue: {
+    fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 17,
+    color: tokens.color.text.primary,
+  },
   track: {
     height: 6,
     borderRadius: 3,
@@ -191,6 +202,7 @@ const lc = StyleSheet.create({
   eyebrow: {
     marginTop: 32,
     fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
     letterSpacing: 2.88,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -202,14 +214,15 @@ const lc = StyleSheet.create({
     fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
   loadingMsg: {
     marginTop: 8,
     fontSize: 14,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 20,
     textAlign: 'center',
-    color: '#c6c6c6',
+    color: tokens.color.text.secondary,
   },
   taskList: { marginTop: 32, gap: 12 },
   taskItem: {
@@ -233,7 +246,7 @@ const lc = StyleSheet.create({
     justifyContent: 'center',
   },
   taskLabel: { fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 19 },
-  taskLabelActive: { color: '#fff' },
+  taskLabelActive: { color: tokens.color.text.primary },
   taskLabelInactive: { color: 'rgba(255,255,255,0.7)' },
   taskProcessing: {
     marginTop: 2,
@@ -312,27 +325,34 @@ const cs = StyleSheet.create({
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 36,
     letterSpacing: -0.72,
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
-  subtitle: { marginTop: 16, fontSize: 14, lineHeight: 20, color: '#fff' },
+  subtitle: {
+    marginTop: 16,
+    fontSize: 14,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 20,
+    color: tokens.color.text.primary,
+  },
   scoreWrap: { alignItems: 'center', marginTop: 64 },
   scoreText: {
     fontSize: 40,
     fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 48,
     letterSpacing: -0.8,
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
   scoreLabel: {
     marginTop: 16,
     fontSize: 14,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 20,
-    color: '#c6c6c6',
+    color: tokens.color.text.secondary,
   },
   errorText: {
     marginTop: 24,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: '#ffd1d9',
     textAlign: 'center',
@@ -356,9 +376,9 @@ function QuizOptionButton({
   onSelect: (id: string) => void;
 }) {
   const borderColor = isCorrect
-    ? '#61d38d'
+    ? tokens.color.state.success
     : isIncorrectSelection
-    ? '#d26a82'
+    ? tokens.color.state.danger
     : isSelected
     ? '#8c6dff'
     : '#696d82';
@@ -368,16 +388,16 @@ function QuizOptionButton({
     ? 'rgba(88,32,52,0.45)'
     : 'rgba(45,50,89,0.88)';
   const checkBg = isCorrect
-    ? '#61d38d'
+    ? tokens.color.state.success
     : isIncorrectSelection
-    ? '#d26a82'
+    ? tokens.color.state.danger
     : isSelected
     ? '#8c6dff'
     : 'transparent';
   const checkBorder = isCorrect
-    ? '#61d38d'
+    ? tokens.color.state.success
     : isIncorrectSelection
-    ? '#d26a82'
+    ? tokens.color.state.danger
     : isSelected
     ? '#8c6dff'
     : '#e6e6ef';
@@ -420,13 +440,18 @@ const qo = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  checkInner: { width: 6, height: 6, borderRadius: 2, backgroundColor: '#fff' },
+  checkInner: {
+    width: 6,
+    height: 6,
+    borderRadius: 2,
+    backgroundColor: tokens.color.text.primary,
+  },
   text: {
     flex: 1,
     fontSize: 16,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22,
-    color: '#fdfdfd',
+    color: tokens.color.text.primary,
   },
 });
 
@@ -447,13 +472,18 @@ const qq = StyleSheet.create({
     backgroundColor: 'rgba(45,50,89,0.88)',
     padding: 16,
   },
-  label: { fontSize: 14, lineHeight: 20, color: '#c6c6c6' },
+  label: {
+    fontSize: 14,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 20,
+    color: tokens.color.text.secondary,
+  },
   text: {
     marginTop: 8,
     fontSize: 20,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
 });
 
@@ -732,26 +762,33 @@ const ss = StyleSheet.create({
     fontSize: 20,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
   errorText: {
     marginTop: 12,
     fontSize: 14,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 21,
     color: '#f5d6de',
     textAlign: 'center',
   },
-  retryBtn: { marginTop: 20, borderRadius: 6, overflow: 'hidden' },
-  retryText: { color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' },
+  retryBtn: { marginTop: 20, borderRadius: tokens.radius.sm, overflow: 'hidden' },
+  retryText: {
+    color: tokens.color.text.primary,
+    fontSize: 16,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+  },
   emptyText: {
     fontSize: 16,
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 24,
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
   },
   progressCard: {
     marginHorizontal: 20,
-    marginTop: 12,
+    marginTop: 48,
     borderRadius: 12,
     paddingHorizontal: 10,
     paddingVertical: 20,
@@ -765,9 +802,14 @@ const ss = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 20,
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
-  scoreDisplay: { fontSize: 12, lineHeight: 17, color: '#fdfdfd' },
+  scoreDisplay: {
+    fontSize: 12,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 17,
+    color: tokens.color.text.primary,
+  },
   progressTrack: {
     marginTop: 13,
     height: 8,
@@ -803,6 +845,11 @@ const ss = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
-  explanationText: { fontSize: 13, lineHeight: 20, color: '#c6c6c6' },
+  explanationText: {
+    fontSize: 13,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 20,
+    color: tokens.color.text.secondary,
+  },
   footer: { paddingHorizontal: 20, paddingTop: 16, paddingBottom: 18 },
 });

@@ -61,6 +61,7 @@ const styles = StyleSheet.create({
   },
   bodyText: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     lineHeight: 25,
     color: '#fff',
     flex: 1,

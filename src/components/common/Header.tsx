@@ -100,6 +100,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginTop: spacing.xs,
     lineHeight: 16,

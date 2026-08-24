@@ -92,7 +92,7 @@ export default function PracticeScreen() {
     <AppBackground>
       <SafeAreaView
         style={{ flex: 1, backgroundColor: 'transparent' }}
-        edges={['top', 'bottom']}
+        edges={['bottom']}
       >
         <PracticeVisualizerLayout>
           <PracticeContent

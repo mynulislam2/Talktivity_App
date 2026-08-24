@@ -227,6 +227,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#666',
     lineHeight: 24,
   },
@@ -246,6 +247,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#000',
   },
   errorContainer: {
@@ -257,6 +259,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#c33',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   submitButton: {
     backgroundColor: colors.primary,

@@ -364,11 +364,13 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#8c8c8c',
   },
   startedAt: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.6)',
   },

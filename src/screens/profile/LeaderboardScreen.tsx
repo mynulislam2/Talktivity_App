@@ -263,6 +263,7 @@ const styles = StyleSheet.create({
   },
   xpSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#8c8c8c',
     marginTop: 4,
   },
@@ -310,6 +311,7 @@ const styles = StyleSheet.create({
   },
   scopeDropdownItemText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.7)',
   },
   scopeDropdownSelectedText: {

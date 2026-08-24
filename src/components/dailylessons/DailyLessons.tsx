@@ -81,6 +81,7 @@ const styles = StyleSheet.create({
   },
   comingSoonText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     marginTop: spacing.md,

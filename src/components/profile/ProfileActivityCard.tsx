@@ -127,6 +127,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22,
     color: '#fff',
     marginTop: 8,
@@ -160,12 +161,14 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
     maxWidth: 88,
   },
   note: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#fff',
     marginBottom: 24,

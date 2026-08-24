@@ -207,6 +207,7 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#fff',
   },

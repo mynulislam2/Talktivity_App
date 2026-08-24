@@ -14,6 +14,8 @@ import type {
   PracticeSessionState,
 } from '@/types/practice';
 import type { ConnectionDetails } from '@/types/call';
+import { isAgentConnected } from '@/store/slices/callSlice';
+import type { AgentState } from '@livekit/components-react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export interface UsePracticeSessionReturn {
@@ -31,7 +33,7 @@ export function usePracticeSession(
   const dispatch = useAppDispatch();
   const courseStatus = useAppSelector(selectCourseStatus);
 
-  const [agentState, setAgentState] = useState<string>('disconnected');
+  const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [connectionDetails, setConnectionDetails] =
     useState<ConnectionDetails | null>(null);
   const [topic, setTopic] = useState<any | null>(null);
@@ -43,11 +45,11 @@ export function usePracticeSession(
     connectionDetailsRef.current = connectionDetails;
   }, [connectionDetails]);
 
-  const isConnected = agentState === 'connected';
+  const isConnected = isAgentConnected(agentState);
   const isConnecting = agentState === 'connecting';
 
   const sessionState: PracticeSessionState = {
-    agentState: agentState as any,
+    agentState,
     isConnected,
     isConnecting,
     connectionDetails: connectionDetails as any,
@@ -154,7 +156,7 @@ export function usePracticeSession(
   }, [sessionType, topic, loadTopic, endSession]);
 
   const updateAgentState = useCallback((state: string) => {
-    setAgentState(state);
+    setAgentState(state as AgentState);
   }, []);
 
   useEffect(() => {

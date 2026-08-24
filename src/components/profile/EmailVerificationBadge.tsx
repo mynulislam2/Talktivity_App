@@ -291,6 +291,7 @@ const styles = StyleSheet.create({
   },
   verifiedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.success,
   },
   notVerifiedBadge: {
@@ -300,6 +301,7 @@ const styles = StyleSheet.create({
   },
   notVerifiedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.warning,
   },
   verifyButton: {
@@ -359,6 +361,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: spacing.md,
     fontSize: 15,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
   },
   codeState: {
@@ -366,6 +369,7 @@ const styles = StyleSheet.create({
   },
   codeInstructions: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 20,
@@ -382,6 +386,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: 13,
+    fontFamily: 'Poppins',
     textAlign: 'center',
   },
   submitButton: {
@@ -404,6 +409,7 @@ const styles = StyleSheet.create({
   resendButtonText: {
     color: colors.primary,
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   successState: {
     alignItems: 'center',
@@ -420,6 +426,7 @@ const styles = StyleSheet.create({
   },
   successSubtitle: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
     textAlign: 'center',
   },

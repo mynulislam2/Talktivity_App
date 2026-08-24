@@ -6,6 +6,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { tokens } from '@/theme/tokens';
 
 export interface QuizLoadingStep {
   name: string;
@@ -64,11 +66,16 @@ export function QuizLoadingCard({
       <View style={styles.card}>
         <View style={styles.header}>
           <View style={styles.spinnerContainer}>
-            <View style={styles.spinnerOuter}>
+            <LinearGradient
+              colors={[tokens.color.accent.gradientStart, tokens.color.accent.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 1 }}
+              style={styles.spinnerOuter}
+            >
               <View style={styles.spinnerInner}>
-                <ActivityIndicator size="small" color="#fff" />
+                <ActivityIndicator size="small" color={tokens.color.text.primary} />
               </View>
-            </View>
+            </LinearGradient>
             <View style={styles.indicatorDot} />
           </View>
           <Text style={styles.title}>{title}</Text>
@@ -81,7 +88,12 @@ export function QuizLoadingCard({
             <Text style={styles.progressPercent}>{Math.round(progress)}%</Text>
           </View>
           <View style={styles.progressBar}>
-            <View style={[styles.progressFill, { width: `${progress}%` }]} />
+            <LinearGradient
+              colors={[tokens.color.accent.gradientStart, '#6a4bff', tokens.color.accent.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={[styles.progressFill, { width: `${progress}%` }]}
+            />
           </View>
         </View>
 
@@ -124,15 +136,14 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 16,
-    backgroundColor: '#0a0923',
   },
   card: {
     width: '100%',
-    padding: 32,
-    borderRadius: 24,
-    backgroundColor: 'rgba(17, 24, 39, 0.3)',
+    padding: 24,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
   },
   header: {
     alignItems: 'center',
@@ -146,7 +157,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#6A5AE0',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -154,7 +164,7 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 32,
-    backgroundColor: 'rgba(17, 24, 39, 0.5)',
+    backgroundColor: 'rgba(9,9,15,0.5)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -165,17 +175,20 @@ const styles = StyleSheet.create({
     width: 24,
     height: 24,
     borderRadius: 12,
-    backgroundColor: '#10b981',
+    backgroundColor: tokens.color.state.success,
   },
   title: {
-    fontSize: 24,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
-    color: '#7B70FF',
+    fontSize: 22,
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    color: tokens.color.text.primary,
     marginBottom: 8,
+    textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    color: '#9ca3af',
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
+    textAlign: 'center',
   },
   progressSection: {
     marginBottom: 32,
@@ -187,59 +200,61 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
   },
   progressPercent: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
   },
   progressBar: {
     width: '100%',
-    height: 12,
-    backgroundColor: 'rgba(55, 65, 81, 0.5)',
-    borderRadius: 6,
+    height: 8,
+    backgroundColor: 'rgba(255,255,255,0.12)',
+    borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#6A5AE0',
-    borderRadius: 6,
+    borderRadius: 4,
   },
   stepsContainer: {
-    gap: 16,
+    gap: 12,
   },
   stepItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    padding: 16,
-    borderRadius: 12,
-    backgroundColor: 'rgba(17, 24, 39, 0.2)',
+    gap: 12,
+    padding: 12,
+    borderRadius: tokens.radius.md,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.2)',
+    borderColor: tokens.color.border.hairline,
+    backgroundColor: tokens.color.surface.subtle,
   },
   stepItemActive: {
-    backgroundColor: 'rgba(31, 41, 55, 0.5)',
-    borderColor: 'rgba(75, 85, 99, 0.5)',
+    backgroundColor: tokens.color.surface.raised,
+    borderColor: tokens.color.border.card,
   },
   stepIcon: {
-    width: 40,
-    height: 40,
-    borderRadius: 20,
-    backgroundColor: 'rgba(55, 65, 81, 0.5)',
+    width: 36,
+    height: 36,
+    borderRadius: 18,
+    backgroundColor: 'rgba(255,255,255,0.10)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   stepIconText: {
-    fontSize: 18,
+    fontSize: 16,
+    fontFamily: 'Poppins',
   },
   stepText: {
     flex: 1,
     fontSize: 14,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
-    color: '#6b7280',
+    color: tokens.color.text.placeholder,
   },
   stepTextActive: {
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
 });

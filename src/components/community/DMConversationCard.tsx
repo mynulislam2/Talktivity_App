@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   },
   time: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.66)',
     flexShrink: 0,
   },
@@ -132,6 +133,7 @@ const styles = StyleSheet.create({
   preview: {
     flex: 1,
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.52)',
   },
   previewUnread: {

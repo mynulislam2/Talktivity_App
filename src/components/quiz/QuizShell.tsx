@@ -1,11 +1,14 @@
 /**
  * QuizShell Component (React Native)
  *
- * Container for quiz content with header and footer.
+ * Container for quiz content with header and footer. The question/options
+ * body scrolls (matching the web's `flex-1 overflow-y-auto` quiz body) so
+ * longer questions never get clipped by the footer.
  */
 
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, ScrollView, StyleSheet } from 'react-native';
+import { tokens } from '@/theme/tokens';
 
 export interface QuizShellProps {
   header?: React.ReactNode;
@@ -28,7 +31,13 @@ export function QuizShell({
         </View>
       ) : null}
 
-      <View style={styles.content}>{children}</View>
+      <ScrollView
+        style={styles.content}
+        contentContainerStyle={styles.contentContainer}
+        showsVerticalScrollIndicator={false}
+      >
+        {children}
+      </ScrollView>
 
       {footer ? (
         <View style={styles.footer}>
@@ -43,39 +52,41 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     width: '100%',
-    backgroundColor: '#0a0923',
   },
   notFullScreen: {
     minHeight: 'auto',
   },
   header: {
     width: '100%',
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(55, 65, 81, 0.3)',
-    backgroundColor: 'rgba(10, 9, 35, 0.3)',
   },
   headerContent: {
-    maxWidth: 480,
+    maxWidth: tokens.layout.maxWidth,
     width: '100%',
     alignSelf: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
+    paddingHorizontal: tokens.layout.gutter,
+    paddingTop: 6,
   },
   content: {
     flex: 1,
     width: '100%',
   },
-  footer: {
-    width: '100%',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(55, 65, 81, 0.3)',
-    backgroundColor: 'rgba(10, 9, 35, 0.3)',
-  },
-  footerContent: {
-    maxWidth: 480,
+  contentContainer: {
+    maxWidth: tokens.layout.maxWidth,
     width: '100%',
     alignSelf: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
+    paddingHorizontal: tokens.layout.gutter,
+    paddingTop: 24,
+    paddingBottom: 24,
+  },
+  footer: {
+    width: '100%',
+  },
+  footerContent: {
+    maxWidth: tokens.layout.maxWidth,
+    width: '100%',
+    alignSelf: 'center',
+    paddingHorizontal: tokens.layout.gutter,
+    paddingTop: 16,
+    paddingBottom: 18,
   },
 });

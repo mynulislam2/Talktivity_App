@@ -234,6 +234,7 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
   },

@@ -171,7 +171,9 @@ export function CallContent({
         <Text style={[styles.title, { fontSize: titleFontSize }]}>
           {sessionTitle}
         </Text>
-        <Text style={[styles.subtitle, { fontSize: subtitleFontSize }]}>
+        <Text
+          style={[styles.subtitle, { fontSize: subtitleFontSize, fontFamily: 'Poppins' }]}
+        >
           Speak naturally to generate your personalized learning report!
         </Text>
         <Text style={[styles.duration, { fontSize: durationFontSize }]}>
@@ -212,6 +214,7 @@ export function CallContent({
               >
                 {/* Voice assistant for detecting audio levels */}
                 <SimpleVoiceAssistant
+                  onStateChange={onStateChange}
                   onUserVolumeStrength={setUserVolumeStrength}
                   onAgentVolumeStrength={setAgentVolumeStrength}
                 />

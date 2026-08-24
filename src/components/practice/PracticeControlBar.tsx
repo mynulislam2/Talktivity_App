@@ -224,6 +224,7 @@ const styles = StyleSheet.create({
   guidanceText: {
     color: '#9ca3af', // gray-400
     fontSize: 12,
+    fontFamily: 'Poppins',
     marginTop: 4,
   },
 });

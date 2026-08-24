@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { LinearGradient } from 'expo-linear-gradient';
+import { ReportCTAButton } from '@/components/report/ReportCTAButton';
+import { tokens } from '@/theme/tokens';
 
 export interface ReportErrorCardProps {
   error: string | null;
@@ -71,28 +72,10 @@ export function ReportErrorCard({
         </Text>
         <Text style={s.message}>{getErrorMessage()}</Text>
         {isUpgradeGate && (
-          <TouchableOpacity onPress={() => {}} style={s.gradientBtn}>
-            <LinearGradient
-              colors={['#2563eb', '#9333ea']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={s.gradientFill}
-            >
-              <Text style={s.btnText}>See Plans</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <ReportCTAButton label="See Plans" onPress={() => {}} style={s.ctaSpacing} />
         )}
         {wantsTalkMore && (
-          <TouchableOpacity onPress={onStartCall} style={s.gradientBtn}>
-            <LinearGradient
-              colors={['#2563eb', '#9333ea']}
-              start={{ x: 0, y: 0 }}
-              end={{ x: 1, y: 0 }}
-              style={s.gradientFill}
-            >
-              <Text style={s.btnText}>Start a Conversation</Text>
-            </LinearGradient>
-          </TouchableOpacity>
+          <ReportCTAButton label="Start a Conversation" onPress={onStartCall} style={s.ctaSpacing} />
         )}
         {!isUpgradeGate && !wantsTalkMore && (
           <TouchableOpacity onPress={onRetry} style={s.retryBtn}>
@@ -114,10 +97,10 @@ const s = StyleSheet.create({
   card: {
     width: '100%',
     maxWidth: 400,
-    borderRadius: 12,
-    backgroundColor: 'rgba(17,24,39,0.5)',
+    borderRadius: tokens.radius.sm,
+    backgroundColor: tokens.color.surface.card,
     borderWidth: 1,
-    borderColor: 'rgba(55,65,81,0.5)',
+    borderColor: tokens.color.border.card,
     padding: 24,
     alignItems: 'center',
   },
@@ -128,28 +111,25 @@ const s = StyleSheet.create({
     textAlign: 'center',
   },
   titlePurple: { color: '#8b82ff' },
-  titleRed: { color: '#f87171' },
+  titleRed: { color: tokens.color.state.errorText },
   message: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
-    color: '#d1d5db',
+    color: tokens.color.text.secondary,
     textAlign: 'center',
     marginBottom: 24,
   },
-  gradientBtn: {
-    width: '100%',
-    borderRadius: 12,
-    overflow: 'hidden',
-    marginBottom: 12,
-  },
-  gradientFill: { paddingVertical: 12, alignItems: 'center' },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
+  ctaSpacing: { width: '100%', marginTop: 0 },
   retryBtn: {
     width: '100%',
-    borderRadius: 12,
-    backgroundColor: '#4b5563',
-    paddingVertical: 12,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
+    borderWidth: 1,
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  retryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
+  retryBtnText: { color: tokens.color.text.primary, fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });

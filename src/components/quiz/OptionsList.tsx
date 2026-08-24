@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { tokens } from '@/theme/tokens';
 import type { QuizOption } from '@/types/quiz';
 
 export interface OptionsListProps {
@@ -37,28 +37,38 @@ export function OptionsList({
         const showGood = showCorrectness && isCorrect;
         const showBad = showCorrectness && isSelected && !isCorrect;
 
+        const borderColor = showGood
+          ? tokens.color.state.success
+          : showBad
+          ? tokens.color.state.danger
+          : isSelected
+          ? tokens.color.accent.primary
+          : tokens.color.border.card;
+        const backgroundColor = showGood
+          ? 'rgba(35,255,122,0.10)'
+          : showBad
+          ? 'rgba(255,35,35,0.10)'
+          : tokens.color.surface.card;
+        const markerColor = showGood
+          ? tokens.color.state.success
+          : showBad
+          ? tokens.color.state.danger
+          : isSelected
+          ? tokens.color.accent.primary
+          : tokens.color.text.secondary;
+
         return (
           <TouchableOpacity
             key={opt.id}
             disabled={disabled}
             onPress={() => onSelect(opt.id)}
-            style={[
-              styles.option,
-              isSelected && styles.optionSelected,
-              disabled && styles.optionDisabled,
-            ]}
+            style={[styles.option, { borderColor, backgroundColor }]}
           >
             <View style={styles.optionContent}>
-              <View style={styles.iconContainer}>
-                {showGood ? (
-                  <Ionicons name="checkmark-circle" size={20} color="#10b981" />
-                ) : showBad ? (
-                  <Ionicons name="close-circle" size={20} color="#ef4444" />
-                ) : (
-                  <View
-                    style={[styles.radio, isSelected && styles.radioSelected]}
-                  />
-                )}
+              <View style={[styles.marker, { borderColor: markerColor }]}>
+                {isSelected || isCorrect ? (
+                  <View style={[styles.markerPip, { backgroundColor: markerColor }]} />
+                ) : null}
               </View>
               <Text style={styles.optionText}>{opt.text}</Text>
             </View>
@@ -77,40 +87,32 @@ const styles = StyleSheet.create({
   option: {
     width: '100%',
     padding: 16,
-    borderRadius: 16,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    backgroundColor: 'rgba(17, 24, 39, 0.2)',
-    borderColor: 'rgba(55, 65, 81, 0.3)',
-  },
-  optionSelected: {
-    backgroundColor: 'rgba(31, 41, 55, 0.6)',
-    borderColor: 'rgba(59, 130, 246, 0.4)',
-  },
-  optionDisabled: {
-    opacity: 0.7,
   },
   optionContent: {
     flexDirection: 'row',
-    alignItems: 'flex-start',
+    alignItems: 'center',
     gap: 12,
   },
-  iconContainer: {
-    marginTop: 2,
+  marker: {
+    width: 16,
+    height: 16,
+    borderRadius: 3,
+    borderWidth: 1,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  radio: {
-    width: 20,
-    height: 20,
-    borderRadius: 10,
-    borderWidth: 2,
-    borderColor: '#4b5563',
-  },
-  radioSelected: {
-    borderColor: '#7B70FF',
+  markerPip: {
+    width: 6,
+    height: 6,
+    borderRadius: 2,
   },
   optionText: {
     flex: 1,
     fontSize: 16,
-    color: '#fff',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    color: tokens.color.text.primary,
     lineHeight: 22,
   },
 });

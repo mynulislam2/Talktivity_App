@@ -20,6 +20,7 @@ export const MessageTimestamp: React.FC<MessageTimestampProps> = ({
 const styles = StyleSheet.create({
   timestamp: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     opacity: 0.75,
   },

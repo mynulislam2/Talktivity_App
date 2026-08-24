@@ -73,7 +73,7 @@ export default function RoleplayScreen() {
 
   return (
     <AppBackground>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
         <RoleplayVisualizerLayout>
           <View style={styles.container}>
             <RoleplayContent

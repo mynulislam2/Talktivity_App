@@ -120,6 +120,7 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 6,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#c6c6c6',
   },

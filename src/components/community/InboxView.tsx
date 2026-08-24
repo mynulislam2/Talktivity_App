@@ -399,6 +399,7 @@ const styles = StyleSheet.create({
     height: '100%',
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   messagesHeader: {
     flexDirection: 'row',
@@ -423,6 +424,7 @@ const styles = StyleSheet.create({
   },
   chatCountText: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.58)',
   },
   recentScroll: {
@@ -444,6 +446,7 @@ const styles = StyleSheet.create({
   },
   recentName: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.74)',
     textAlign: 'center',
     width: '100%',
@@ -490,6 +493,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: 'rgba(255,255,255,0.62)',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -518,6 +522,7 @@ const styles = StyleSheet.create({
   emptySubtitle: {
     marginTop: 8,
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.52)',
     textAlign: 'center',
   },
@@ -547,6 +552,7 @@ const styles = StyleSheet.create({
   },
   groupRowTime: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.66)',
     flexShrink: 0,
   },
@@ -559,6 +565,7 @@ const styles = StyleSheet.create({
   groupRowPreviewText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.52)',
   },
   groupRowPreviewUnread: {

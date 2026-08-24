@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { tokens } from '@/theme/tokens';
 
 export interface AnswerFeedbackProps {
   show: boolean;
@@ -25,11 +26,11 @@ export function AnswerFeedback({ show, correct, text }: AnswerFeedbackProps) {
       ]}
     >
       <View style={styles.content}>
-        {correct ? (
-          <Ionicons name="checkmark-circle" size={20} color="#10b981" />
-        ) : (
-          <Ionicons name="close-circle" size={20} color="#ef4444" />
-        )}
+        <Ionicons
+          name={correct ? 'checkmark-circle' : 'close-circle'}
+          size={20}
+          color={correct ? tokens.color.state.success : tokens.color.state.danger}
+        />
         <Text style={styles.text}>{correct ? 'Correct!' : 'Not quite'}</Text>
       </View>
       {text ? <Text style={styles.subtext}>{text}</Text> : null}
@@ -39,17 +40,17 @@ export function AnswerFeedback({ show, correct, text }: AnswerFeedbackProps) {
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 24,
-    padding: 20,
+    borderRadius: tokens.radius.sm,
+    padding: 16,
     borderWidth: 1,
   },
   containerCorrect: {
-    backgroundColor: 'rgba(16, 185, 129, 0.15)',
-    borderColor: 'rgba(16, 185, 129, 0.2)',
+    backgroundColor: 'rgba(35,255,122,0.10)',
+    borderColor: tokens.color.state.success,
   },
   containerIncorrect: {
-    backgroundColor: 'rgba(239, 68, 68, 0.15)',
-    borderColor: 'rgba(239, 68, 68, 0.2)',
+    backgroundColor: 'rgba(255,35,35,0.10)',
+    borderColor: tokens.color.state.danger,
   },
   content: {
     flexDirection: 'row',
@@ -59,12 +60,13 @@ const styles = StyleSheet.create({
   text: {
     fontSize: 16,
     fontWeight: '600', fontFamily: 'Poppins-SemiBold',
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
   subtext: {
     marginTop: 8,
     fontSize: 14,
-    color: '#d1d5db',
+    fontWeight: '400', fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     lineHeight: 20,
   },
 });

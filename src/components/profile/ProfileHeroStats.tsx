@@ -94,6 +94,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
     maxWidth: 88,

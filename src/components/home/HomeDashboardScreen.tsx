@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
   },
   weekdayLabel: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22.4,
   },
   weekdayLabelActive: {
@@ -246,6 +247,7 @@ const styles = StyleSheet.create({
   todayPlanDesc: {
     marginTop: 6,
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 20.25,
     color: '#fff',
   },
@@ -279,6 +281,7 @@ const styles = StyleSheet.create({
   coachSectionDesc: {
     marginTop: 6,
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22.4,
     color: '#c6c6c6',
   },
@@ -318,6 +321,7 @@ const styles = StyleSheet.create({
   coachCardDesc: {
     marginTop: 8,
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 21,
     color: '#c6c6c6',
     maxWidth: 220,

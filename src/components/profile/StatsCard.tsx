@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     textAlign: 'center',
   },

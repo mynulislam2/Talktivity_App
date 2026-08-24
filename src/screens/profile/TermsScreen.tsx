@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   content: { padding: 20, gap: 16 },
-  text: { fontSize: 14, lineHeight: 22, color: 'rgba(255,255,255,0.7)' },
+  text: { fontSize: 14, fontFamily: 'Poppins', lineHeight: 22, color: 'rgba(255,255,255,0.7)' },
 });
 
 export default TermsScreen;

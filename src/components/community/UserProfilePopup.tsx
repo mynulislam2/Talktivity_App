@@ -272,6 +272,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
   },
   messageButtonWrapper: {

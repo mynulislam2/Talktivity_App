@@ -131,6 +131,7 @@ const styles = StyleSheet.create({
   },
   username: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.md,
   },
@@ -145,6 +146,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginLeft: spacing.sm,
   },

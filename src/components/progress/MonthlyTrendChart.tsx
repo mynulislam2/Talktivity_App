@@ -227,6 +227,7 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
     maxWidth: 60,
@@ -249,6 +250,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   infoSection: {

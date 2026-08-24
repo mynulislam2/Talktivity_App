@@ -28,6 +28,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenBackground from '../../components/common/ScreenBackground';
 import GradientButton from '../../components/common/GradientButton';
+import { tokens } from '../../theme/tokens';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   loginUser,
@@ -143,6 +144,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
           keyboardShouldPersistTaps="handled"
         >
           <View style={styles.content}>
+            <View style={styles.topSection}>
             {/* Logo + Title */}
             <View style={styles.header}>
               <Image
@@ -162,7 +164,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                     onPress={handleErrorDismiss}
                     style={styles.errorDismiss}
                   >
-                    <Ionicons name="close" size={20} color="#fff" />
+                    <Ionicons name="close" size={18} color={tokens.color.state.errorText} />
                   </TouchableOpacity>
                 </View>
               </View>
@@ -228,7 +230,7 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
             </View>
 
             {/* Password Input */}
-            <View style={styles.inputGroup}>
+            <View style={[styles.inputGroup, styles.passwordGroup]}>
               <Text style={styles.label}>
                 Password <Text style={styles.required}>*</Text>
               </Text>
@@ -303,6 +305,27 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
                 />
               </View>
             </GradientButton>
+            </View>
+
+            {/* Legal notice */}
+            <View style={styles.legalFooter}>
+              <Text style={styles.legalText}>
+                By joining, you agree to the{' '}
+                <Text
+                  style={styles.legalLink}
+                  onPress={() => navigation.navigate('Terms')}
+                >
+                  Terms of Service
+                </Text>{' '}
+                and{' '}
+                <Text
+                  style={styles.legalLink}
+                  onPress={() => navigation.navigate('Privacy')}
+                >
+                  Privacy Policy
+                </Text>
+              </Text>
+            </View>
           </View>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -364,6 +387,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
+    justifyContent: 'space-between',
     marginHorizontal: 20,
     maxWidth: 353,
     alignSelf: 'center',
@@ -371,15 +395,31 @@ const styles = StyleSheet.create({
     paddingTop: 92,
     paddingBottom: 24,
   },
+  topSection: {
+    width: '100%',
+  },
+  legalFooter: {
+    paddingTop: 40,
+  },
+  legalText: {
+    fontSize: 10,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 14,
+    color: tokens.color.text.secondary,
+    textAlign: 'center',
+  },
+  legalLink: {
+    color: tokens.color.accent.gradientStart,
+  },
   // Header
   header: {
     alignItems: 'center',
-    gap: 12,
-    marginBottom: 32,
+    gap: 18,
+    marginBottom: 48,
   },
   logo: {
-    width: 60,
-    height: 60,
+    width: 56,
+    height: 56,
   },
   title: {
     fontSize: 28,
@@ -389,24 +429,21 @@ const styles = StyleSheet.create({
     color: '#fdfdfd',
     textAlign: 'center',
   },
-  // Error
+  // Error — the web's ErrorDisplay has no background and no border, only red text.
   errorContainer: {
-    backgroundColor: 'rgba(239,68,68,0.10)',
-    borderRadius: 6,
-    padding: 12,
-    marginTop: 16,
-    marginBottom: 4,
-    borderWidth: 1,
-    borderColor: '#ef4444',
+    padding: 4,
+    marginBottom: 16,
   },
   errorContent: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    alignItems: 'center',
+    alignItems: 'flex-start',
+    gap: 12,
   },
   errorText: {
-    color: '#F44336',
+    color: tokens.color.state.errorText,
     fontSize: 14,
+    fontFamily: 'Poppins',
     flex: 1,
   },
   errorDismiss: {
@@ -417,13 +454,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    height: 42,
-    borderRadius: 6,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: '#636363',
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderColor: tokens.color.border.input,
+    backgroundColor: tokens.color.surface.card,
     gap: 8,
-    marginTop: 32,
   },
   googleButtonText: {
     fontSize: 16,
@@ -462,21 +498,21 @@ const styles = StyleSheet.create({
     marginBottom: 8,
   },
   required: {
-    color: '#8c8c8c',
+    color: tokens.color.text.placeholder,
   },
   inputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 42,
-    borderRadius: 6,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: '#636363',
-    backgroundColor: 'rgba(255,255,255,0.10)',
+    borderColor: tokens.color.border.input,
+    backgroundColor: tokens.color.surface.card,
     paddingLeft: 12,
   },
   inputError: {
-    borderColor: '#ef4444',
-    backgroundColor: 'rgba(239,68,68,0.10)',
+    borderColor: tokens.color.state.danger,
+    backgroundColor: 'rgba(255,35,35,0.10)',
   },
   inputIcon: {
     marginRight: 8,
@@ -486,6 +522,7 @@ const styles = StyleSheet.create({
     height: 42,
     paddingRight: 12,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#ffffff',
   },
@@ -494,26 +531,32 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
   },
   fieldError: {
-    color: '#ef4444',
+    color: tokens.color.state.errorText,
     fontSize: 12,
+    fontFamily: 'Poppins',
     marginTop: 4,
+  },
+  // Password group sits tighter to the "Forget password?" link (gap-2 = 8px)
+  // than the 18px the shared inputGroup spacing gives every other field.
+  passwordGroup: {
+    marginBottom: 0,
   },
   // Forgot Password
   forgotContainer: {
     alignSelf: 'flex-end',
-    marginTop: -8,
-    marginBottom: 24,
+    marginTop: 8,
+    marginBottom: 34,
   },
   forgotText: {
     fontSize: 14,
     fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 19.6,
-    color: '#C6C6C6',
+    color: tokens.color.text.secondary,
   },
   // Continue Button
   continueButton: {
-    height: 42,
-    borderRadius: 6,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     alignItems: 'center',
     justifyContent: 'center',
     overflow: 'hidden',
@@ -591,6 +634,7 @@ const styles = StyleSheet.create({
   },
   modalText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#8C8C8C',
     textAlign: 'center',
     lineHeight: 20,

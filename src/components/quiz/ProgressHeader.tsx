@@ -1,11 +1,14 @@
 /**
  * ProgressHeader Component (React Native)
  *
- * Header showing quiz progress and score.
+ * Header showing quiz progress and score. Token-based card treatment,
+ * matching the progress block used on the Listening Quiz screen.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
+import { tokens } from '@/theme/tokens';
 import type { QuizType } from '@/types/quiz';
 
 export interface ProgressHeaderProps {
@@ -15,31 +18,27 @@ export interface ProgressHeaderProps {
   score: number;
 }
 
-export function ProgressHeader({
-  type,
-  current,
-  total,
-  score,
-}: ProgressHeaderProps) {
-  const label = type === 'listening' ? 'Listening Quiz' : 'Quiz';
+export function ProgressHeader({ current, total, score }: ProgressHeaderProps) {
+  const progressPercent = total ? (current / total) * 100 : 0;
 
   return (
     <View style={styles.container}>
-      <View style={styles.leftSection}>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{label}</Text>
-        </View>
-        <Text style={styles.questionInfo}>
-          Question <Text style={styles.questionNumber}>{current}</Text> of{' '}
-          <Text style={styles.questionNumber}>{total}</Text>
+      <View style={styles.row}>
+        <Text style={styles.questionCount}>
+          Question {current} of {total}
+        </Text>
+        <Text style={styles.scoreDisplay}>
+          Score {score} of {total}
         </Text>
       </View>
-
-      <View style={styles.scoreSection}>
-        <Text style={styles.scoreLabel}>Score</Text>
-        <Text style={styles.scoreValue}>
-          {score}/{total}
-        </Text>
+      <View style={styles.track}>
+        <LinearGradient
+          colors={['#5d4cff', '#c765fd']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={[styles.fill, { width: `${Math.max(progressPercent, 8)}%` } as any]}
+        />
+        <View style={[styles.thumb, { left: `${Math.max(progressPercent, 8)}%` } as any]} />
       </View>
     </View>
   );
@@ -47,58 +46,46 @@ export function ProgressHeader({
 
 const styles = StyleSheet.create({
   container: {
+    width: '100%',
+  },
+  row: {
     flexDirection: 'row',
-    alignItems: 'center',
     justifyContent: 'space-between',
-    gap: 12,
-  },
-  leftSection: {
-    flex: 1,
-    minWidth: 0,
-  },
-  badge: {
-    alignSelf: 'flex-start',
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 4,
-    borderRadius: 20,
-    backgroundColor: 'rgba(37, 99, 235, 0.3)',
-    borderWidth: 1,
-    borderColor: 'rgba(75, 85, 99, 0.3)',
   },
-  badgeText: {
+  questionCount: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
-    color: '#fff',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    lineHeight: 20,
+    color: tokens.color.text.primary,
   },
-  questionInfo: {
+  scoreDisplay: {
     fontSize: 12,
-    color: '#9ca3af',
-    marginTop: 8,
+    fontWeight: '400', fontFamily: 'Poppins',
+    lineHeight: 17,
+    color: tokens.color.text.secondary,
   },
-  questionNumber: {
-    color: '#fff',
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+  track: {
+    marginTop: 13,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#bec6ff',
+    position: 'relative',
   },
-  scoreSection: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 16,
-    backgroundColor: 'rgba(17, 24, 39, 0.4)',
-    borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
-    alignItems: 'center',
-  },
-  scoreLabel: {
-    fontSize: 12,
-    color: '#9ca3af',
-  },
-  scoreValue: {
-    fontSize: 18,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
-    color: '#34d399',
-    marginTop: 2,
+  fill: { height: '100%', borderRadius: 4 },
+  thumb: {
+    position: 'absolute',
+    top: '50%',
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    backgroundColor: '#8c6dff',
+    shadowColor: 'rgba(140,109,255,0.85)',
+    shadowOffset: { width: 0, height: 0 },
+    shadowOpacity: 0.85,
+    shadowRadius: 16,
+    elevation: 4,
+    marginTop: -8,
+    marginLeft: -8,
   },
 });

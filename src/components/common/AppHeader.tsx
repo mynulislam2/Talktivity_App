@@ -214,6 +214,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: '#9ca3af',
     marginTop: 1,
   },
@@ -228,6 +229,7 @@ const styles = StyleSheet.create({
   },
   streakEmoji: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     marginRight: spacing.xs,
   },
   streakText: {

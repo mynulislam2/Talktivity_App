@@ -179,10 +179,12 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(156, 163, 175, 1)',
   },
   progressValue: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(156, 163, 175, 1)',
   },
   progressBar: {
@@ -223,6 +225,7 @@ const styles = StyleSheet.create({
   },
   stepIconText: {
     fontSize: 16,
+    fontFamily: 'Poppins',
   },
   stepContent: {
     flex: 1,
@@ -249,6 +252,7 @@ const styles = StyleSheet.create({
   },
   stepStatusText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#10b981',
   },
   checkIcon: {

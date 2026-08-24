@@ -399,6 +399,7 @@ const styles = StyleSheet.create({
   },
   rowLabel: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
     flex: 1,
@@ -436,6 +437,7 @@ const styles = StyleSheet.create({
   },
   cancelledBadge: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.55)',
   },
@@ -451,6 +453,7 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#ff7a84',
   },
@@ -464,6 +467,7 @@ const styles = StyleSheet.create({
   },
   feedbackText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.8)',
   },

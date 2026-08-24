@@ -72,7 +72,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({
         colors={gradientColors}
         start={start}
         end={end}
-        style={[styles.gradient, { height: sizeValues[size] }]}
+        style={[styles.gradient, { height: '100%' }]}
       >
         {loading ? (
           <ActivityIndicator color={colors.white} size="small" />

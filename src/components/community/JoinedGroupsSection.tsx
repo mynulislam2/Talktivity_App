@@ -147,6 +147,7 @@ const styles = StyleSheet.create({
   },
   countBadgeText: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: '#C6C6C6',
   },
   loadingContainer: {
@@ -159,6 +160,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: '#C6C6C6',
     fontSize: 12,
+    fontFamily: 'Poppins',
   },
   emptyContainer: {
     flexDirection: 'column',
@@ -180,10 +182,12 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#FDFDFD',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   emptySubtext: {
     color: '#C6C6C6',
     fontSize: 12,
+    fontFamily: 'Poppins',
   },
   groupCard: {
     borderRadius: 6,
@@ -237,6 +241,7 @@ const styles = StyleSheet.create({
   },
   groupMeta: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     lineHeight: 15.4,
     color: '#C6C6C6',
   },

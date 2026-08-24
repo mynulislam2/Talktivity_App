@@ -276,6 +276,7 @@ const styles = StyleSheet.create({
   },
   lastUpdated: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(148, 163, 184, 1)',
     marginTop: spacing.xl,
     fontStyle: 'italic',

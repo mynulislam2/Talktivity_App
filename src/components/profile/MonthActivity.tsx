@@ -148,6 +148,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   errorContainer: {
@@ -157,5 +158,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
 });

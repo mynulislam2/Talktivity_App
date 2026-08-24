@@ -96,6 +96,7 @@ const styles = StyleSheet.create({
   },
   valueText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   barContainer: {

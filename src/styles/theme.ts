@@ -52,6 +52,7 @@ const theme = {
       paddingVertical: spacing.md,
       paddingHorizontal: spacing.md,
       fontSize: 14,
+      fontFamily: 'Poppins',
       backgroundColor: colors.brand.inputBg,
       color: colors.text.primary,
     },

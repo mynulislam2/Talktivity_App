@@ -6,33 +6,17 @@
  */
 
 import { useEffect } from 'react';
-import { BackHandler, Alert } from 'react-native';
+import { BackHandler } from 'react-native';
 
 export const useBackHandlerConfirmation = (
   isActive: boolean,
-  onConfirmDisconnect: () => void,
-  title: string = 'End Conversation?',
-  message: string = 'Are you sure you want to end your current call session?'
+  onRequestDisconnect: () => void
 ) => {
   useEffect(() => {
     if (!isActive) return;
 
     const handleBackPress = () => {
-      Alert.alert(
-        title,
-        message,
-        [
-          { text: 'Continue Call', style: 'cancel', onPress: () => {} },
-          {
-            text: 'End Call',
-            style: 'destructive',
-            onPress: () => {
-              onConfirmDisconnect();
-            },
-          },
-        ],
-        { cancelable: true }
-      );
+      onRequestDisconnect();
       return true; // Intercept & block default back navigation
     };
 
@@ -42,5 +26,5 @@ export const useBackHandlerConfirmation = (
     );
 
     return () => backHandler.remove();
-  }, [isActive, onConfirmDisconnect, title, message]);
+  }, [isActive, onRequestDisconnect]);
 };

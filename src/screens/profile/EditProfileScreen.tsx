@@ -17,6 +17,7 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import {
   SafeAreaView,
   useSafeAreaInsets,
@@ -360,7 +361,7 @@ const EditProfileScreen: React.FC = () => {
           >
             <Ionicons
               name="chevron-back"
-              size={18}
+              size={20}
               color="rgba(255,255,255,0.8)"
             />
           </TouchableOpacity>
@@ -485,12 +486,7 @@ const EditProfileScreen: React.FC = () => {
                             }
                             activeOpacity={0.7}
                           >
-                            <Text
-                              style={[
-                                styles.pillText,
-                                active && styles.pillTextActive,
-                              ]}
-                            >
+                            <Text style={[styles.pillText, active && styles.pillTextActive]}>
                               {option.label}
                             </Text>
                           </TouchableOpacity>
@@ -504,23 +500,15 @@ const EditProfileScreen: React.FC = () => {
                         return (
                           <TouchableOpacity
                             key={option.value}
-                            style={[
-                              styles.optionItem,
-                              active && styles.optionItemActive,
-                            ]}
+                            style={[styles.optionItem, active && styles.optionItemActive]}
                             onPress={() => setDraftValue(option.value)}
                             activeOpacity={0.7}
                           >
-                            <Text
-                              style={[
-                                styles.optionText,
-                                active && styles.optionTextActive,
-                              ]}
-                            >
+                            <Text style={[styles.optionText, active && styles.optionTextActive]}>
                               {option.label}
                             </Text>
                             {active && (
-                              <Ionicons name="checkmark" size={18} color="#fff" />
+                              <Ionicons name="checkmark" size={18} color="#c8a4ff" />
                             )}
                           </TouchableOpacity>
                         );
@@ -553,13 +541,20 @@ const EditProfileScreen: React.FC = () => {
                         ? draftMultiValue.length === 0
                         : draftValue.trim().length === 0)
                     }
-                    activeOpacity={0.7}
+                    activeOpacity={0.85}
                   >
-                    {isSaving ? (
-                      <ActivityIndicator size="small" color="#fff" />
-                    ) : (
-                      <Text style={styles.saveBtnText}>Save Changes</Text>
-                    )}
+                    <LinearGradient
+                      colors={['#0e55ff', '#6a4bff', '#c55dfe']}
+                      start={{ x: 0.5, y: 0 }}
+                      end={{ x: 0.5, y: 1 }}
+                      style={styles.saveBtnGradient}
+                    >
+                      {isSaving ? (
+                        <ActivityIndicator size="small" color="#fff" />
+                      ) : (
+                        <Text style={styles.saveBtnText}>Save Changes</Text>
+                      )}
+                    </LinearGradient>
                   </TouchableOpacity>
                 </View>
               </Pressable>
@@ -620,10 +615,6 @@ const styles = StyleSheet.create({
     color: '#a7f3d0',
   },
   errorBanner: {
-    borderWidth: 1,
-    borderColor: 'rgba(244,63,94,0.2)',
-    borderRadius: 6,
-    backgroundColor: 'rgba(244,63,94,0.1)',
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 12,
@@ -691,20 +682,18 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(9,7,20,0.7)',
   },
   bottomSheet: {
-    backgroundColor: '#171a31',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: '#1c1f38',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 36,
+    paddingTop: 24,
+    paddingBottom: 40,
     maxHeight: '80%',
     shadowColor: '#000',
-    shadowOffset: { width: 0, height: -24 },
-    shadowOpacity: 0.4,
+    shadowOffset: { width: 0, height: -32 },
+    shadowOpacity: 0.6,
     shadowRadius: 60,
-    elevation: 15,
+    elevation: 20,
   },
   sheetHeader: {
     flexDirection: 'row',
@@ -717,11 +706,11 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   sheetTitle: {
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 24,
-    color: '#fff',
+    color: '#fdfdfd',
   },
   sheetDescription: {
     fontSize: 13,
@@ -741,10 +730,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   sheetError: {
-    borderWidth: 1,
-    borderColor: 'rgba(244,63,94,0.2)',
-    borderRadius: 10,
-    backgroundColor: 'rgba(244,63,94,0.1)',
     paddingHorizontal: 16,
     paddingVertical: 12,
     marginBottom: 12,
@@ -756,7 +741,7 @@ const styles = StyleSheet.create({
     color: '#fca5a5',
   },
   sheetOptions: {
-    maxHeight: '45%',
+    flexShrink: 1,
   },
   inputLabel: {
     fontSize: 13,
@@ -770,10 +755,10 @@ const styles = StyleSheet.create({
     borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.08)',
     paddingHorizontal: 16,
-    paddingVertical: 12,
-    fontSize: 16,
+    paddingVertical: 14,
+    fontSize: 15,
     fontFamily: 'Poppins',
-    color: '#fff',
+    color: '#fdfdfd',
   },
   pillsContainer: {
     flexDirection: 'row',
@@ -783,14 +768,14 @@ const styles = StyleSheet.create({
   pill: {
     borderWidth: 1,
     borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.06)',
+    backgroundColor: 'rgba(255,255,255,0.08)',
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 100,
   },
   pillActive: {
-    backgroundColor: 'rgba(41,73,255,1)',
-    borderColor: 'transparent',
+    backgroundColor: 'rgba(138,72,255,0.3)',
+    borderColor: '#7240ff',
   },
   pillText: {
     fontSize: 13,
@@ -808,60 +793,76 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
     borderRadius: 12,
+    backgroundColor: '#252840',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    minHeight: 50,
   },
   optionItemActive: {
-    backgroundColor: 'rgba(41,73,255,1)',
-    borderColor: 'transparent',
+    backgroundColor: '#252840',
   },
   optionText: {
     fontSize: 15,
     fontFamily: 'Poppins',
     lineHeight: 21,
-    color: 'rgba(255,255,255,0.8)',
+    color: 'rgba(255,255,255,0.75)',
   },
   optionTextActive: {
-    color: '#fff',
+    fontSize: 15,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    lineHeight: 21,
+    color: '#fdfdfd',
   },
   sheetActions: {
     flexDirection: 'row',
     gap: 12,
-    marginTop: 24,
+    marginTop: 20,
+    paddingTop: 8,
   },
   cancelBtn: {
     flex: 1,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingVertical: 12,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    paddingVertical: 14,
     borderRadius: 12,
     alignItems: 'center',
+    justifyContent: 'center',
   },
   cancelBtnText: {
     fontSize: 14,
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
-    color: '#fff',
+    color: 'rgba(255,255,255,0.8)',
   },
   saveBtn: {
     flex: 1,
-    backgroundColor: 'rgba(41,73,255,1)',
-    paddingVertical: 12,
     borderRadius: 12,
+    overflow: 'hidden',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    shadowColor: '#6a4bff',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.4,
+    shadowRadius: 12,
+    elevation: 6,
+  },
+  saveBtnGradient: {
+    paddingVertical: 14,
     alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
   },
   saveBtnDisabled: {
-    opacity: 0.55,
+    opacity: 0.4,
+    shadowOpacity: 0,
   },
   saveBtnText: {
     fontSize: 14,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
 });

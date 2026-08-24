@@ -32,13 +32,6 @@ export const HomeErrorState: React.FC<HomeErrorStateProps> = ({
           ? 'Too many requests. Please wait a moment and try again.'
           : error}
       </Text>
-      {isRateLimit ? (
-        <Text style={styles.waitText}>Wait 30-60 seconds before retrying</Text>
-      ) : (
-        <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-          <Text style={styles.retryButtonText}>Retry</Text>
-        </TouchableOpacity>
-      )}
     </View>
   );
 };
@@ -53,25 +46,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins',
     marginBottom: spacing.md,
-    textAlign: 'center',
-  },
-  retryButton: {
-    backgroundColor: colors.brand.buttonPrimary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 999,
-  },
-  retryButtonText: {
-    color: colors.white,
-    fontSize: 14,
-    fontWeight: '600',
-    fontFamily: 'Poppins-SemiBold',
-  },
-  waitText: {
-    color: colors.text.muted,
-    fontSize: 12,
-    fontFamily: 'Poppins',
-    marginTop: spacing.sm,
     textAlign: 'center',
   },
 });

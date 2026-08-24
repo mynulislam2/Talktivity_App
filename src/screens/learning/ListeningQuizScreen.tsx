@@ -34,7 +34,7 @@ function ListeningHeader({
     <View style={lh.container}>
       <View style={lh.inner}>
         <TouchableOpacity onPress={onBack} style={lh.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
+          <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
         </TouchableOpacity>
         <View style={lh.headerSpacer} />
         <Text style={lh.title}>{title}</Text>
@@ -600,9 +600,6 @@ export default function ListeningQuizScreen() {
             <View style={ss.errorCard}>
               <Text style={ss.errorTitle}>Failed to generate your quiz</Text>
               <Text style={ss.errorText}>{quizError}</Text>
-              <TouchableOpacity onPress={() => {}} style={ss.retryBtn}>
-                <Text style={ss.retryText}>Retry</Text>
-              </TouchableOpacity>
             </View>
           </View>
         </SafeAreaView>
@@ -765,10 +762,6 @@ const ss = StyleSheet.create({
   errorCard: {
     width: '100%',
     maxWidth: 350,
-    borderRadius: 16,
-    borderWidth: 1,
-    borderColor: '#6e4152',
-    backgroundColor: 'rgba(53,22,33,0.76)',
     padding: 20,
     alignItems: 'center',
   },

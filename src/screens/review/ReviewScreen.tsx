@@ -106,7 +106,7 @@ function ReviewTopBar({
           activeOpacity={0.7}
           style={rtb.backBtn}
         >
-          <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+          <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
         </TouchableOpacity>
         <View style={rtb.headerSpacer} />
         {title || subtitle ? (
@@ -1230,14 +1230,6 @@ export const ReviewScreen: React.FC = () => {
             <View style={ss.errorCard}>
               <Text style={ss.errorTitle}>Error</Text>
               <Text style={ss.errorMsg}>{error}</Text>
-              <GradientButton
-                onPress={goBack}
-                label="Go Back"
-                gradientColors={['#2563eb', '#9333ea']}
-                size="medium"
-                fullWidth={false}
-                textStyle={{ fontWeight: '500', fontFamily: 'Poppins-Medium' }}
-              />
             </View>
           </View>
         </SafeAreaView>
@@ -1256,14 +1248,6 @@ export const ReviewScreen: React.FC = () => {
               <Text style={ss.emptyMsg}>
                 Please complete some speaking sessions first.
               </Text>
-              <GradientButton
-                onPress={goBack}
-                label="Go Back"
-                gradientColors={['#2563eb', '#9333ea']}
-                size="medium"
-                fullWidth={false}
-                textStyle={{ fontWeight: '500', fontFamily: 'Poppins-Medium' }}
-              />
             </View>
           </View>
         </SafeAreaView>
@@ -1409,10 +1393,6 @@ const ss = StyleSheet.create({
   },
   errorCard: {
     width: '100%',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(251,113,133,0.2)',
-    backgroundColor: 'rgba(245,66,90,0.1)',
     padding: 24,
     alignItems: 'center',
   },
@@ -1432,10 +1412,6 @@ const ss = StyleSheet.create({
   },
   emptyCard: {
     width: '100%',
-    borderRadius: 20,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(255,255,255,0.04)',
     padding: 24,
     alignItems: 'center',
   },

@@ -476,7 +476,7 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
           >
             <Ionicons
               name="chevron-back"
-              size={18}
+              size={20}
               color="rgba(255,255,255,0.8)"
             />
           </TouchableOpacity>
@@ -923,14 +923,16 @@ const styles = StyleSheet.create({
     marginTop: 2,
     alignSelf: 'flex-start',
   },
-  groupProfileActions: { alignItems: 'center' },
+  groupProfileActions: { alignItems: 'center', width: '100%', gap: 12 },
   muteButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 12,
+    width: '100%',
   },
   muteButtonActive: { backgroundColor: '#2949ff' },
   muteButtonMuted: { backgroundColor: '#d97706' },
@@ -938,15 +940,17 @@ const styles = StyleSheet.create({
   leaveButton: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     gap: 8,
     paddingVertical: 12,
     paddingHorizontal: 24,
-    borderRadius: 8,
+    borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255,111,133,0.3)',
-    marginTop: 8,
+    borderColor: 'rgba(255,68,68,0.3)',
+    backgroundColor: 'rgba(255,68,68,0.1)',
+    width: '100%',
   },
-  leaveButtonText: { color: '#ff6f85', fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
+  leaveButtonText: { color: '#ff4444', fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });
 
 export default GroupChatScreen;

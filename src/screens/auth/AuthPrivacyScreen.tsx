@@ -41,8 +41,9 @@ const AuthPrivacyScreen: React.FC<AuthPrivacyScreenProps> = ({
           <TouchableOpacity
             onPress={() => navigation.goBack()}
             activeOpacity={0.7}
+            style={styles.backButton}
           >
-            <Ionicons name="chevron-back" size={28} color="#fff" />
+            <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
           </TouchableOpacity>
         </View>
 
@@ -238,6 +239,16 @@ const styles = StyleSheet.create({
     paddingBottom: spacing.md,
     borderBottomWidth: 1,
     borderBottomColor: 'rgba(51, 65, 85, 0.3)',
+  },
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   content: {
     paddingHorizontal: spacing.lg,

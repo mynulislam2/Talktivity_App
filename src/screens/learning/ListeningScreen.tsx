@@ -101,7 +101,7 @@ function ListeningHeader({
     <View style={lh.container}>
       <View style={lh.inner}>
         <TouchableOpacity onPress={onBack} style={lh.backBtn} activeOpacity={0.7}>
-          <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
+          <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
         </TouchableOpacity>
         <View style={lh.headerSpacer} />
         <Text style={lh.title}>{title}</Text>

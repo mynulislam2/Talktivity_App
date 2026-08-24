@@ -80,7 +80,7 @@ export default function TodaysReportScreen() {
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={ss.backBtnWrap}>
             <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-              <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+              <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
             </TouchableOpacity>
           </View>
           <ReportLoadingCard />
@@ -95,7 +95,7 @@ export default function TodaysReportScreen() {
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={ss.backBtnWrap}>
             <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-              <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+              <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
             </TouchableOpacity>
           </View>
           <ReportErrorCard
@@ -114,7 +114,7 @@ export default function TodaysReportScreen() {
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={ss.backBtnWrap}>
             <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-              <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+              <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
             </TouchableOpacity>
           </View>
           <ReportErrorCard

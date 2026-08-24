@@ -20,8 +20,11 @@ export function CommunityHeader({ title = 'Community' }: CommunityHeaderProps) {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation();
 
+  const buttonSize = tokens.control.height;
+
   return (
     <View style={[styles.container, { paddingTop: Math.max(insets.top, 16) }]}>
+      {/* Left: back button */}
       <TouchableOpacity
         onPress={() => (navigation as any).navigate('Home')}
         style={styles.backButton}
@@ -29,13 +32,18 @@ export function CommunityHeader({ title = 'Community' }: CommunityHeaderProps) {
       >
         <Ionicons
           name="chevron-back"
-          size={18}
-          color={tokens.color.text.primary}
+          size={20}
+          color="rgba(255,255,255,0.8)"
         />
       </TouchableOpacity>
+
+      {/* Center: title — truly centered across full width */}
       <Text style={styles.title} numberOfLines={1}>
         {title}
       </Text>
+
+      {/* Right: spacer with same width as back button to balance the layout */}
+      <View style={{ width: buttonSize }} />
     </View>
   );
 }
@@ -44,14 +52,11 @@ const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'center',
+    justifyContent: 'space-between',
     paddingHorizontal: 16,
     paddingBottom: 4,
-    position: 'relative',
   },
   backButton: {
-    position: 'absolute',
-    left: 16,
     width: tokens.control.height,
     height: tokens.control.height,
     borderRadius: tokens.radius.sm,
@@ -60,9 +65,9 @@ const styles = StyleSheet.create({
     backgroundColor: tokens.color.surface.card,
     justifyContent: 'center',
     alignItems: 'center',
-    zIndex: 1,
   },
   title: {
+    flex: 1,
     fontSize: 22,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',

@@ -168,7 +168,7 @@ const ForgotPasswordScreen: React.FC<AuthScreenProps> = ({ navigation }) => {
                 activeOpacity={0.7}
                 hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
               >
-                <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
+                <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
               </TouchableOpacity>
 
               {/* Logo + Title */}

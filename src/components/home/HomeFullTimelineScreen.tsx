@@ -34,7 +34,7 @@ function ScreenBackButton({ onClick }: { onClick: () => void }) {
       activeOpacity={0.7}
       aria-label="Go back"
     >
-      <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+      <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
     </TouchableOpacity>
   );
 }
@@ -324,11 +324,11 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: 42,
+    height: 42,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -614,10 +614,6 @@ const styles = StyleSheet.create({
   },
   errorCard: {
     marginTop: 24,
-    borderRadius: 6,
-    borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.08)',
     padding: 24,
     alignItems: 'center',
   },

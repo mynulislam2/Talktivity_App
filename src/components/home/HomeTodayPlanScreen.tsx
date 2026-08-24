@@ -50,7 +50,7 @@ function ScreenBackButton({ onClick }: { onClick: () => void }) {
       style={styles.backButton}
       activeOpacity={0.7}
     >
-      <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
+      <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
     </TouchableOpacity>
   );
 }
@@ -194,7 +194,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
             title: 'Interactive Review',
             description: 'Review your conversation mistakes with AI coaching',
             helper: booleans.reviewUnlocked
-              ? 'Start your speaking review'
+              ? 'AI feedback ready'
               : booleans.speakingCompleted
               ? 'Review is being prepared'
               : 'Complete Speaking Zone first',
@@ -253,7 +253,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
             title: 'Interactive Review',
             description: 'Review your conversation mistakes with AI coaching',
             helper: booleans.reviewUnlocked
-              ? 'Start your speaking review'
+              ? 'AI feedback ready'
               : booleans.speakingCompleted
               ? 'Review is being prepared'
               : 'Complete Speaking Zone first',
@@ -514,6 +514,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 16,
+    gap: 12,
   },
   timelineCardButton: {
     marginTop: 0,
@@ -528,8 +529,10 @@ const styles = StyleSheet.create({
   timelineCardFooter: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'flex-end',
     gap: 4,
     marginTop: 0,
+    flexShrink: 1,
   },
   completedText: {
     fontSize: 14,
@@ -541,6 +544,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontFamily: 'Poppins',
     lineHeight: 19.6,
+    flexShrink: 1,
   },
   helperTextYellow: {
     color: '#facc15',
@@ -549,11 +553,11 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
   },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: 42,
+    height: 42,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',

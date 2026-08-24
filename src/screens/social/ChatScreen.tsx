@@ -253,7 +253,7 @@ const ChatScreen: React.FC<ChatScreenProps> = ({ navigation, route }) => {
           onPress={() => setSelectedDmId(null)}
           style={styles.backButton}
         >
-          <Ionicons name="chevron-back" size={28} color="#000" />
+          <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
         </TouchableOpacity>
 
         <View style={styles.chatHeaderContent}>
@@ -408,6 +408,14 @@ const styles = StyleSheet.create({
     borderBottomColor: colors.glass.border,
   },
   backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.md,
   },
   chatHeaderContent: {

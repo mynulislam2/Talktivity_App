@@ -31,7 +31,7 @@ const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ navigation }) => {
           >
             <Ionicons
               name="chevron-back"
-              size={18}
+              size={20}
               color="rgba(255,255,255,0.8)"
             />
           </TouchableOpacity>
@@ -64,11 +64,11 @@ const s = StyleSheet.create({
     paddingBottom: 12,
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: 42,
+    height: 42,
+    borderRadius: 6,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
+    borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.08)',
     justifyContent: 'center',
     alignItems: 'center',

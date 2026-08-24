@@ -32,7 +32,7 @@ export function CommunityLoadingState() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.dark.background,
+    backgroundColor: 'transparent',
   },
   content: {
     paddingVertical: spacing.lg,

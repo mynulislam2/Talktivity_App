@@ -23,9 +23,6 @@ export function TopicsErrorState({ error, onRetry }: TopicsErrorStateProps) {
           If the issue persists, check your network connection or backend server
           logs.
         </Text>
-        <Pressable style={styles.retryButton} onPress={onRetry}>
-          <Text style={styles.retryButtonText}>Retry Load Topics</Text>
-        </Pressable>
       </View>
     </View>
   );
@@ -55,17 +52,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
     textAlign: 'center',
     marginBottom: spacing.lg,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 8,
-  },
-  retryButtonText: {
-    color: '#fff',
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Poppins-SemiBold',
   },
 });

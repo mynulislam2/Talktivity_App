@@ -196,7 +196,7 @@ const ChangePasswordScreen: React.FC = () => {
             style={styles.backBtn}
             activeOpacity={0.7}
           >
-            <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
+            <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
           </TouchableOpacity>
           <View style={styles.headerSpacer} />
           <Text style={styles.headerTitle}>Change Password</Text>

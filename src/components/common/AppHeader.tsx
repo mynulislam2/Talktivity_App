@@ -112,7 +112,7 @@ export const AppHeader: React.FC<AppHeaderProps> = ({
               onPress={handleBackPress}
               activeOpacity={0.7}
             >
-              <Ionicons name="chevron-back" size={22} color={colors.white} />
+              <Ionicons name="chevron-back" size={20} color={colors.white} />
             </TouchableOpacity>
           )}
           {!showBack && showAvatar && (
@@ -180,7 +180,14 @@ const styles = StyleSheet.create({
     minWidth: 0,
   },
   backButton: {
-    padding: spacing.sm,
+    width: 42,
+    height: 42,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginRight: spacing.sm,
   },
   avatarContainer: {

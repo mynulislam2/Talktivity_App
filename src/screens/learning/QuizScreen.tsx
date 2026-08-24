@@ -162,15 +162,6 @@ export default function QuizScreen() {
             <View style={styles.errorCard}>
               <Text style={styles.errorCardTitle}>Failed to generate quiz</Text>
               <Text style={styles.errorCardText}>{quizError}</Text>
-              <FigmaPrimaryButton
-                onPress={() => {
-                  // Retry by resetting
-                  reset();
-                }}
-                style={styles.retryButton}
-              >
-                <Text style={styles.retryButtonText}>Retry</Text>
-              </FigmaPrimaryButton>
             </View>
           </View>
         </SafeAreaView>
@@ -318,10 +309,6 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 350,
     padding: 24,
-    borderRadius: tokens.radius.sm,
-    backgroundColor: tokens.color.surface.card,
-    borderWidth: 1,
-    borderColor: tokens.color.border.card,
     alignItems: 'center',
   },
   errorCardTitle: {

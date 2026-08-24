@@ -29,22 +29,6 @@ export function ProfileErrorState({ error, onRetry }: ProfileErrorStateProps) {
     <View style={styles.container}>
       <View style={styles.content}>
         <Text style={styles.errorText}>Unable to load profile</Text>
-        <View style={styles.buttonRow}>
-          <TouchableOpacity
-            style={[styles.button, styles.retryButton]}
-            onPress={onRetry}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.buttonText}>Retry</Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            style={[styles.button, styles.logoutButton]}
-            onPress={handleLogout}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.buttonText}>Sign Out</Text>
-          </TouchableOpacity>
-        </View>
       </View>
     </View>
   );
@@ -69,26 +53,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
     color: colors.text.primary,
     marginBottom: spacing.xl,
-  },
-  buttonRow: {
-    flexDirection: 'row',
-    gap: spacing.md,
-  },
-  button: {
-    paddingHorizontal: spacing.lg,
-    paddingVertical: spacing.md,
-    borderRadius: 8,
-  },
-  retryButton: {
-    backgroundColor: colors.primary,
-  },
-  logoutButton: {
-    backgroundColor: colors.error,
-  },
-  buttonText: {
-    color: colors.text.primary,
-    fontSize: 16,
-    fontWeight: '600',
-    fontFamily: 'Poppins-SemiBold',
   },
 });

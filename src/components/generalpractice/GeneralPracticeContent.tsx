@@ -21,10 +21,12 @@ import {
 } from 'react-native';
 import { LiveKitRoom, AgentState, useRoomContext } from '@livekit/react-native';
 import Feather from '@expo/vector-icons/Feather';
+import { Ionicons } from '@expo/vector-icons';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import type { ConnectionDetails } from '@/types/call';
 import type { PracticeSessionState } from '@/types/practice';
 import { SimpleVoiceAssistant, TranscriptList } from '@/components/livekit';
+import { EndSessionModal } from '../common/EndSessionModal';
 import type { TranscriptMessage } from '@/components/livekit';
 import { useVoiceVolume } from '@/components/practice/PracticeVisualizerLayout';
 import { useLoudspeakerAudioSession } from '@/hooks/useLoudspeakerAudioSession';
@@ -126,13 +128,6 @@ function LiveControls({
 
   return (
     <View style={styles.liveControls}>
-      <TouchableOpacity
-        onPress={onDisconnect}
-        style={styles.endCallButton}
-        activeOpacity={0.85}
-      >
-        <Feather name="x" size={24} color="#ff3434" />
-      </TouchableOpacity>
       <View style={styles.muteSection}>
         <Text style={styles.muteLabel}>Speak with Alina</Text>
         <TouchableOpacity
@@ -188,7 +183,6 @@ function LiveControls({
           ))}
         </View>
       </View>
-      <View style={styles.rightSpacer} />
     </View>
   );
 }
@@ -211,6 +205,7 @@ export function GeneralPracticeContent({
     sessionState.agentState !== 'disconnected' || Boolean(connectionDetails);
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
+  const [showEndModal, setShowEndModal] = useState(false);
 
   // Configure AudioSession for loudspeaker output during LiveKit general practice
   useLoudspeakerAudioSession(hasLiveConversation);
@@ -218,8 +213,16 @@ export function GeneralPracticeContent({
   // Auto-disconnect active general practice session when app is backgrounded
   useBackgroundSessionCleanup(hasLiveConversation, onDisconnect);
 
+  const requestEndSession = useCallback(() => {
+    if (hasLiveConversation) {
+      setShowEndModal(true);
+    } else {
+      onBack?.();
+    }
+  }, [hasLiveConversation, onBack]);
+
   // Intercept Android hardware back button mid-call
-  useBackHandlerConfirmation(hasLiveConversation, onDisconnect);
+  useBackHandlerConfirmation(hasLiveConversation, requestEndSession);
 
   // General practice uses a different live prompt — no "stay in character"
   const livePrompt =
@@ -259,7 +262,7 @@ export function GeneralPracticeContent({
         <View style={[styles.sessionHero, { height: heroHeight }]}>
           {onBack && (
             <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
-              <Feather name="arrow-left" size={20} color="#fff" />
+              <Ionicons name="chevron-back" size={20} color="#fff" />
             </TouchableOpacity>
           )}
           <Image
@@ -333,8 +336,8 @@ export function GeneralPracticeContent({
             { height: heroHeight },
           ]}
         >
-          <TouchableOpacity onPress={onDisconnect} style={styles.backButton} activeOpacity={0.7}>
-            <Feather name="arrow-left" size={20} color="#fff" />
+          <TouchableOpacity onPress={requestEndSession} style={styles.endSessionButton} activeOpacity={0.7}>
+            <Feather name="x" size={20} color="#fff" />
           </TouchableOpacity>
           <Image
             source={COACH_AVATAR}
@@ -355,9 +358,18 @@ export function GeneralPracticeContent({
 
         <LiveControls
           agentState={sessionState.agentState}
-          onDisconnect={onDisconnect}
+          onDisconnect={requestEndSession}
         />
       </LiveKitRoom>
+
+      <EndSessionModal
+        visible={showEndModal}
+        onClose={() => setShowEndModal(false)}
+        onConfirm={() => {
+          setShowEndModal(false);
+          onDisconnect();
+        }}
+      />
     </View>
   );
 }
@@ -390,6 +402,20 @@ const styles = StyleSheet.create({
     height: 40,
     borderRadius: 8,
     backgroundColor: 'rgba(255,255,255,0.12)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  endSessionButton: {
+    position: 'absolute',
+    top: 24,
+    right: 20,
+    zIndex: 99,
+    width: 42,
+    height: 42,
+    borderRadius: 21,
+    borderWidth: 1,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.10)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -430,22 +456,13 @@ const styles = StyleSheet.create({
   },
   promptText: { fontSize: 13, fontFamily: 'Poppins', lineHeight: 18.85, color: '#fdfdfd' },
   liveControls: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    justifyContent: 'space-between',
+    alignItems: 'center',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     paddingBottom: 32,
     paddingTop: 16,
   },
-  endCallButton: {
-    width: 44,
-    height: 44,
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rightSpacer: { width: 44, height: 44 },
+
   muteSection: { alignItems: 'center', gap: 12 },
   muteLabel: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 16.8, color: '#fff', opacity: 0.7 },
   muteButton: {

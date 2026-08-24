@@ -35,6 +35,7 @@ import {
 import { performGlobalLogout } from '@/utils/logoutClient';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
+import { tokens } from '@/theme/tokens';
 import ScreenBackground from '../../components/common/ScreenBackground';
 
 interface SettingsScreenProps {
@@ -51,7 +52,7 @@ function SettingsSection({
   return (
     <View style={styles.section}>
       <Text style={styles.sectionTitle}>{title}</Text>
-      <View style={styles.sectionContent}>{children}</View>
+      <View style={styles.sectionBody}>{children}</View>
     </View>
   );
 }
@@ -299,7 +300,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
             activeOpacity={0.7}
           >
             <Text style={styles.logoutText}>Log Out</Text>
-            <Ionicons name="chevron-forward" size={20} color="#ff2e2e" />
+            <Ionicons name="arrow-forward" size={20} color="#ff2e2e" />
           </TouchableOpacity>
 
           {/* Feedback */}
@@ -351,12 +352,12 @@ const styles = StyleSheet.create({
   },
   headerSpacer: { flex: 1 },
   backButton: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -370,21 +371,20 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   section: {
-    gap: 12,
+    borderWidth: 1,
+    borderColor: tokens.color.border.card,
+    borderRadius: tokens.radius.sm,
+    backgroundColor: tokens.color.surface.card,
+    padding: 16,
   },
   sectionTitle: {
     fontSize: 20,
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     color: '#fdfdfd',
-    marginBottom: 4,
   },
-  sectionContent: {
-    borderWidth: 1,
-    borderColor: '#3d3e50',
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.10)',
-    padding: 16,
+  sectionBody: {
+    marginTop: 20,
     gap: 12,
   },
   settingsRow: {

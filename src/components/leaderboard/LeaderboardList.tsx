@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Svg, {
   Circle,
   Defs,
@@ -176,14 +177,8 @@ export function LeaderboardList({
         ) : (
           leaderboard.map((user) => {
             const tone = calcRowTone(user.position);
-            return (
-              <View
-                key={`${leaderboardType}-${user.id}`}
-                style={[
-                  styles.row,
-                  { backgroundColor: tone.bg, borderColor: tone.border },
-                ]}
-              >
+            const rowContent = (
+              <>
                 <View style={styles.rowLeft}>
                   {user.position <= 3 ? (
                     <RankMedal position={user.position} />
@@ -209,6 +204,33 @@ export function LeaderboardList({
                 <View style={styles.rowRight}>
                   <Text style={styles.xpText}>{user.xp}</Text>
                 </View>
+              </>
+            );
+
+            // Rank 1 gets a blue-to-purple gradient row (matches web).
+            if (user.position === 1) {
+              return (
+                <LinearGradient
+                  key={`${leaderboardType}-${user.id}`}
+                  colors={['rgba(14,85,255,0.65)', 'rgba(140,70,230,0.55)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.row, { borderColor: tone.border }]}
+                >
+                  {rowContent}
+                </LinearGradient>
+              );
+            }
+
+            return (
+              <View
+                key={`${leaderboardType}-${user.id}`}
+                style={[
+                  styles.row,
+                  { backgroundColor: tone.bg, borderColor: tone.border },
+                ]}
+              >
+                {rowContent}
               </View>
             );
           })
@@ -238,14 +260,14 @@ const styles = StyleSheet.create({
     fontWeight: '500', fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     color: 'rgba(255,255,255,0.4)',
-    textTransform: 'uppercase',
   },
   listContainer: {
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.06)',
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 20,
     gap: 10,
   },
   row: {

@@ -22,14 +22,14 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { ProfileData } from '@/types/profile';
 import type { ProficiencyResult } from '@/types/proficiency';
-import { ProfileCameraBadgeIcon } from './ProfileVisualIcons';
+import { tokens } from '@/theme/tokens';
+import { ProfileCameraBadgeIcon, UpgradeMagicIcon } from './ProfileVisualIcons';
 
 export interface ProfileCardProps {
   profile: ProfileData | null;
   planType?: string;
   isProActive?: boolean;
-  canUpgrade?: boolean;
-  upgradeLabel?: 'Upgrade' | 'Upgraded';
+  onUpgradePress?: () => void;
   proficiency?: ProficiencyResult | null;
   onProfileImageClick?: () => void;
   isUploadingProfileImage?: boolean;
@@ -67,6 +67,8 @@ function ProfileEditIcon() {
 export function ProfileCard({
   profile,
   planType = 'Free',
+  isProActive = false,
+  onUpgradePress,
   proficiency,
   onProfileImageClick,
   isUploadingProfileImage = false,
@@ -141,6 +143,18 @@ export function ProfileCard({
           <Text style={styles.planLabel}>Your Plan</Text>
           <Text style={styles.planValue}>{planType}</Text>
         </View>
+
+        <TouchableOpacity
+          onPress={isProActive ? undefined : onUpgradePress}
+          disabled={isProActive}
+          style={[styles.upgradeButton, isProActive && styles.upgradeButtonDisabled]}
+          activeOpacity={0.7}
+        >
+          <UpgradeMagicIcon size={16} />
+          <Text style={styles.upgradeButtonText}>
+            {isProActive ? 'Upgraded' : 'Upgrade'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -244,5 +258,26 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     color: '#fff',
     marginTop: 4,
+  },
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minWidth: 98,
+    borderWidth: 1,
+    borderColor: 'rgba(249,249,249,0.5)',
+    backgroundColor: tokens.color.accent.primary,
+    borderRadius: tokens.radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  upgradeButtonDisabled: {
+    opacity: 0.65,
+  },
+  upgradeButtonText: {
+    fontSize: 14,
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    color: '#fff',
   },
 });

@@ -8,14 +8,34 @@
 import React, { useMemo } from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useHeaderProfile, useHeaderStreak } from '@/hooks/header';
 import { resolveApiAssetUrl } from '@/utils/community';
+import { useAppSelector } from '@/store/hooks';
+import { selectCurrentSubscription } from '@/store/slices/subscriptionSlice';
+import { getUpgradeActionState } from '@/utils/subscriptionStatus';
+import { tokens } from '@/theme/tokens';
 import Svg, {
   Path,
   Defs,
   LinearGradient as SvgLinearGradient,
   Stop,
 } from 'react-native-svg';
+
+function UpgradeSparkIcon() {
+  return (
+    <Svg viewBox="0 0 16 16" width={14} height={14} fill="none">
+      <Path
+        d="m8 1.8 1.02 2.67 2.78 1.03-2.78.98L8 9.17l-1.02-2.7L4.2 5.5l2.78-1.03L8 1.8Z"
+        fill="#fff"
+      />
+      <Path
+        d="m12.1 8.95.52 1.35 1.38.5-1.38.5-.52 1.38-.5-1.38-1.38-.5 1.38-.5.5-1.35Z"
+        fill="#fff"
+      />
+    </Svg>
+  );
+}
 
 function MiniFlameIcon() {
   return (
@@ -64,11 +84,16 @@ export function Header() {
   const { user } = useHeaderProfile();
   const { streak, loading } = useHeaderStreak();
   const profilePicture = resolveApiAssetUrl(user?.profile_picture);
+  const subscription = useAppSelector(selectCurrentSubscription);
 
   const greeting = useMemo(() => getGreetingLabel(new Date()), []);
   const firstName = useMemo(
     () => getFirstName(user?.full_name),
     [user?.full_name]
+  );
+  const { label: upgradeLabel, canUpgrade } = useMemo(
+    () => getUpgradeActionState(subscription),
+    [subscription]
   );
   const streakCount = loading ? 0 : streak;
 
@@ -97,12 +122,29 @@ export function Header() {
           </View>
         </View>
 
-        {/* Right: streak */}
+        {/* Right: streak + upgrade pill */}
         <View style={styles.rightSection}>
           <View style={styles.streakContainer}>
             <MiniFlameIcon />
             <Text style={styles.streakText}>{streakCount}</Text>
           </View>
+
+          {canUpgrade ? (
+            <LinearGradient
+              colors={[tokens.color.accent.gradientStart, tokens.color.accent.gradientEnd]}
+              start={{ x: 0, y: 0 }}
+              end={{ x: 1, y: 0 }}
+              style={styles.upgradeChip}
+            >
+              <UpgradeSparkIcon />
+              <Text style={styles.upgradeChipText}>{upgradeLabel}</Text>
+            </LinearGradient>
+          ) : (
+            <View style={[styles.upgradeChip, styles.upgradeChipDisabled]}>
+              <UpgradeSparkIcon />
+              <Text style={styles.upgradeChipText}>{upgradeLabel}</Text>
+            </View>
+          )}
         </View>
       </View>
     </View>
@@ -172,7 +214,27 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
+    gap: 12,
+  },
+  upgradeChip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: '#f9f9f9',
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+  },
+  upgradeChipDisabled: {
+    backgroundColor: tokens.color.surface.card,
+    opacity: 0.8,
+  },
+  upgradeChipText: {
+    fontSize: 11,
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    lineHeight: 13.2,
+    color: tokens.color.text.primary,
   },
   streakContainer: {
     flexDirection: 'row',

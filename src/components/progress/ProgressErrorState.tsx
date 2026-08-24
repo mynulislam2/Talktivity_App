@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export interface ProgressErrorStateProps {
   error: string | null;
@@ -23,12 +23,15 @@ export function ProgressErrorState({
         <Text style={styles.errorText}>
           {error || 'Failed to load achievements'}
         </Text>
-        <TouchableOpacity
-          style={styles.retryButton}
-          onPress={onRetry}
-          activeOpacity={0.8}
-        >
-          <Text style={styles.retryButtonText}>Retry</Text>
+        <TouchableOpacity onPress={onRetry} activeOpacity={0.8}>
+          <LinearGradient
+            colors={['#3b82f6', '#a855f7']}
+            start={{ x: 0, y: 0 }}
+            end={{ x: 1, y: 0 }}
+            style={styles.retryButton}
+          >
+            <Text style={styles.retryButtonText}>Retry</Text>
+          </LinearGradient>
         </TouchableOpacity>
       </View>
     </View>
@@ -62,7 +65,6 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     borderRadius: 12,
-    backgroundColor: 'rgba(74,114,255,1)',
     paddingHorizontal: 20,
     paddingVertical: 10,
     shadowColor: 'rgba(74,114,255,0.28)',

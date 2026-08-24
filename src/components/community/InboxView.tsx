@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { CommunityAvatar } from './CommunityAvatar';
 import { DMConversationCard } from './DMConversationCard';
@@ -260,25 +261,30 @@ export function InboxView({
             ['unread', `Unread ${unreadEntryCount}`],
             ['group', 'Group'],
           ] as const
-        ).map(([value, label]) => (
-          <TouchableOpacity
-            key={value}
-            onPress={() => setActiveFilter(value)}
-            style={[
-              styles.filterChip,
-              activeFilter === value && styles.filterChipActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                activeFilter === value && styles.filterChipTextActive,
-              ]}
+        ).map(([value, label]) =>
+          activeFilter === value ? (
+            <TouchableOpacity key={value} onPress={() => setActiveFilter(value)}>
+              <LinearGradient
+                colors={['#2C5BFF', '#A45DFF']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.filterChip, styles.filterChipActive]}
+              >
+                <Text style={[styles.filterChipText, styles.filterChipTextActive]}>
+                  {label}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              key={value}
+              onPress={() => setActiveFilter(value)}
+              style={styles.filterChip}
             >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text style={styles.filterChipText}>{label}</Text>
+            </TouchableOpacity>
+          )
+        )}
       </View>
 
       <View>
@@ -456,7 +462,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   filterChipActive: {
-    backgroundColor: 'transparent',
     borderColor: 'transparent',
     shadowColor: 'rgba(101,85,255,0.26)',
     shadowOffset: { width: 0, height: 10 },
@@ -498,7 +503,7 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.06)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -522,7 +527,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 8,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: 12,
   },
   groupRowText: {
     flex: 1,

@@ -68,6 +68,7 @@ import { resolveApiAssetUrl } from '@/utils/community';
 import { MessageComposer, MessageBubble, ChatLoading } from '@/components/chat';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
+import { tokens } from '@/theme/tokens';
 import type { GroupChatScreenProps } from '@/navigation/types';
 
 const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
@@ -725,12 +726,12 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     justifyContent: 'center',
     alignItems: 'center',
   },

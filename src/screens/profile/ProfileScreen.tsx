@@ -144,6 +144,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
         <ProfileCard
           profile={profile}
           planType={planType}
+          isProActive={isProActive}
           proficiency={proficiency}
           onProfileImageClick={openProfileImagePicker}
           isUploadingProfileImage={isUploadingProfileImage}

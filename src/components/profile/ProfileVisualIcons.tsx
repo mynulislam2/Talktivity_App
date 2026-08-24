@@ -55,9 +55,9 @@ export function ProfileCameraBadgeIcon({ size = 30 }: IconProps) {
   );
 }
 
-export function UpgradeMagicIcon({ size = 16 }: IconProps) {
+export function UpgradeMagicIcon({ size = 16, color = '#fff' }: IconProps & { color?: string }) {
   return (
-    <Svg viewBox="0 0 20 20" width={size} height={size} fill="none">
+    <Svg viewBox="0 0 20 20" width={size} height={size} fill="none" color={color}>
       <Path
         d="M10 2.5 11.35 6l3.65 1.35-3.65 1.3L10 12.15 8.65 8.65 5 7.35 8.65 6 10 2.5Z"
         fill="currentColor"

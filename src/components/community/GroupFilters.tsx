@@ -134,7 +134,7 @@ const styles = StyleSheet.create({
   dropdown: {
     height: 32,
     minWidth: 110,
-    borderRadius: 100,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -167,7 +167,7 @@ const styles = StyleSheet.create({
   searchToggle: {
     width: 40,
     height: 40,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',
@@ -177,7 +177,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 18,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',

@@ -441,7 +441,7 @@ const EditProfileScreen: React.FC = () => {
                     onPress={closeEditor}
                     style={styles.sheetClose}
                   >
-                    <Ionicons name="close" size={18} color="#fff" />
+                    <Ionicons name="close" size={16} color="#fff" />
                   </TouchableOpacity>
                 </View>
 

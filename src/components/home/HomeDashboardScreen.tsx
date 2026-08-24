@@ -31,7 +31,6 @@ function getWeekdayItems() {
         weekday: 'short',
         timeZone: 'UTC',
       }),
-      dayNumber: date.getUTCDate(),
       isToday: index === 0,
     };
   });
@@ -70,15 +69,13 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
                     : styles.weekdayCircleInactive,
                 ]}
               >
-                {item.isToday ? (
+                {item.isToday && (
                   <Feather
                     name="check"
                     size={16}
                     color="#fff"
                     strokeWidth={2.5}
                   />
-                ) : (
-                  <Text style={styles.weekdayNumber}>{item.dayNumber}</Text>
                 )}
               </View>
               <Text
@@ -215,11 +212,6 @@ const styles = StyleSheet.create({
   weekdayCircleInactive: {
     borderColor: '#a0a0a1',
     backgroundColor: 'transparent',
-  },
-  weekdayNumber: {
-    fontSize: 12,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
-    color: '#a0a0a1',
   },
   weekdayLabel: {
     fontSize: 16,

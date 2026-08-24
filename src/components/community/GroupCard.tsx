@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Group } from '@/types/community';
 import { CommunityAvatar } from './CommunityAvatar';
+import { tokens } from '@/theme/tokens';
 
 export interface GroupCardProps {
   group: Group;
@@ -115,10 +116,10 @@ export function GroupCard({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     padding: 20,
     shadowColor: 'rgba(4,8,22,0.16)',
     shadowOffset: { width: 0, height: 20 },

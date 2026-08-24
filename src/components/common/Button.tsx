@@ -131,7 +131,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
   },
   disabledText: {

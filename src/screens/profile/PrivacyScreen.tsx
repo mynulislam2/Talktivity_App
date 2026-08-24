@@ -76,7 +76,7 @@ const s = StyleSheet.create({
   spacer: { flex: 1 },
   title: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },

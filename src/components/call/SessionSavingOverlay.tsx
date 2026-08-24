@@ -106,7 +106,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: colors.white,
     textAlign: 'center',
     marginTop: 24,
@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
   dismissButtonText: {
     color: colors.white,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
 });

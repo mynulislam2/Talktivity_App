@@ -262,7 +262,7 @@ const styles = StyleSheet.create({
   },
   subscriptionTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 23,
     color: '#fff',
   },
@@ -285,7 +285,7 @@ const styles = StyleSheet.create({
   },
   subscriptionButtonText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   cancelButton: {
@@ -301,7 +301,7 @@ const styles = StyleSheet.create({
   },
   cancelButtonText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#ff9aa3',
   },
   billingFeedback: {
@@ -322,7 +322,7 @@ const styles = StyleSheet.create({
   },
   insightsTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   insightsDesc: {

@@ -51,7 +51,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   errorDetails: {
@@ -68,7 +68,7 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.white,
   },
 });

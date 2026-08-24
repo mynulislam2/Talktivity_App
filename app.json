@@ -5,7 +5,10 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./src/assets/images/icon.png",
-    "scheme": ["talktivity", "com.googleusercontent.apps.845075130244-6buns0pih3ihqlusmoeh25s3q0enc2t0"],
+    "scheme": [
+      "talktivity",
+      "com.googleusercontent.apps.845075130244-6buns0pih3ihqlusmoeh25s3q0enc2t0"
+    ],
     "userInterfaceStyle": "dark",
     "newArchEnabled": true,
     "ios": {
@@ -33,7 +36,7 @@
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
+      "output": "single",
       "favicon": "./src/assets/images/favicon.png"
     },
     "plugins": [
@@ -50,9 +53,6 @@
         }
       ],
       "expo-font"
-    ],
-    "experiments": {
-      "typedRoutes": true
-    }
+    ]
   }
 }

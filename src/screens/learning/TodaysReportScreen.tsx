@@ -21,14 +21,7 @@ import { DiscourseCard } from '@/components/report/DiscourseCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
 import { ReportErrorCard } from '@/components/report/ReportErrorCard';
 import { TodayReportStepHeader } from '@/components/report/TodayReportStepHeader';
-
-function GradientBackground({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {children}
-    </View>
-  );
-}
+import { AppBackground } from '../../components/common/AppBackground';
 
 export default function TodaysReportScreen() {
   const navigation = useNavigation();
@@ -82,7 +75,7 @@ export default function TodaysReportScreen() {
 
   if (isLoading) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={ss.backBtnWrap}>
             <TouchableOpacity onPress={goBack} style={ss.backBtn}>
@@ -91,13 +84,13 @@ export default function TodaysReportScreen() {
           </View>
           <ReportLoadingCard />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (error || !report) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={ss.backBtnWrap}>
             <TouchableOpacity onPress={goBack} style={ss.backBtn}>
@@ -110,13 +103,13 @@ export default function TodaysReportScreen() {
             onRetry={refresh}
           />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (!overallScores) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={ss.backBtnWrap}>
             <TouchableOpacity onPress={goBack} style={ss.backBtn}>
@@ -129,7 +122,7 @@ export default function TodaysReportScreen() {
             onRetry={refresh}
           />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
@@ -203,7 +196,7 @@ export default function TodaysReportScreen() {
   ].filter(Boolean);
 
   return (
-    <GradientBackground>
+    <AppBackground>
       <SafeAreaView style={ss.safe} edges={['top']}>
         <View style={ss.backBtnWrap}>
           <TouchableOpacity onPress={goBack} style={ss.backBtn}>
@@ -224,7 +217,7 @@ export default function TodaysReportScreen() {
           {pages[step]}
         </Animated.View>
       </SafeAreaView>
-    </GradientBackground>
+    </AppBackground>
   );
 }
 

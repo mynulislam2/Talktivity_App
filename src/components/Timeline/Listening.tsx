@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.white,
     flex: 1,
   },
@@ -164,7 +164,7 @@ const styles = StyleSheet.create({
   },
   completedText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.success,
   },
   lockedBadge: {
@@ -174,7 +174,7 @@ const styles = StyleSheet.create({
   },
   lockedText: {
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.warning,
   },
   actionButton: {
@@ -191,6 +191,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: colors.white,
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });

@@ -209,7 +209,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.white,
   },
   subtitle: {
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: colors.white,
   },
   rightSection: {

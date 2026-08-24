@@ -169,7 +169,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#7B70FF',
     marginBottom: 8,
   },
@@ -236,7 +236,7 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#6b7280',
   },
   stepTextActive: {

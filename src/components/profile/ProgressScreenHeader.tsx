@@ -45,7 +45,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 29,
     letterSpacing: 0.12,
     color: '#fff',

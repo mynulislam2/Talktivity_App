@@ -82,7 +82,7 @@ const styles = StyleSheet.create({
   },
   toggleButtonText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#9ca3af',
   },
   toggleButtonTextActive: {

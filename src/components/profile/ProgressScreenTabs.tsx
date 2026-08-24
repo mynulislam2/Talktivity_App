@@ -141,12 +141,12 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   tabTextSmall: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
   },
   tabTextActive: {
     color: '#fff',

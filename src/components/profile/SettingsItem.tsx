@@ -100,7 +100,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.black,
     marginBottom: spacing.xs,
   },
@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 12,
     color: colors.primary,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     marginTop: spacing.xs,
   },
 });

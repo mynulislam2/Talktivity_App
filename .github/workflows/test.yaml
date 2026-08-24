@@ -30,7 +30,11 @@ jobs:
             ${{ runner.os }}-node-
       
       - name: Install
-        run: npm install
+        # npm ci installs strictly from package-lock.json, so CI cannot silently
+        # drift from the committed lockfile the way `npm install` can.
+        # Peer-dependency resolution comes from .npmrc (legacy-peer-deps=true) —
+        # see that file for why it is required today.
+        run: npm ci
 
       - name: Typescript
         run: npm run typescript

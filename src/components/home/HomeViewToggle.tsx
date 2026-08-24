@@ -144,13 +144,13 @@ const styles = StyleSheet.create({
   },
   tabTextActive: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     zIndex: 1,
   },
   tabTextInactive: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.5)',
   },
   glowDark: {

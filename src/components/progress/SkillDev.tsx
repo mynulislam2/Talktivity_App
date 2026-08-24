@@ -235,7 +235,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   selector: {
@@ -254,7 +254,7 @@ const styles = StyleSheet.create({
   },
   selectorButtonText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255, 255, 255, 0.9)',
   },
   selectorButtonTextActive: {
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   skillValue: {
     width: 40,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     textAlign: 'right',
   },
@@ -347,7 +347,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#86efac',
   },
   infoText: {

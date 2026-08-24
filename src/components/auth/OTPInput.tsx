@@ -155,7 +155,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     color: '#fff',
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
   },
   inputActive: {

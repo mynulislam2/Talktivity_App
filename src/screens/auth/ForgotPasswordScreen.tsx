@@ -337,7 +337,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   content: {
@@ -364,7 +364,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
     color: colors.text.primary,
     marginBottom: spacing.sm,
     lineHeight: 22,
@@ -408,7 +408,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });
 

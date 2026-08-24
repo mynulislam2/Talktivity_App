@@ -315,7 +315,7 @@ const styles = StyleSheet.create({
   },
   avatarSmText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   avatarEmpty: {
@@ -330,7 +330,7 @@ const styles = StyleSheet.create({
   },
   youLabel: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     lineHeight: 24,
   },
@@ -344,7 +344,7 @@ const styles = StyleSheet.create({
   },
   xpHeader: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.55)',
@@ -357,7 +357,7 @@ const styles = StyleSheet.create({
   },
   xpValue: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   scopeSection: {
@@ -387,7 +387,7 @@ const styles = StyleSheet.create({
   },
   scopeDropdownSelectedText: {
     fontSize: 28,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     letterSpacing: 0.14,
     color: '#fff',
   },
@@ -411,7 +411,7 @@ const styles = StyleSheet.create({
   },
   listHeaderText: {
     fontSize: 13,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     color: 'rgba(255,255,255,0.4)',
     textTransform: 'uppercase',
@@ -442,7 +442,7 @@ const styles = StyleSheet.create({
   },
   rankText: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.6)',
   },
   rowAvatar: {
@@ -462,19 +462,19 @@ const styles = StyleSheet.create({
   },
   rowAvatarText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   rowName: {
     fontSize: 15,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     flex: 1,
   },
   rowRight: {},
   rowXp: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   emptyState: {

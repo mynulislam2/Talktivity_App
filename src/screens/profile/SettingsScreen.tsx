@@ -362,7 +362,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fff',
   },
@@ -374,7 +374,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     color: '#fdfdfd',
     marginBottom: 4,
@@ -430,7 +430,7 @@ const styles = StyleSheet.create({
     minWidth: 32,
     textAlign: 'center',
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: '#c6c6c6',
   },

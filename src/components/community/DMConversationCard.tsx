@@ -114,7 +114,7 @@ const styles = StyleSheet.create({
   name: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.02,
     color: '#fff',
   },
@@ -147,7 +147,7 @@ const styles = StyleSheet.create({
   },
   liveBadgeText: {
     fontSize: 10,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#7BFFB7',
   },
   unreadContainer: {

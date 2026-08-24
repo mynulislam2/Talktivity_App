@@ -407,7 +407,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     color: '#fff',
   },
@@ -423,7 +423,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 25.2,
     color: '#fff',
     marginTop: 16,
@@ -495,7 +495,7 @@ const styles = StyleSheet.create({
   },
   timelineCardTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22.4,
     color: '#fff',
   },
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 16.8,
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
   timelineCardFooter: {
     flexDirection: 'row',

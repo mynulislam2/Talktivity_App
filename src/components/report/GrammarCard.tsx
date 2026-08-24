@@ -43,8 +43,8 @@ const statStyles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     padding: 16,
   },
-  title: { fontSize: 18, fontWeight: '600', color: '#ffffff' },
-  value: { fontSize: 24, fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginTop: 2 },
+  title: { fontSize: 18, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#ffffff' },
+  value: { fontSize: 24, fontWeight: '700', fontFamily: 'Poppins-Bold', color: 'rgba(255,255,255,0.9)', marginTop: 2 },
   body: { marginTop: 8 },
 });
 
@@ -157,12 +157,12 @@ const ss = StyleSheet.create({
   inner: { width: '100%', maxWidth: 400, paddingVertical: 8 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBox: { padding: 8, borderRadius: 8 },
-  title: { fontSize: 20, fontWeight: '600', color: '#ffffff' },
+  title: { fontSize: 20, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#ffffff' },
   subtitle: { fontSize: 14, color: '#9ca3af' },
   statSpace: { gap: 16 },
   desc: { fontSize: 14, color: '#d1d5db', lineHeight: 20 },
   errorGroup: { marginBottom: 12 },
-  errorCategory: { fontSize: 14, fontWeight: '600', color: '#f87171', marginBottom: 4 },
+  errorCategory: { fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#f87171', marginBottom: 4 },
   errorDetail: { marginLeft: 8, marginBottom: 6 },
   errorIncorrect: { fontSize: 13, color: '#fca5a5', fontStyle: 'italic', marginTop: 2 },
   errorCorrected: { fontSize: 13, color: '#86efac', fontStyle: 'italic', marginTop: 1 },
@@ -177,5 +177,5 @@ const ss = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  btnText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  btnText: { color: '#ffffff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });

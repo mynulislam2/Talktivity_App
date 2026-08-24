@@ -3,6 +3,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  StyleProp,
   ViewStyle,
   TextStyle,
   ActivityIndicator,
@@ -20,7 +21,7 @@ interface GradientButtonProps {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   fullWidth?: boolean;
   gradientColors?: readonly [string, string, ...string[]];
@@ -112,7 +113,7 @@ const styles = StyleSheet.create({
     opacity: 0.5,
   },
   text: {
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.white,
     textAlign: 'center',
   },

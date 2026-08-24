@@ -33,6 +33,7 @@ import {
   QuizCongratulations,
 } from '@/components/quiz';
 import { colors } from '@/styles/colors';
+import { AppBackground } from '../../components/common/AppBackground';
 
 export default function QuizScreen() {
   const navigation = useNavigation();
@@ -109,69 +110,77 @@ export default function QuizScreen() {
 
   if (!browserSupportsSpeechRecognition) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContent}>
-          <Text style={styles.errorTitle}>
-            Speech Recognition Not Supported
-          </Text>
-          <Text style={styles.errorText}>
-            Your device doesn't support speech recognition. Please use a device
-            with speech recognition capabilities.
-          </Text>
-        </View>
-      </SafeAreaView>
+      <AppBackground>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.centerContent}>
+            <Text style={styles.errorTitle}>
+              Speech Recognition Not Supported
+            </Text>
+            <Text style={styles.errorText}>
+              Your device doesn't support speech recognition. Please use a device
+              with speech recognition capabilities.
+            </Text>
+          </View>
+        </SafeAreaView>
+      </AppBackground>
     );
   }
 
   if (!isMicrophoneAvailable) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContent}>
-          <Text style={styles.errorTitle}>Microphone Access Required</Text>
-          <Text style={styles.errorText}>
-            Please allow microphone access to use the pronunciation feature.
-          </Text>
-        </View>
-      </SafeAreaView>
+      <AppBackground>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.centerContent}>
+            <Text style={styles.errorTitle}>Microphone Access Required</Text>
+            <Text style={styles.errorText}>
+              Please allow microphone access to use the pronunciation feature.
+            </Text>
+          </View>
+        </SafeAreaView>
+      </AppBackground>
     );
   }
 
   if (loading) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          <QuizLoadingCard
-            title="Creating Your Quiz"
-            subtitle={
-              loadingMessage ||
-              'Our AI is analyzing your conversation to create personalized questions'
-            }
-            steps={steps}
-          />
-        </ScrollView>
-      </SafeAreaView>
+      <AppBackground>
+        <SafeAreaView style={styles.container}>
+          <ScrollView contentContainerStyle={styles.scrollContent}>
+            <QuizLoadingCard
+              title="Creating Your Quiz"
+              subtitle={
+                loadingMessage ||
+                'Our AI is analyzing your conversation to create personalized questions'
+              }
+              steps={steps}
+            />
+          </ScrollView>
+        </SafeAreaView>
+      </AppBackground>
     );
   }
 
   if (quizError) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContent}>
-          <View style={styles.errorCard}>
-            <Text style={styles.errorCardTitle}>Failed to generate quiz</Text>
-            <Text style={styles.errorCardText}>{quizError}</Text>
-            <TouchableOpacity
-              style={styles.retryButton}
-              onPress={() => {
-                // Retry by resetting
-                reset();
-              }}
-            >
-              <Text style={styles.retryButtonText}>Retry</Text>
-            </TouchableOpacity>
+      <AppBackground>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.centerContent}>
+            <View style={styles.errorCard}>
+              <Text style={styles.errorCardTitle}>Failed to generate quiz</Text>
+              <Text style={styles.errorCardText}>{quizError}</Text>
+              <TouchableOpacity
+                style={styles.retryButton}
+                onPress={() => {
+                  // Retry by resetting
+                  reset();
+                }}
+              >
+                <Text style={styles.retryButtonText}>Retry</Text>
+              </TouchableOpacity>
+            </View>
           </View>
-        </View>
-      </SafeAreaView>
+        </SafeAreaView>
+      </AppBackground>
     );
   }
 
@@ -203,11 +212,13 @@ export default function QuizScreen() {
 
   if (!currentQuestion) {
     return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.centerContent}>
-          <Text style={styles.errorText}>No questions available.</Text>
-        </View>
-      </SafeAreaView>
+      <AppBackground>
+        <SafeAreaView style={styles.container}>
+          <View style={styles.centerContent}>
+            <Text style={styles.errorText}>No questions available.</Text>
+          </View>
+        </SafeAreaView>
+      </AppBackground>
     );
   }
 
@@ -215,78 +226,80 @@ export default function QuizScreen() {
     String(currentQuestion.meta?.type || '').toLowerCase() === 'pronunciation';
 
   return (
-    <SafeAreaView style={styles.container}>
-      <QuizShell
-        fullScreen={false}
-        header={
-          <ProgressHeader
-            type="speaking"
-            current={currentIndex + 1}
-            total={totalQuestions}
-            score={score}
-          />
-        }
-        footer={
-          <View style={styles.footer}>
-            {isPronunciation && (
-              <PronunciationControls
-                listening={listening}
-                userSpeech={userSpeech}
-                onStart={startListening}
-                onStop={stopListening}
-              />
-            )}
-            <AnswerFeedback show={isAnswered} correct={isCorrect} />
-            <View style={styles.buttonRow}>
-              {!isAnswered ? (
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    (isPronunciation
-                      ? !userSpeech || userSpeech.trim().length === 0
-                      : selectedOptionIds.length === 0) &&
-                      styles.submitButtonDisabled,
-                  ]}
-                  disabled={
-                    isPronunciation
-                      ? !userSpeech || userSpeech.trim().length === 0
-                      : selectedOptionIds.length === 0
-                  }
-                  onPress={submitAnswer}
-                >
-                  <Text style={styles.submitButtonText}>Submit</Text>
-                </TouchableOpacity>
-              ) : (
-                <TouchableOpacity style={styles.nextButton} onPress={goNext}>
-                  <Text style={styles.nextButtonText}>
-                    {currentIndex + 1 >= totalQuestions ? 'Finish' : 'Next'}
-                  </Text>
-                </TouchableOpacity>
+    <AppBackground>
+      <SafeAreaView style={styles.container}>
+        <QuizShell
+          fullScreen={false}
+          header={
+            <ProgressHeader
+              type="speaking"
+              current={currentIndex + 1}
+              total={totalQuestions}
+              score={score}
+            />
+          }
+          footer={
+            <View style={styles.footer}>
+              {isPronunciation && (
+                <PronunciationControls
+                  listening={listening}
+                  userSpeech={userSpeech}
+                  onStart={startListening}
+                  onStop={stopListening}
+                />
               )}
+              <AnswerFeedback show={isAnswered} correct={isCorrect} />
+              <View style={styles.buttonRow}>
+                {!isAnswered ? (
+                  <TouchableOpacity
+                    style={[
+                      styles.submitButton,
+                      (isPronunciation
+                        ? !userSpeech || userSpeech.trim().length === 0
+                        : selectedOptionIds.length === 0) &&
+                        styles.submitButtonDisabled,
+                    ]}
+                    disabled={
+                      isPronunciation
+                        ? !userSpeech || userSpeech.trim().length === 0
+                        : selectedOptionIds.length === 0
+                    }
+                    onPress={submitAnswer}
+                  >
+                    <Text style={styles.submitButtonText}>Submit</Text>
+                  </TouchableOpacity>
+                ) : (
+                  <TouchableOpacity style={styles.nextButton} onPress={goNext}>
+                    <Text style={styles.nextButtonText}>
+                      {currentIndex + 1 >= totalQuestions ? 'Finish' : 'Next'}
+                    </Text>
+                  </TouchableOpacity>
+                )}
+              </View>
             </View>
-          </View>
-        }
-      >
-        <QuestionCard question={currentQuestion} />
-        {!isPronunciation && (
-          <OptionsList
-            options={currentQuestion.options}
-            selectedIds={selectedOptionIds}
-            correctIds={currentQuestion.correctOptionIds}
-            disabled={isAnswered}
-            showCorrectness={isAnswered}
-            onSelect={selectOption}
-          />
-        )}
-      </QuizShell>
-    </SafeAreaView>
+          }
+        >
+          <QuestionCard question={currentQuestion} />
+          {!isPronunciation && (
+            <OptionsList
+              options={currentQuestion.options}
+              selectedIds={selectedOptionIds}
+              correctIds={currentQuestion.correctOptionIds}
+              disabled={isAnswered}
+              showCorrectness={isAnswered}
+              onSelect={selectOption}
+            />
+          )}
+        </QuizShell>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.dark.backgroundDeep,
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,
@@ -300,7 +313,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 24,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: 16,
     textAlign: 'center',
@@ -322,7 +335,7 @@ const styles = StyleSheet.create({
   },
   errorCardTitle: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: 8,
   },
@@ -341,7 +354,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: colors.text.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   footer: {
     gap: 12,
@@ -364,7 +377,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: colors.text.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   nextButton: {
     flex: 1,
@@ -377,6 +390,6 @@ const styles = StyleSheet.create({
   nextButtonText: {
     color: colors.text.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });

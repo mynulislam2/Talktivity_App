@@ -61,7 +61,7 @@ const styles = StyleSheet.create({
   },
   questionText: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     lineHeight: 28,
   },
@@ -77,7 +77,7 @@ const styles = StyleSheet.create({
   },
   targetWord: {
     fontSize: 36,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#7B70FF',
   },
   phonetic: {

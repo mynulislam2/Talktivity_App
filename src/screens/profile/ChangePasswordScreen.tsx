@@ -30,6 +30,7 @@ import { spacing } from '@/styles/spacing';
 import { authService } from '@/services/auth';
 import OTPInput from '@/components/auth/OTPInput';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import { AppBackground } from '../../components/common/AppBackground';
 
 type Step = 'verify' | 'code' | 'password' | 'success';
 
@@ -186,243 +187,245 @@ const ChangePasswordScreen: React.FC = () => {
   const buttonConfig = getButtonConfig();
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      <View
-        style={[styles.header, { paddingTop: Math.max(insets.top + 8, 16) }]}
-      >
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backBtn}
-          activeOpacity={0.7}
+    <AppBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        <View
+          style={[styles.header, { paddingTop: Math.max(insets.top + 8, 16) }]}
         >
-          <Ionicons
-            name="chevron-back"
-            size={18}
-            color="rgba(255,255,255,0.8)"
-          />
-        </TouchableOpacity>
-        <View style={styles.headerSpacer} />
-        <Text style={styles.headerTitle}>Change Password</Text>
-        <View style={styles.headerSpacer} />
-      </View>
-      <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.keyboardAvoiding}
-      >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={18}
+              color="rgba(255,255,255,0.8)"
+            />
+          </TouchableOpacity>
+          <View style={styles.headerSpacer} />
+          <Text style={styles.headerTitle}>Change Password</Text>
+          <View style={styles.headerSpacer} />
+        </View>
+        <KeyboardAvoidingView
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+          style={styles.keyboardAvoiding}
         >
-          <View style={styles.content}>
-            {step === 'success' ? (
-              /* Success State */
-              <View style={styles.successContainer}>
-                <View style={styles.successIcon}>
-                  <Ionicons
-                    name="checkmark-circle"
-                    size={64}
-                    color={colors.success}
-                  />
-                </View>
-                <Text style={styles.successTitle}>Password Changed</Text>
-                <Text style={styles.successSubtitle}>
-                  Your password has been changed successfully.
-                </Text>
-              </View>
-            ) : (
-              /* Single-Page Form */
-              <View style={styles.form}>
-                <Text style={styles.intro}>
-                  To change your password, we'll send a verification code to
-                  your email.
-                </Text>
-
-                {/* Step 1: Email Display (locked) */}
-                <View style={styles.stepContainer}>
-                  <View style={styles.stepHeader}>
-                    <View style={styles.stepBadge}>
-                      <Text style={styles.stepBadgeText}>1</Text>
-                    </View>
-                    <Text style={styles.stepLabel}>Your Email</Text>
-                  </View>
-                  <View style={styles.inputWrapper}>
+          <ScrollView
+            contentContainerStyle={styles.scrollContent}
+            keyboardShouldPersistTaps="handled"
+          >
+            <View style={styles.content}>
+              {step === 'success' ? (
+                /* Success State */
+                <View style={styles.successContainer}>
+                  <View style={styles.successIcon}>
                     <Ionicons
-                      name="mail-outline"
-                      size={20}
-                      color={colors.text.secondary}
-                      style={styles.inputIcon}
-                    />
-                    <TextInput
-                      style={[styles.input, styles.inputLocked]}
-                      value={email}
-                      editable={false}
+                      name="checkmark-circle"
+                      size={64}
+                      color={colors.success}
                     />
                   </View>
+                  <Text style={styles.successTitle}>Password Changed</Text>
+                  <Text style={styles.successSubtitle}>
+                    Your password has been changed successfully.
+                  </Text>
                 </View>
-
-                {/* Step 2: Verification Code */}
-                {(step === 'code' || step === 'password') && (
-                  <View style={styles.stepContainer}>
-                    <View style={styles.stepHeader}>
-                      <View
-                        style={[
-                          styles.stepBadge,
-                          codeLocked && styles.stepBadgeComplete,
-                        ]}
-                      >
-                        {codeLocked ? (
-                          <Ionicons
-                            name="checkmark"
-                            size={14}
-                            color={colors.text.primary}
-                          />
-                        ) : (
-                          <Text style={styles.stepBadgeText}>2</Text>
-                        )}
-                      </View>
-                      <Text style={styles.stepLabel}>Verification Code</Text>
-                      {!codeLocked && (
-                        <TouchableOpacity
-                          onPress={handleResendCode}
-                          disabled={loading}
-                        >
-                          <Text style={styles.resendText}>Resend</Text>
-                        </TouchableOpacity>
-                      )}
-                    </View>
-                    <Text style={styles.codeSentText}>
-                      Enter the 6-digit code sent to your email
-                    </Text>
-                    <View style={codeLocked ? styles.otpLocked : undefined}>
-                      <OTPInput
-                        value={verificationCode}
-                        onChange={setVerificationCode}
-                        disabled={codeLocked || loading}
-                        autoFocus={step === 'code'}
-                        error={!!error && step === 'code'}
-                      />
-                    </View>
-                    {codeLocked && (
-                      <View style={styles.lockedNotice}>
-                        <Ionicons
-                          name="lock-closed"
-                          size={14}
-                          color={colors.success}
-                        />
-                        <Text style={styles.lockedNoticeText}>
-                          Code verified
-                        </Text>
-                      </View>
-                    )}
-                  </View>
-                )}
-
-                {/* Step 3: New Password */}
-                {step === 'password' && (
+              ) : (
+                /* Single-Page Form */
+                <View style={styles.form}>
+                  <Text style={styles.intro}>
+                    To change your password, we'll send a verification code to
+                    your email.
+                  </Text>
+  
+                  {/* Step 1: Email Display (locked) */}
                   <View style={styles.stepContainer}>
                     <View style={styles.stepHeader}>
                       <View style={styles.stepBadge}>
-                        <Text style={styles.stepBadgeText}>3</Text>
+                        <Text style={styles.stepBadgeText}>1</Text>
                       </View>
-                      <Text style={styles.stepLabel}>Create New Password</Text>
+                      <Text style={styles.stepLabel}>Your Email</Text>
                     </View>
-
-                    <View style={styles.passwordFields}>
-                      <View
-                        style={[
-                          styles.inputWrapper,
-                          newPasswordFocused && styles.inputWrapperFocused,
-                        ]}
-                      >
-                        <Ionicons
-                          name="key-outline"
-                          size={20}
-                          color={
-                            newPasswordFocused
-                              ? colors.primary
-                              : colors.text.tertiary
-                          }
-                          style={styles.inputIcon}
-                        />
-                        <TextInput
-                          style={styles.input}
-                          placeholder="New password"
-                          placeholderTextColor={colors.text.secondary}
-                          secureTextEntry
-                          editable={!loading}
-                          value={newPassword}
-                          onChangeText={setNewPassword}
-                          onFocus={() => setNewPasswordFocused(true)}
-                          onBlur={() => setNewPasswordFocused(false)}
-                        />
-                      </View>
-
-                      <View
-                        style={[
-                          styles.inputWrapper,
-                          confirmPasswordFocused && styles.inputWrapperFocused,
-                        ]}
-                      >
-                        <Ionicons
-                          name="shield-outline"
-                          size={20}
-                          color={
-                            confirmPasswordFocused
-                              ? colors.primary
-                              : colors.text.tertiary
-                          }
-                          style={styles.inputIcon}
-                        />
-                        <TextInput
-                          style={styles.input}
-                          placeholder="Confirm password"
-                          placeholderTextColor={colors.text.secondary}
-                          secureTextEntry
-                          editable={!loading}
-                          value={confirmPassword}
-                          onChangeText={setConfirmPassword}
-                          onFocus={() => setConfirmPasswordFocused(true)}
-                          onBlur={() => setConfirmPasswordFocused(false)}
-                        />
-                      </View>
+                    <View style={styles.inputWrapper}>
+                      <Ionicons
+                        name="mail-outline"
+                        size={20}
+                        color={colors.text.secondary}
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={[styles.input, styles.inputLocked]}
+                        value={email}
+                        editable={false}
+                      />
                     </View>
                   </View>
-                )}
-
-                {/* Error Display */}
-                {error && (
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
-                  </View>
-                )}
-              </View>
-            )}
-          </View>
-        </ScrollView>
-
-        {/* Fixed Bottom Button */}
-        <View
-          style={[
-            styles.bottomButton,
-            { paddingBottom: Math.max(insets.bottom, 16) },
-          ]}
-        >
-          <FigmaPrimaryButton
-            onPress={buttonConfig.onPress}
-            disabled={loading}
-            loading={loading}
-            style={{ height: 50, borderRadius: 10, width: '100%' }}
+  
+                  {/* Step 2: Verification Code */}
+                  {(step === 'code' || step === 'password') && (
+                    <View style={styles.stepContainer}>
+                      <View style={styles.stepHeader}>
+                        <View
+                          style={[
+                            styles.stepBadge,
+                            codeLocked && styles.stepBadgeComplete,
+                          ]}
+                        >
+                          {codeLocked ? (
+                            <Ionicons
+                              name="checkmark"
+                              size={14}
+                              color={colors.text.primary}
+                            />
+                          ) : (
+                            <Text style={styles.stepBadgeText}>2</Text>
+                          )}
+                        </View>
+                        <Text style={styles.stepLabel}>Verification Code</Text>
+                        {!codeLocked && (
+                          <TouchableOpacity
+                            onPress={handleResendCode}
+                            disabled={loading}
+                          >
+                            <Text style={styles.resendText}>Resend</Text>
+                          </TouchableOpacity>
+                        )}
+                      </View>
+                      <Text style={styles.codeSentText}>
+                        Enter the 6-digit code sent to your email
+                      </Text>
+                      <View style={codeLocked ? styles.otpLocked : undefined}>
+                        <OTPInput
+                          value={verificationCode}
+                          onChange={setVerificationCode}
+                          disabled={codeLocked || loading}
+                          autoFocus={step === 'code'}
+                          error={!!error && step === 'code'}
+                        />
+                      </View>
+                      {codeLocked && (
+                        <View style={styles.lockedNotice}>
+                          <Ionicons
+                            name="lock-closed"
+                            size={14}
+                            color={colors.success}
+                          />
+                          <Text style={styles.lockedNoticeText}>
+                            Code verified
+                          </Text>
+                        </View>
+                      )}
+                    </View>
+                  )}
+  
+                  {/* Step 3: New Password */}
+                  {step === 'password' && (
+                    <View style={styles.stepContainer}>
+                      <View style={styles.stepHeader}>
+                        <View style={styles.stepBadge}>
+                          <Text style={styles.stepBadgeText}>3</Text>
+                        </View>
+                        <Text style={styles.stepLabel}>Create New Password</Text>
+                      </View>
+  
+                      <View style={styles.passwordFields}>
+                        <View
+                          style={[
+                            styles.inputWrapper,
+                            newPasswordFocused && styles.inputWrapperFocused,
+                          ]}
+                        >
+                          <Ionicons
+                            name="key-outline"
+                            size={20}
+                            color={
+                              newPasswordFocused
+                                ? colors.primary
+                                : colors.text.tertiary
+                            }
+                            style={styles.inputIcon}
+                          />
+                          <TextInput
+                            style={styles.input}
+                            placeholder="New password"
+                            placeholderTextColor={colors.text.secondary}
+                            secureTextEntry
+                            editable={!loading}
+                            value={newPassword}
+                            onChangeText={setNewPassword}
+                            onFocus={() => setNewPasswordFocused(true)}
+                            onBlur={() => setNewPasswordFocused(false)}
+                          />
+                        </View>
+  
+                        <View
+                          style={[
+                            styles.inputWrapper,
+                            confirmPasswordFocused && styles.inputWrapperFocused,
+                          ]}
+                        >
+                          <Ionicons
+                            name="shield-outline"
+                            size={20}
+                            color={
+                              confirmPasswordFocused
+                                ? colors.primary
+                                : colors.text.tertiary
+                            }
+                            style={styles.inputIcon}
+                          />
+                          <TextInput
+                            style={styles.input}
+                            placeholder="Confirm password"
+                            placeholderTextColor={colors.text.secondary}
+                            secureTextEntry
+                            editable={!loading}
+                            value={confirmPassword}
+                            onChangeText={setConfirmPassword}
+                            onFocus={() => setConfirmPasswordFocused(true)}
+                            onBlur={() => setConfirmPasswordFocused(false)}
+                          />
+                        </View>
+                      </View>
+                    </View>
+                  )}
+  
+                  {/* Error Display */}
+                  {error && (
+                    <View style={styles.errorContainer}>
+                      <Text style={styles.errorText}>{error}</Text>
+                    </View>
+                  )}
+                </View>
+              )}
+            </View>
+          </ScrollView>
+  
+          {/* Fixed Bottom Button */}
+          <View
+            style={[
+              styles.bottomButton,
+              { paddingBottom: Math.max(insets.bottom, 16) },
+            ]}
           >
-            {loading ? null : (
-              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
-                {buttonConfig.text}
-              </Text>
-            )}
-            {loading && <ActivityIndicator size="small" color="#fff" />}
-          </FigmaPrimaryButton>
-        </View>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+            <FigmaPrimaryButton
+              onPress={buttonConfig.onPress}
+              disabled={loading}
+              loading={loading}
+              style={{ height: 50, borderRadius: 10, width: '100%' }}
+            >
+              {loading ? null : (
+                <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
+                  {buttonConfig.text}
+                </Text>
+              )}
+              {loading && <ActivityIndicator size="small" color="#fff" />}
+            </FigmaPrimaryButton>
+          </View>
+        </KeyboardAvoidingView>
+      </SafeAreaView>
+    </AppBackground>
   );
 };
 
@@ -450,7 +453,7 @@ const styles = StyleSheet.create({
   headerSpacer: { flex: 1 },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -498,18 +501,18 @@ const styles = StyleSheet.create({
   stepBadgeText: {
     color: colors.text.primary,
     fontSize: 12,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
   },
   stepLabel: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     flex: 1,
   },
   resendText: {
     fontSize: 13,
     color: colors.primary,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
   codeSentText: {
     fontSize: 13,
@@ -581,7 +584,7 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },

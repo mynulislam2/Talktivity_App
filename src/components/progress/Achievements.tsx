@@ -120,7 +120,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: spacing.xs,
   },
@@ -142,7 +142,7 @@ const styles = StyleSheet.create({
   },
   levelText: {
     fontSize: 12,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   levelInfo: {
@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   },
   levelTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   levelSubtext: {
@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   streakTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   streakSubtext: {
@@ -204,7 +204,7 @@ const styles = StyleSheet.create({
   },
   badgesTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     marginBottom: spacing.xs,
   },
@@ -239,7 +239,7 @@ const styles = StyleSheet.create({
   },
   badgeName: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fbbf24',
   },
   badgeNameLocked: {

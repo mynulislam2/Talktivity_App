@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 32,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   cameraBadge: {
@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 29,
     letterSpacing: 0.12,
     color: '#fff',

@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 30.8,
     letterSpacing: -0.03,
     color: '#FDFDFD',

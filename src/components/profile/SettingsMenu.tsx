@@ -263,7 +263,7 @@ const styles = StyleSheet.create({
   },
   menuItemText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   memberSince: {
@@ -292,7 +292,7 @@ const styles = StyleSheet.create({
   },
   signOutText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#ff6f85',
   },
 });

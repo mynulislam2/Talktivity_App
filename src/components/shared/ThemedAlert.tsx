@@ -192,7 +192,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: '#ffffff',
     textAlign: 'center',
     marginBottom: 8,
@@ -222,7 +222,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#ffffff',
   },
 });

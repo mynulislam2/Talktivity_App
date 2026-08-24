@@ -25,6 +25,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { courseService } from '@/services/course';
 import { progressService } from '@/services/progress';
+import { AppBackground } from '../../components/common/AppBackground';
 
 const WAVE_BARS = [12, 18, 28, 20, 34, 42, 30, 22, 36, 18, 12];
 const COACH_IMG = require('../../../assets/figma/coach/alina-intro.png');
@@ -88,14 +89,6 @@ function resolveAudioUrl(audioPath?: string): string {
   return `https://audio.talktivity.app/${normalizedPath}`;
 }
 
-function GradientBackground({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {children}
-    </View>
-  );
-}
-
 function ListeningHeader({
   title,
   onBack,
@@ -140,7 +133,7 @@ const lh = StyleSheet.create({
   headerSpacer: { flex: 1 },
   title: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -569,18 +562,18 @@ export default function ListeningScreen() {
 
   if (!currentTopic) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={s.safe} edges={['top']}>
           <View style={s.padded}>
             <ListeningHeader title="Listening" onBack={goBack} />
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   return (
-    <GradientBackground>
+    <AppBackground>
       <SafeAreaView style={s.safe} edges={['top']}>
         <View style={[s.padded, s.topSection]}>
           <ListeningHeader
@@ -730,7 +723,7 @@ export default function ListeningScreen() {
           </View>
         </LinearGradient>
       </SafeAreaView>
-    </GradientBackground>
+    </AppBackground>
   );
 }
 
@@ -826,7 +819,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
     gap: 4,
   },
-  continueText: { color: '#fff', fontSize: 16, fontWeight: '500' },
+  continueText: { color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' },
   lockedText: {
     fontSize: 12,
     lineHeight: 18,

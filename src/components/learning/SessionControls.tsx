@@ -124,7 +124,7 @@ const styles = StyleSheet.create({
   timerLabel: {
     fontSize: 12,
     color: colors.text.secondary,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     marginBottom: spacing.xs,
   },
   timer: {
@@ -171,7 +171,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.white,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     marginLeft: spacing.sm,
   },
 });

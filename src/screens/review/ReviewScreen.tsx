@@ -27,6 +27,7 @@ import { progressService } from '@/services/progress';
 import type { ReviewItem, ValidationResult } from '@/types/review';
 import { validateAnswer } from '@/utils/validation';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import { AppBackground } from '../../components/common/AppBackground';
 let ExpoSpeechRecognitionModule: any = null;
 let useSpeechRecognitionEvent: any = () => {};
 try {
@@ -84,14 +85,6 @@ async function playBase64Audio(
       });
     });
   }
-}
-
-function GradientBackground({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {children}
-    </View>
-  );
 }
 
 function ReviewTopBar({
@@ -157,7 +150,7 @@ const rtb = StyleSheet.create({
   headerSpacer: { flex: 1 },
   title: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -326,7 +319,7 @@ const rlc = StyleSheet.create({
   headline: {
     marginTop: 12,
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
     color: '#fff',
@@ -353,13 +346,13 @@ const rlc = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  taskLabel: { fontSize: 14, fontWeight: '500', lineHeight: 19 },
+  taskLabel: { fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 19 },
   taskLabelActive: { color: '#fff' },
   taskLabelInactive: { color: 'rgba(255,255,255,0.7)' },
   taskProcessing: {
     marginTop: 2,
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#5cff4d',
   },
   taskCheck: {
@@ -470,11 +463,11 @@ const cmb = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#1e1f3a',
   },
-  coachName: { color: '#fff', fontWeight: '600', fontSize: 13 },
+  coachName: { color: '#fff', fontWeight: '600', fontFamily: 'Poppins-SemiBold', fontSize: 13 },
   onlineLabel: {
     color: '#4ade80',
     fontSize: 9,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.8,
   },
   messageText: { color: '#fff', fontSize: 14, lineHeight: 21 },
@@ -589,7 +582,7 @@ function ReviewCardComponent({
             color="#fff"
             style={{ marginRight: 4 }}
           />
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
             {actionLabel}
           </Text>
         </FigmaPrimaryButton>
@@ -657,7 +650,7 @@ const rcc = StyleSheet.create({
   originalText: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fdfdfd',
   },
@@ -682,7 +675,7 @@ const rcc = StyleSheet.create({
   correctedText: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fdfdfd',
   },
@@ -729,7 +722,7 @@ const rcc = StyleSheet.create({
   },
   transcriptLabel: {
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     letterSpacing: 1.54,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.6)',
@@ -788,7 +781,7 @@ function ReviewCompletionScreen({
           onPress={onGoHome}
           style={{ height: 45, borderRadius: 6, width: '100%' }}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
             Continue
           </Text>
           <Ionicons
@@ -815,7 +808,7 @@ const cs = StyleSheet.create({
   title: {
     marginTop: 16,
     fontSize: 36,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 36,
     letterSpacing: -0.72,
     color: '#fff',
@@ -829,7 +822,7 @@ const cs = StyleSheet.create({
   scoreWrap: { alignItems: 'center', marginTop: 64 },
   scoreText: {
     fontSize: 40,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 48,
     letterSpacing: -0.8,
     color: '#fff',
@@ -837,7 +830,7 @@ const cs = StyleSheet.create({
   scoreLabel: {
     marginTop: 16,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: '#c6c6c6',
   },
@@ -858,7 +851,7 @@ const cs = StyleSheet.create({
     borderWidth: 1,
   },
   pillDot: { width: 8, height: 8, borderRadius: 4 },
-  pillText: { fontSize: 12, fontWeight: '600' },
+  pillText: { fontSize: 12, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   continueWrap: { marginTop: 28 },
 });
 
@@ -1146,7 +1139,7 @@ export const ReviewScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} title="ANALYSIS" />
           <ReportLoadingCard
@@ -1154,13 +1147,13 @@ export const ReviewScreen: React.FC = () => {
             totalDurationMs={40000}
           />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (error) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <View style={ss.centerContent}>
@@ -1173,13 +1166,13 @@ export const ReviewScreen: React.FC = () => {
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (reviewItems.length === 0) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <View style={ss.centerContent}>
@@ -1194,13 +1187,13 @@ export const ReviewScreen: React.FC = () => {
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (!sessionStarted) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <ScrollView
@@ -1269,30 +1262,30 @@ export const ReviewScreen: React.FC = () => {
                   color="#fff"
                   style={{ marginRight: 4 }}
                 />
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '500' }}>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
                   {greetReady ? 'Start Review' : 'Preparing...'}
                 </Text>
               </FigmaPrimaryButton>
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (reviewComplete) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <ReviewCompletionScreen reviewItems={reviewItems} onGoHome={goBack} />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   return (
-    <GradientBackground>
+    <AppBackground>
       <SafeAreaView style={ss.safe} edges={['top']}>
         <ReviewTopBar
           onBack={goBack}
@@ -1323,7 +1316,7 @@ export const ReviewScreen: React.FC = () => {
           )}
         </ScrollView>
       </SafeAreaView>
-    </GradientBackground>
+    </AppBackground>
   );
 };
 const ss = StyleSheet.create({
@@ -1345,7 +1338,7 @@ const ss = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: '#fda4af',
     marginBottom: 8,
   },
@@ -1361,7 +1354,7 @@ const ss = StyleSheet.create({
     paddingVertical: 12,
     backgroundColor: 'rgba(37,99,235,0.5)',
   },
-  errorBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
+  errorBtnText: { color: '#fff', fontWeight: '600', fontFamily: 'Poppins-SemiBold', fontSize: 14 },
   emptyCard: {
     width: '100%',
     borderRadius: 20,
@@ -1373,7 +1366,7 @@ const ss = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: 8,
   },
@@ -1387,7 +1380,7 @@ const ss = StyleSheet.create({
   startInner: { maxWidth: 353, alignSelf: 'center' },
   startTitle: {
     fontSize: 28,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 34,
     textAlign: 'center',
     color: '#fff',

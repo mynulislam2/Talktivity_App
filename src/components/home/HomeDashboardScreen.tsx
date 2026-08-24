@@ -218,7 +218,7 @@ const styles = StyleSheet.create({
   },
   weekdayNumber: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#a0a0a1',
   },
   weekdayLabel: {
@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   todayPlanTitle: {
     fontSize: 22,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 25.3,
     letterSpacing: 0.12,
     color: '#fff',
@@ -265,7 +265,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 16.8,
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
   todayPlanHero: {
     position: 'absolute',
@@ -279,7 +279,7 @@ const styles = StyleSheet.create({
   },
   coachSectionTitle: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 28.8,
     letterSpacing: 0.12,
     color: '#fff',
@@ -311,7 +311,7 @@ const styles = StyleSheet.create({
   },
   coachCardTitle: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     letterSpacing: 0.12,
     color: '#fff',
@@ -352,7 +352,7 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 16.8,
     color: '#fff',
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
   coachCardButtonTextLocked: {
     color: 'rgba(255,255,255,0.8)',

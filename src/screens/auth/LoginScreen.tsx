@@ -383,7 +383,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: '#fdfdfd',
@@ -427,7 +427,7 @@ const styles = StyleSheet.create({
   },
   googleButtonText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22.4,
     color: '#FDFDFD',
   },
@@ -446,7 +446,7 @@ const styles = StyleSheet.create({
   },
   dividerText: {
     fontSize: 12,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#ffffff',
   },
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 22.4,
     color: '#ffffff',
     marginBottom: 8,
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   },
   forgotText: {
     fontSize: 14,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#C6C6C6',
   },
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
   },
   continueText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 19.6,
     color: '#ffffff',
   },
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fdfdfd',
   },
   modalBody: {
@@ -584,7 +584,7 @@ const styles = StyleSheet.create({
   },
   modalHeading: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fdfdfd',
     textAlign: 'center',
     marginBottom: 8,
@@ -609,7 +609,7 @@ const styles = StyleSheet.create({
   modalButtonSecondaryText: {
     color: '#fdfdfd',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });
 

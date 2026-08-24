@@ -127,7 +127,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#fff',
-    fontWeight: '600', // font-semibold
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold', // font-semibold
     textAlign: 'center',
   },
   disabled: {

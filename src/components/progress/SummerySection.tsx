@@ -172,7 +172,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   streakBadge: {
@@ -186,7 +186,7 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fbbf24',
   },
   grid: {
@@ -205,7 +205,7 @@ const styles = StyleSheet.create({
   },
   gridValue: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
   },
   valueGreen: {
     color: '#86efac',
@@ -243,12 +243,12 @@ const styles = StyleSheet.create({
   },
   xpTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   xpValue: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fbbf24',
   },
   xpProgress: {
@@ -294,7 +294,7 @@ const styles = StyleSheet.create({
   },
   xpBreakdownValue: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   xpBreakdownXP: {
     fontSize: 12,

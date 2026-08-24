@@ -69,7 +69,7 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 18,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: spacing.md,
     paddingHorizontal: spacing.lg,

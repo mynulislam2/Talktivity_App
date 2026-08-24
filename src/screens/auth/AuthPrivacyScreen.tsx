@@ -246,7 +246,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: '#FFFFFF',
     marginBottom: spacing.xl,
   },
@@ -255,7 +255,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#FFFFFF',
     marginBottom: spacing.md,
   },
@@ -264,7 +264,7 @@ const styles = StyleSheet.create({
     color: 'rgba(203, 213, 225, 1)',
     lineHeight: 22,
     marginBottom: spacing.md,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
   },
   bulletPoint: {
     fontSize: 14,
@@ -272,7 +272,7 @@ const styles = StyleSheet.create({
     lineHeight: 22,
     marginBottom: spacing.sm,
     marginLeft: spacing.md,
-    fontWeight: '400',
+    fontWeight: '400', fontFamily: 'Poppins',
   },
   lastUpdated: {
     fontSize: 12,

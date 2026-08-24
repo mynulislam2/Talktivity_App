@@ -44,12 +44,12 @@ function SkillBar({ label, value }: { label: string; value: number }) {
 
 const sb = StyleSheet.create({
   container: { gap: 8 },
-  label: { fontSize: 13, fontWeight: '500', lineHeight: 17, color: '#fff' },
+  label: { fontSize: 13, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 17, color: '#fff' },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   value: {
     width: 36,
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: 'rgba(255,255,255,0.9)',
     fontVariant: ['tabular-nums'] as any,
   },
@@ -122,7 +122,7 @@ export function EnglishScoreCard({
           end={{ x: 1, y: 0 }}
           style={s.gradientBtn}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' }}>
             Explore My Deep Dive Report
           </Text>
         </LinearGradient>
@@ -139,11 +139,11 @@ const s = StyleSheet.create({
     paddingBottom: 28,
   },
   hero: { alignItems: 'center' },
-  heroTitle: { fontSize: 22, fontWeight: '600', lineHeight: 28, color: '#fff' },
+  heroTitle: { fontSize: 22, fontWeight: '600', fontFamily: 'Poppins-SemiBold', lineHeight: 28, color: '#fff' },
   heroLevel: {
     marginTop: 8,
     fontSize: 32,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 32,
     color: '#3b7fff',
   },

@@ -133,7 +133,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 19.2,
     color: '#FDFDFD',
   },
@@ -223,7 +223,7 @@ const styles = StyleSheet.create({
   coverText: {
     color: '#333',
     fontSize: 14,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
   },
   groupNameInfo: {
     minWidth: 0,
@@ -231,7 +231,7 @@ const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 16.8,
     color: '#FDFDFD',
   },
@@ -255,6 +255,6 @@ const styles = StyleSheet.create({
   leaveButtonText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
 });

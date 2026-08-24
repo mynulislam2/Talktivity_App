@@ -185,7 +185,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   chartContainer: {
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#86efac',
   },
   infoText: {

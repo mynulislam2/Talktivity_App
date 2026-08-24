@@ -14,6 +14,7 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Animated, { FadeInUp, BounceIn, FadeIn } from 'react-native-reanimated';
+import { AppBackground } from '../common/AppBackground';
 
 export interface QuizCongratulationsProps {
   quizType: 'speaking' | 'listening';
@@ -38,53 +39,55 @@ export function QuizCongratulations({
       : "You've completed the quiz!";
 
   return (
-    <SafeAreaView style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        <Animated.View style={styles.content} entering={FadeIn.duration(600)}>
-          <Animated.Text
-            style={styles.title}
-            entering={BounceIn.delay(300).duration(800)}
-          >
-            🎉 Congratulations!
-          </Animated.Text>
-          <Animated.Text
-            style={styles.message}
-            entering={FadeInUp.delay(500).duration(600)}
-          >
-            {quizTypeMessage}
-          </Animated.Text>
-          <Animated.Text
-            style={styles.scoreText}
-            entering={FadeInUp.delay(700).duration(600)}
-          >
-            Your Score: <Text style={styles.scoreValue}>{score}</Text> /{' '}
-            <Text style={styles.scoreValue}>{totalQuestions}</Text>
-          </Animated.Text>
-          {error ? <Text style={styles.errorText}>{error}</Text> : null}
-          <Animated.View
-            style={styles.buttons}
-            entering={FadeInUp.delay(900).duration(600)}
-          >
-            <TouchableOpacity style={styles.button} onPress={onTryAgain}>
-              <Text style={styles.buttonText}>🔁 Try Again</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles.button} onPress={onNext}>
-              <Text style={styles.buttonText}>Next</Text>
-            </TouchableOpacity>
+    <AppBackground>
+      <SafeAreaView style={styles.container}>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <Animated.View style={styles.content} entering={FadeIn.duration(600)}>
+            <Animated.Text
+              style={styles.title}
+              entering={BounceIn.delay(300).duration(800)}
+            >
+              🎉 Congratulations!
+            </Animated.Text>
+            <Animated.Text
+              style={styles.message}
+              entering={FadeInUp.delay(500).duration(600)}
+            >
+              {quizTypeMessage}
+            </Animated.Text>
+            <Animated.Text
+              style={styles.scoreText}
+              entering={FadeInUp.delay(700).duration(600)}
+            >
+              Your Score: <Text style={styles.scoreValue}>{score}</Text> /{' '}
+              <Text style={styles.scoreValue}>{totalQuestions}</Text>
+            </Animated.Text>
+            {error ? <Text style={styles.errorText}>{error}</Text> : null}
+            <Animated.View
+              style={styles.buttons}
+              entering={FadeInUp.delay(900).duration(600)}
+            >
+              <TouchableOpacity style={styles.button} onPress={onTryAgain}>
+                <Text style={styles.buttonText}>🔁 Try Again</Text>
+              </TouchableOpacity>
+              <TouchableOpacity style={styles.button} onPress={onNext}>
+                <Text style={styles.buttonText}>Next</Text>
+              </TouchableOpacity>
+            </Animated.View>
           </Animated.View>
-        </Animated.View>
-      </ScrollView>
-    </SafeAreaView>
+        </ScrollView>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#0a0923',
+    backgroundColor: 'transparent',
   },
   scrollContent: {
     flexGrow: 1,
@@ -98,7 +101,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 36,
-    fontWeight: '800',
+    fontWeight: '800', fontFamily: 'Poppins-Bold',
     color: '#10b981',
     textAlign: 'center',
   },
@@ -109,12 +112,12 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   scoreValue: {
     color: '#7B70FF',
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
   },
   errorText: {
     fontSize: 14,
@@ -134,6 +137,6 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });

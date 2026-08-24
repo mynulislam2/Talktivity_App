@@ -84,7 +84,7 @@ const styles = StyleSheet.create({
   headerSpacer: { flex: 1 },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },

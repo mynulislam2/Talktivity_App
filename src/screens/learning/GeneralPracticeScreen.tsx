@@ -20,6 +20,7 @@ import {
 import { GeneralPracticeContent } from '@/components/generalpractice/GeneralPracticeContent';
 import { PracticeVisualizerLayout } from '@/components/practice/PracticeVisualizerLayout';
 import { handleDeviceFailure } from '@/lib/call/deviceFailureHandlerNative';
+import { AppBackground } from '../../components/common/AppBackground';
 
 export default function GeneralPracticeScreen() {
   const navigation = useNavigation();
@@ -72,25 +73,27 @@ export default function GeneralPracticeScreen() {
   const topicTitle = topic?.title || 'General Practice';
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
-      <PracticeVisualizerLayout>
-        <View style={styles.container}>
-          <GeneralPracticeContent
-            topicTitle={topicTitle}
-            sessionState={sessionState}
-            connectionDetails={connectionDetails}
-            onConnect={handleConnect}
-            onDisconnect={handleDisconnect}
-            onStateChange={updateAgentState}
-            canStartSession={canStartSession}
-            timeLoading={statusLoading}
-            stateColor={stateColor}
-            onDeviceFailure={handleDeviceFailure}
-            onBack={() => navigation.goBack()}
-          />
-        </View>
-      </PracticeVisualizerLayout>
-    </SafeAreaView>
+    <AppBackground>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
+        <PracticeVisualizerLayout>
+          <View style={styles.container}>
+            <GeneralPracticeContent
+              topicTitle={topicTitle}
+              sessionState={sessionState}
+              connectionDetails={connectionDetails}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+              onStateChange={updateAgentState}
+              canStartSession={canStartSession}
+              timeLoading={statusLoading}
+              stateColor={stateColor}
+              onDeviceFailure={handleDeviceFailure}
+              onBack={() => navigation.goBack()}
+            />
+          </View>
+        </PracticeVisualizerLayout>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
 

@@ -45,12 +45,12 @@ const statStyles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#ffffff',
   },
   value: {
     fontSize: 24,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: 'rgba(255,255,255,0.9)',
     marginTop: 2,
   },
@@ -155,7 +155,7 @@ const ss = StyleSheet.create({
   },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBox: { padding: 8, borderRadius: 8 },
-  title: { fontSize: 20, fontWeight: '600', color: '#ffffff' },
+  title: { fontSize: 20, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#ffffff' },
   subtitle: { fontSize: 14, color: '#9ca3af' },
   statSpace: { gap: 16 },
   desc: { fontSize: 14, color: '#d1d5db', lineHeight: 20 },
@@ -171,5 +171,5 @@ const ss = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  btnText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  btnText: { color: '#ffffff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });

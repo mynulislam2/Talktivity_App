@@ -44,8 +44,10 @@ jest.mock('expo-image-picker', () => ({
   },
 }));
 
-// Mock navigation
+// Mock navigation (keep real exports like DarkTheme/DefaultTheme so theme
+// modules that import them still work under test; only override the hooks).
 jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
   useNavigation: jest.fn(() => ({
     navigate: jest.fn(),
     goBack: jest.fn(),

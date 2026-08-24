@@ -384,13 +384,13 @@ const styles = StyleSheet.create({
   },
   introHeadline: {
     fontSize: 28,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: '#fff',
     textAlign: 'center',
   },
-  gradientText: { fontWeight: '700', color: '#c55dfe' },
+  gradientText: { fontWeight: '700', fontFamily: 'Poppins-Bold', color: '#c55dfe' },
   introDescription: {
     marginTop: 16,
     fontSize: 12,
@@ -406,7 +406,7 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   buttonSection: { paddingHorizontal: 20, paddingBottom: 32, paddingTop: 16 },
-  startButtonText: { fontSize: 16, fontWeight: '500', color: '#fff' },
+  startButtonText: { fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium', color: '#fff' },
   liveSection: { flex: 1, paddingHorizontal: 20, paddingTop: 24 },
   promptBubble: {
     maxWidth: 292,

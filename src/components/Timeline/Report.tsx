@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.white,
     flex: 1,
   },
@@ -125,6 +125,6 @@ const styles = StyleSheet.create({
   actionButtonText: {
     color: colors.white,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });

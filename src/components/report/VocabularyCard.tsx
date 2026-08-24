@@ -43,8 +43,8 @@ const statStyles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.1)',
     padding: 16,
   },
-  title: { fontSize: 18, fontWeight: '600', color: '#ffffff' },
-  value: { fontSize: 24, fontWeight: '700', color: 'rgba(255,255,255,0.9)', marginTop: 2 },
+  title: { fontSize: 18, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#ffffff' },
+  value: { fontSize: 24, fontWeight: '700', fontFamily: 'Poppins-Bold', color: 'rgba(255,255,255,0.9)', marginTop: 2 },
   body: { marginTop: 8, gap: 4 },
 });
 
@@ -119,12 +119,12 @@ export function VocabularyCard({
                 {Object.entries(vocabulary.wordSuggestions).map(([basicWord, suggestions]) =>
                   Array.isArray(suggestions) && suggestions.length > 0 ? (
                     <View key={basicWord} style={ss.suggestionGroup}>
-                      <Text style={[ss.desc, { fontWeight: '600' }]}>
+                      <Text style={[ss.desc, { fontWeight: '600', fontFamily: 'Poppins-SemiBold' }]}>
                         Instead of "{basicWord}":
                       </Text>
                       {suggestions.map((suggestion: any, idx: number) => (
                         <View key={idx} style={ss.suggestionDetail}>
-                          <Text style={{ fontSize: 13, fontWeight: '500', color: suggestion.color || '#60a5fa' }}>
+                          <Text style={{ fontSize: 13, fontWeight: '500', fontFamily: 'Poppins-Medium', color: suggestion.color || '#60a5fa' }}>
                             {suggestion.word}
                           </Text>
                           <Text style={ss.desc}>
@@ -145,7 +145,7 @@ export function VocabularyCard({
                 {Object.entries(vocabulary.exampleSentences).map(([word, sentence]) =>
                   sentence ? (
                     <Text key={word} style={ss.desc}>
-                      <Text style={{ fontWeight: '600' }}>{word}:</Text>{' '}
+                      <Text style={{ fontWeight: '600', fontFamily: 'Poppins-SemiBold' }}>{word}:</Text>{' '}
                       {String(sentence)}
                     </Text>
                   ) : null
@@ -205,7 +205,7 @@ const ss = StyleSheet.create({
   inner: { width: '100%', maxWidth: 400, paddingVertical: 8 },
   header: { flexDirection: 'row', alignItems: 'center', gap: 12, marginBottom: 16 },
   iconBox: { padding: 8, borderRadius: 8 },
-  title: { fontSize: 20, fontWeight: '600', color: '#ffffff' },
+  title: { fontSize: 20, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#ffffff' },
   subtitle: { fontSize: 14, color: '#9ca3af' },
   statSpace: { gap: 16 },
   desc: { fontSize: 14, color: '#d1d5db', lineHeight: 20 },
@@ -216,7 +216,7 @@ const ss = StyleSheet.create({
     paddingVertical: 2,
   },
   levelLabel: { fontSize: 14, color: '#cbd5e1' },
-  levelValue: { fontSize: 14, fontWeight: '600', color: '#ffffff' },
+  levelValue: { fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#ffffff' },
   suggestionGroup: { marginBottom: 12 },
   suggestionDetail: { marginLeft: 8, marginBottom: 4 },
   wordTags: { flexDirection: 'row', flexWrap: 'wrap', gap: 8, marginTop: 4 },
@@ -226,7 +226,7 @@ const ss = StyleSheet.create({
     paddingVertical: 6,
     borderRadius: 12,
   },
-  wordTagText: { fontSize: 13, color: '#60a5fa', fontWeight: '600' },
+  wordTagText: { fontSize: 13, color: '#60a5fa', fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   gradientBtn: {
     marginTop: 24,
     paddingVertical: 12,
@@ -238,5 +238,5 @@ const ss = StyleSheet.create({
     shadowRadius: 6,
     elevation: 4,
   },
-  btnText: { color: '#ffffff', fontSize: 16, fontWeight: '600' },
+  btnText: { color: '#ffffff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });

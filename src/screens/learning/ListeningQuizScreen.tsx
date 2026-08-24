@@ -18,16 +18,9 @@ import { useAppDispatch } from '@/store/hooks';
 import { setLastListeningQuiz } from '@/store/slices/quizSlice';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import type { QuizOption, QuizQuestion } from '@/types/quiz';
+import { AppBackground } from '../../components/common/AppBackground';
 
 const PARTY_POPPER = require('../../../assets/figma/listening/party-popper.png');
-
-function GradientBackground({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {children}
-    </View>
-  );
-}
 
 function ListeningHeader({
   title,
@@ -73,7 +66,7 @@ const lh = StyleSheet.create({
   headerSpacer: { flex: 1 },
   title: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -206,7 +199,7 @@ const lc = StyleSheet.create({
   headline: {
     marginTop: 12,
     fontSize: 22,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
     color: '#fff',
@@ -239,13 +232,13 @@ const lc = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  taskLabel: { fontSize: 14, fontWeight: '500', lineHeight: 19 },
+  taskLabel: { fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 19 },
   taskLabelActive: { color: '#fff' },
   taskLabelInactive: { color: 'rgba(255,255,255,0.7)' },
   taskProcessing: {
     marginTop: 2,
     fontSize: 11,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#5cff4d',
   },
   taskCheck: {
@@ -290,7 +283,7 @@ function CompletionScreen({
         onPress={onContinue}
         style={{ height: 45, borderRadius: 6, width: '100%' }}
       >
-        <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
+        <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
           Continue
         </Text>
         <Ionicons
@@ -316,7 +309,7 @@ const cs = StyleSheet.create({
   title: {
     marginTop: 16,
     fontSize: 36,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 36,
     letterSpacing: -0.72,
     color: '#fff',
@@ -325,7 +318,7 @@ const cs = StyleSheet.create({
   scoreWrap: { alignItems: 'center', marginTop: 64 },
   scoreText: {
     fontSize: 40,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 48,
     letterSpacing: -0.8,
     color: '#fff',
@@ -333,7 +326,7 @@ const cs = StyleSheet.create({
   scoreLabel: {
     marginTop: 16,
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: '#c6c6c6',
   },
@@ -431,7 +424,7 @@ const qo = StyleSheet.create({
   text: {
     flex: 1,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22,
     color: '#fdfdfd',
   },
@@ -458,7 +451,7 @@ const qq = StyleSheet.create({
   text: {
     marginTop: 8,
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     color: '#fff',
   },
@@ -539,7 +532,7 @@ export default function ListeningQuizScreen() {
 
   if (loading) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 6 }}>
             <ListeningHeader title="Listening Quiz" onBack={goBack} />
@@ -548,13 +541,13 @@ export default function ListeningQuizScreen() {
             <LoadingCard loadingMessage={loadingMessage} steps={steps} />
           </ScrollView>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (quizError) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 6 }}>
             <ListeningHeader title="Listening Quiz" onBack={goBack} />
@@ -569,13 +562,13 @@ export default function ListeningQuizScreen() {
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (completedUI) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <CompletionScreen
             score={score}
@@ -584,13 +577,13 @@ export default function ListeningQuizScreen() {
             onContinue={() => (navigation as any).navigate('HomeScreen')}
           />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (!currentQuestion) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <View style={{ paddingHorizontal: 20, paddingTop: 6 }}>
             <ListeningHeader title="Listening Quiz" onBack={goBack} />
@@ -601,7 +594,7 @@ export default function ListeningQuizScreen() {
             </Text>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
@@ -617,7 +610,7 @@ export default function ListeningQuizScreen() {
     : 'Next';
 
   return (
-    <GradientBackground>
+    <AppBackground>
       <SafeAreaView style={ss.safe} edges={['top']}>
         <View style={{ paddingHorizontal: 20, paddingTop: 6 }}>
           <ListeningHeader title="Listening Quiz" onBack={goBack} />
@@ -697,7 +690,7 @@ export default function ListeningQuizScreen() {
             disabled={!isAnswered && selectedOptionIds.length === 0}
             style={{ height: 45, borderRadius: 6, width: '100%' }}
           >
-            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
               {ctaLabel}
             </Text>
             {!isAnswered && selectedOptionIds.length > 0 ? null : null}
@@ -712,7 +705,7 @@ export default function ListeningQuizScreen() {
           </FigmaPrimaryButton>
         </View>
       </SafeAreaView>
-    </GradientBackground>
+    </AppBackground>
   );
 }
 
@@ -737,7 +730,7 @@ const ss = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     color: '#fff',
   },
@@ -749,7 +742,7 @@ const ss = StyleSheet.create({
     textAlign: 'center',
   },
   retryBtn: { marginTop: 20, borderRadius: 6, overflow: 'hidden' },
-  retryText: { color: '#fff', fontSize: 16, fontWeight: '500' },
+  retryText: { color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' },
   emptyText: {
     fontSize: 16,
     lineHeight: 24,
@@ -770,7 +763,7 @@ const ss = StyleSheet.create({
   },
   questionCount: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: '#fff',
   },

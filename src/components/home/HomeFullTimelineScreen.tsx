@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     color: '#fff',
   },
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   journeyBadgeText: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22.4,
     color: '#fff',
   },
@@ -359,7 +359,7 @@ const styles = StyleSheet.create({
   },
   heroTitle: {
     fontSize: 28,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: '#fff',
@@ -392,7 +392,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 24,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 28.8,
     letterSpacing: 0.12,
     color: '#fff',
@@ -415,7 +415,7 @@ const styles = StyleSheet.create({
   },
   timelineTitle: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 28,
     color: '#fff',
   },
@@ -486,7 +486,7 @@ const styles = StyleSheet.create({
   },
   weekCardTitle: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22.4,
     color: '#fff',
   },

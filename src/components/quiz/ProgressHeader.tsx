@@ -70,7 +70,7 @@ const styles = StyleSheet.create({
   },
   badgeText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   questionInfo: {
@@ -80,7 +80,7 @@ const styles = StyleSheet.create({
   },
   questionNumber: {
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   scoreSection: {
     paddingHorizontal: 16,
@@ -97,7 +97,7 @@ const styles = StyleSheet.create({
   },
   scoreValue: {
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#34d399',
     marginTop: 2,
   },

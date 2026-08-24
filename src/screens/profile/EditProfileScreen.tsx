@@ -33,6 +33,7 @@ import {
   getDisplayLanguage,
   setDisplayLanguage,
 } from '@/lib/preferences/userExperiencePreferences';
+import { AppBackground } from '../../components/common/AppBackground';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 
@@ -348,230 +349,232 @@ const EditProfileScreen: React.FC = () => {
   ]);
 
   return (
-    <SafeAreaView style={styles.container} edges={['bottom']}>
-      {/* Header */}
-      <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
-        <TouchableOpacity
-          onPress={() => navigation.goBack()}
-          style={styles.backButton}
-          activeOpacity={0.7}
+    <AppBackground>
+      <SafeAreaView style={styles.container} edges={['bottom']}>
+        {/* Header */}
+        <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
+          <TouchableOpacity
+            onPress={() => navigation.goBack()}
+            style={styles.backButton}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={18}
+              color="rgba(255,255,255,0.8)"
+            />
+          </TouchableOpacity>
+          <Text style={styles.headerTitle}>Edit your profile</Text>
+          <View style={{ width: 42 }} />
+        </View>
+
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
         >
-          <Ionicons
-            name="chevron-back"
-            size={18}
-            color="rgba(255,255,255,0.8)"
-          />
-        </TouchableOpacity>
-        <Text style={styles.headerTitle}>Edit your profile</Text>
-        <View style={{ width: 42 }} />
-      </View>
+          {feedback && (
+            <View style={styles.feedbackBanner}>
+              <Text style={styles.feedbackText}>{feedback}</Text>
+            </View>
+          )}
 
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {feedback && (
-          <View style={styles.feedbackBanner}>
-            <Text style={styles.feedbackText}>{feedback}</Text>
+          {error && activeField === null && (
+            <View style={styles.errorBanner}>
+              <Text style={styles.errorBannerText}>{error}</Text>
+            </View>
+          )}
+
+          <View style={styles.fieldsContainer}>
+            {loading ? (
+              Array.from({ length: 5 }).map((_, i) => (
+                <View key={i} style={styles.skeletonField} />
+              ))
+            ) : (
+              <>
+                {FIELD_CONFIGS.map((config) => (
+                  <TouchableOpacity
+                    key={config.key}
+                    style={styles.fieldCard}
+                    onPress={() => openEditor(config.key)}
+                    activeOpacity={0.7}
+                  >
+                    <View style={styles.fieldCardText}>
+                      <Text style={styles.fieldCardLabel}>{config.label}</Text>
+                      <Text style={styles.fieldCardValue} numberOfLines={1}>
+                        {fieldValues[config.key]}
+                      </Text>
+                    </View>
+                    <View style={styles.fieldCardAction}>
+                      <Ionicons name="pencil" size={18} color="#2879ff" />
+                      <Text style={styles.fieldCardEditText}>Edit</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))}
+              </>
+            )}
           </View>
-        )}
+        </ScrollView>
 
-        {error && activeField === null && (
-          <View style={styles.errorBanner}>
-            <Text style={styles.errorBannerText}>{error}</Text>
-          </View>
-        )}
-
-        <View style={styles.fieldsContainer}>
-          {loading ? (
-            Array.from({ length: 5 }).map((_, i) => (
-              <View key={i} style={styles.skeletonField} />
-            ))
-          ) : (
-            <>
-              {FIELD_CONFIGS.map((config) => (
-                <TouchableOpacity
-                  key={config.key}
-                  style={styles.fieldCard}
-                  onPress={() => openEditor(config.key)}
-                  activeOpacity={0.7}
-                >
-                  <View style={styles.fieldCardText}>
-                    <Text style={styles.fieldCardLabel}>{config.label}</Text>
-                    <Text style={styles.fieldCardValue} numberOfLines={1}>
-                      {fieldValues[config.key]}
+        {/* Bottom Sheet Editor */}
+        {activeConfig && (
+          <Modal
+            visible={!!activeField}
+            transparent
+            animationType="slide"
+            onRequestClose={closeEditor}
+          >
+            <Pressable style={styles.overlay} onPress={closeEditor}>
+              <Pressable
+                style={styles.bottomSheet}
+                onPress={(e) => e.stopPropagation()}
+              >
+                <View style={styles.sheetHeader}>
+                  <View style={styles.sheetHeaderText}>
+                    <Text style={styles.sheetTitle}>
+                      Edit {activeConfig.label}
+                    </Text>
+                    <Text style={styles.sheetDescription}>
+                      {activeConfig.description}
                     </Text>
                   </View>
-                  <View style={styles.fieldCardAction}>
-                    <Ionicons name="pencil" size={18} color="#2879ff" />
-                    <Text style={styles.fieldCardEditText}>Edit</Text>
-                  </View>
-                </TouchableOpacity>
-              ))}
-            </>
-          )}
-        </View>
-      </ScrollView>
-
-      {/* Bottom Sheet Editor */}
-      {activeConfig && (
-        <Modal
-          visible={!!activeField}
-          transparent
-          animationType="slide"
-          onRequestClose={closeEditor}
-        >
-          <Pressable style={styles.overlay} onPress={closeEditor}>
-            <Pressable
-              style={styles.bottomSheet}
-              onPress={(e) => e.stopPropagation()}
-            >
-              <View style={styles.sheetHeader}>
-                <View style={styles.sheetHeaderText}>
-                  <Text style={styles.sheetTitle}>
-                    Edit {activeConfig.label}
-                  </Text>
-                  <Text style={styles.sheetDescription}>
-                    {activeConfig.description}
-                  </Text>
+                  <TouchableOpacity
+                    onPress={closeEditor}
+                    style={styles.sheetClose}
+                  >
+                    <Ionicons name="close" size={18} color="#fff" />
+                  </TouchableOpacity>
                 </View>
-                <TouchableOpacity
-                  onPress={closeEditor}
-                  style={styles.sheetClose}
-                >
-                  <Ionicons name="close" size={18} color="#fff" />
-                </TouchableOpacity>
-              </View>
 
-              {error && (
-                <View style={styles.sheetError}>
-                  <Text style={styles.sheetErrorText}>{error}</Text>
-                </View>
-              )}
-
-              <ScrollView
-                style={styles.sheetOptions}
-                showsVerticalScrollIndicator={false}
-              >
-                {activeField === 'fullName' ? (
-                  <View>
-                    <Text style={styles.inputLabel}>Display name</Text>
-                    <TextInput
-                      style={styles.textInput}
-                      value={draftValue}
-                      onChangeText={setDraftValue}
-                      placeholder="Type your name"
-                      placeholderTextColor="rgba(255,255,255,0.3)"
-                      maxLength={80}
-                      autoFocus
-                    />
-                  </View>
-                ) : activeConfig.multi ? (
-                  <View style={styles.pillsContainer}>
-                    {activeConfig.options?.map((option) => {
-                      const active = draftMultiValue.includes(option.value);
-                      return (
-                        <TouchableOpacity
-                          key={option.value}
-                          style={[styles.pill, active && styles.pillActive]}
-                          onPress={() =>
-                            setDraftMultiValue((prev) =>
-                              active
-                                ? prev.filter((v) => v !== option.value)
-                                : [...prev, option.value]
-                            )
-                          }
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            style={[
-                              styles.pillText,
-                              active && styles.pillTextActive,
-                            ]}
-                          >
-                            {option.label}
-                          </Text>
-                        </TouchableOpacity>
-                      );
-                    })}
-                  </View>
-                ) : (
-                  <View style={styles.optionsList}>
-                    {activeConfig.options?.map((option) => {
-                      const active = draftValue === option.value;
-                      return (
-                        <TouchableOpacity
-                          key={option.value}
-                          style={[
-                            styles.optionItem,
-                            active && styles.optionItemActive,
-                          ]}
-                          onPress={() => setDraftValue(option.value)}
-                          activeOpacity={0.7}
-                        >
-                          <Text
-                            style={[
-                              styles.optionText,
-                              active && styles.optionTextActive,
-                            ]}
-                          >
-                            {option.label}
-                          </Text>
-                          {active && (
-                            <Ionicons name="checkmark" size={18} color="#fff" />
-                          )}
-                        </TouchableOpacity>
-                      );
-                    })}
+                {error && (
+                  <View style={styles.sheetError}>
+                    <Text style={styles.sheetErrorText}>{error}</Text>
                   </View>
                 )}
-              </ScrollView>
 
-              <View style={styles.sheetActions}>
-                <TouchableOpacity
-                  style={styles.cancelBtn}
-                  onPress={closeEditor}
-                  activeOpacity={0.7}
+                <ScrollView
+                  style={styles.sheetOptions}
+                  showsVerticalScrollIndicator={false}
                 >
-                  <Text style={styles.cancelBtnText}>Cancel</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  style={[
-                    styles.saveBtn,
-                    (isSaving ||
+                  {activeField === 'fullName' ? (
+                    <View>
+                      <Text style={styles.inputLabel}>Display name</Text>
+                      <TextInput
+                        style={styles.textInput}
+                        value={draftValue}
+                        onChangeText={setDraftValue}
+                        placeholder="Type your name"
+                        placeholderTextColor="rgba(255,255,255,0.3)"
+                        maxLength={80}
+                        autoFocus
+                      />
+                    </View>
+                  ) : activeConfig.multi ? (
+                    <View style={styles.pillsContainer}>
+                      {activeConfig.options?.map((option) => {
+                        const active = draftMultiValue.includes(option.value);
+                        return (
+                          <TouchableOpacity
+                            key={option.value}
+                            style={[styles.pill, active && styles.pillActive]}
+                            onPress={() =>
+                              setDraftMultiValue((prev) =>
+                                active
+                                  ? prev.filter((v) => v !== option.value)
+                                  : [...prev, option.value]
+                              )
+                            }
+                            activeOpacity={0.7}
+                          >
+                            <Text
+                              style={[
+                                styles.pillText,
+                                active && styles.pillTextActive,
+                              ]}
+                            >
+                              {option.label}
+                            </Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  ) : (
+                    <View style={styles.optionsList}>
+                      {activeConfig.options?.map((option) => {
+                        const active = draftValue === option.value;
+                        return (
+                          <TouchableOpacity
+                            key={option.value}
+                            style={[
+                              styles.optionItem,
+                              active && styles.optionItemActive,
+                            ]}
+                            onPress={() => setDraftValue(option.value)}
+                            activeOpacity={0.7}
+                          >
+                            <Text
+                              style={[
+                                styles.optionText,
+                                active && styles.optionTextActive,
+                              ]}
+                            >
+                              {option.label}
+                            </Text>
+                            {active && (
+                              <Ionicons name="checkmark" size={18} color="#fff" />
+                            )}
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </View>
+                  )}
+                </ScrollView>
+
+                <View style={styles.sheetActions}>
+                  <TouchableOpacity
+                    style={styles.cancelBtn}
+                    onPress={closeEditor}
+                    activeOpacity={0.7}
+                  >
+                    <Text style={styles.cancelBtnText}>Cancel</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    style={[
+                      styles.saveBtn,
+                      (isSaving ||
+                        (activeConfig.multi
+                          ? draftMultiValue.length === 0
+                          : draftValue.trim().length === 0)) &&
+                      styles.saveBtnDisabled,
+                    ]}
+                    onPress={saveField}
+                    disabled={
+                      isSaving ||
                       (activeConfig.multi
                         ? draftMultiValue.length === 0
-                        : draftValue.trim().length === 0)) &&
-                    styles.saveBtnDisabled,
-                  ]}
-                  onPress={saveField}
-                  disabled={
-                    isSaving ||
-                    (activeConfig.multi
-                      ? draftMultiValue.length === 0
-                      : draftValue.trim().length === 0)
-                  }
-                  activeOpacity={0.7}
-                >
-                  {isSaving ? (
-                    <ActivityIndicator size="small" color="#fff" />
-                  ) : (
-                    <Text style={styles.saveBtnText}>Save Changes</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
+                        : draftValue.trim().length === 0)
+                    }
+                    activeOpacity={0.7}
+                  >
+                    {isSaving ? (
+                      <ActivityIndicator size="small" color="#fff" />
+                    ) : (
+                      <Text style={styles.saveBtnText}>Save Changes</Text>
+                    )}
+                  </TouchableOpacity>
+                </View>
+              </Pressable>
             </Pressable>
-          </Pressable>
-        </Modal>
-      )}
-    </SafeAreaView>
+          </Modal>
+        )}
+      </SafeAreaView>
+    </AppBackground>
   );
 };
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.background,
+    backgroundColor: 'transparent',
   },
   header: {
     flexDirection: 'row',
@@ -593,7 +596,7 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   scrollContent: {
@@ -661,7 +664,7 @@ const styles = StyleSheet.create({
   },
   fieldCardValue: {
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 22,
     color: '#fdfdfd',
     marginTop: 4,
@@ -709,7 +712,7 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 20,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     color: '#fff',
   },
@@ -828,7 +831,7 @@ const styles = StyleSheet.create({
   },
   cancelBtnText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   saveBtn: {
@@ -843,7 +846,7 @@ const styles = StyleSheet.create({
   },
   saveBtnText: {
     fontSize: 14,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
 });

@@ -159,7 +159,7 @@ const styles = StyleSheet.create({
   avatarText: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
   },
   bubble: {
     maxWidth: '75%',
@@ -190,7 +190,7 @@ const styles = StyleSheet.create({
   },
   authorName: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     opacity: 0.9,
     color: '#fff',
   },

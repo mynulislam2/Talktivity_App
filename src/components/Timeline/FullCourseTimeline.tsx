@@ -478,12 +478,12 @@ const styles = StyleSheet.create({
   },
   headerBadgeText: {
     fontSize: 12,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.purple[400],
   },
   title: {
     fontSize: 20,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: spacing.sm,
@@ -518,7 +518,7 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: spacing.xs,
   },
@@ -551,7 +551,7 @@ const styles = StyleSheet.create({
   },
   weekSelectorTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: 2,
   },
@@ -572,7 +572,7 @@ const styles = StyleSheet.create({
   },
   weekSelectorButtonText: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   modalOverlay: {
@@ -594,7 +594,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: spacing.md,
   },
@@ -613,7 +613,7 @@ const styles = StyleSheet.create({
   },
   weekOptionText: {
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.muted,
   },
   weekOptionTextSelected: {
@@ -703,7 +703,7 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   weekBadge: {
@@ -716,7 +716,7 @@ const styles = StyleSheet.create({
   },
   weekBadgeText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.muted,
   },
   statusBadge: {
@@ -729,7 +729,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   topicTitle: {
     fontSize: 14,
@@ -758,7 +758,7 @@ const styles = StyleSheet.create({
   },
   dayTypeText: {
     fontSize: 10,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.muted,
   },
   emptyContainer: {
@@ -767,7 +767,7 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
@@ -792,7 +792,7 @@ const styles = StyleSheet.create({
   },
   authTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
@@ -817,7 +817,7 @@ const styles = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '700', fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
@@ -837,7 +837,7 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: colors.white,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });
 

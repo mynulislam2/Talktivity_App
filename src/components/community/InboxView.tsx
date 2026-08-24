@@ -403,7 +403,7 @@ const styles = StyleSheet.create({
   },
   messagesTitle: {
     fontSize: 34,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.04,
     color: '#fff',
   },
@@ -466,7 +466,7 @@ const styles = StyleSheet.create({
   },
   filterChipText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: 'rgba(255,255,255,0.66)',
   },
   filterChipTextActive: {
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
   emptyTitle: {
     marginTop: 16,
     fontSize: 16,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -536,7 +536,7 @@ const styles = StyleSheet.create({
   groupRowName: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.02,
     color: '#fff',
   },

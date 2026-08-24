@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
   closeButtonText: {
     ...typography.body2,
     color: '#fff',
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
 });
 

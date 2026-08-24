@@ -310,7 +310,7 @@ const styles = StyleSheet.create({
   },
   verifyButtonText: {
     fontSize: 11,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   modalOverlay: {
@@ -349,7 +349,7 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   loadingState: {
@@ -372,7 +372,7 @@ const styles = StyleSheet.create({
   },
   emailHighlight: {
     color: colors.text.primary,
-    fontWeight: '500',
+    fontWeight: '500', fontFamily: 'Poppins-Medium',
   },
   errorContainer: {
     backgroundColor: 'rgba(127, 29, 29, 0.3)',
@@ -396,7 +396,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: colors.text.primary,
     fontSize: 16,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   resendButton: {
     alignItems: 'center',
@@ -414,7 +414,7 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     marginBottom: spacing.xs,
   },

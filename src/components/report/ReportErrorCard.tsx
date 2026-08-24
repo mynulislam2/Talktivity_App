@@ -123,7 +123,7 @@ const s = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     marginBottom: 16,
     textAlign: 'center',
   },
@@ -143,7 +143,7 @@ const s = StyleSheet.create({
     marginBottom: 12,
   },
   gradientFill: { paddingVertical: 12, alignItems: 'center' },
-  btnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  btnText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   retryBtn: {
     width: '100%',
     borderRadius: 12,
@@ -151,5 +151,5 @@ const s = StyleSheet.create({
     paddingVertical: 12,
     alignItems: 'center',
   },
-  retryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  retryBtnText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });

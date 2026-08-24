@@ -50,7 +50,7 @@ const s = StyleSheet.create({
   },
   title: {
     fontSize: 17,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     lineHeight: 21,
     color: '#ffffff',
   },

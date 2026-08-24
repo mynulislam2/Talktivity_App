@@ -1,5 +1,5 @@
 import React from 'react';
-import { type ViewStyle } from 'react-native';
+import { type StyleProp, type ViewStyle } from 'react-native';
 import GradientButton from '../common/GradientButton';
 
 interface FigmaPrimaryButtonProps {
@@ -7,7 +7,7 @@ interface FigmaPrimaryButtonProps {
   onPress?: () => void;
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
 }
 
 export function FigmaPrimaryButton({

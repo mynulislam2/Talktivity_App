@@ -151,7 +151,7 @@ const styles = StyleSheet.create({
   categoryTitle: {
     color: '#fff',
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
   },
   plusButton: {
     width: 42,

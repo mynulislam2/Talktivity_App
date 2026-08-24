@@ -734,7 +734,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: { fontSize: 18, fontWeight: '500', color: '#FFFFFF' },
+  headerTitle: { fontSize: 18, fontWeight: '500', fontFamily: 'Poppins-Medium', color: '#FFFFFF' },
   headerSpacer: { flex: 1 },
   headerMenuButton: {
     width: 36,
@@ -809,7 +809,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    fontWeight: '600',
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.5)',
   },
   errorSubtext: {
@@ -831,7 +831,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
-  dmOverlayText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  dmOverlayText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   groupProfileOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.6)',
@@ -867,7 +867,7 @@ const styles = StyleSheet.create({
   groupProfileAvatarSection: { alignItems: 'center', marginBottom: 20 },
   groupProfileName: {
     fontSize: 22,
-    fontWeight: 'bold',
+    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginTop: 12,
     marginBottom: 4,
@@ -903,7 +903,7 @@ const styles = StyleSheet.create({
   },
   memberAvatarContainer: { position: 'relative' },
   memberInfo: { flex: 1, minWidth: 0 },
-  memberName: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  memberName: { fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#fff' },
   adminBadge: {
     fontSize: 11,
     color: '#fbbf24',
@@ -926,7 +926,7 @@ const styles = StyleSheet.create({
   },
   muteButtonActive: { backgroundColor: '#2949ff' },
   muteButtonMuted: { backgroundColor: '#d97706' },
-  muteButtonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  muteButtonText: { color: '#fff', fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   leaveButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -938,7 +938,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,111,133,0.3)',
     marginTop: 8,
   },
-  leaveButtonText: { color: '#ff6f85', fontSize: 14, fontWeight: '600' },
+  leaveButtonText: { color: '#ff6f85', fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });
 
 export default GroupChatScreen;

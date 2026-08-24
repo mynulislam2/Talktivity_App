@@ -141,15 +141,18 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#000',
     marginBottom: spacing.xs,
   },
   meta: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
   },
   description: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: '#666',
     lineHeight: 18,
     marginBottom: spacing.md,
@@ -166,6 +169,7 @@ const styles = StyleSheet.create({
   joinButtonText: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     marginLeft: spacing.sm,
   },
@@ -181,6 +185,7 @@ const styles = StyleSheet.create({
   joinedText: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.primary,
     marginLeft: spacing.sm,
   },

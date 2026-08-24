@@ -17,10 +17,12 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 // Mock Expo modules
-jest.mock('expo-audio', () => ({
-  setAudioModeAsync: jest.fn(),
-  Sound: {
-    createAsync: jest.fn(),
+jest.mock('expo-av', () => ({
+  Audio: {
+    setAudioModeAsync: jest.fn(),
+    Sound: {
+      createAsync: jest.fn(),
+    },
   },
 }));
 
@@ -42,8 +44,10 @@ jest.mock('expo-image-picker', () => ({
   },
 }));
 
-// Mock navigation
+// Mock navigation (keep real exports like DarkTheme/DefaultTheme so theme
+// modules that import them still work under test; only override the hooks).
 jest.mock('@react-navigation/native', () => ({
+  ...jest.requireActual('@react-navigation/native'),
   useNavigation: jest.fn(() => ({
     navigate: jest.fn(),
     goBack: jest.fn(),

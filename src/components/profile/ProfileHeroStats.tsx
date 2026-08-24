@@ -83,6 +83,7 @@ const styles = StyleSheet.create({
   value: {
     fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.14,
     color: '#fff',
   },
@@ -94,6 +95,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
     maxWidth: 88,

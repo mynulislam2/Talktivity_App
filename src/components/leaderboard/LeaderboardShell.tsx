@@ -149,6 +149,7 @@ const styles = StyleSheet.create({
   scopeText: {
     fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.14,
     color: '#fff',
   },
@@ -182,10 +183,12 @@ const styles = StyleSheet.create({
   dropdownItemText: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: 'rgba(255,255,255,0.7)',
   },
   dropdownItemTextActive: {
     color: '#fff',
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

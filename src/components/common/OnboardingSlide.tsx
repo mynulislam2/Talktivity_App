@@ -84,6 +84,7 @@ const styles = StyleSheet.create({
   headline: {
     fontSize: typography.h1.fontSize,
     fontWeight: typography.h1.fontWeight as any,
+    fontFamily: 'Poppins-Bold',
     color: colors.textDark.primary,
     textAlign: 'center',
     marginBottom: spacing.lg,
@@ -92,6 +93,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: typography.body1.fontSize,
+    fontFamily: 'Poppins',
     color: colors.textDark.secondary,
     textAlign: 'center',
     lineHeight: 24,

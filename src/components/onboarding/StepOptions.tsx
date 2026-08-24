@@ -128,11 +128,13 @@ const styles = StyleSheet.create({
   },
   optionIcon: {
     fontSize: 20,
+    fontFamily: 'Poppins',
     color: '#FFFFFF', // White icon
   },
   optionText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#FFFFFF', // White text
     lineHeight: 18,

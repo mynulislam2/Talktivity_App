@@ -6,14 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  TouchableOpacity,
-  ActivityIndicator,
-  Image,
-} from 'react-native';
+import { View, Text, StyleSheet, ActivityIndicator } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -27,8 +20,8 @@ import {
 } from '@/components/leaderboard';
 import { useLeaderboardData, useLeaderboardRefresh } from '@/hooks/leaderboard';
 import type { LeaderboardScreenProps } from '@/navigation/types';
-import type { LeaderboardType, LeaderboardUser } from '@/types/leaderboard';
-import { colors } from '@/styles/colors';
+import type { LeaderboardType } from '@/types/leaderboard';
+import { tokens } from '@/theme/tokens';
 import ScreenBackground from '../../components/common/ScreenBackground';
 
 const SCOPE_OPTIONS: { value: LeaderboardType; label: string }[] = [
@@ -71,7 +64,10 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
       <ScreenBackground>
         <SafeAreaView style={styles.container} edges={['bottom']}>
           <View style={styles.loadingContainer}>
-            <ActivityIndicator size="large" color="#6A5AE0" />
+            <ActivityIndicator
+              size="large"
+              color={tokens.color.accent.primary}
+            />
           </View>
         </SafeAreaView>
       </ScreenBackground>
@@ -158,8 +154,8 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
                 </Text>
                 <Ionicons
                   name="share-outline"
-                  size={18}
-                  color="rgba(255,255,255,0.7)"
+                  size={20}
+                  color="rgba(255,255,255,0.8)"
                 />
               </View>
             </View>
@@ -200,85 +196,16 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
           />
         </View>
 
-        {/* Leaderboard list container */}
-        <View style={styles.listContainer}>
-          <View style={styles.listHeader}>
-            <View style={styles.listHeaderLeft}>
-              <Text style={styles.listHeaderText}>Rank</Text>
-              <Text style={[styles.listHeaderText, { marginLeft: 52 }]}>
-                Users
-              </Text>
-            </View>
-            <Text style={styles.listHeaderText}>Total XP</Text>
-          </View>
-
-          <View style={styles.listBody}>
-            {currentLeaderboard.length > 0 ? (
-              currentLeaderboard.map((user) => (
-                <LeaderboardRowItem
-                  key={`${currentType}-${user.id}`}
-                  user={user}
-                />
-              ))
-            ) : (
-              <View style={styles.emptyState}>
-                <Text style={styles.emptyText}>
-                  No ranked learners yet. Complete lessons and earn XP to join
-                  the board.
-                </Text>
-              </View>
-            )}
-          </View>
-        </View>
-
-        {/* Dropdown renders inline below the trigger */}
+        {/* Leaderboard list — rank medals, avatars, XP (matches frontend) */}
+        <LeaderboardList
+          leaderboard={currentLeaderboard}
+          leaderboardType={currentType}
+        />
       </ProgressPageShell>
     </SafeAreaView>
    </ScreenBackground>
   );
 };
-
-function LeaderboardRowItem({ user }: { user: LeaderboardUser }) {
-  const getRowStyle = (position: number) => {
-    if (position === 1)
-      return { bg: 'rgba(14,85,255,0.28)', border: 'rgba(99,102,241,0.3)' };
-    return { bg: 'rgba(255,255,255,0.06)', border: 'rgba(255,255,255,0.06)' };
-  };
-  const tone = getRowStyle(user.position);
-
-  return (
-    <View
-      style={[
-        styles.row,
-        { backgroundColor: tone.bg, borderColor: tone.border },
-      ]}
-    >
-      <View style={styles.rowLeft}>
-        <View style={styles.rankBox}>
-          <Text style={styles.rankText}>{user.position}</Text>
-        </View>
-        {user.profile_picture ? (
-          <Image
-            source={{ uri: user.profile_picture }}
-            style={styles.rowAvatar}
-          />
-        ) : (
-          <View style={styles.rowAvatarPlaceholder}>
-            <Text style={styles.rowAvatarText}>
-              {(user.name || 'U').charAt(0).toUpperCase()}
-            </Text>
-          </View>
-        )}
-        <Text style={styles.rowName} numberOfLines={1}>
-          {user.name}
-        </Text>
-      </View>
-      <View style={styles.rowRight}>
-        <Text style={styles.rowXp}>{user.xp}</Text>
-      </View>
-    </View>
-  );
-}
 
 const styles = StyleSheet.create({
   container: {
@@ -316,6 +243,7 @@ const styles = StyleSheet.create({
   avatarSmText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   avatarEmpty: {
@@ -331,11 +259,13 @@ const styles = StyleSheet.create({
   youLabel: {
     fontSize: 20,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     lineHeight: 24,
   },
   xpSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#8c8c8c',
     marginTop: 4,
   },
@@ -345,6 +275,7 @@ const styles = StyleSheet.create({
   xpHeader: {
     fontSize: 12,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.55)',
@@ -358,6 +289,7 @@ const styles = StyleSheet.create({
   xpValue: {
     fontSize: 20,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   scopeSection: {
@@ -383,110 +315,15 @@ const styles = StyleSheet.create({
   },
   scopeDropdownItemText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.7)',
   },
   scopeDropdownSelectedText: {
     fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.14,
     color: '#fff',
-  },
-  listContainer: {
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    padding: 12,
-  },
-  listHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 12,
-    marginBottom: 16,
-  },
-  listHeaderLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  listHeaderText: {
-    fontSize: 13,
-    fontWeight: '500',
-    letterSpacing: 0.08,
-    color: 'rgba(255,255,255,0.4)',
-    textTransform: 'uppercase',
-  },
-  listBody: {
-    gap: 10,
-  },
-  row: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    borderRadius: 10,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderWidth: 1,
-  },
-  rowLeft: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 12,
-    flex: 1,
-    minWidth: 0,
-  },
-  rankBox: {
-    width: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  rankText: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: 'rgba(255,255,255,0.6)',
-  },
-  rowAvatar: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-  },
-  rowAvatarPlaceholder: {
-    width: 38,
-    height: 38,
-    borderRadius: 19,
-    backgroundColor: 'rgba(255,255,255,0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  rowAvatarText: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  rowName: {
-    fontSize: 15,
-    fontWeight: '500',
-    color: '#fff',
-    flex: 1,
-  },
-  rowRight: {},
-  rowXp: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: '#fff',
-  },
-  emptyState: {
-    borderRadius: 6,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    paddingHorizontal: 16,
-    paddingVertical: 20,
-  },
-  emptyText: {
-    fontSize: 14,
-    color: 'rgba(255,255,255,0.55)',
-    textAlign: 'center',
   },
   // Scope dropdown rendered via Modal
 });

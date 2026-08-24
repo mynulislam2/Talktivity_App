@@ -2,6 +2,7 @@ import React, { useRef } from 'react';
 import { View, StyleSheet, Animated } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LinearGradient } from 'expo-linear-gradient';
+import { AppBackground } from '../../components/common/AppBackground';
 import { useReportGeneration } from '@/hooks/report/useReportGeneration';
 import { useReportNavigation } from '@/hooks/report/useReportNavigation';
 import { useReportCompletion } from '@/hooks/report/useReportCompletion';
@@ -20,14 +21,6 @@ import type { HomeStackParamList } from '@/navigation/types';
 type ReportScreenPropsUnion =
   | ReportScreenProps
   | NativeStackScreenProps<HomeStackParamList, 'ReportScreen'>;
-
-function GradientBackground({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {children}
-    </View>
-  );
-}
 
 function ReportScreenContent() {
   const { reportData, phase, error, errorCode, retry } =
@@ -56,35 +49,35 @@ function ReportScreenContent() {
   // PREPARING → loader
   if (phase === 'preparing' || (!reportData && !error)) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReportLoadingCard loadingMessage="Analyzing your conversation and generating your personalized report..." />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   // TALK_MORE or TERMINAL → error card
   if (phase === 'talkMore' || phase === 'terminal' || !reportData) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReportErrorCard error={error} code={errorCode} onRetry={retry} />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (!overallScores) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReportErrorCard
             error="Unable to calculate report scores"
             onRetry={retry}
           />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
@@ -118,7 +111,7 @@ function ReportScreenContent() {
   ];
 
   return (
-    <GradientBackground>
+    <AppBackground>
       <SafeAreaView style={ss.safe} edges={['top']}>
         <Animated.View
           style={[
@@ -139,7 +132,7 @@ function ReportScreenContent() {
           {pages[currentStep]}
         </Animated.View>
       </SafeAreaView>
-    </GradientBackground>
+    </AppBackground>
   );
 }
 

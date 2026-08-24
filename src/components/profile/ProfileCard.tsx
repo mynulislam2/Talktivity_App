@@ -22,14 +22,14 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { ProfileData } from '@/types/profile';
 import type { ProficiencyResult } from '@/types/proficiency';
-import { ProfileCameraBadgeIcon } from './ProfileVisualIcons';
+import { tokens } from '@/theme/tokens';
+import { ProfileCameraBadgeIcon, UpgradeMagicIcon } from './ProfileVisualIcons';
 
 export interface ProfileCardProps {
   profile: ProfileData | null;
   planType?: string;
   isProActive?: boolean;
-  canUpgrade?: boolean;
-  upgradeLabel?: 'Upgrade' | 'Upgraded';
+  onUpgradePress?: () => void;
   proficiency?: ProficiencyResult | null;
   onProfileImageClick?: () => void;
   isUploadingProfileImage?: boolean;
@@ -67,11 +67,18 @@ function ProfileEditIcon() {
 export function ProfileCard({
   profile,
   planType = 'Free',
+  isProActive = false,
+  onUpgradePress,
   proficiency,
   onProfileImageClick,
   isUploadingProfileImage = false,
 }: ProfileCardProps) {
   const navigation = useNavigation<NativeStackNavigationProp<any>>();
+  // There is no working upgrade destination in this app yet, so a caller
+  // that doesn't supply onUpgradePress means "nowhere to send the user" —
+  // render the button visibly disabled rather than let it look tappable
+  // and silently do nothing.
+  const upgradeDisabled = isProActive || !onUpgradePress;
   const selfRatedLevel = getStartingLevelCefr(profile?.startingLevel);
   const ratingLine = selfRatedLevel
     ? `CEFR ${selfRatedLevel} Self Rated`
@@ -141,6 +148,18 @@ export function ProfileCard({
           <Text style={styles.planLabel}>Your Plan</Text>
           <Text style={styles.planValue}>{planType}</Text>
         </View>
+
+        <TouchableOpacity
+          onPress={upgradeDisabled ? undefined : onUpgradePress}
+          disabled={upgradeDisabled}
+          style={[styles.upgradeButton, upgradeDisabled && styles.upgradeButtonDisabled]}
+          activeOpacity={0.7}
+        >
+          <UpgradeMagicIcon size={16} />
+          <Text style={styles.upgradeButtonText}>
+            {isProActive ? 'Upgraded' : 'Upgrade'}
+          </Text>
+        </TouchableOpacity>
       </View>
     </View>
   );
@@ -186,6 +205,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   cameraBadge: {
@@ -219,12 +239,14 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 24,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 29,
     letterSpacing: 0.12,
     color: '#fff',
   },
   cefrLine: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
     marginTop: 4,
@@ -236,13 +258,37 @@ const styles = StyleSheet.create({
   },
   planLabel: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
   },
   planValue: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#fff',
     marginTop: 4,
+  },
+  upgradeButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 8,
+    minWidth: 98,
+    borderWidth: 1,
+    borderColor: 'rgba(249,249,249,0.5)',
+    backgroundColor: tokens.color.accent.primary,
+    borderRadius: tokens.radius.sm,
+    paddingHorizontal: 10,
+    paddingVertical: 10,
+  },
+  upgradeButtonDisabled: {
+    opacity: 0.65,
+  },
+  upgradeButtonText: {
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    color: '#fff',
   },
 });

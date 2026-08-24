@@ -98,10 +98,12 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   insight: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
 });

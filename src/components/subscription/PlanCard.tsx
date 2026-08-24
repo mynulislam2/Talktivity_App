@@ -205,23 +205,27 @@ const styles = StyleSheet.create({
   recommendedBadgeText: {
     color: '#fff',
     fontSize: 10,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     textTransform: 'uppercase',
   },
   planName: {
     fontSize: 20,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     color: '#fff',
     marginBottom: spacing.md,
   },
   price: {
     fontSize: 32,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '800',
     color: '#fff',
     marginBottom: spacing.sm,
   },
   period: {
     fontSize: 16,
+    fontFamily: 'Poppins-Medium',
     fontWeight: '500',
     color: 'rgba(203, 213, 225, 1)',
   },
@@ -237,6 +241,7 @@ const styles = StyleSheet.create({
   },
   featureText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(203, 213, 225, 1)',
     flex: 1,
   },
@@ -256,6 +261,7 @@ const styles = StyleSheet.create({
   primaryButtonText: {
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
   },
   disabledButton: {
@@ -267,10 +273,12 @@ const styles = StyleSheet.create({
   disabledButtonText: {
     color: '#9ca3af',
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
   },
   noCardText: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(203, 213, 225, 1)',
     textAlign: 'center',
     marginTop: spacing.sm,

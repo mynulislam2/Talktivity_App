@@ -1,5 +1,7 @@
+import { tokens } from '../theme/tokens';
+
 export const colors = {
-  primary: '#6A5AE0',
+  primary: tokens.color.accent.primary, // was '#6A5AE0'
   primaryLight: '#7B70FF',
   primaryDark: '#5A4BC0',
 
@@ -27,7 +29,7 @@ export const colors = {
   },
 
   dark: {
-    background: '#09090f',
+    background: tokens.color.bg.screen,
     backgroundAlt: '#1E2029',
     backgroundCard: '#1E2029',
     backgroundHover: '#2a2e38',

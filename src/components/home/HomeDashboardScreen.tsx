@@ -31,7 +31,6 @@ function getWeekdayItems() {
         weekday: 'short',
         timeZone: 'UTC',
       }),
-      dayNumber: date.getUTCDate(),
       isToday: index === 0,
     };
   });
@@ -70,15 +69,13 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
                     : styles.weekdayCircleInactive,
                 ]}
               >
-                {item.isToday ? (
+                {item.isToday && (
                   <Feather
                     name="check"
                     size={16}
                     color="#fff"
                     strokeWidth={2.5}
                   />
-                ) : (
-                  <Text style={styles.weekdayNumber}>{item.dayNumber}</Text>
                 )}
               </View>
               <Text
@@ -216,13 +213,9 @@ const styles = StyleSheet.create({
     borderColor: '#a0a0a1',
     backgroundColor: 'transparent',
   },
-  weekdayNumber: {
-    fontSize: 12,
-    fontWeight: '500',
-    color: '#a0a0a1',
-  },
   weekdayLabel: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22.4,
   },
   weekdayLabelActive: {
@@ -247,6 +240,7 @@ const styles = StyleSheet.create({
   todayPlanTitle: {
     fontSize: 22,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25.3,
     letterSpacing: 0.12,
     color: '#fff',
@@ -254,6 +248,7 @@ const styles = StyleSheet.create({
   todayPlanDesc: {
     marginTop: 6,
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 20.25,
     color: '#fff',
   },
@@ -266,6 +261,7 @@ const styles = StyleSheet.create({
     lineHeight: 16.8,
     color: '#fff',
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   todayPlanHero: {
     position: 'absolute',
@@ -280,6 +276,7 @@ const styles = StyleSheet.create({
   coachSectionTitle: {
     fontSize: 24,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 28.8,
     letterSpacing: 0.12,
     color: '#fff',
@@ -287,6 +284,7 @@ const styles = StyleSheet.create({
   coachSectionDesc: {
     marginTop: 6,
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22.4,
     color: '#c6c6c6',
   },
@@ -312,6 +310,7 @@ const styles = StyleSheet.create({
   coachCardTitle: {
     fontSize: 20,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 24,
     letterSpacing: 0.12,
     color: '#fff',
@@ -326,6 +325,7 @@ const styles = StyleSheet.create({
   coachCardDesc: {
     marginTop: 8,
     fontSize: 15,
+    fontFamily: 'Poppins',
     lineHeight: 21,
     color: '#c6c6c6',
     maxWidth: 220,
@@ -353,6 +353,7 @@ const styles = StyleSheet.create({
     lineHeight: 16.8,
     color: '#fff',
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   coachCardButtonTextLocked: {
     color: 'rgba(255,255,255,0.8)',

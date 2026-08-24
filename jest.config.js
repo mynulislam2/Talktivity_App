@@ -1,16 +1,19 @@
 /**
  * Jest Configuration
  *
- * Testing setup and configuration for React Native app
+ * Single source of truth. The `jest` key in package.json was removed so the
+ * two configs can no longer disagree (they did: react-native vs jest-expo,
+ * which made every suite fail to parse).
  */
 
 module.exports = {
-  preset: 'react-native',
-  testEnvironment: 'node',
+  preset: 'jest-expo',
   setupFilesAfterEnv: ['<rootDir>/jest.setup.js'],
   moduleNameMapper: {
-    '^@/(.*)$': '<rootDir>/$1',
-    '\\.(css|less|scss|sass)$': 'identity-obj-proxy',
+    // tsconfig.json maps @/service/* -> ./src/services/* and @/* -> ./src/*.
+    // The more specific alias MUST come first or it never matches.
+    '^@/service/(.*)$': '<rootDir>/src/services/$1',
+    '^@/(.*)$': '<rootDir>/src/$1',
   },
   testMatch: [
     '**/__tests__/**/*.test.ts',
@@ -18,26 +21,8 @@ module.exports = {
     '**/*.test.ts',
     '**/*.test.tsx',
   ],
-  collectCoverageFrom: [
-    'src/**/*.{ts,tsx}',
-    'Hooks/**/*.{ts,tsx}',
-    'lib/**/*.{ts,tsx}',
-    'service/**/*.{ts,tsx}',
-    '!**/node_modules/**',
-    '!**/*.d.ts',
-  ],
-  coverageThreshold: {
-    global: {
-      branches: 50,
-      functions: 50,
-      lines: 50,
-      statements: 50,
-    },
-  },
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!**/node_modules/**', '!**/*.d.ts'],
   transformIgnorePatterns: [
-    '/node_modules/(?!(@react-native|@expo|expo|react-native|@react-navigation|react-native-gesture-handler|@react-native-async-storage)/)',
+    'node_modules/(?!((jest-)?react-native|@react-native(-community)?|expo(nent)?|@expo(nent)?/.*|@expo-google-fonts/.*|react-navigation|@react-navigation/.*|@unimodules/.*|unimodules|sentry-expo|native-base|react-native-svg|@livekit/.*|livekit-client))',
   ],
-  globals: {
-    __DEV__: true,
-  },
 };

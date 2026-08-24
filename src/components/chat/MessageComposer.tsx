@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
     paddingVertical: 0,
     fontSize: 12,
     fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: '#FDFDFD',
   },

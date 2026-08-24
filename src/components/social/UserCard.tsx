@@ -110,17 +110,20 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#000',
     marginBottom: spacing.xs,
   },
   status: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
   },
   level: {
     fontSize: 12,
     color: colors.primary,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   pointsContainer: {
     flexDirection: 'row',
@@ -130,6 +133,7 @@ const styles = StyleSheet.create({
   points: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.primary,
     marginLeft: spacing.xs,
   },

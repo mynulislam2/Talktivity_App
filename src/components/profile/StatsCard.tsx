@@ -83,11 +83,13 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.black,
     marginBottom: spacing.xs,
   },
   statLabel: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     textAlign: 'center',
   },

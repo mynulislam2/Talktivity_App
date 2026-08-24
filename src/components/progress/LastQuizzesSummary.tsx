@@ -73,6 +73,7 @@ const styles = StyleSheet.create({
   sectionTitle: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255, 255, 255, 0.7)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -96,6 +97,7 @@ const styles = StyleSheet.create({
   },
   quizLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.5)',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
@@ -103,10 +105,12 @@ const styles = StyleSheet.create({
   quizType: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   quizDate: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
   },
   quizScore: {
@@ -116,10 +120,12 @@ const styles = StyleSheet.create({
   scoreValue: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#34d399',
   },
   scorePercent: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
   },
 });

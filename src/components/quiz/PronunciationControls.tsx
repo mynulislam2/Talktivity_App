@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { tokens } from '@/theme/tokens';
 
 export interface PronunciationControlsProps {
   listening: boolean;
@@ -37,7 +38,7 @@ export function PronunciationControls({
           <Ionicons
             name={listening ? 'mic-off' : 'mic'}
             size={20}
-            color="#fff"
+            color={tokens.color.text.primary}
           />
         </TouchableOpacity>
       </View>
@@ -56,11 +57,11 @@ export function PronunciationControls({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 24,
-    backgroundColor: 'rgba(17, 24, 39, 0.3)',
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
-    padding: 20,
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -75,48 +76,57 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    fontFamily: 'Poppins-SemiBold',
+    color: tokens.color.text.primary,
   },
   subtitle: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginTop: 2,
   },
   micButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#5A4BC0',
+    backgroundColor: tokens.color.accent.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   micButtonActive: {
-    backgroundColor: '#ef4444',
+    backgroundColor: tokens.color.state.danger,
   },
   speechContainer: {
     marginTop: 16,
     padding: 12,
-    borderRadius: 16,
-    backgroundColor: 'rgba(31, 41, 55, 0.3)',
+    borderRadius: tokens.radius.md,
+    backgroundColor: tokens.color.surface.subtle,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
+    borderColor: tokens.color.border.hairline,
   },
   speechLabel: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginBottom: 4,
   },
   speechText: {
     fontSize: 14,
-    color: '#fff',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    color: tokens.color.text.primary,
     minHeight: 20,
   },
   speechPlaceholder: {
-    color: '#6b7280',
+    color: tokens.color.text.placeholder,
   },
   errorText: {
     marginTop: 8,
     fontSize: 12,
-    color: '#fca5a5',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    color: tokens.color.state.errorText,
   },
 });

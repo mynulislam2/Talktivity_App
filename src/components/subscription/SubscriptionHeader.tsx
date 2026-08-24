@@ -60,10 +60,12 @@ const styles = StyleSheet.create({
   backButtonText: {
     color: 'rgba(203, 213, 225, 1)',
     fontSize: 14,
+    fontFamily: 'Poppins',
     marginLeft: spacing.sm,
   },
   title: {
     fontSize: 24,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     color: '#fff',
     textAlign: 'center',
@@ -71,6 +73,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(203, 213, 225, 1)',
     textAlign: 'center',
   },

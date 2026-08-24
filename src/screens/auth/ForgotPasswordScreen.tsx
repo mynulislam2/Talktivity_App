@@ -6,6 +6,10 @@
  * 2. Submit and receive verification code
  * 3. Enter reset code and new password
  * 4. Reset password successfully
+ *
+ * NOTE: this flow does not call the backend yet (see handleEmailSubmit /
+ * handlePasswordReset below) — that is a known, pre-existing functional gap
+ * tracked separately and intentionally left untouched here.
  */
 
 import React, { useState } from 'react';
@@ -15,18 +19,20 @@ import {
   StyleSheet,
   TextInput,
   TouchableOpacity,
-  ActivityIndicator,
   KeyboardAvoidingView,
   ScrollView,
   Platform,
   Alert,
+  Image,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import ScreenBackground from '../../components/common/ScreenBackground';
+import { FigmaPrimaryButton } from '../../components/ui/FigmaPrimaryButton';
+import OTPInput from '../../components/auth/OTPInput';
+import { tokens } from '../../theme/tokens';
 
 import type { AuthScreenProps } from '../../navigation/types';
-import { colors } from '../../styles/colors';
-import { spacing } from '../../styles/spacing';
 
 type ResetStep = 'email' | 'code' | 'reset';
 
@@ -44,6 +50,8 @@ const ForgotPasswordScreen: React.FC<AuthScreenProps> = ({ navigation }) => {
   // Step 3: New Password
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleEmailSubmit = async () => {
     setError(null);
@@ -141,184 +149,224 @@ const ForgotPasswordScreen: React.FC<AuthScreenProps> = ({ navigation }) => {
   };
 
   return (
-    <ScreenBackground>
+    <ScreenBackground style={styles.root}>
+      <SafeAreaView style={styles.safeArea} edges={['top']} />
       <KeyboardAvoidingView
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
         style={styles.container}
       >
-        <ScrollView contentContainerStyle={styles.scrollContent}>
-          {/* Header with Back Button */}
-          <View style={styles.headerBar}>
-            <TouchableOpacity onPress={handleBackPress}>
-              <Ionicons name="chevron-back" size={28} color="#fff" />
-            </TouchableOpacity>
-            <Text style={styles.headerTitle}>Reset Password</Text>
-            <View style={{ width: 28 }} />
-          </View>
+        <ScrollView
+          contentContainerStyle={styles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          <View style={styles.content}>
+            <View style={styles.topSection}>
+              {/* Back control */}
+              <TouchableOpacity
+                style={styles.backButton}
+                onPress={handleBackPress}
+                activeOpacity={0.7}
+                hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+              >
+                <Ionicons name="chevron-back" size={20} color={tokens.color.text.primary} />
+              </TouchableOpacity>
 
-        <View style={styles.content}>
-          {/* Step 1: Email */}
-          {step === 'email' && (
-            <>
-              <View style={styles.intro}>
-                <Text style={styles.subtitle}>
-                  Enter your email address and we'll send you a code to reset
-                  your password
-                </Text>
+              {/* Logo + Title */}
+              <View style={styles.header}>
+                <Image
+                  source={require('../../assets/images/talktivity-logo.png')}
+                  style={styles.logo}
+                  resizeMode="contain"
+                />
+                <Text style={styles.title}>Reset Your Password</Text>
               </View>
 
-              <View style={styles.form}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Email</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter your email"
-                    placeholderTextColor="#999"
-                    keyboardType="email-address"
-                    autoCapitalize="none"
-                    editable={!loading}
-                    value={email}
-                    onChangeText={setEmail}
-                  />
-                </View>
+              {/* Step 1: Email */}
+              {step === 'email' && (
+                <>
+                  <Text style={styles.subtitle}>
+                    Enter your email address and we&apos;ll send you a code to
+                    reset your password
+                  </Text>
 
-                {error && (
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>
+                      Email Address <Text style={styles.required}>*</Text>
+                    </Text>
+                    <View style={[styles.inputWrapper, error && styles.inputError]}>
+                      <Ionicons
+                        name="mail-outline"
+                        size={18}
+                        color="#9a9a9a"
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="you@example.com"
+                        placeholderTextColor={tokens.color.text.placeholder}
+                        keyboardType="email-address"
+                        autoCapitalize="none"
+                        editable={!loading}
+                        value={email}
+                        onChangeText={setEmail}
+                      />
+                    </View>
                   </View>
-                )}
 
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    loading && styles.disabledButton,
-                  ]}
-                  onPress={handleEmailSubmit}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
-                    <Text style={styles.submitButtonText}>Send Reset Code</Text>
+                  {error && <Text style={styles.errorText}>{error}</Text>}
+
+                  <FigmaPrimaryButton
+                    onPress={handleEmailSubmit}
+                    disabled={loading}
+                    loading={loading}
+                    style={styles.submitButton}
+                  >
+                    <Text style={styles.submitButtonText}>Send Verification Code</Text>
+                  </FigmaPrimaryButton>
+                </>
+              )}
+
+              {/* Step 2: Verification Code */}
+              {step === 'code' && (
+                <>
+                  <Text style={styles.subtitle}>
+                    Enter the verification code we sent to {email}
+                  </Text>
+
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Verification Code</Text>
+                    <OTPInput
+                      value={verificationCode}
+                      onChange={setVerificationCode}
+                      disabled={loading}
+                      autoFocus
+                      error={!!error}
+                    />
+                  </View>
+
+                  {error && (
+                    <Text style={[styles.errorText, styles.errorTextCenter]}>{error}</Text>
                   )}
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
 
-          {/* Step 2: Verification Code */}
-          {step === 'code' && (
-            <>
-              <View style={styles.intro}>
-                <Text style={styles.subtitle}>
-                  Enter the verification code we sent to {email}
-                </Text>
-              </View>
-
-              <View style={styles.form}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Verification Code</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Enter 6-digit code"
-                    placeholderTextColor="#999"
-                    keyboardType="number-pad"
-                    editable={!loading}
-                    value={verificationCode}
-                    onChangeText={setVerificationCode}
-                    maxLength={6}
-                  />
-                </View>
-
-                {error && (
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
-                  </View>
-                )}
-
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    loading && styles.disabledButton,
-                  ]}
-                  onPress={handleCodeSubmit}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
+                  <FigmaPrimaryButton
+                    onPress={handleCodeSubmit}
+                    disabled={loading}
+                    loading={loading}
+                    style={styles.submitButton}
+                  >
                     <Text style={styles.submitButtonText}>Verify Code</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
+                  </FigmaPrimaryButton>
+                </>
+              )}
 
-          {/* Step 3: New Password */}
-          {step === 'reset' && (
-            <>
-              <View style={styles.intro}>
-                <Text style={styles.subtitle}>Enter your new password</Text>
-              </View>
+              {/* Step 3: New Password */}
+              {step === 'reset' && (
+                <>
+                  <Text style={styles.subtitle}>Enter your new password</Text>
 
-              <View style={styles.form}>
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>New Password</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Create a new password"
-                    placeholderTextColor="#999"
-                    secureTextEntry
-                    editable={!loading}
-                    value={newPassword}
-                    onChangeText={setNewPassword}
-                  />
-                </View>
-
-                <View style={styles.inputGroup}>
-                  <Text style={styles.label}>Confirm Password</Text>
-                  <TextInput
-                    style={styles.input}
-                    placeholder="Confirm your password"
-                    placeholderTextColor="#999"
-                    secureTextEntry
-                    editable={!loading}
-                    value={confirmPassword}
-                    onChangeText={setConfirmPassword}
-                  />
-                </View>
-
-                {error && (
-                  <View style={styles.errorContainer}>
-                    <Text style={styles.errorText}>{error}</Text>
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>New Password</Text>
+                    <View style={styles.inputWrapper}>
+                      <Ionicons
+                        name="lock-closed-outline"
+                        size={18}
+                        color="#9a9a9a"
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Create a new password"
+                        placeholderTextColor={tokens.color.text.placeholder}
+                        secureTextEntry={!showNewPassword}
+                        editable={!loading}
+                        value={newPassword}
+                        onChangeText={setNewPassword}
+                      />
+                      <TouchableOpacity
+                        style={styles.passwordToggle}
+                        onPress={() => setShowNewPassword((v) => !v)}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Ionicons
+                          name={showNewPassword ? 'eye-off-outline' : 'eye-outline'}
+                          size={18}
+                          color="#9a9a9a"
+                        />
+                      </TouchableOpacity>
+                    </View>
                   </View>
-                )}
 
-                <TouchableOpacity
-                  style={[
-                    styles.submitButton,
-                    loading && styles.disabledButton,
-                  ]}
-                  onPress={handlePasswordReset}
-                  disabled={loading}
-                >
-                  {loading ? (
-                    <ActivityIndicator color="#fff" />
-                  ) : (
+                  <View style={styles.inputGroup}>
+                    <Text style={styles.label}>Confirm Password</Text>
+                    <View style={styles.inputWrapper}>
+                      <Ionicons
+                        name="lock-closed-outline"
+                        size={18}
+                        color="#9a9a9a"
+                        style={styles.inputIcon}
+                      />
+                      <TextInput
+                        style={styles.input}
+                        placeholder="Confirm your password"
+                        placeholderTextColor={tokens.color.text.placeholder}
+                        secureTextEntry={!showConfirmPassword}
+                        editable={!loading}
+                        value={confirmPassword}
+                        onChangeText={setConfirmPassword}
+                      />
+                      <TouchableOpacity
+                        style={styles.passwordToggle}
+                        onPress={() => setShowConfirmPassword((v) => !v)}
+                        activeOpacity={0.7}
+                        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+                      >
+                        <Ionicons
+                          name={showConfirmPassword ? 'eye-off-outline' : 'eye-outline'}
+                          size={18}
+                          color="#9a9a9a"
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </View>
+
+                  {error && <Text style={styles.errorText}>{error}</Text>}
+
+                  <FigmaPrimaryButton
+                    onPress={handlePasswordReset}
+                    disabled={loading}
+                    loading={loading}
+                    style={styles.submitButton}
+                  >
                     <Text style={styles.submitButtonText}>Reset Password</Text>
-                  )}
-                </TouchableOpacity>
-              </View>
-            </>
-          )}
-        </View>
-      </ScrollView>
-    </KeyboardAvoidingView>
-   </ScreenBackground>
+                  </FigmaPrimaryButton>
+                </>
+              )}
+            </View>
+
+            {/* Back to Login */}
+            <TouchableOpacity
+              style={styles.backToLogin}
+              onPress={() => navigation.goBack()}
+              activeOpacity={0.7}
+            >
+              <Text style={styles.backToLoginText}>Back to Login</Text>
+            </TouchableOpacity>
+          </View>
+        </ScrollView>
+      </KeyboardAvoidingView>
+      <SafeAreaView style={styles.safeArea} edges={['bottom']} />
+    </ScreenBackground>
   );
 };
 
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
+  safeArea: {
+    backgroundColor: 'transparent',
+  },
   container: {
     flex: 1,
     backgroundColor: 'transparent',
@@ -326,89 +374,140 @@ const styles = StyleSheet.create({
   scrollContent: {
     flexGrow: 1,
   },
-  headerBar: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.glass.border,
-  },
-  headerTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: colors.text.primary,
-  },
   content: {
     flex: 1,
-    paddingHorizontal: spacing.xl,
-    paddingVertical: spacing.lg,
+    justifyContent: 'space-between',
+    marginHorizontal: 20,
     maxWidth: 353,
     alignSelf: 'center',
     width: '100%',
+    paddingTop: 16,
+    paddingBottom: 24,
   },
-  intro: {
-    marginBottom: spacing.xl,
+  topSection: {
+    width: '100%',
+  },
+  // Back control — canonical recipe: 42px square, radius 6, surface.card
+  // background, border.card border, chevron icon.
+  backButton: {
+    width: 42,
+    height: 42,
+    borderRadius: tokens.radius.sm,
+    borderWidth: 1,
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: 24,
+  },
+  // Header (logo + title)
+  header: {
+    alignItems: 'center',
+    gap: 18,
+    marginBottom: 48,
+  },
+  logo: {
+    width: 56,
+    height: 56,
+  },
+  title: {
+    fontSize: 28,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    lineHeight: 33.6,
+    letterSpacing: 0.14,
+    color: tokens.color.text.primary,
+    textAlign: 'center',
   },
   subtitle: {
-    fontSize: 16,
-    color: colors.text.secondary,
-    lineHeight: 24,
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    lineHeight: 19.6,
+    color: tokens.color.text.secondary,
+    marginBottom: 20,
+    textAlign: 'center',
   },
-  form: {
-    flex: 1,
-  },
+  // Input
   inputGroup: {
-    marginBottom: spacing.lg,
+    marginBottom: 20,
   },
   label: {
     fontSize: 16,
     fontWeight: '400',
-    color: colors.text.primary,
-    marginBottom: spacing.sm,
-    lineHeight: 22,
+    fontFamily: 'Poppins',
+    lineHeight: 22.4,
+    color: '#ffffff',
+    marginBottom: 8,
+  },
+  required: {
+    color: tokens.color.text.placeholder,
+  },
+  inputWrapper: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
+    borderWidth: 1,
+    borderColor: tokens.color.border.input,
+    backgroundColor: tokens.color.surface.card,
+    paddingLeft: 12,
+  },
+  inputError: {
+    borderColor: tokens.color.state.danger,
+    backgroundColor: 'rgba(255,35,35,0.10)',
+  },
+  inputIcon: {
+    marginRight: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: colors.borderInput,
-    borderRadius: 6,
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.md,
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.text.primary,
-    backgroundColor: colors.brand.inputBg,
+    flex: 1,
     height: 42,
+    paddingRight: 12,
+    fontSize: 14,
+    fontFamily: 'Poppins',
+    lineHeight: 19.6,
+    color: '#ffffff',
   },
-  errorContainer: {
-    backgroundColor: colors.brand.inputErrorBg,
-    borderRadius: 6,
-    padding: spacing.md,
-    marginBottom: spacing.lg,
-    borderWidth: 1,
-    borderColor: colors.borderInputError,
+  passwordToggle: {
+    paddingRight: 12,
+    paddingLeft: 4,
   },
   errorText: {
-    color: colors.error,
-    fontSize: 14,
+    color: tokens.color.state.errorText,
+    fontSize: 13,
+    fontFamily: 'Poppins',
+    lineHeight: 18,
+    marginBottom: 20,
+  },
+  errorTextCenter: {
+    textAlign: 'center',
   },
   submitButton: {
-    backgroundColor: colors.brand.buttonPrimary,
-    paddingVertical: spacing.md,
-    borderRadius: 999,
-    alignItems: 'center',
-    marginTop: spacing.lg,
-    height: 42,
-    justifyContent: 'center',
-  },
-  disabledButton: {
-    opacity: 0.6,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
+    width: '100%',
   },
   submitButtonText: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 14,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    lineHeight: 19.6,
+    color: '#ffffff',
+  },
+  // Back to Login
+  backToLogin: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  backToLoginText: {
+    fontSize: 14,
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    lineHeight: 19.6,
+    color: tokens.color.text.secondary,
   },
 });
 

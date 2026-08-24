@@ -1,9 +1,10 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
-import { TouchableOpacity } from 'react-native';
 import { EnglishRadarChart } from '@/components/report/EnglishRadarChart';
+import { ReportCTAButton } from '@/components/report/ReportCTAButton';
+import { tokens } from '@/theme/tokens';
 import type { OverallScores } from '@/types/report';
 import type { RadarDataPoint } from '@/lib/report/calculations';
 
@@ -44,20 +45,21 @@ function SkillBar({ label, value }: { label: string; value: number }) {
 
 const sb = StyleSheet.create({
   container: { gap: 8 },
-  label: { fontSize: 13, fontWeight: '500', lineHeight: 17, color: '#fff' },
+  label: { fontSize: 13, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 17, color: tokens.color.text.primary },
   row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
   value: {
     width: 36,
     fontSize: 12,
     fontWeight: '500',
-    color: 'rgba(255,255,255,0.9)',
+    fontFamily: 'Poppins-Medium',
+    color: tokens.color.text.primary,
     fontVariant: ['tabular-nums'] as any,
   },
   track: {
     flex: 1,
     height: 8,
     borderRadius: 4,
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    backgroundColor: tokens.color.surface.card,
     overflow: 'hidden',
   },
   fill: { height: '100%', borderRadius: 4 },
@@ -77,7 +79,7 @@ export function EnglishScoreCard({
   ];
 
   return (
-    <View style={s.container}>
+    <ScrollView style={s.wrapper} contentContainerStyle={s.container}>
       {hideHeroTitle ? null : (
         <View style={s.hero}>
           <Text style={s.heroTitle}>Your English Score</Text>
@@ -106,7 +108,7 @@ export function EnglishScoreCard({
         <Ionicons
           name="information-circle-outline"
           size={16}
-          color="#8ca7ff"
+          color={tokens.color.accent.rim}
           style={{ marginTop: 2 }}
         />
         <Text style={s.infoText}>
@@ -115,23 +117,13 @@ export function EnglishScoreCard({
         </Text>
       </View>
 
-      <TouchableOpacity onPress={onContinue} activeOpacity={0.9} style={{ width: '100%', marginTop: 24 }}>
-        <LinearGradient
-          colors={['#2563eb', '#9333ea']}
-          start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 0 }}
-          style={s.gradientBtn}
-        >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '600' }}>
-            Explore My Deep Dive Report
-          </Text>
-        </LinearGradient>
-      </TouchableOpacity>
-    </View>
+      <ReportCTAButton label="Explore My Deep Dive Report" onPress={onContinue} />
+    </ScrollView>
   );
 }
 
 const s = StyleSheet.create({
+  wrapper: { flex: 1 },
   container: {
     width: '100%',
     alignSelf: 'center',
@@ -139,21 +131,29 @@ const s = StyleSheet.create({
     paddingBottom: 28,
   },
   hero: { alignItems: 'center' },
-  heroTitle: { fontSize: 22, fontWeight: '600', lineHeight: 28, color: '#fff' },
+  heroTitle: { fontSize: 22, fontWeight: '600', fontFamily: 'Poppins-SemiBold', lineHeight: 28, color: tokens.color.text.primary },
   heroLevel: {
     marginTop: 8,
     fontSize: 32,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 32,
-    color: '#3b7fff',
+    color: tokens.color.accent.primary,
   },
-  heroScore: { marginTop: 4, fontSize: 13, lineHeight: 18, color: '#c6c6c6' },
+  heroScore: {
+    marginTop: 4,
+    fontSize: 13,
+    fontFamily: 'Poppins',
+    lineHeight: 18,
+    color: tokens.color.text.secondary,
+  },
   heroScoreAlt: {
     marginTop: 4,
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     textAlign: 'center',
-    color: '#c6c6c6',
+    color: tokens.color.text.secondary,
   },
   grid: {
     marginTop: 20,
@@ -168,22 +168,18 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     gap: 10,
     marginTop: 24,
-    borderRadius: 12,
+    borderRadius: tokens.radius.xl,
     borderWidth: 1,
-    borderColor: 'rgba(61,62,80,1)',
-    backgroundColor: 'rgba(255,255,255,0.1)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     paddingHorizontal: 14,
     paddingVertical: 12,
   },
-  infoText: { flex: 1, fontSize: 12, lineHeight: 17, color: '#c6c6c6' },
-  gradientBtn: {
-    paddingVertical: 12,
-    borderRadius: 9999,
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 6,
-    elevation: 4,
+  infoText: {
+    flex: 1,
+    fontSize: 12,
+    fontFamily: 'Poppins',
+    lineHeight: 17,
+    color: tokens.color.text.secondary,
   },
 });

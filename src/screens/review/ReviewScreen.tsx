@@ -27,6 +27,9 @@ import { progressService } from '@/services/progress';
 import type { ReviewItem, ValidationResult } from '@/types/review';
 import { validateAnswer } from '@/utils/validation';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import { AppBackground } from '../../components/common/AppBackground';
+import GradientButton from '../../components/common/GradientButton';
+import { tokens } from '@/theme/tokens';
 let ExpoSpeechRecognitionModule: any = null;
 let useSpeechRecognitionEvent: any = () => {};
 try {
@@ -86,24 +89,14 @@ async function playBase64Audio(
   }
 }
 
-function GradientBackground({ children }: { children: React.ReactNode }) {
-  return (
-    <View style={{ flex: 1, backgroundColor: 'transparent' }}>
-      {children}
-    </View>
-  );
-}
-
 function ReviewTopBar({
   onBack,
   title,
   subtitle,
-  accentBack = false,
 }: {
   onBack: () => void;
   title?: string;
   subtitle?: string;
-  accentBack?: boolean;
 }) {
   return (
     <View style={rtb.container}>
@@ -111,19 +104,23 @@ function ReviewTopBar({
         <TouchableOpacity
           onPress={onBack}
           activeOpacity={0.7}
-          style={[rtb.backBtn, accentBack && rtb.backBtnAccent]}
+          style={rtb.backBtn}
         >
           <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
         </TouchableOpacity>
         <View style={rtb.headerSpacer} />
-        {title ? (
-          <Text
-            style={[rtb.title, subtitle ? rtb.titleWithSub : rtb.titleSolo]}
-          >
-            {title}
-          </Text>
+        {title || subtitle ? (
+          <View style={rtb.titleGroup}>
+            {title ? (
+              <Text
+                style={[rtb.title, subtitle ? rtb.titleWithSub : rtb.titleSolo]}
+              >
+                {title}
+              </Text>
+            ) : null}
+            {subtitle ? <Text style={rtb.subtitle}>{subtitle}</Text> : null}
+          </View>
         ) : null}
-        {subtitle ? <Text style={rtb.subtitle}>{subtitle}</Text> : null}
         <View style={rtb.headerSpacer} />
       </View>
     </View>
@@ -142,29 +139,29 @@ const rtb = StyleSheet.create({
     alignItems: 'center',
   },
   backBtn: {
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  backBtnAccent: {
-    borderRadius: 5,
-  },
   headerSpacer: { flex: 1 },
+  titleGroup: { alignItems: 'center' },
   title: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
-  titleWithSub: { fontSize: 18 },
-  titleSolo: { fontSize: 18, letterSpacing: 3.2 },
+  titleWithSub: { fontSize: 20, fontFamily: 'Poppins', lineHeight: 24 },
+  titleSolo: { fontSize: 16, fontFamily: 'Poppins', letterSpacing: 3.2 },
   subtitle: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: 'rgba(255,255,255,0.8)',
     textAlign: 'center',
@@ -306,8 +303,8 @@ const rlc = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  progressLabel: { fontSize: 12, lineHeight: 17, color: '#c6c6c6' },
-  progressValue: { fontSize: 12, lineHeight: 17, color: '#fff' },
+  progressLabel: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: '#c6c6c6' },
+  progressValue: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: '#fff' },
   track: {
     height: 6,
     borderRadius: 3,
@@ -318,6 +315,7 @@ const rlc = StyleSheet.create({
   eyebrow: {
     marginTop: 32,
     fontSize: 12,
+    fontFamily: 'Poppins',
     letterSpacing: 2.88,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -327,6 +325,7 @@ const rlc = StyleSheet.create({
     marginTop: 12,
     fontSize: 22,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
     color: '#fff',
@@ -353,13 +352,14 @@ const rlc = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  taskLabel: { fontSize: 14, fontWeight: '500', lineHeight: 19 },
+  taskLabel: { fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 19 },
   taskLabelActive: { color: '#fff' },
   taskLabelInactive: { color: 'rgba(255,255,255,0.7)' },
   taskProcessing: {
     marginTop: 2,
     fontSize: 11,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#5cff4d',
   },
   taskCheck: {
@@ -470,15 +470,16 @@ const cmb = StyleSheet.create({
     borderWidth: 2,
     borderColor: '#1e1f3a',
   },
-  coachName: { color: '#fff', fontWeight: '600', fontSize: 13 },
+  coachName: { color: '#fff', fontWeight: '600', fontFamily: 'Poppins-SemiBold', fontSize: 13 },
   onlineLabel: {
     color: '#4ade80',
     fontSize: 9,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.8,
   },
-  messageText: { color: '#fff', fontSize: 14, lineHeight: 21 },
-  cursor: { color: '#fff', fontSize: 14 },
+  messageText: { color: '#fff', fontSize: 14, fontFamily: 'Poppins', lineHeight: 21 },
+  cursor: { color: '#fff', fontSize: 14, fontFamily: 'Poppins' },
 });
 
 function ReviewCardComponent({
@@ -534,15 +535,15 @@ function ReviewCardComponent({
       <View style={rcc.cardWrap}>
         <View style={rcc.originalSection}>
           <View style={rcc.iconRed}>
-            <Ionicons name="close" size={18} color="#ff2323" />
+            <Ionicons name="close" size={18} color={tokens.color.state.danger} />
           </View>
-          <Text style={rcc.originalText}>{item.original}</Text>
+          <Text style={rcc.originalText}>{'“'}{item.original}{'”'}</Text>
         </View>
         <View style={rcc.correctedSection}>
           <View style={rcc.iconGreen}>
-            <Ionicons name="checkmark" size={18} color="#07e500" />
+            <Ionicons name="checkmark" size={18} color={tokens.color.state.success} />
           </View>
-          <Text style={rcc.correctedText}>{item.corrected}</Text>
+          <Text style={rcc.correctedText}>{'“'}{item.corrected}{'”'}</Text>
         </View>
       </View>
       <View style={rcc.explanationSection}>
@@ -569,7 +570,7 @@ function ReviewCardComponent({
             ) : null}
           </View>
           {transcript ? (
-            <Text style={rcc.transcriptText}>{transcript}</Text>
+            <Text style={rcc.transcriptText}>{'“'}{transcript}{'”'}</Text>
           ) : isListening ? (
             <Text style={rcc.transcriptPlaceholder}>Listening...</Text>
           ) : isValidating ? (
@@ -589,7 +590,7 @@ function ReviewCardComponent({
             color="#fff"
             style={{ marginRight: 4 }}
           />
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
             {actionLabel}
           </Text>
         </FigmaPrimaryButton>
@@ -599,9 +600,11 @@ function ReviewCardComponent({
 }
 
 const rcc = StyleSheet.create({
-  outer: { paddingHorizontal: 20, paddingTop: 16 },
+  outer: { paddingHorizontal: 20, paddingTop: 20 },
   coachImageWrap: {
-    borderRadius: 6,
+    // Only the bottom corners are rounded — matches web (`rounded-b-[6px]`).
+    borderBottomLeftRadius: 6,
+    borderBottomRightRadius: 6,
     backgroundColor: 'rgba(47,65,145,0.1)',
     overflow: 'hidden',
     height: 180,
@@ -616,7 +619,7 @@ const rcc = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 16,
   },
-  coachBubbleText: { fontSize: 12, lineHeight: 17, color: '#fdfdfd' },
+  coachBubbleText: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: '#fdfdfd' },
   progressRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -625,6 +628,7 @@ const rcc = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     letterSpacing: 1.44,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.55)',
@@ -649,7 +653,7 @@ const rcc = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#ff2323',
+    borderColor: tokens.color.state.danger,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -658,6 +662,7 @@ const rcc = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fdfdfd',
   },
@@ -674,7 +679,7 @@ const rcc = StyleSheet.create({
     height: 28,
     borderRadius: 14,
     borderWidth: 1,
-    borderColor: '#07e500',
+    borderColor: tokens.color.state.success,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 2,
@@ -683,6 +688,7 @@ const rcc = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fdfdfd',
   },
@@ -709,6 +715,7 @@ const rcc = StyleSheet.create({
   explanationText: {
     flex: 1,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
   },
@@ -730,6 +737,7 @@ const rcc = StyleSheet.create({
   transcriptLabel: {
     fontSize: 11,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 1.54,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.6)',
@@ -746,11 +754,13 @@ const rcc = StyleSheet.create({
   },
   transcriptText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: 'rgba(255,255,255,0.9)',
   },
   transcriptPlaceholder: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: 'rgba(255,255,255,0.35)',
     fontStyle: 'italic',
@@ -769,6 +779,9 @@ function ReviewCompletionScreen({
   onGoHome: () => void;
 }) {
   const total = reviewItems.length;
+  const grammarCount = reviewItems.filter((i) => i.type === 'grammar').length;
+  const vocabCount = reviewItems.filter((i) => i.type === 'vocabulary').length;
+  const sentenceCount = reviewItems.filter((i) => i.type === 'sentence').length;
 
   return (
     <View style={cs.container}>
@@ -782,13 +795,39 @@ function ReviewCompletionScreen({
           </Text>
           <Text style={cs.scoreLabel}>Completed</Text>
         </View>
+        <View style={cs.pillRow}>
+          {grammarCount > 0 ? (
+            <View style={[cs.pill, cs.pillBlue]}>
+              <View style={[cs.pillDot, cs.pillDotBlue]} />
+              <Text style={[cs.pillText, cs.pillTextBlue]}>
+                Grammar · {grammarCount}
+              </Text>
+            </View>
+          ) : null}
+          {vocabCount > 0 ? (
+            <View style={[cs.pill, cs.pillPurple]}>
+              <View style={[cs.pillDot, cs.pillDotPurple]} />
+              <Text style={[cs.pillText, cs.pillTextPurple]}>
+                Vocabulary · {vocabCount}
+              </Text>
+            </View>
+          ) : null}
+          {sentenceCount > 0 ? (
+            <View style={[cs.pill, cs.pillGreen]}>
+              <View style={[cs.pillDot, cs.pillDotGreen]} />
+              <Text style={[cs.pillText, cs.pillTextGreen]}>
+                Sentence · {sentenceCount}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       </View>
       <View style={cs.continueWrap}>
         <FigmaPrimaryButton
           onPress={onGoHome}
           style={{ height: 45, borderRadius: 6, width: '100%' }}
         >
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500' }}>
+          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
             Continue
           </Text>
           <Ionicons
@@ -816,6 +855,7 @@ const cs = StyleSheet.create({
     marginTop: 16,
     fontSize: 36,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 36,
     letterSpacing: -0.72,
     color: '#fff',
@@ -823,6 +863,7 @@ const cs = StyleSheet.create({
   subtitle: {
     marginTop: 16,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#fff',
   },
@@ -830,6 +871,7 @@ const cs = StyleSheet.create({
   scoreText: {
     fontSize: 40,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 48,
     letterSpacing: -0.8,
     color: '#fff',
@@ -838,6 +880,7 @@ const cs = StyleSheet.create({
     marginTop: 16,
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: '#c6c6c6',
   },
@@ -858,7 +901,25 @@ const cs = StyleSheet.create({
     borderWidth: 1,
   },
   pillDot: { width: 8, height: 8, borderRadius: 4 },
-  pillText: { fontSize: 12, fontWeight: '600' },
+  pillText: { fontSize: 12, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
+  pillBlue: {
+    borderColor: 'rgba(59,130,246,0.3)',
+    backgroundColor: 'rgba(59,130,246,0.2)',
+  },
+  pillDotBlue: { backgroundColor: '#60a5fa' },
+  pillTextBlue: { color: '#93c5fd' },
+  pillPurple: {
+    borderColor: 'rgba(168,85,247,0.3)',
+    backgroundColor: 'rgba(168,85,247,0.2)',
+  },
+  pillDotPurple: { backgroundColor: '#c084fc' },
+  pillTextPurple: { color: '#d8b4fe' },
+  pillGreen: {
+    borderColor: 'rgba(34,197,94,0.3)',
+    backgroundColor: 'rgba(34,197,94,0.2)',
+  },
+  pillDotGreen: { backgroundColor: '#4ade80' },
+  pillTextGreen: { color: '#86efac' },
   continueWrap: { marginTop: 28 },
 });
 
@@ -890,16 +951,18 @@ export const ReviewScreen: React.FC = () => {
 
   const currentReviewItem = reviewItems[currentCardIndex];
 
-  if (typeof useSpeechRecognitionEvent === 'function') {
-    useSpeechRecognitionEvent('start', () => setListening(true));
-    useSpeechRecognitionEvent('end', () => setListening(false));
-    useSpeechRecognitionEvent('result', (event: any) => {
-      if (event.results && event.results.length > 0) {
-        setTranscript(event.results[0].transcript || '');
-      }
-    });
-    useSpeechRecognitionEvent('error', () => setListening(false));
-  }
+  // `useSpeechRecognitionEvent` is always a function — either the real hook
+  // from `expo-speech-recognition` or the no-op fallback declared above —
+  // so these must be called unconditionally (React Hooks cannot be gated
+  // behind a runtime check without corrupting hook order across renders).
+  useSpeechRecognitionEvent('start', () => setListening(true));
+  useSpeechRecognitionEvent('end', () => setListening(false));
+  useSpeechRecognitionEvent('result', (event: any) => {
+    if (event.results && event.results.length > 0) {
+      setTranscript(event.results[0].transcript || '');
+    }
+  });
+  useSpeechRecognitionEvent('error', () => setListening(false));
 
   useEffect(() => {
     let cancelled = false;
@@ -1146,7 +1209,7 @@ export const ReviewScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} title="ANALYSIS" />
           <ReportLoadingCard
@@ -1154,32 +1217,37 @@ export const ReviewScreen: React.FC = () => {
             totalDurationMs={40000}
           />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (error) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <View style={ss.centerContent}>
             <View style={ss.errorCard}>
               <Text style={ss.errorTitle}>Error</Text>
               <Text style={ss.errorMsg}>{error}</Text>
-              <TouchableOpacity onPress={goBack} style={ss.errorBtn}>
-                <Text style={ss.errorBtnText}>Go Back</Text>
-              </TouchableOpacity>
+              <GradientButton
+                onPress={goBack}
+                label="Go Back"
+                gradientColors={['#2563eb', '#9333ea']}
+                size="medium"
+                fullWidth={false}
+                textStyle={{ fontWeight: '500', fontFamily: 'Poppins-Medium' }}
+              />
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (reviewItems.length === 0) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <View style={ss.centerContent}>
@@ -1188,19 +1256,24 @@ export const ReviewScreen: React.FC = () => {
               <Text style={ss.emptyMsg}>
                 Please complete some speaking sessions first.
               </Text>
-              <TouchableOpacity onPress={goBack} style={ss.errorBtn}>
-                <Text style={ss.errorBtnText}>Go Back</Text>
-              </TouchableOpacity>
+              <GradientButton
+                onPress={goBack}
+                label="Go Back"
+                gradientColors={['#2563eb', '#9333ea']}
+                size="medium"
+                fullWidth={false}
+                textStyle={{ fontWeight: '500', fontFamily: 'Poppins-Medium' }}
+              />
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (!sessionStarted) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <ScrollView
@@ -1227,7 +1300,7 @@ export const ReviewScreen: React.FC = () => {
                         <Ionicons
                           name="alert-circle"
                           size={17}
-                          color="#ff2323"
+                          color={tokens.color.state.danger}
                           style={{ marginRight: 4 }}
                         />
                         <Text style={ss.previewOriginal} numberOfLines={1}>
@@ -1238,7 +1311,7 @@ export const ReviewScreen: React.FC = () => {
                         <Ionicons
                           name="checkmark-circle"
                           size={17}
-                          color="#07e500"
+                          color={tokens.color.state.success}
                           style={{ marginRight: 4 }}
                         />
                         <Text style={ss.previewCorrected} numberOfLines={1}>
@@ -1269,35 +1342,35 @@ export const ReviewScreen: React.FC = () => {
                   color="#fff"
                   style={{ marginRight: 4 }}
                 />
-                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '500' }}>
+                <Text style={{ color: '#fff', fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
                   {greetReady ? 'Start Review' : 'Preparing...'}
                 </Text>
               </FigmaPrimaryButton>
             </View>
           </View>
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   if (reviewComplete) {
     return (
-      <GradientBackground>
+      <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
           <ReviewTopBar onBack={goBack} />
           <ReviewCompletionScreen reviewItems={reviewItems} onGoHome={goBack} />
         </SafeAreaView>
-      </GradientBackground>
+      </AppBackground>
     );
   }
 
   return (
-    <GradientBackground>
+    <AppBackground>
       <SafeAreaView style={ss.safe} edges={['top']}>
         <ReviewTopBar
           onBack={goBack}
           title="Mistake Review Time!"
-          accentBack
+          subtitle="Practice with your AI Coach"
         />
         <ScrollView
           style={{ flex: 1 }}
@@ -1323,7 +1396,7 @@ export const ReviewScreen: React.FC = () => {
           )}
         </ScrollView>
       </SafeAreaView>
-    </GradientBackground>
+    </AppBackground>
   );
 };
 const ss = StyleSheet.create({
@@ -1346,22 +1419,17 @@ const ss = StyleSheet.create({
   errorTitle: {
     fontSize: 18,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#fda4af',
     marginBottom: 8,
   },
   errorMsg: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,241,242,0.9)',
     textAlign: 'center',
     marginBottom: 20,
   },
-  errorBtn: {
-    borderRadius: 12,
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(37,99,235,0.5)',
-  },
-  errorBtnText: { color: '#fff', fontWeight: '600', fontSize: 14 },
   emptyCard: {
     width: '100%',
     borderRadius: 20,
@@ -1374,11 +1442,13 @@ const ss = StyleSheet.create({
   emptyTitle: {
     fontSize: 18,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: 8,
   },
   emptyMsg: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.65)',
     textAlign: 'center',
     marginBottom: 20,
@@ -1388,6 +1458,7 @@ const ss = StyleSheet.create({
   startTitle: {
     fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 34,
     textAlign: 'center',
     color: '#fff',
@@ -1396,6 +1467,7 @@ const ss = StyleSheet.create({
   startSubtitle: {
     marginTop: 8,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 17,
     textAlign: 'center',
     color: '#c6c6c6',
@@ -1419,11 +1491,12 @@ const ss = StyleSheet.create({
     paddingHorizontal: 7,
     paddingVertical: 6,
   },
-  previewNumberText: { fontSize: 12, lineHeight: 17, color: '#fff' },
+  previewNumberText: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: '#fff' },
   previewRow: { flexDirection: 'row', alignItems: 'center' },
   previewOriginal: {
     flex: 1,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: '#ffacac',
     textDecorationLine: 'line-through',
@@ -1431,6 +1504,7 @@ const ss = StyleSheet.create({
   previewCorrected: {
     flex: 1,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: '#fdfdfd',
   },
@@ -1445,7 +1519,7 @@ const ss = StyleSheet.create({
     paddingHorizontal: 6,
     paddingVertical: 2,
   },
-  previewBadgeText: { fontSize: 8, lineHeight: 11, color: '#fdfdfd' },
+  previewBadgeText: { fontSize: 8, fontFamily: 'Poppins', lineHeight: 11, color: '#fdfdfd' },
   startFooter: {
     position: 'absolute',
     bottom: 0,

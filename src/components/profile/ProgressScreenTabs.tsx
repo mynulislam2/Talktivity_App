@@ -2,19 +2,18 @@
  * ProgressScreenTabs Component (React Native)
  *
  * Three-tab navigation: Profile / Achievements / Leaderboard
- * Matches talktivity_frontend/components/profile/ProgressScreenTabs.tsx
+ * Matches talktivity_frontend/components/profile/ProgressScreenTabs.tsx, except
+ * the tabs are equal-width (flex: 1) instead of min-w-[132px] + horizontal
+ * scroll — at 390px the web's three min-width tabs need 420px and always
+ * clip/scroll (see docs/design/web-page-specs.md "Fixed-width leaks"); that's
+ * a bug we deliberately don't port.
  */
 
 import React from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-} from 'react-native';
+import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
+import { tokens } from '@/theme/tokens';
 
 type ProgressTab = 'profile' | 'achievements' | 'leaderboard';
 
@@ -42,97 +41,85 @@ export function ProgressScreenTabs({ activeTab }: ProgressScreenTabsProps) {
   };
 
   return (
-    <ScrollView
-      horizontal
-      showsHorizontalScrollIndicator={false}
-      style={styles.scroll}
-      contentContainerStyle={styles.scrollContent}
-    >
-      <View style={styles.tabsRow}>
-        {TAB_CONFIG.map((tab) => {
-          const isActive = tab.key === activeTab;
-          return (
-            <TouchableOpacity
-              key={tab.key}
-              style={styles.tabWrapper}
-              onPress={() => handleTabPress(tab.key)}
-              activeOpacity={0.7}
-            >
-              {isActive ? (
-                <LinearGradient
-                  colors={['#2C5BFF', '#A45DFF']}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                  style={styles.tabActiveGradient}
+    <View style={styles.tabsRow}>
+      {TAB_CONFIG.map((tab) => {
+        const isActive = tab.key === activeTab;
+        return (
+          <TouchableOpacity
+            key={tab.key}
+            style={styles.tabWrapper}
+            onPress={() => handleTabPress(tab.key)}
+            activeOpacity={0.7}
+          >
+            {isActive ? (
+              <LinearGradient
+                colors={[tokens.color.accent.primary, '#b55cff']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 0 }}
+                style={styles.tabActiveGradient}
+              >
+                <Text
+                  style={[
+                    styles.tabText,
+                    tab.key === 'profile' && styles.tabTextSmall,
+                    styles.tabTextActive,
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
                 >
-                  <Text
-                    style={[
-                      styles.tabText,
-                      tab.key === 'profile' && styles.tabTextSmall,
-                      styles.tabTextActive,
-                    ]}
-                  >
-                    {tab.label}
-                  </Text>
-                </LinearGradient>
-              ) : (
-                <View style={styles.tab}>
-                  <Text
-                    style={[
-                      styles.tabText,
-                      tab.key === 'profile' && styles.tabTextSmall,
-                    ]}
-                  >
-                    {tab.label}
-                  </Text>
-                </View>
-              )}
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-    </ScrollView>
+                  {tab.label}
+                </Text>
+              </LinearGradient>
+            ) : (
+              <View style={styles.tab}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    tab.key === 'profile' && styles.tabTextSmall,
+                  ]}
+                  numberOfLines={1}
+                  adjustsFontSizeToFit
+                  minimumFontScale={0.7}
+                >
+                  {tab.label}
+                </Text>
+              </View>
+            )}
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
-  scroll: {
-    marginBottom: 24,
-    marginHorizontal: -4,
-    flexGrow: 0,
-    height: 50,
-  },
-  scrollContent: {
-    paddingHorizontal: 4,
-    paddingBottom: 8,
-  },
   tabsRow: {
     flexDirection: 'row',
-    gap: 12,
-    minWidth: '100%',
+    gap: 8,
+    marginBottom: 24,
   },
   tabWrapper: {
-    borderRadius: 6,
+    flex: 1,
+    borderRadius: tokens.radius.sm,
     overflow: 'hidden',
   },
   tab: {
-    height: 42,
-    minWidth: 132,
+    height: tokens.control.height,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 6,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.10)',
-    paddingHorizontal: 16,
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
+    paddingHorizontal: 8,
   },
   tabActiveGradient: {
-    height: 42,
-    minWidth: 132,
+    height: tokens.control.height,
     justifyContent: 'center',
     alignItems: 'center',
-    borderRadius: 6,
-    paddingHorizontal: 16,
+    borderRadius: tokens.radius.sm,
+    paddingHorizontal: 8,
     shadowColor: 'rgba(84,86,255,0.26)',
     shadowOffset: { width: 0, height: 14 },
     shadowOpacity: 0.26,
@@ -140,15 +127,18 @@ const styles = StyleSheet.create({
     elevation: 6,
   },
   tabText: {
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: '500',
-    color: '#fff',
+    fontFamily: 'Poppins-Medium',
+    color: tokens.color.text.primary,
+    textAlign: 'center',
   },
   tabTextSmall: {
-    fontSize: 14,
+    fontSize: 12,
     fontWeight: '400',
+    fontFamily: 'Poppins',
   },
   tabTextActive: {
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
 });

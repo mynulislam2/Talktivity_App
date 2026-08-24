@@ -236,6 +236,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   selector: {
@@ -255,6 +256,7 @@ const styles = StyleSheet.create({
   selectorButtonText: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255, 255, 255, 0.9)',
   },
   selectorButtonTextActive: {
@@ -277,6 +279,7 @@ const styles = StyleSheet.create({
   skillLabel: {
     width: 80,
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   skillBar: {
@@ -295,6 +298,7 @@ const styles = StyleSheet.create({
     width: 40,
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     textAlign: 'right',
   },
@@ -318,6 +322,7 @@ const styles = StyleSheet.create({
   },
   lineChartLabel: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
   },
@@ -329,6 +334,7 @@ const styles = StyleSheet.create({
   noDataText: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   infoSection: {
     marginTop: spacing.sm,
@@ -343,15 +349,18 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   infoValue: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#86efac',
   },
   infoText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: spacing.xs,
   },

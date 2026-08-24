@@ -50,9 +50,7 @@ const Timeline: React.FC<TimelineProps> = ({ courseStatus }) => {
       quizCompleted,
       listeningCompleted,
       listeningQuizCompleted,
-      roleplayCompleted,
     },
-    refresh: refreshProgress,
   } = useDailyProgress(courseStatus);
 
   // Auto-refresh progress when the hook polls — no duplicate listener needed
@@ -304,12 +302,14 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   subtitle: {
     fontSize: 12,
     color: colors.text.muted,
     fontWeight: '400',
+    fontFamily: 'Poppins',
   },
   timelineContainer: {
     position: 'relative',
@@ -358,17 +358,20 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     flex: 1,
   },
   cardDescription: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     marginBottom: spacing.md,
     lineHeight: 18,
   },
   timeRemaining: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.warning,
     marginBottom: spacing.sm,
   },
@@ -380,6 +383,7 @@ const styles = StyleSheet.create({
   completedText: {
     fontSize: 12,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.success,
   },
   actionButton: {
@@ -397,6 +401,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 13,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   authCard: {
     backgroundColor: colors.dark.backgroundCard,
@@ -423,6 +428,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 

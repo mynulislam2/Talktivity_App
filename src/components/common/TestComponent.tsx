@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     marginBottom: 20,
     color: '#000',
     textAlign: 'center',
@@ -67,6 +68,7 @@ const styles = StyleSheet.create({
   subtitle: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     marginTop: 15,
     marginBottom: 10,
     color: '#333',
@@ -81,6 +83,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     marginBottom: 8,
     color: '#666',
     lineHeight: 20,

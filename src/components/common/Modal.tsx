@@ -108,6 +108,7 @@ const styles = StyleSheet.create({
     ...typography.body2,
     color: '#fff',
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 

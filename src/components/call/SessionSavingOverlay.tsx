@@ -107,6 +107,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
     textAlign: 'center',
     marginTop: 24,
@@ -114,6 +115,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#ccc',
     textAlign: 'center',
     maxWidth: 300,
@@ -128,6 +130,7 @@ const styles = StyleSheet.create({
   },
   helpText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
     textAlign: 'center',
   },
@@ -141,5 +144,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });

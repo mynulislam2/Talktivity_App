@@ -50,8 +50,10 @@ export interface PracticeContentProps {
 
 function LiveControls({
   agentState,
+  onDisconnect,
 }: {
   agentState: AgentState;
+  onDisconnect: () => void;
 }) {
   const [isMuted, setIsMuted] = useState(false);
   const room = useRoomContext();
@@ -125,6 +127,13 @@ function LiveControls({
 
   return (
     <View style={styles.liveControls}>
+      <TouchableOpacity
+        onPress={onDisconnect}
+        style={styles.endCallButton}
+        activeOpacity={0.85}
+      >
+        <Feather name="x" size={24} color="#ff3434" />
+      </TouchableOpacity>
       <View style={styles.muteSection}>
         <Text style={styles.muteLabel}>Speak with Alina</Text>
         <TouchableOpacity
@@ -184,6 +193,7 @@ function LiveControls({
           ))}
         </View>
       </View>
+      <View style={styles.rightSpacer} />
     </View>
   );
 }
@@ -202,7 +212,7 @@ export function PracticeContent({
   onDeviceFailure,
   onBack,
 }: PracticeContentProps) {
-  const { width } = useWindowDimensions();
+  const { width, height: windowHeight } = useWindowDimensions();
   const hasLiveConversation =
     sessionState.agentState !== 'disconnected' || Boolean(connectionDetails);
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
@@ -260,7 +270,9 @@ export function PracticeContent({
     ? 'Practice Limit Reached'
     : 'Start Conversation';
   const livePrompt = `Let's practice ${topicTitle}. Tell me what you think about this topic and I'll guide the conversation.`;
-  const heroHeight = hasLiveConversation ? 260 : 300;
+  const heroHeight = hasLiveConversation
+    ? Math.min(258, Math.max(188, windowHeight * 0.29))
+    : Math.min(292, Math.max(216, windowHeight * 0.34));
 
   if (!hasLiveConversation) {
     return (
@@ -268,7 +280,7 @@ export function PracticeContent({
         <View style={[styles.sessionHero, { height: heroHeight }]}>
           {onBack && (
             <TouchableOpacity onPress={onBack} style={styles.backButton} activeOpacity={0.7}>
-              <Feather name="chevron-left" size={18} color="rgba(255,255,255,0.8)" />
+              <Feather name="arrow-left" size={20} color="#fff" />
             </TouchableOpacity>
           )}
           <Image
@@ -287,7 +299,11 @@ export function PracticeContent({
               <Text style={styles.gradientText}>{s.headlineGradient}</Text>
             </Text>
             <Text style={styles.introDescription}>{s.description}</Text>
-            {/* No time remaining shown */}
+            {!timeLoading && (
+              <Text style={styles.introMeta}>
+                Time remaining today: {remainingTime}
+              </Text>
+            )}
           </View>
         </ScrollView>
         <View style={styles.buttonSection}>
@@ -323,7 +339,10 @@ export function PracticeContent({
         }}
       >
         <SimpleVoiceAssistant
-          onStateChange={setAgentState}
+          onStateChange={(state) => {
+            setAgentState(state);
+            onStateChange(state);
+          }}
           onTranscriptsChange={setTranscripts}
         />
         <View
@@ -334,7 +353,7 @@ export function PracticeContent({
           ]}
         >
           <TouchableOpacity onPress={onDisconnect} style={styles.backButton} activeOpacity={0.7}>
-            <Feather name="x" size={18} color="#ff3434" />
+            <Feather name="arrow-left" size={20} color="#fff" />
           </TouchableOpacity>
           <Image
             source={require('../../../assets/figma/coach/alina-intro.png')}
@@ -353,6 +372,7 @@ export function PracticeContent({
         </View>
         <LiveControls
           agentState={sessionState.agentState}
+          onDisconnect={onDisconnect}
         />
       </LiveKitRoom>
     </View>
@@ -373,15 +393,13 @@ const styles = StyleSheet.create({
   coachImage: { width: '100%', height: '100%' },
   backButton: {
     position: 'absolute',
-    top: 48,
+    top: 24,
     left: 20,
     zIndex: 99,
-    width: 36,
-    height: 36,
-    borderRadius: 5,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    width: 40,
+    height: 40,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255,255,255,0.12)',
     justifyContent: 'center',
     alignItems: 'center',
   },
@@ -395,15 +413,17 @@ const styles = StyleSheet.create({
   introHeadline: {
     fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: '#fff',
     textAlign: 'center',
   },
-  gradientText: { fontWeight: '700', color: '#c55dfe' },
+  gradientText: { fontWeight: '700', fontFamily: 'Poppins-Bold', color: '#c55dfe' },
   introDescription: {
     marginTop: 16,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
     textAlign: 'center',
@@ -411,12 +431,13 @@ const styles = StyleSheet.create({
   introMeta: {
     marginTop: 16,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: 'rgba(255,255,255,0.72)',
     textAlign: 'center',
   },
   buttonSection: { paddingHorizontal: 20, paddingBottom: 32, paddingTop: 16 },
-  startButtonText: { fontSize: 16, fontWeight: '500', color: '#fff' },
+  startButtonText: { fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium', color: '#fff' },
   liveSection: { flex: 1, paddingHorizontal: 20, paddingTop: 24 },
   promptBubble: {
     maxWidth: 292,
@@ -425,15 +446,26 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(47,65,145,0.22)',
     padding: 12,
   },
-  promptText: { fontSize: 13, lineHeight: 18.85, color: '#fdfdfd' },
+  promptText: { fontSize: 13, fontFamily: 'Poppins', lineHeight: 18.85, color: '#fdfdfd' },
   liveControls: {
-    alignItems: 'center',
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
     paddingHorizontal: 20,
     paddingBottom: 32,
     paddingTop: 16,
   },
+  endCallButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 6,
+    backgroundColor: 'rgba(255,255,255,0.1)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  rightSpacer: { width: 44, height: 44 },
   muteSection: { alignItems: 'center', gap: 12 },
-  muteLabel: { fontSize: 12, lineHeight: 16.8, color: '#fff', opacity: 0.7 },
+  muteLabel: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 16.8, color: '#fff', opacity: 0.7 },
   muteButton: {
     width: 68,
     height: 68,

@@ -215,6 +215,7 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 32,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   statusBadge: {
@@ -238,6 +239,7 @@ const styles = StyleSheet.create({
   userName: {
     fontSize: 20,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: 8,
   },
@@ -251,6 +253,7 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#93c5fd',
   },
   statusRow: {
@@ -272,6 +275,7 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
   },
   messageButtonWrapper: {
@@ -289,6 +293,7 @@ const styles = StyleSheet.create({
   messageButtonText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
 });

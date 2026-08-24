@@ -20,7 +20,6 @@ const ProfileNavigator: React.FC = () => {
     <Stack.Navigator
       screenOptions={{
         headerShown: false,
-        contentStyle: { backgroundColor: '#F8F9FA' },
       }}
     >
       <Stack.Screen name="ProfileScreen" component={ProfileScreen} />

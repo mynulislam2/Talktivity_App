@@ -126,11 +126,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.black,
     marginBottom: spacing.xs,
   },
   username: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.md,
   },
@@ -145,6 +147,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginLeft: spacing.sm,
   },
@@ -159,6 +162,7 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 13,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.primary,
     marginLeft: spacing.sm,
   },

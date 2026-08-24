@@ -171,7 +171,9 @@ export function CallContent({
         <Text style={[styles.title, { fontSize: titleFontSize }]}>
           {sessionTitle}
         </Text>
-        <Text style={[styles.subtitle, { fontSize: subtitleFontSize }]}>
+        <Text
+          style={[styles.subtitle, { fontSize: subtitleFontSize, fontFamily: 'Poppins' }]}
+        >
           Speak naturally to generate your personalized learning report!
         </Text>
         <Text style={[styles.duration, { fontSize: durationFontSize }]}>
@@ -212,6 +214,7 @@ export function CallContent({
               >
                 {/* Voice assistant for detecting audio levels */}
                 <SimpleVoiceAssistant
+                  onStateChange={onStateChange}
                   onUserVolumeStrength={setUserVolumeStrength}
                   onAgentVolumeStrength={setAgentVolumeStrength}
                 />
@@ -259,6 +262,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontWeight: '800',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
     textAlign: 'center',
     marginBottom: 12,
@@ -277,6 +281,7 @@ const styles = StyleSheet.create({
   duration: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     textAlign: 'center',
   },
   contentSection: {

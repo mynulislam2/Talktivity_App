@@ -20,6 +20,7 @@ import {
 import { PracticeContent } from '@/components/practice';
 import { PracticeVisualizerLayout } from '@/components/practice/PracticeVisualizerLayout';
 import { handleDeviceFailure } from '@/lib/call/deviceFailureHandlerNative';
+import { AppBackground } from '../../components/common/AppBackground';
 
 export default function PracticeScreen() {
   const navigation = useNavigation();
@@ -88,26 +89,28 @@ export default function PracticeScreen() {
   const topicTitle = topic?.title || 'General Conversation';
 
   return (
-    <SafeAreaView
-      style={{ flex: 1, backgroundColor: 'transparent' }}
-      edges={['top', 'bottom']}
-    >
-      <PracticeVisualizerLayout>
-        <PracticeContent
-          topicTitle={topicTitle}
-          sessionState={sessionState}
-          connectionDetails={connectionDetails}
-          onConnect={handleConnect}
-          onDisconnect={handleDisconnect}
-          onStateChange={updateAgentState}
-          canStartSession={canStartSession}
-          timeLoading={statusLoading}
-          remainingTime={remainingTime}
-          stateColor={stateColor}
-          onDeviceFailure={handleDeviceFailure}
-          onBack={() => navigation.goBack()}
-        />
-      </PracticeVisualizerLayout>
-    </SafeAreaView>
+    <AppBackground>
+      <SafeAreaView
+        style={{ flex: 1, backgroundColor: 'transparent' }}
+        edges={['bottom']}
+      >
+        <PracticeVisualizerLayout>
+          <PracticeContent
+            topicTitle={topicTitle}
+            sessionState={sessionState}
+            connectionDetails={connectionDetails}
+            onConnect={handleConnect}
+            onDisconnect={handleDisconnect}
+            onStateChange={updateAgentState}
+            canStartSession={canStartSession}
+            timeLoading={statusLoading}
+            remainingTime={remainingTime}
+            stateColor={stateColor}
+            onDeviceFailure={handleDeviceFailure}
+            onBack={() => navigation.goBack()}
+          />
+        </PracticeVisualizerLayout>
+      </SafeAreaView>
+    </AppBackground>
   );
 }

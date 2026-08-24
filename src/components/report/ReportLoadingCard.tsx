@@ -2,6 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
+import { tokens } from '@/theme/tokens';
 
 export interface ReportLoadingCardProps {
   loadingMessage?: string;
@@ -132,8 +133,8 @@ const s = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  progressLabel: { fontSize: 12, lineHeight: 17, color: '#c6c6c6' },
-  progressValue: { fontSize: 12, lineHeight: 17, color: '#fff' },
+  progressLabel: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: tokens.color.text.secondary },
+  progressValue: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: tokens.color.text.primary },
   track: {
     height: 6,
     borderRadius: 3,
@@ -144,6 +145,7 @@ const s = StyleSheet.create({
   eyebrow: {
     marginTop: 32,
     fontSize: 12,
+    fontFamily: 'Poppins',
     letterSpacing: 2.88,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -153,16 +155,18 @@ const s = StyleSheet.create({
     marginTop: 12,
     fontSize: 22,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
-    color: '#fff',
+    color: tokens.color.text.primary,
   },
   loadingMsg: {
     marginTop: 8,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     textAlign: 'center',
-    color: '#c6c6c6',
+    color: tokens.color.text.secondary,
   },
   taskList: { marginTop: 32, gap: 12 },
   taskItem: {
@@ -185,13 +189,14 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  taskLabel: { fontSize: 14, fontWeight: '500', lineHeight: 19 },
-  taskLabelActive: { color: '#fff' },
+  taskLabel: { fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 19 },
+  taskLabelActive: { color: tokens.color.text.primary },
   taskLabelInactive: { color: 'rgba(255,255,255,0.7)' },
   taskProcessing: {
     marginTop: 2,
     fontSize: 11,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#5cff4d',
   },
   taskCheck: {

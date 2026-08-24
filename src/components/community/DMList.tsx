@@ -75,6 +75,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: 'rgba(255,255,255,0.62)',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -92,10 +93,12 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#FDFDFD',
     fontSize: 14,
+    fontFamily: 'Poppins',
     marginBottom: 4,
   },
   emptySubtext: {
     color: '#C6C6C6',
     fontSize: 12,
+    fontFamily: 'Poppins',
   },
 });

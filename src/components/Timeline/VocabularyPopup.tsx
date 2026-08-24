@@ -225,6 +225,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 17,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
   },
   closeButton: {
@@ -237,16 +238,19 @@ const styles = StyleSheet.create({
   wordText: {
     fontSize: 20,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
     marginBottom: spacing.sm,
   },
   wordDefinition: {
     fontSize: 15,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.xs,
   },
   wordExample: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     fontStyle: 'italic',
   },
@@ -270,5 +274,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: colors.text.secondary,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

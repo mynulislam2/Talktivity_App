@@ -94,9 +94,11 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: '#fbbf24',
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   messageText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#fff',
     marginBottom: spacing.sm,
   },
@@ -108,19 +110,23 @@ const styles = StyleSheet.create({
   },
   senderName: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   timestamp: {
     fontSize: 12,
+    fontFamily: 'Poppins',
   },
   linkText: {
     fontSize: 12,
     color: '#7B70FF',
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   unpinText: {
     fontSize: 12,
     color: '#f87171',
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });

@@ -1,6 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { tokens } from '@/theme/tokens';
 
 export interface TodayReportStepHeaderProps {
   title: string;
@@ -27,7 +28,7 @@ export function TodayReportStepHeader({ title, level, iconName }: TodayReportSte
 const s = StyleSheet.create({
   header: {
     borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255,255,255,0.06)',
+    borderBottomColor: tokens.color.border.hairline,
     paddingHorizontal: 20,
     paddingTop: 16,
     paddingBottom: 16,
@@ -40,8 +41,8 @@ const s = StyleSheet.create({
   iconBox: {
     width: 40,
     height: 40,
-    borderRadius: 10,
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderRadius: tokens.radius.lg,
+    backgroundColor: tokens.color.surface.raised,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -51,13 +52,15 @@ const s = StyleSheet.create({
   title: {
     fontSize: 17,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 21,
-    color: '#ffffff',
+    color: tokens.color.text.primary,
   },
   level: {
     marginTop: 2,
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
-    color: '#a8a8b8',
+    color: tokens.color.text.secondary,
   },
 });

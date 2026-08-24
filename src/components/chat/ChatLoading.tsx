@@ -35,5 +35,6 @@ const styles = StyleSheet.create({
   message: {
     color: colors.text.secondary,
     fontSize: 16,
+    fontFamily: 'Poppins',
   },
 });

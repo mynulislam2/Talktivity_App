@@ -95,11 +95,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     lineHeight: 24,
   },
   subtitle: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginTop: spacing.xs,
     lineHeight: 16,

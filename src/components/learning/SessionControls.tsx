@@ -125,6 +125,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.text.secondary,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     marginBottom: spacing.xs,
   },
   timer: {
@@ -172,6 +173,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     marginLeft: spacing.sm,
   },
 });

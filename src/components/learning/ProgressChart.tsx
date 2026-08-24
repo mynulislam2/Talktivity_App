@@ -92,10 +92,12 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.black,
   },
   valueText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   barContainer: {
@@ -117,6 +119,7 @@ const styles = StyleSheet.create({
   percentageText: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.secondary,
     minWidth: 32,
     textAlign: 'right',

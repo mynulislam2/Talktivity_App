@@ -160,6 +160,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
   },
   bubble: {
     maxWidth: '75%',
@@ -191,6 +192,7 @@ const styles = StyleSheet.create({
   authorName: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     opacity: 0.9,
     color: '#fff',
   },
@@ -207,6 +209,7 @@ const styles = StyleSheet.create({
   },
   content: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#fff',
   },

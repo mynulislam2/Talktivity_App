@@ -479,17 +479,20 @@ const styles = StyleSheet.create({
   headerBadgeText: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.purple[400],
   },
   title: {
     fontSize: 20,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     textAlign: 'center',
     marginBottom: spacing.sm,
   },
   subtitle: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     lineHeight: 18,
@@ -519,11 +522,13 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: spacing.xs,
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   weekSelectorContainer: {
@@ -552,11 +557,13 @@ const styles = StyleSheet.create({
   weekSelectorTitle: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: 2,
   },
   weekSelectorSubtitle: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   weekSelectorButton: {
@@ -573,6 +580,7 @@ const styles = StyleSheet.create({
   weekSelectorButtonText: {
     fontSize: 13,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   modalOverlay: {
@@ -595,6 +603,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: spacing.md,
   },
@@ -614,6 +623,7 @@ const styles = StyleSheet.create({
   weekOptionText: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.muted,
   },
   weekOptionTextSelected: {
@@ -704,6 +714,7 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   weekBadge: {
@@ -717,6 +728,7 @@ const styles = StyleSheet.create({
   weekBadgeText: {
     fontSize: 10,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.muted,
   },
   statusBadge: {
@@ -730,9 +742,11 @@ const styles = StyleSheet.create({
   statusText: {
     fontSize: 10,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   topicTitle: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.primary,
     marginTop: spacing.xs,
   },
@@ -749,6 +763,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   dayTypeBadge: {
@@ -759,6 +774,7 @@ const styles = StyleSheet.create({
   dayTypeText: {
     fontSize: 10,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.muted,
   },
   emptyContainer: {
@@ -768,12 +784,14 @@ const styles = StyleSheet.create({
   emptyTitle: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   emptyText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   authContainer: {
@@ -793,12 +811,14 @@ const styles = StyleSheet.create({
   authTitle: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   authText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
@@ -818,12 +838,14 @@ const styles = StyleSheet.create({
   errorTitle: {
     fontSize: 15,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginTop: spacing.md,
     marginBottom: spacing.sm,
   },
   errorText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     marginBottom: spacing.lg,
@@ -838,6 +860,7 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 

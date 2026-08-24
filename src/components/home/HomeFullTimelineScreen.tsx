@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   headerTitle: {
     fontSize: 24,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     color: '#fff',
   },
@@ -350,6 +351,7 @@ const styles = StyleSheet.create({
   journeyBadgeText: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 22.4,
     color: '#fff',
   },
@@ -360,6 +362,7 @@ const styles = StyleSheet.create({
   heroTitle: {
     fontSize: 28,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: '#fff',
@@ -368,6 +371,7 @@ const styles = StyleSheet.create({
   heroDesc: {
     marginTop: 8,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#c6c6c6',
     textAlign: 'center',
@@ -393,6 +397,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 28.8,
     letterSpacing: 0.12,
     color: '#fff',
@@ -407,6 +412,7 @@ const styles = StyleSheet.create({
   statLabel: {
     marginTop: 24,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
   },
@@ -416,6 +422,7 @@ const styles = StyleSheet.create({
   timelineTitle: {
     fontSize: 20,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 28,
     color: '#fff',
   },
@@ -487,6 +494,7 @@ const styles = StyleSheet.create({
   weekCardTitle: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 22.4,
     color: '#fff',
   },
@@ -500,6 +508,7 @@ const styles = StyleSheet.create({
   },
   weekBadgeText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#fff',
   },
@@ -513,6 +522,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeCompletedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#22c55e',
   },
@@ -526,6 +536,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeTodayText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#fb7185',
   },
@@ -539,6 +550,7 @@ const styles = StyleSheet.create({
   },
   statusBadgeMissedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#ff3a3a',
   },
@@ -552,12 +564,14 @@ const styles = StyleSheet.create({
   },
   statusBadgeUpcomingText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#2949ff',
   },
   weekCardSubtitle: {
     marginTop: 4,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
   },
@@ -574,11 +588,13 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
   },
   actionText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#fff',
   },
@@ -593,6 +609,7 @@ const styles = StyleSheet.create({
   },
   loadingText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#c6c6c6',
   },
   errorCard: {
@@ -606,6 +623,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#fda4af',
   },
 });

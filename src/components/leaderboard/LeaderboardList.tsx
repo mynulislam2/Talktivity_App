@@ -6,6 +6,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, Image } from 'react-native';
+import { LinearGradient } from 'expo-linear-gradient';
 import Svg, {
   Circle,
   Defs,
@@ -121,6 +122,7 @@ function RankMedal({ position }: { position: number }) {
           position: 'absolute',
           fontSize: 16,
           fontWeight: '800',
+          fontFamily: 'Poppins-Bold',
           color: c.text,
           textShadowColor: 'rgba(255,255,255,0.4)',
           textShadowOffset: { width: 0, height: 1 },
@@ -140,6 +142,7 @@ function RankNumber({ position }: { position: number }) {
         style={{
           fontSize: 16,
           fontWeight: '600',
+          fontFamily: 'Poppins-SemiBold',
           color: 'rgba(255,255,255,0.6)',
         }}
       >
@@ -176,14 +179,8 @@ export function LeaderboardList({
         ) : (
           leaderboard.map((user) => {
             const tone = calcRowTone(user.position);
-            return (
-              <View
-                key={`${leaderboardType}-${user.id}`}
-                style={[
-                  styles.row,
-                  { backgroundColor: tone.bg, borderColor: tone.border },
-                ]}
-              >
+            const rowContent = (
+              <>
                 <View style={styles.rowLeft}>
                   {user.position <= 3 ? (
                     <RankMedal position={user.position} />
@@ -209,6 +206,33 @@ export function LeaderboardList({
                 <View style={styles.rowRight}>
                   <Text style={styles.xpText}>{user.xp}</Text>
                 </View>
+              </>
+            );
+
+            // Rank 1 gets a blue-to-purple gradient row (matches web).
+            if (user.position === 1) {
+              return (
+                <LinearGradient
+                  key={`${leaderboardType}-${user.id}`}
+                  colors={['rgba(14,85,255,0.65)', 'rgba(140,70,230,0.55)']}
+                  start={{ x: 0, y: 0 }}
+                  end={{ x: 1, y: 0 }}
+                  style={[styles.row, { borderColor: tone.border }]}
+                >
+                  {rowContent}
+                </LinearGradient>
+              );
+            }
+
+            return (
+              <View
+                key={`${leaderboardType}-${user.id}`}
+                style={[
+                  styles.row,
+                  { backgroundColor: tone.bg, borderColor: tone.border },
+                ]}
+              >
+                {rowContent}
               </View>
             );
           })
@@ -236,16 +260,17 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 13,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     color: 'rgba(255,255,255,0.4)',
-    textTransform: 'uppercase',
   },
   listContainer: {
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.06)',
-    padding: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 20,
     gap: 10,
   },
   row: {
@@ -282,11 +307,13 @@ const styles = StyleSheet.create({
   avatarText: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   userName: {
     fontSize: 15,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     flex: 1,
   },
@@ -294,6 +321,7 @@ const styles = StyleSheet.create({
   xpText: {
     fontSize: 15,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   emptyContainer: {
@@ -304,6 +332,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.55)',
     textAlign: 'center',
   },

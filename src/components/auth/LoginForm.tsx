@@ -117,6 +117,7 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#000',
     marginBottom: spacing.sm,
   },
@@ -127,6 +128,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#000',
   },
   errorContainer: {
@@ -138,6 +140,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#c33',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   submitButton: {
     backgroundColor: colors.primary,
@@ -153,6 +156,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });
 

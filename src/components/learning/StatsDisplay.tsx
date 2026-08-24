@@ -95,6 +95,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 24,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
     marginBottom: spacing.xs,
   },
@@ -102,6 +103,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.text.secondary,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     textAlign: 'center',
   },
 });

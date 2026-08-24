@@ -11,6 +11,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import type { Group } from '@/types/community';
 import { CommunityAvatar } from './CommunityAvatar';
+import { tokens } from '@/theme/tokens';
 
 export interface GroupCardProps {
   group: Group;
@@ -115,10 +116,10 @@ export function GroupCard({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 12,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.1)',
-    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     padding: 20,
     shadowColor: 'rgba(4,8,22,0.16)',
     shadowOffset: { width: 0, height: 20 },
@@ -147,6 +148,7 @@ const styles = StyleSheet.create({
   groupName: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 21.6,
     color: '#FDFDFD',
     maxWidth: 180,
@@ -154,6 +156,7 @@ const styles = StyleSheet.create({
   category: {
     fontSize: 12,
     fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: 'rgba(255,255,255,0.58)',
   },
@@ -169,6 +172,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   joinButton: {
     paddingHorizontal: 12,
@@ -189,10 +193,12 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   description: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 21,
     color: '#FDFDFD',
   },
@@ -209,6 +215,7 @@ const styles = StyleSheet.create({
   memberText: {
     fontSize: 12,
     fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: 'rgba(255,255,255,0.64)',
   },
@@ -223,6 +230,7 @@ const styles = StyleSheet.create({
   activityText: {
     fontSize: 12,
     fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#FDFDFD',
   },

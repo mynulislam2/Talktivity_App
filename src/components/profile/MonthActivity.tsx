@@ -99,6 +99,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
   statValue: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
   },
   valueBlue: {
     color: colors.primaryLight,
@@ -148,6 +150,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   errorContainer: {
@@ -157,5 +160,6 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
 });

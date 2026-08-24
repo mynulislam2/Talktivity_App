@@ -62,6 +62,7 @@ const styles = StyleSheet.create({
   input: {
     flex: 1,
     fontSize: 15,
+    fontFamily: 'Poppins',
     color: '#F1F5F9',
     paddingHorizontal: 0,
   },

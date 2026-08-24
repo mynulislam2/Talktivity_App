@@ -141,9 +141,13 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           />
         }
       >
+        {/* No onUpgradePress: this app has no working upgrade/checkout
+            screen yet, so ProfileCard renders the Upgrade button visibly
+            disabled rather than wiring it to a route that doesn't exist. */}
         <ProfileCard
           profile={profile}
           planType={planType}
+          isProActive={isProActive}
           proficiency={proficiency}
           onProfileImageClick={openProfileImagePicker}
           isUploadingProfileImage={isUploadingProfileImage}
@@ -263,11 +267,13 @@ const styles = StyleSheet.create({
   subscriptionTitle: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 23,
     color: '#fff',
   },
   subscriptionDesc: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: '#c6c6c6',
     marginTop: 4,
@@ -286,6 +292,7 @@ const styles = StyleSheet.create({
   subscriptionButtonText: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   cancelButton: {
@@ -302,10 +309,12 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#ff9aa3',
   },
   billingFeedback: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.75)',
   },
@@ -323,10 +332,12 @@ const styles = StyleSheet.create({
   insightsTitle: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   insightsDesc: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.55)',
     marginTop: 4,

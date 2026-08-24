@@ -152,6 +152,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   plusButton: {
     width: 42,

@@ -30,6 +30,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: spacing.sm,
   },
@@ -41,11 +42,13 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     color: '#9ca3af',
     marginBottom: spacing.xs,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#6b7280',
     textAlign: 'center',
   },

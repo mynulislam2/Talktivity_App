@@ -65,9 +65,9 @@ const sizeStyles: Record<string, ViewStyle> = {
 };
 
 const sizeTextStyles: Record<string, TextStyle> = {
-  small: { fontSize: 13 },
-  medium: { fontSize: 15 },
-  large: { fontSize: 17 },
+  small: { fontSize: 13, fontFamily: 'Poppins' },
+  medium: { fontSize: 15, fontFamily: 'Poppins' },
+  large: { fontSize: 17, fontFamily: 'Poppins' },
 };
 
 const Button: React.FC<ButtonProps> = ({
@@ -132,6 +132,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
   },
   disabledText: {

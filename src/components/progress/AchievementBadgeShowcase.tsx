@@ -359,11 +359,13 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.12,
     color: '#fff',
   },
   emptyText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.55)',
     marginTop: 16,
   },
@@ -406,6 +408,7 @@ const styles = StyleSheet.create({
   counterText: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fff',
   },

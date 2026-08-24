@@ -68,6 +68,7 @@ import { resolveApiAssetUrl } from '@/utils/community';
 import { MessageComposer, MessageBubble, ChatLoading } from '@/components/chat';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
+import { tokens } from '@/theme/tokens';
 import type { GroupChatScreenProps } from '@/navigation/types';
 
 const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
@@ -725,16 +726,16 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: { fontSize: 18, fontWeight: '500', color: '#FFFFFF' },
+  headerTitle: { fontSize: 18, fontWeight: '500', fontFamily: 'Poppins-Medium', color: '#FFFFFF' },
   headerSpacer: { flex: 1 },
   headerMenuButton: {
     width: 36,
@@ -753,18 +754,19 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(239,68,68,0.5)',
   },
-  errorBannerText: { color: '#fff', fontSize: 14, textAlign: 'center' },
+  errorBannerText: { color: '#fff', fontSize: 14, fontFamily: 'Poppins', textAlign: 'center' },
   messagesWrapper: { flex: 1, position: 'relative' },
   messagesList: { flex: 1 },
   messagesContent: { paddingHorizontal: 16, paddingVertical: 16, gap: 12 },
   emptyState: { alignItems: 'center', paddingVertical: 48 },
   emptyTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
     marginTop: 16,
     marginBottom: 8,
   },
-  emptySubtext: { fontSize: 14, color: 'rgba(255,255,255,0.4)' },
+  emptySubtext: { fontSize: 14, fontFamily: 'Poppins', color: 'rgba(255,255,255,0.4)' },
   scrollToBottomBtn: {
     position: 'absolute',
     bottom: 16,
@@ -798,7 +800,7 @@ const styles = StyleSheet.create({
   },
   typingDot2: { opacity: 0.7 },
   typingDot3: { opacity: 0.4 },
-  typingLabel: { fontSize: 14, color: 'rgba(255,255,255,0.5)', flex: 1 },
+  typingLabel: { fontSize: 14, fontFamily: 'Poppins', color: 'rgba(255,255,255,0.5)', flex: 1 },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
@@ -810,10 +812,12 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.5)',
   },
   errorSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
   },
@@ -831,7 +835,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
-  dmOverlayText: { color: '#fff', fontSize: 16, fontWeight: '600' },
+  dmOverlayText: { color: '#fff', fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   groupProfileOverlay: {
     ...StyleSheet.absoluteFillObject,
     backgroundColor: 'rgba(0,0,0,0.6)',
@@ -868,12 +872,14 @@ const styles = StyleSheet.create({
   groupProfileName: {
     fontSize: 22,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginTop: 12,
     marginBottom: 4,
   },
   groupProfileDesc: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
     marginBottom: 8,
@@ -881,6 +887,7 @@ const styles = StyleSheet.create({
   },
   groupProfileMemberCount: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
     flexDirection: 'row',
     alignItems: 'center',
@@ -903,9 +910,10 @@ const styles = StyleSheet.create({
   },
   memberAvatarContainer: { position: 'relative' },
   memberInfo: { flex: 1, minWidth: 0 },
-  memberName: { fontSize: 16, fontWeight: '600', color: '#fff' },
+  memberName: { fontSize: 16, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: '#fff' },
   adminBadge: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: '#fbbf24',
     backgroundColor: 'rgba(251,191,36,0.15)',
     paddingHorizontal: 8,
@@ -926,7 +934,7 @@ const styles = StyleSheet.create({
   },
   muteButtonActive: { backgroundColor: '#2949ff' },
   muteButtonMuted: { backgroundColor: '#d97706' },
-  muteButtonText: { color: '#fff', fontSize: 14, fontWeight: '600' },
+  muteButtonText: { color: '#fff', fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
   leaveButton: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -938,7 +946,7 @@ const styles = StyleSheet.create({
     borderColor: 'rgba(255,111,133,0.3)',
     marginTop: 8,
   },
-  leaveButtonText: { color: '#ff6f85', fontSize: 14, fontWeight: '600' },
+  leaveButtonText: { color: '#ff6f85', fontSize: 14, fontWeight: '600', fontFamily: 'Poppins-SemiBold' },
 });
 
 export default GroupChatScreen;

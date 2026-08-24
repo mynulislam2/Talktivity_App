@@ -3,6 +3,7 @@ import {
   TouchableOpacity,
   Text,
   StyleSheet,
+  StyleProp,
   ViewStyle,
   TextStyle,
   ActivityIndicator,
@@ -20,7 +21,7 @@ interface GradientButtonProps {
   size?: 'small' | 'medium' | 'large';
   disabled?: boolean;
   loading?: boolean;
-  style?: ViewStyle;
+  style?: StyleProp<ViewStyle>;
   textStyle?: TextStyle;
   fullWidth?: boolean;
   gradientColors?: readonly [string, string, ...string[]];
@@ -31,9 +32,9 @@ interface GradientButtonProps {
 const sizeValues = { small: 36, medium: 42, large: 48 };
 
 const sizeTextStyles: Record<string, TextStyle> = {
-  small: { fontSize: 14 },
-  medium: { fontSize: 16 },
-  large: { fontSize: 18 },
+  small: { fontSize: 14, fontFamily: 'Poppins' },
+  medium: { fontSize: 16, fontFamily: 'Poppins' },
+  large: { fontSize: 18, fontFamily: 'Poppins' },
 };
 
 const GradientButton: React.FC<GradientButtonProps> = ({
@@ -71,7 +72,7 @@ const GradientButton: React.FC<GradientButtonProps> = ({
         colors={gradientColors}
         start={start}
         end={end}
-        style={[styles.gradient, { height: sizeValues[size] }]}
+        style={[styles.gradient, { height: '100%' }]}
       >
         {loading ? (
           <ActivityIndicator color={colors.white} size="small" />
@@ -113,6 +114,7 @@ const styles = StyleSheet.create({
   },
   text: {
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.white,
     textAlign: 'center',
   },

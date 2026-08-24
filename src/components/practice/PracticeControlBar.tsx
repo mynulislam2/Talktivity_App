@@ -175,6 +175,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#ffffff',
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 
   // Connected state styles
@@ -219,11 +220,13 @@ const styles = StyleSheet.create({
     color: '#34d399', // emerald-400
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 
   guidanceText: {
     color: '#9ca3af', // gray-400
     fontSize: 12,
+    fontFamily: 'Poppins',
     marginTop: 4,
   },
 });

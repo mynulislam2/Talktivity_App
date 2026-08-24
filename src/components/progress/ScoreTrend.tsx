@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   selector: {
@@ -204,6 +205,7 @@ const styles = StyleSheet.create({
   selectorButtonText: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255, 255, 255, 0.9)',
   },
   selectorButtonTextActive: {
@@ -234,12 +236,14 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
   },
   chartValue: {
     fontSize: 10,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   noDataContainer: {
@@ -250,6 +254,7 @@ const styles = StyleSheet.create({
   noDataText: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   infoSection: {
     marginTop: spacing.sm,
@@ -263,11 +268,13 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   infoValue: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fbbf24',
   },
 });

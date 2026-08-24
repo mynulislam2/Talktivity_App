@@ -113,6 +113,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 21.6,
     letterSpacing: 0.12,
     color: colors.text.primary,
@@ -120,6 +121,7 @@ const styles = StyleSheet.create({
   description: {
     marginTop: 6,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: '#c6c6c6',
   },
@@ -145,6 +147,7 @@ const styles = StyleSheet.create({
     lineHeight: 16.8,
     color: '#fff',
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   buttonIcon: {
     marginLeft: 4,

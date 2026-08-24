@@ -204,6 +204,7 @@ const styles = StyleSheet.create({
   emptyText: {
     color: colors.text.primary,
     fontSize: 16,
+    fontFamily: 'Poppins',
     textAlign: 'center',
   },
 });

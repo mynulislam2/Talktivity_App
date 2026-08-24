@@ -101,7 +101,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    borderRadius: 12,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.04)',
@@ -111,6 +111,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: 'rgba(255,255,255,0.62)',
     fontSize: 14,
+    fontFamily: 'Poppins',
     marginLeft: 8,
   },
   emptyContainer: {
@@ -118,7 +119,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 12,
-    borderRadius: 12,
+    borderRadius: 24,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.04)',
@@ -138,9 +139,11 @@ const styles = StyleSheet.create({
     color: '#FDFDFD',
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   emptySubtext: {
     color: '#C6C6C6',
     fontSize: 12,
+    fontFamily: 'Poppins',
   },
 });

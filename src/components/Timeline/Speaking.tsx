@@ -50,7 +50,7 @@ export const Speaking: React.FC<SpeakingProps> = ({
           screen: 'TopicsScreen',
         });
       }
-    } catch (err) {
+    } catch (_err) {
       // Error navigating
     }
   };
@@ -139,17 +139,20 @@ const styles = StyleSheet.create({
   cardTitle: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.white,
     flex: 1,
   },
   cardDescription: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.md,
     lineHeight: 18,
   },
   timeRemaining: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.warning,
     marginBottom: spacing.sm,
   },
@@ -161,6 +164,7 @@ const styles = StyleSheet.create({
   completedText: {
     fontSize: 12,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.success,
   },
   actionButton: {
@@ -178,5 +182,6 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

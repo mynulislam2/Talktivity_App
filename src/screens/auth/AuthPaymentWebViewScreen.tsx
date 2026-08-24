@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     marginTop: spacing.md,
     fontSize: 16,
+    fontFamily: 'Poppins-Medium',
     fontWeight: '500',
   },
 });

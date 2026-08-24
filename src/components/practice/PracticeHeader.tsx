@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   timeText: {
     color: '#ffffff',
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.3,
   },
 
@@ -129,6 +130,7 @@ const styles = StyleSheet.create({
   stateText: {
     color: '#ffffff',
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.3,
   },
 });

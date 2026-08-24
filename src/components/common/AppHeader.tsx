@@ -210,10 +210,12 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.white,
   },
   subtitle: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: '#9ca3af',
     marginTop: 1,
   },
@@ -228,11 +230,13 @@ const styles = StyleSheet.create({
   },
   streakEmoji: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     marginRight: spacing.xs,
   },
   streakText: {
     fontSize: 13,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: colors.white,
   },
   rightSection: {

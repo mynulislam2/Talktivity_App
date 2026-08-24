@@ -16,6 +16,18 @@ import { AgentState } from '@livekit/components-react';
 import { extractCallErrorMessage } from '@/lib/call/errorHandler';
 
 /**
+ * LiveKit's AgentState has no 'connected' member. A session is connected once
+ * the agent has left the pre-session states, i.e. anything that is not
+ * disconnected / connecting / pre-connect-buffering / failed.
+ */
+export const isAgentConnected = (state: AgentState): boolean =>
+  state === 'initializing' ||
+  state === 'idle' ||
+  state === 'listening' ||
+  state === 'thinking' ||
+  state === 'speaking';
+
+/**
  * Call state interface
  */
 interface CallState {
@@ -96,21 +108,17 @@ const callSlice = createSlice({
     setAgentState: (state, action: PayloadAction<AgentState>) => {
       const agentState = action.payload;
       state.sessionState.agentState = agentState;
-      state.sessionState.isConnecting = (agentState as any) === 'connecting';
-      state.sessionState.isConnected = (agentState as any) === 'connected';
-      state.sessionState.isDisconnected =
-        (agentState as any) === 'disconnected';
+      state.sessionState.isConnecting = agentState === 'connecting';
+      state.sessionState.isConnected = isAgentConnected(agentState);
+      state.sessionState.isDisconnected = agentState === 'disconnected';
 
       // Set session start time when connected
-      if (
-        (agentState as any) === 'connected' &&
-        !state.sessionState.sessionStartTime
-      ) {
+      if (isAgentConnected(agentState) && !state.sessionState.sessionStartTime) {
         state.sessionState.sessionStartTime = new Date();
       }
 
       // Clear session start time when disconnected
-      if ((agentState as any) === 'disconnected') {
+      if (agentState === 'disconnected') {
         state.sessionState.sessionStartTime = null;
       }
     },

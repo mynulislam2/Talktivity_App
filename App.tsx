@@ -23,6 +23,8 @@ import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
+import { appNavigationTheme } from './src/theme/navigationTheme';
+import { applyGlobalFontDefaults } from './src/theme/fonts';
 
 import { store, persistor } from '@/store';
 import { AlertProvider } from '@/contexts/AlertContext';
@@ -32,6 +34,12 @@ import { AnimatedSplashScreen } from '@/components/common/AnimatedSplashScreen';
 
 // Keep native Expo splash screen visible while JS loads
 SplashScreen.preventAutoHideAsync().catch(() => {});
+
+// Default every Text/TextInput to Poppins so unstyled nodes still render in
+// the loaded font. Individual `style` props still win. See fonts.ts for why
+// this works under React 19. Nothing renders until `isReady` below, so it's
+// safe to set this once here rather than after fonts resolve.
+applyGlobalFontDefaults();
 
 // Setup LiveKit for React Native
 if (Platform.OS !== 'web') {
@@ -102,7 +110,7 @@ export default function App() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <SafeAreaProvider>
-        <NavigationContainer>
+        <NavigationContainer theme={appNavigationTheme}>
           <Provider store={store}>
             <PersistGate
               loading={null}
@@ -146,3 +154,14 @@ const styles = StyleSheet.create({
 
 // Register the app with React Native — Android looks for "main" component
 AppRegistry.registerComponent('main', () => App);
+
+// On web, registering is not enough: react-native-web also needs the app to be
+// RUN against a DOM node, otherwise the component is registered but never
+// mounted and #root stays empty. Native platforms mount via AppRegistry
+// themselves, so this branch is web-only and does not affect iOS or Android.
+if (Platform.OS === 'web' && typeof document !== 'undefined') {
+  const rootTag = document.getElementById('root') ?? document.getElementById('main');
+  if (rootTag) {
+    AppRegistry.runApplication('main', { rootTag });
+  }
+}

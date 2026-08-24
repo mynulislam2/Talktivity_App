@@ -19,6 +19,7 @@ import {
 import { RoleplayContent } from '@/components/roleplay/RoleplayContent';
 import { RoleplayVisualizerLayout } from '@/components/roleplay/RoleplayVisualizerLayout';
 import { handleDeviceFailure } from '@/lib/call/deviceFailureHandlerNative';
+import { AppBackground } from '../../components/common/AppBackground';
 
 export default function RoleplayScreen() {
   const navigation = useNavigation();
@@ -71,26 +72,28 @@ export default function RoleplayScreen() {
   const topicTitle = topic?.title || 'General Conversation';
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={[]}>
-      <RoleplayVisualizerLayout>
-        <View style={styles.container}>
-          <RoleplayContent
-            topicTitle={topicTitle}
-            sessionState={sessionState}
-            connectionDetails={connectionDetails}
-            onConnect={handleConnect}
-            onDisconnect={handleDisconnect}
-            onStateChange={updateAgentState}
-            canStartSession={canStartSession}
-            timeLoading={statusLoading}
-            remainingTime={remainingTime}
-            stateColor={stateColor}
-            onDeviceFailure={handleDeviceFailure}
-            onBack={() => navigation.goBack()}
-          />
-        </View>
-      </RoleplayVisualizerLayout>
-    </SafeAreaView>
+    <AppBackground>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
+        <RoleplayVisualizerLayout>
+          <View style={styles.container}>
+            <RoleplayContent
+              topicTitle={topicTitle}
+              sessionState={sessionState}
+              connectionDetails={connectionDetails}
+              onConnect={handleConnect}
+              onDisconnect={handleDisconnect}
+              onStateChange={updateAgentState}
+              canStartSession={canStartSession}
+              timeLoading={statusLoading}
+              remainingTime={remainingTime}
+              stateColor={stateColor}
+              onDeviceFailure={handleDeviceFailure}
+              onBack={() => navigation.goBack()}
+            />
+          </View>
+        </RoleplayVisualizerLayout>
+      </SafeAreaView>
+    </AppBackground>
   );
 }
 

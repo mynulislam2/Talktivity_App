@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: 14,
+    fontFamily: 'Poppins',
     marginBottom: spacing.md,
     textAlign: 'center',
   },
@@ -64,10 +65,12 @@ const styles = StyleSheet.create({
     color: colors.white,
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   waitText: {
     color: colors.text.muted,
     fontSize: 12,
+    fontFamily: 'Poppins',
     marginTop: spacing.sm,
     textAlign: 'center',
   },

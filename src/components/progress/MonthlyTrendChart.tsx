@@ -186,6 +186,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   chartContainer: {
@@ -227,6 +228,7 @@ const styles = StyleSheet.create({
   },
   chartLabel: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
     maxWidth: 60,
@@ -249,6 +251,7 @@ const styles = StyleSheet.create({
   },
   legendText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   infoSection: {
@@ -264,15 +267,18 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   infoValue: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#86efac',
   },
   infoText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: spacing.xs,
   },

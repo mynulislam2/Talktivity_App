@@ -85,10 +85,12 @@ const styles = StyleSheet.create({
   lessonTitle: {
     fontSize: 14,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
   },
   lessonDuration: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   playButton: {

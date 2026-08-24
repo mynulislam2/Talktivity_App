@@ -57,16 +57,19 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
       paddingVertical: 8,
       paddingHorizontal: 16,
       fontSize: 14,
+      fontFamily: 'Poppins',
     },
     md: {
       paddingVertical: 12,
       paddingHorizontal: 24,
       fontSize: 16,
+      fontFamily: 'Poppins',
     },
     lg: {
       paddingVertical: 16,
       paddingHorizontal: 32,
       fontSize: 16,
+      fontFamily: 'Poppins',
     },
   };
 
@@ -127,7 +130,7 @@ const styles = StyleSheet.create({
   },
   text: {
     color: '#fff',
-    fontWeight: '600', // font-semibold
+    fontWeight: '600', fontFamily: 'Poppins-SemiBold', // font-semibold
     textAlign: 'center',
   },
   disabled: {

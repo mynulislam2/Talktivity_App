@@ -115,11 +115,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.02,
     color: '#fff',
   },
   time: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.66)',
     flexShrink: 0,
   },
@@ -132,6 +134,7 @@ const styles = StyleSheet.create({
   preview: {
     flex: 1,
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.52)',
   },
   previewUnread: {
@@ -148,6 +151,7 @@ const styles = StyleSheet.create({
   liveBadgeText: {
     fontSize: 10,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#7BFFB7',
   },
   unreadContainer: {

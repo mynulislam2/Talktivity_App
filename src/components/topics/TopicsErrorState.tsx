@@ -36,7 +36,6 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#000',
     padding: spacing.lg,
   },
   content: {
@@ -46,12 +45,14 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#ef4444',
     fontSize: 16,
+    fontFamily: 'Poppins',
     textAlign: 'center',
     marginBottom: spacing.md,
   },
   subText: {
     color: '#9ca3af',
     fontSize: 14,
+    fontFamily: 'Poppins',
     textAlign: 'center',
     marginBottom: spacing.lg,
   },
@@ -65,5 +66,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

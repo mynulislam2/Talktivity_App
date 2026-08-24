@@ -109,6 +109,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   inactiveTabContent: {
     flexDirection: 'row',
@@ -123,6 +124,7 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.72)',
     fontSize: 14,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   unreadBadge: {
     borderRadius: 100,
@@ -134,5 +136,6 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 10,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

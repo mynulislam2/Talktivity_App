@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { tokens } from '@/theme/tokens';
 
 export interface ListeningControlsProps {
   isPlaying: boolean;
@@ -46,7 +47,7 @@ export function ListeningControls({
           <Ionicons
             name={isPlaying ? 'pause' : 'play'}
             size={24}
-            color="#fff"
+            color={tokens.color.text.primary}
           />
         </TouchableOpacity>
       </View>
@@ -63,11 +64,11 @@ export function ListeningControls({
 
 const styles = StyleSheet.create({
   container: {
-    borderRadius: 24,
-    backgroundColor: 'rgba(17, 24, 39, 0.3)',
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(55, 65, 81, 0.3)',
-    padding: 20,
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
+    padding: 16,
   },
   header: {
     flexDirection: 'row',
@@ -83,23 +84,26 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 14,
     fontWeight: '600',
-    color: '#fff',
+    fontFamily: 'Poppins-SemiBold',
+    color: tokens.color.text.primary,
   },
   subtitle: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginTop: 2,
   },
   playButton: {
     width: 48,
     height: 48,
     borderRadius: 24,
-    backgroundColor: '#5A4BC0',
+    backgroundColor: tokens.color.accent.primary,
     justifyContent: 'center',
     alignItems: 'center',
   },
   playButtonDisabled: {
-    backgroundColor: '#6b7280',
+    backgroundColor: tokens.color.text.placeholder,
     opacity: 0.5,
   },
   progressContainer: {
@@ -110,18 +114,20 @@ const styles = StyleSheet.create({
   progressBar: {
     flex: 1,
     height: 8,
-    backgroundColor: 'rgba(55, 65, 81, 0.5)',
+    backgroundColor: 'rgba(255,255,255,0.12)',
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressFill: {
     height: '100%',
-    backgroundColor: '#5A4BC0',
+    backgroundColor: tokens.color.accent.primary,
     borderRadius: 4,
   },
   progressText: {
     fontSize: 12,
-    color: '#9ca3af',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     minWidth: 40,
     textAlign: 'right',
   },

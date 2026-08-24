@@ -8,6 +8,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { CommunityAvatar } from './CommunityAvatar';
 import { DMConversationCard } from './DMConversationCard';
@@ -260,25 +261,30 @@ export function InboxView({
             ['unread', `Unread ${unreadEntryCount}`],
             ['group', 'Group'],
           ] as const
-        ).map(([value, label]) => (
-          <TouchableOpacity
-            key={value}
-            onPress={() => setActiveFilter(value)}
-            style={[
-              styles.filterChip,
-              activeFilter === value && styles.filterChipActive,
-            ]}
-          >
-            <Text
-              style={[
-                styles.filterChipText,
-                activeFilter === value && styles.filterChipTextActive,
-              ]}
+        ).map(([value, label]) =>
+          activeFilter === value ? (
+            <TouchableOpacity key={value} onPress={() => setActiveFilter(value)}>
+              <LinearGradient
+                colors={['#2C5BFF', '#A45DFF']}
+                start={{ x: 0, y: 0 }}
+                end={{ x: 1, y: 1 }}
+                style={[styles.filterChip, styles.filterChipActive]}
+              >
+                <Text style={[styles.filterChipText, styles.filterChipTextActive]}>
+                  {label}
+                </Text>
+              </LinearGradient>
+            </TouchableOpacity>
+          ) : (
+            <TouchableOpacity
+              key={value}
+              onPress={() => setActiveFilter(value)}
+              style={styles.filterChip}
             >
-              {label}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text style={styles.filterChipText}>{label}</Text>
+            </TouchableOpacity>
+          )
+        )}
       </View>
 
       <View>
@@ -393,6 +399,7 @@ const styles = StyleSheet.create({
     height: '100%',
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   messagesHeader: {
     flexDirection: 'row',
@@ -404,6 +411,7 @@ const styles = StyleSheet.create({
   messagesTitle: {
     fontSize: 34,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.04,
     color: '#fff',
   },
@@ -417,6 +425,7 @@ const styles = StyleSheet.create({
   },
   chatCountText: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.58)',
   },
   recentScroll: {
@@ -438,6 +447,7 @@ const styles = StyleSheet.create({
   },
   recentName: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.74)',
     textAlign: 'center',
     width: '100%',
@@ -456,7 +466,6 @@ const styles = StyleSheet.create({
     paddingVertical: 6,
   },
   filterChipActive: {
-    backgroundColor: 'transparent',
     borderColor: 'transparent',
     shadowColor: 'rgba(101,85,255,0.26)',
     shadowOffset: { width: 0, height: 10 },
@@ -467,6 +476,7 @@ const styles = StyleSheet.create({
   filterChipText: {
     fontSize: 12,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: 'rgba(255,255,255,0.66)',
   },
   filterChipTextActive: {
@@ -485,6 +495,7 @@ const styles = StyleSheet.create({
   loadingText: {
     color: 'rgba(255,255,255,0.62)',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   emptyContainer: {
     alignItems: 'center',
@@ -498,7 +509,7 @@ const styles = StyleSheet.create({
   emptyIcon: {
     width: 56,
     height: 56,
-    borderRadius: 28,
+    borderRadius: 12,
     backgroundColor: 'rgba(255,255,255,0.06)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -507,12 +518,14 @@ const styles = StyleSheet.create({
     marginTop: 16,
     fontSize: 16,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
   emptySubtitle: {
     marginTop: 8,
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.52)',
     textAlign: 'center',
   },
@@ -522,7 +535,7 @@ const styles = StyleSheet.create({
     gap: 12,
     paddingHorizontal: 8,
     paddingVertical: 10,
-    borderRadius: 20,
+    borderRadius: 12,
   },
   groupRowText: {
     flex: 1,
@@ -537,11 +550,13 @@ const styles = StyleSheet.create({
     flex: 1,
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.02,
     color: '#fff',
   },
   groupRowTime: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.66)',
     flexShrink: 0,
   },
@@ -554,6 +569,7 @@ const styles = StyleSheet.create({
   groupRowPreviewText: {
     flex: 1,
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.52)',
   },
   groupRowPreviewUnread: {

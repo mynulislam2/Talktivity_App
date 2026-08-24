@@ -121,9 +121,11 @@ const styles = StyleSheet.create({
   scoreValue: {
     fontSize: 48,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
   },
   scoreMax: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
   },
   feedbackContainer: {
@@ -132,17 +134,20 @@ const styles = StyleSheet.create({
   feedbackTitle: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     marginBottom: spacing.xs,
   },
   feedbackText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     lineHeight: 18,
   },
   metricsTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     marginBottom: spacing.md,
     marginTop: spacing.lg,
@@ -157,6 +162,7 @@ const styles = StyleSheet.create({
   metricLabel: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.secondary,
     marginBottom: spacing.xs,
   },
@@ -174,6 +180,7 @@ const styles = StyleSheet.create({
   metricValue: {
     fontSize: 12,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
   },
   tipsContainer: {
@@ -189,6 +196,7 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.primary,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 16,
   },
 });

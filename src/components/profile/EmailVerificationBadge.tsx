@@ -291,6 +291,7 @@ const styles = StyleSheet.create({
   },
   verifiedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.success,
   },
   notVerifiedBadge: {
@@ -300,6 +301,7 @@ const styles = StyleSheet.create({
   },
   notVerifiedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.warning,
   },
   verifyButton: {
@@ -311,6 +313,7 @@ const styles = StyleSheet.create({
   verifyButtonText: {
     fontSize: 11,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   modalOverlay: {
@@ -350,6 +353,7 @@ const styles = StyleSheet.create({
   modalTitle: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
   },
   loadingState: {
@@ -359,6 +363,7 @@ const styles = StyleSheet.create({
   loadingText: {
     marginTop: spacing.md,
     fontSize: 15,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
   },
   codeState: {
@@ -366,6 +371,7 @@ const styles = StyleSheet.create({
   },
   codeInstructions: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
     textAlign: 'center',
     lineHeight: 20,
@@ -373,6 +379,7 @@ const styles = StyleSheet.create({
   emailHighlight: {
     color: colors.text.primary,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   errorContainer: {
     backgroundColor: 'rgba(127, 29, 29, 0.3)',
@@ -382,6 +389,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: colors.error,
     fontSize: 13,
+    fontFamily: 'Poppins',
     textAlign: 'center',
   },
   submitButton: {
@@ -397,6 +405,7 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   resendButton: {
     alignItems: 'center',
@@ -404,6 +413,7 @@ const styles = StyleSheet.create({
   resendButtonText: {
     color: colors.primary,
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   successState: {
     alignItems: 'center',
@@ -415,11 +425,13 @@ const styles = StyleSheet.create({
   successTitle: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.primary,
     marginBottom: spacing.xs,
   },
   successSubtitle: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.tertiary,
     textAlign: 'center',
   },

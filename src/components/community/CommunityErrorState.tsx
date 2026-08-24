@@ -7,6 +7,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { LinearGradient } from 'expo-linear-gradient';
 
 export interface CommunityErrorStateProps {
   error: string;
@@ -19,12 +20,24 @@ export function CommunityErrorState({
 }: CommunityErrorStateProps) {
   return (
     <View style={styles.container}>
-      <View style={styles.iconContainer}>
+      <LinearGradient
+        colors={['#b91c1c', '#dc2626']}
+        start={{ x: 0, y: 0 }}
+        end={{ x: 1, y: 1 }}
+        style={styles.iconContainer}
+      >
         <Ionicons name="alert-circle" size={40} color="#fff" />
-      </View>
+      </LinearGradient>
       <Text style={styles.errorText}>{error}</Text>
-      <TouchableOpacity style={styles.retryButton} onPress={onRetry}>
-        <Text style={styles.retryButtonText}>Try Again</Text>
+      <TouchableOpacity onPress={onRetry} activeOpacity={0.8}>
+        <LinearGradient
+          colors={['#2563eb', '#9333ea']}
+          start={{ x: 0, y: 0 }}
+          end={{ x: 1, y: 0 }}
+          style={styles.retryButton}
+        >
+          <Text style={styles.retryButtonText}>Try Again</Text>
+        </LinearGradient>
       </TouchableOpacity>
     </View>
   );
@@ -39,7 +52,6 @@ const styles = StyleSheet.create({
     width: 80,
     height: 80,
     borderRadius: 40,
-    backgroundColor: '#dc2626',
     justifyContent: 'center',
     alignItems: 'center',
     marginBottom: 16,
@@ -47,6 +59,7 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#9ca3af',
     marginBottom: 8,
     textAlign: 'center',
@@ -55,12 +68,12 @@ const styles = StyleSheet.create({
     marginTop: 16,
     paddingHorizontal: 24,
     paddingVertical: 12,
-    borderRadius: 24,
-    backgroundColor: '#5A4BC0',
+    borderRadius: 100,
   },
   retryButtonText: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

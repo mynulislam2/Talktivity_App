@@ -121,6 +121,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 16,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: spacing.xs,
   },
@@ -143,6 +144,7 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 12,
     fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   levelInfo: {
@@ -152,10 +154,12 @@ const styles = StyleSheet.create({
   levelTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   levelSubtext: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   progressBar: {
@@ -193,10 +197,12 @@ const styles = StyleSheet.create({
   streakTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   streakSubtext: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   badgesSection: {
@@ -205,6 +211,7 @@ const styles = StyleSheet.create({
   badgesTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     marginBottom: spacing.xs,
   },
@@ -232,6 +239,7 @@ const styles = StyleSheet.create({
   },
   badgeIcon: {
     fontSize: 16,
+    fontFamily: 'Poppins',
   },
   badgeInfo: {
     flex: 1,
@@ -240,6 +248,7 @@ const styles = StyleSheet.create({
   badgeName: {
     fontSize: 12,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fbbf24',
   },
   badgeNameLocked: {
@@ -247,6 +256,7 @@ const styles = StyleSheet.create({
   },
   badgeDescription: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.5)',
   },
 });

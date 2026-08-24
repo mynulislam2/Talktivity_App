@@ -122,6 +122,7 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 30.8,
     letterSpacing: -0.03,
     color: '#FDFDFD',
@@ -134,7 +135,7 @@ const styles = StyleSheet.create({
   dropdown: {
     height: 32,
     minWidth: 110,
-    borderRadius: 100,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.06)',
@@ -154,10 +155,12 @@ const styles = StyleSheet.create({
   },
   dropdownItemText: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.7)',
   },
   dropdownSelectedText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#fff',
   },
   dropdownIcon: {
@@ -167,7 +170,7 @@ const styles = StyleSheet.create({
   searchToggle: {
     width: 40,
     height: 40,
-    borderRadius: 14,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',
@@ -177,7 +180,7 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 18,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',
@@ -191,5 +194,6 @@ const styles = StyleSheet.create({
     flex: 1,
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
 });

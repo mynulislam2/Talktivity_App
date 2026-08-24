@@ -66,6 +66,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: colors.text.primary,
     marginBottom: spacing.xl,
   },
@@ -88,5 +89,6 @@ const styles = StyleSheet.create({
     color: colors.text.primary,
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

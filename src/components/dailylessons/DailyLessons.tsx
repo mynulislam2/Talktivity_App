@@ -70,6 +70,7 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 18,
     fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
     marginBottom: spacing.md,
     paddingHorizontal: spacing.lg,
@@ -81,6 +82,7 @@ const styles = StyleSheet.create({
   },
   comingSoonText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     marginTop: spacing.md,

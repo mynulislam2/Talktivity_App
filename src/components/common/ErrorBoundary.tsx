@@ -12,12 +12,13 @@ import {
   StyleSheet,
   TouchableOpacity,
   ScrollView,
-  SafeAreaView,
 } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { logError, AppError, ErrorType } from '@/lib/errorHandler';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
+import { tokens } from '@/theme/tokens';
 
 interface ErrorBoundaryProps {
   children: ReactNode;
@@ -131,7 +132,7 @@ export class ErrorBoundary extends React.Component<
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F8F9FA',
+    backgroundColor: tokens.color.bg.screen,
   },
   content: {
     flexGrow: 1,
@@ -146,13 +147,15 @@ const styles = StyleSheet.create({
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: colors.text.primary,
+    fontFamily: 'Poppins-Bold',
+    color: tokens.color.text.primary,
     marginBottom: spacing.md,
     textAlign: 'center',
   },
   message: {
     fontSize: 16,
-    color: colors.text.secondary,
+    fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
     marginBottom: spacing.lg,
     textAlign: 'center',
     lineHeight: 24,
@@ -169,6 +172,7 @@ const styles = StyleSheet.create({
   debugTitle: {
     fontSize: 14,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.error,
     marginBottom: spacing.sm,
   },
@@ -198,6 +202,7 @@ const styles = StyleSheet.create({
   buttonText: {
     fontSize: 16,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     marginLeft: spacing.sm,
   },

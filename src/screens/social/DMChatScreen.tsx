@@ -58,6 +58,7 @@ import { resolveApiAssetUrl } from '@/utils/community';
 import { MessageComposer, MessageBubble, ChatLoading } from '@/components/chat';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
+import { tokens } from '@/theme/tokens';
 import type { DMChatScreenProps } from '@/navigation/types';
 
 const DMChatScreen: React.FC<DMChatScreenProps> = () => {
@@ -533,18 +534,19 @@ const styles = StyleSheet.create({
   backButton: {
     position: 'absolute',
     left: 16,
-    width: 36,
-    height: 36,
-    borderRadius: 5,
+    width: tokens.control.height,
+    height: tokens.control.height,
+    borderRadius: tokens.radius.sm,
     borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: tokens.color.border.card,
+    backgroundColor: tokens.color.surface.card,
     justifyContent: 'center',
     alignItems: 'center',
   },
   headerTitle: {
     fontSize: 18,
     fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#FFFFFF',
   },
@@ -564,10 +566,12 @@ const styles = StyleSheet.create({
   },
   statusOnlineText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
   },
   statusOfflineText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
   },
   errorBanner: {
@@ -583,6 +587,7 @@ const styles = StyleSheet.create({
   errorBannerText: {
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
     textAlign: 'center',
   },
   messagesWrapper: {
@@ -603,12 +608,14 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
     marginTop: 16,
     marginBottom: 8,
   },
   emptySubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
   },
   typingContainer: {
@@ -636,6 +643,7 @@ const styles = StyleSheet.create({
   },
   typingText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.5)',
   },
   scrollToBottomBtn: {
@@ -666,10 +674,12 @@ const styles = StyleSheet.create({
   errorText: {
     fontSize: 18,
     fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.5)',
   },
   errorSubtext: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.4)',
     textAlign: 'center',
   },

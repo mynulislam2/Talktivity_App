@@ -6,11 +6,12 @@
 
 import React from 'react';
 import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { tokens } from '@/theme/tokens';
 
 export function ProgressLoadingState() {
   return (
     <View style={styles.container}>
-      <ActivityIndicator size="large" color="#6A5AE0" />
+      <ActivityIndicator size="large" color={tokens.color.accent.primary} />
     </View>
   );
 }

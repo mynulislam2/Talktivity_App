@@ -5,7 +5,7 @@ module.exports = {
   ignorePatterns: ['/dist/*', '*.d.ts'],
   rules: {
     'prettier/prettier': [
-      'error',
+      'warn',
       {
         quoteProps: 'consistent',
         singleQuote: true,

@@ -14,9 +14,6 @@
     "postinstall": "patch-package",
     "typescript": "tsc --noemit -p tsconfig.json"
   },
-  "jest": {
-    "preset": "jest-expo"
-  },
   "dependencies": {
     "@config-plugins/react-native-webrtc": "13.0.0",
     "@expo/vector-icons": "^15.0.3",

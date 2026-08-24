@@ -17,10 +17,12 @@ jest.mock('@react-native-async-storage/async-storage', () => ({
 }));
 
 // Mock Expo modules
-jest.mock('expo-audio', () => ({
-  setAudioModeAsync: jest.fn(),
-  Sound: {
-    createAsync: jest.fn(),
+jest.mock('expo-av', () => ({
+  Audio: {
+    setAudioModeAsync: jest.fn(),
+    Sound: {
+      createAsync: jest.fn(),
+    },
   },
 }));
 

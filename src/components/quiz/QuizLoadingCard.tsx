@@ -179,14 +179,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: tokens.color.text.primary,
     marginBottom: 8,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 14,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
     textAlign: 'center',
   },
@@ -200,12 +202,14 @@ const styles = StyleSheet.create({
   },
   progressLabel: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
   },
   progressPercent: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
   },
   progressBar: {
@@ -251,7 +255,8 @@ const styles = StyleSheet.create({
   stepText: {
     flex: 1,
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: tokens.color.text.placeholder,
   },
   stepTextActive: {

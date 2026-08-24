@@ -58,7 +58,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 16,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fda4af',
     textAlign: 'center',
     marginBottom: 16,
@@ -75,7 +76,8 @@ const styles = StyleSheet.create({
   },
   retryButtonText: {
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
 });

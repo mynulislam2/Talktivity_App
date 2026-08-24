@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 22,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: -0.02,
     color: '#fff',
     textAlign: 'center',

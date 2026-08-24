@@ -164,7 +164,8 @@ const styles = StyleSheet.create({
   },
   sheetTitle: {
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#e5e7eb',
   },
   closeButton: {
@@ -199,7 +200,8 @@ const styles = StyleSheet.create({
   },
   avatarInitial: {
     fontSize: 32,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   statusBadge: {
@@ -222,7 +224,8 @@ const styles = StyleSheet.create({
   },
   nameText: {
     fontSize: 18,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#f9fafb',
     marginTop: spacing.sm,
   },
@@ -236,7 +239,8 @@ const styles = StyleSheet.create({
   levelText: {
     fontSize: 12,
     color: '#bfdbfe',
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   statusRow: {
     marginTop: spacing.sm,
@@ -269,7 +273,8 @@ const styles = StyleSheet.create({
   },
   messageButtonText: {
     fontSize: 15,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#f9fafb',
   },
 });

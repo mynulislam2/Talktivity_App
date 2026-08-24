@@ -224,7 +224,8 @@ const styles = StyleSheet.create({
   },
   modalTitle: {
     fontSize: 17,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
   },
   closeButton: {
@@ -236,7 +237,8 @@ const styles = StyleSheet.create({
   },
   wordText: {
     fontSize: 20,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
     marginBottom: spacing.sm,
   },
@@ -271,6 +273,7 @@ const styles = StyleSheet.create({
   counter: {
     fontSize: 14,
     color: colors.text.secondary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

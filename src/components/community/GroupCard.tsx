@@ -147,14 +147,16 @@ const styles = StyleSheet.create({
   },
   groupName: {
     fontSize: 18,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 21.6,
     color: '#FDFDFD',
     maxWidth: 180,
   },
   category: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: 'rgba(255,255,255,0.58)',
   },
@@ -169,7 +171,8 @@ const styles = StyleSheet.create({
   joinedText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   joinButton: {
     paddingHorizontal: 12,
@@ -189,11 +192,13 @@ const styles = StyleSheet.create({
   joinButtonText: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   description: {
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 21,
     color: '#FDFDFD',
   },
@@ -209,7 +214,8 @@ const styles = StyleSheet.create({
   },
   memberText: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: 'rgba(255,255,255,0.64)',
   },
@@ -223,7 +229,8 @@ const styles = StyleSheet.create({
   },
   activityText: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#FDFDFD',
   },

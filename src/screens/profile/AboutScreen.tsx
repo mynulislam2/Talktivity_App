@@ -355,19 +355,22 @@ const styles = StyleSheet.create({
   },
   appName: {
     fontSize: 32,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   tagline: {
     fontSize: 14,
     color: colors.text.secondary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
   },
   version: {
     fontSize: 12,
     color: colors.text.tertiary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   card: {
     backgroundColor: colors.dark.backgroundCard,
@@ -377,13 +380,15 @@ const styles = StyleSheet.create({
   },
   cardTitle: {
     fontSize: 16,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
   },
   cardText: {
     fontSize: 13,
     color: colors.text.secondary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 20,
   },
   featuresList: {
@@ -400,13 +405,15 @@ const styles = StyleSheet.create({
   },
   featureTitle: {
     fontSize: 13,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   featureDesc: {
     fontSize: 12,
     color: colors.text.secondary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 16,
   },
   teamButton: {
@@ -420,7 +427,8 @@ const styles = StyleSheet.create({
   },
   teamButtonText: {
     fontSize: 13,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
   },
   statsSection: {
@@ -437,13 +445,15 @@ const styles = StyleSheet.create({
   },
   statNumber: {
     fontSize: 18,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
   },
   statLabel: {
     fontSize: 11,
     color: colors.primary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   statDivider: {
     width: 1,
@@ -463,7 +473,8 @@ const styles = StyleSheet.create({
   },
   techBadgeText: {
     fontSize: 12,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
   },
   socialLinks: {
@@ -498,12 +509,14 @@ const styles = StyleSheet.create({
   contactLabel: {
     fontSize: 11,
     color: colors.text.secondary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   contactValue: {
     fontSize: 13,
     color: colors.text.primary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   legalLinks: {
     flexDirection: 'row',
@@ -514,7 +527,8 @@ const styles = StyleSheet.create({
   legalLink: {
     fontSize: 12,
     color: colors.primary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   legalDot: {
     fontSize: 12,
@@ -528,7 +542,8 @@ const styles = StyleSheet.create({
   copyrightText: {
     fontSize: 11,
     color: colors.text.tertiary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });
 

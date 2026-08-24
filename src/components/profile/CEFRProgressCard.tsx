@@ -358,7 +358,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.12,
     color: '#fff',
   },
@@ -413,14 +414,16 @@ const styles = StyleSheet.create({
   levelLabelText: {
     fontSize: 16,
     color: 'rgba(255,255,255,0.92)',
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
   },
   levelLabelTextActive: {
     color: '#fff',
   },
   levelDescriptor: {
     fontSize: 16,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -440,12 +443,14 @@ const styles = StyleSheet.create({
   },
   radarScore: {
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#2879ff',
   },
   radarLabelText: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: '#8c8c8c',
   },
 });

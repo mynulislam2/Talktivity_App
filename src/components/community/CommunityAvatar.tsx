@@ -96,7 +96,8 @@ const styles = StyleSheet.create({
   },
   initials: {
     color: '#fff',
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.08,
     textTransform: 'uppercase',
   },

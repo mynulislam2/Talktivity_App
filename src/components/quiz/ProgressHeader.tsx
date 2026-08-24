@@ -55,13 +55,15 @@ const styles = StyleSheet.create({
   },
   questionCount: {
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: tokens.color.text.primary,
   },
   scoreDisplay: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: tokens.color.text.secondary,
   },

@@ -173,7 +173,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   closeBtn: {
@@ -234,7 +235,8 @@ const styles = StyleSheet.create({
   cancelButtonText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   startGradient: {
     flex: 1,
@@ -248,7 +250,8 @@ const styles = StyleSheet.create({
   startButtonText: {
     color: '#fff',
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   buttonDisabled: {
     opacity: 0.5,

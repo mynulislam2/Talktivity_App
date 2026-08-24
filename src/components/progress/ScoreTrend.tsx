@@ -185,7 +185,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
   },
   selector: {
@@ -203,7 +204,8 @@ const styles = StyleSheet.create({
   },
   selectorButtonText: {
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255, 255, 255, 0.9)',
   },
   selectorButtonTextActive: {
@@ -240,7 +242,8 @@ const styles = StyleSheet.create({
   },
   chartValue: {
     fontSize: 10,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   noDataContainer: {
@@ -270,7 +273,8 @@ const styles = StyleSheet.create({
   },
   infoValue: {
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fbbf24',
   },
 });

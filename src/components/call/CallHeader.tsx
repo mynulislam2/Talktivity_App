@@ -99,7 +99,8 @@ const styles = StyleSheet.create({
   },
   statusText: {
     color: colors.white,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.3,
   },
   logoutButton: {
@@ -113,7 +114,8 @@ const styles = StyleSheet.create({
   },
   logoutText: {
     color: colors.white,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.3,
   },
 });

@@ -82,7 +82,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.black,
     marginBottom: spacing.xs,
   },

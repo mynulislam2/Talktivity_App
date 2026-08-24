@@ -152,7 +152,8 @@ const rtb = StyleSheet.create({
   titleGroup: { alignItems: 'center' },
   title: {
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
   },
@@ -323,7 +324,8 @@ const rlc = StyleSheet.create({
   headline: {
     marginTop: 12,
     fontSize: 22,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
     color: '#fff',
@@ -356,7 +358,8 @@ const rlc = StyleSheet.create({
   taskProcessing: {
     marginTop: 2,
     fontSize: 11,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#5cff4d',
   },
   taskCheck: {
@@ -471,7 +474,8 @@ const cmb = StyleSheet.create({
   onlineLabel: {
     color: '#4ade80',
     fontSize: 9,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.8,
   },
   messageText: { color: '#fff', fontSize: 14, fontFamily: 'Poppins', lineHeight: 21 },
@@ -657,7 +661,8 @@ const rcc = StyleSheet.create({
   originalText: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fdfdfd',
   },
@@ -682,7 +687,8 @@ const rcc = StyleSheet.create({
   correctedText: {
     flex: 1,
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#fdfdfd',
   },
@@ -730,7 +736,8 @@ const rcc = StyleSheet.create({
   },
   transcriptLabel: {
     fontSize: 11,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 1.54,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.6)',
@@ -847,7 +854,8 @@ const cs = StyleSheet.create({
   title: {
     marginTop: 16,
     fontSize: 36,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 36,
     letterSpacing: -0.72,
     color: '#fff',
@@ -862,7 +870,8 @@ const cs = StyleSheet.create({
   scoreWrap: { alignItems: 'center', marginTop: 64 },
   scoreText: {
     fontSize: 40,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 48,
     letterSpacing: -0.8,
     color: '#fff',
@@ -870,7 +879,8 @@ const cs = StyleSheet.create({
   scoreLabel: {
     marginTop: 16,
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 20,
     color: '#c6c6c6',
   },
@@ -1408,7 +1418,8 @@ const ss = StyleSheet.create({
   },
   errorTitle: {
     fontSize: 18,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#fda4af',
     marginBottom: 8,
   },
@@ -1430,7 +1441,8 @@ const ss = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 18,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginBottom: 8,
   },
@@ -1445,7 +1457,8 @@ const ss = StyleSheet.create({
   startInner: { maxWidth: 353, alignSelf: 'center' },
   startTitle: {
     fontSize: 28,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 34,
     textAlign: 'center',
     color: '#fff',

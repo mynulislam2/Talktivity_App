@@ -134,7 +134,8 @@ const lh = StyleSheet.create({
   headerSpacer: { flex: 1 },
   title: {
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: tokens.color.text.primary,
     textAlign: 'center',
   },
@@ -235,7 +236,8 @@ const sb = StyleSheet.create({
   time: {
     width: 31,
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: tokens.color.text.primary,
     textAlign: 'left',
@@ -758,7 +760,8 @@ const s = StyleSheet.create({
   quote: {
     marginTop: 8,
     fontSize: 16,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     fontStyle: 'italic',
     lineHeight: 22,
     textAlign: 'center',
@@ -774,7 +777,8 @@ const s = StyleSheet.create({
   transcriptLine: { marginBottom: 16 },
   transcriptText: {
     fontSize: 17,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 26,
     paddingHorizontal: 0,
     borderRadius: 12,
@@ -819,7 +823,8 @@ const s = StyleSheet.create({
   },
   rateText: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: tokens.color.text.primary,
   },
@@ -837,7 +842,8 @@ const s = StyleSheet.create({
   errorBannerText: {
     flex: 1,
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 17,
     color: tokens.color.state.errorText,
     textAlign: 'center',
@@ -858,7 +864,8 @@ const s = StyleSheet.create({
   },
   lockedText: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: 'rgba(255,255,255,0.6)',
     textAlign: 'center',

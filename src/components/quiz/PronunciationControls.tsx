@@ -75,12 +75,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: tokens.color.text.primary,
   },
   subtitle: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
     marginTop: 2,
   },
@@ -105,13 +107,15 @@ const styles = StyleSheet.create({
   },
   speechLabel: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
     marginBottom: 4,
   },
   speechText: {
     fontSize: 14,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.primary,
     minHeight: 20,
   },
@@ -121,7 +125,8 @@ const styles = StyleSheet.create({
   errorText: {
     marginTop: 8,
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.state.errorText,
   },
 });

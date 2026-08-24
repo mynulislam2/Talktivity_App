@@ -125,7 +125,8 @@ const styles = StyleSheet.create({
   },
   name: {
     fontSize: 16,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.black,
     marginBottom: spacing.xs,
   },
@@ -160,7 +161,8 @@ const styles = StyleSheet.create({
   },
   levelText: {
     fontSize: 13,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.primary,
     marginLeft: spacing.sm,
   },

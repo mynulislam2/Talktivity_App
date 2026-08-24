@@ -242,7 +242,8 @@ const styles = StyleSheet.create({
   },
   avatarSmText: {
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   avatarEmpty: {
@@ -257,7 +258,8 @@ const styles = StyleSheet.create({
   },
   youLabel: {
     fontSize: 20,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     lineHeight: 24,
   },
@@ -272,7 +274,8 @@ const styles = StyleSheet.create({
   },
   xpHeader: {
     fontSize: 12,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     textTransform: 'uppercase',
     color: 'rgba(255,255,255,0.55)',
@@ -285,7 +288,8 @@ const styles = StyleSheet.create({
   },
   xpValue: {
     fontSize: 20,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
   },
   scopeSection: {
@@ -316,7 +320,8 @@ const styles = StyleSheet.create({
   },
   scopeDropdownSelectedText: {
     fontSize: 28,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.14,
     color: '#fff',
   },

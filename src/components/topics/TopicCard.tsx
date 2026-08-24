@@ -139,7 +139,8 @@ const styles = StyleSheet.create({
   title: {
     color: '#fff',
     fontSize: 12,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     marginBottom: 6,
     textShadowColor: 'rgba(0, 0, 0, 0.75)',
     textShadowOffset: { width: 0, height: 1 },
@@ -161,7 +162,8 @@ const styles = StyleSheet.create({
   discussButtonText: {
     color: '#fff',
     fontSize: 10,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   customCard: {
     flex: 1,
@@ -193,7 +195,8 @@ const styles = StyleSheet.create({
   customTitle: {
     color: '#9ca3af',
     fontSize: 12,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     textAlign: 'center',
   },
   customSubtitle: {

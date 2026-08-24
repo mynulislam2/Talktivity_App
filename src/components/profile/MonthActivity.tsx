@@ -98,7 +98,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 16,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: colors.text.primary,
     marginBottom: spacing.sm,
   },
@@ -132,7 +133,8 @@ const styles = StyleSheet.create({
   },
   statValue: {
     fontSize: 16,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
   },
   valueBlue: {
     color: colors.primaryLight,

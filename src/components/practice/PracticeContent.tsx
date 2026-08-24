@@ -412,7 +412,8 @@ const styles = StyleSheet.create({
   },
   introHeadline: {
     fontSize: 28,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: '#fff',

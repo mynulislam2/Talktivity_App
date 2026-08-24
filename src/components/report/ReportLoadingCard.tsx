@@ -154,7 +154,8 @@ const s = StyleSheet.create({
   headline: {
     marginTop: 12,
     fontSize: 22,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 28,
     textAlign: 'center',
     color: tokens.color.text.primary,
@@ -194,7 +195,8 @@ const s = StyleSheet.create({
   taskProcessing: {
     marginTop: 2,
     fontSize: 11,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#5cff4d',
   },
   taskCheck: {

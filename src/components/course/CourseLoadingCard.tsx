@@ -232,7 +232,8 @@ const styles = StyleSheet.create({
   },
   stepName: {
     fontSize: 13,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: 'rgba(107, 114, 128, 1)',
   },
   stepNameActive: {

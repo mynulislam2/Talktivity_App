@@ -155,7 +155,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     color: tokens.color.text.primary,
     fontSize: 22,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     textAlign: 'center',
   },
   inputActive: {

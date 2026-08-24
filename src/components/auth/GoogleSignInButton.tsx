@@ -63,6 +63,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.text.primary,
     fontSize: 16,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });

@@ -106,7 +106,8 @@ const s = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     marginBottom: 16,
     textAlign: 'center',
   },

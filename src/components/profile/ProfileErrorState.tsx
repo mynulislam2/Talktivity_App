@@ -88,6 +88,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: colors.text.primary,
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
 });

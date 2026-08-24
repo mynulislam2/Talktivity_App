@@ -128,13 +128,15 @@ const styles = StyleSheet.create({
   },
   tabText: {
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: tokens.color.text.primary,
     textAlign: 'center',
   },
   tabTextSmall: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
   },
   tabTextActive: {
     color: tokens.color.text.primary,

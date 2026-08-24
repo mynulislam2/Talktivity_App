@@ -93,7 +93,8 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     color: '#fbbf24',
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   messageText: {
     fontSize: 14,
@@ -119,11 +120,13 @@ const styles = StyleSheet.create({
   linkText: {
     fontSize: 12,
     color: '#7B70FF',
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   unpinText: {
     fontSize: 12,
     color: '#f87171',
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });

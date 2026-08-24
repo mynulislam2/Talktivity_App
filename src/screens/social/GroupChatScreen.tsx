@@ -811,7 +811,8 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 18,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.5)',
   },
   errorSubtext: {
@@ -870,7 +871,8 @@ const styles = StyleSheet.create({
   groupProfileAvatarSection: { alignItems: 'center', marginBottom: 20 },
   groupProfileName: {
     fontSize: 22,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: '#fff',
     marginTop: 12,
     marginBottom: 4,

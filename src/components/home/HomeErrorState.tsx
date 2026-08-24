@@ -64,7 +64,8 @@ const styles = StyleSheet.create({
   retryButtonText: {
     color: colors.white,
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   waitText: {
     color: colors.text.muted,

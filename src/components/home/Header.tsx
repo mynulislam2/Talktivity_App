@@ -192,7 +192,8 @@ const styles = StyleSheet.create({
   },
   avatarInitial: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: 'rgba(255,255,255,0.92)',
   },
   textSection: {
@@ -201,13 +202,15 @@ const styles = StyleSheet.create({
   },
   greetingLine: {
     fontSize: 18,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     letterSpacing: 0.01,
     color: '#fdfdfd',
   },
   greetingSub: {
     fontSize: 14,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: '#fdfdfd',
     marginTop: 2,
   },
@@ -232,7 +235,8 @@ const styles = StyleSheet.create({
   },
   upgradeChipText: {
     fontSize: 11,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 13.2,
     color: tokens.color.text.primary,
   },
@@ -243,7 +247,8 @@ const styles = StyleSheet.create({
   },
   streakText: {
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 21.6,
     color: '#fdfdfd',
   },

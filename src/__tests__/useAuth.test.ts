@@ -4,8 +4,7 @@
  * Integration tests for authentication hook
  */
 
-import { renderHook, act, waitFor } from '@testing-library/react';
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, beforeEach } from '@jest/globals';
 
 // TODO: Update to import actual useAuth hook when available
 // import { useAuth } from '../Hooks/useAuth';

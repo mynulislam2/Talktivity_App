@@ -446,7 +446,8 @@ const styles = StyleSheet.create({
   headerSpacer: { flex: 1 },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: tokens.color.text.primary,
     textAlign: 'center',
   },
@@ -464,13 +465,15 @@ const styles = StyleSheet.create({
   },
   pageTitle: {
     fontSize: 26,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: tokens.color.text.primary,
     marginBottom: 8,
   },
   pageSubtitle: {
     fontSize: 14,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
     lineHeight: 20,
     marginBottom: 24,
@@ -507,18 +510,21 @@ const styles = StyleSheet.create({
   stepBadgeText: {
     color: tokens.color.text.primary,
     fontSize: 12,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
   },
   stepLabel: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: tokens.color.text.primary,
     flex: 1,
   },
   resendText: {
     fontSize: 13,
     color: tokens.color.accent.primary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   codeSentText: {
     fontSize: 13,
@@ -599,7 +605,8 @@ const styles = StyleSheet.create({
   },
   successTitle: {
     fontSize: 20,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: tokens.color.text.primary,
     marginBottom: 8,
   },
@@ -626,7 +633,8 @@ const styles = StyleSheet.create({
   },
   ctaButtonText: {
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#ffffff',
   },
 });

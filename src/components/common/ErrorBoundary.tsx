@@ -146,7 +146,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: tokens.color.text.primary,
     marginBottom: spacing.md,
     textAlign: 'center',
@@ -170,7 +171,8 @@ const styles = StyleSheet.create({
   },
   debugTitle: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.error,
     marginBottom: spacing.sm,
   },
@@ -199,7 +201,8 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
     marginLeft: spacing.sm,
   },

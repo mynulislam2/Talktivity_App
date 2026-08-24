@@ -112,7 +112,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 21.6,
     letterSpacing: 0.12,
     color: colors.text.primary,
@@ -145,7 +146,8 @@ const styles = StyleSheet.create({
     fontSize: 14,
     lineHeight: 16.8,
     color: '#fff',
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   buttonIcon: {
     marginLeft: 4,

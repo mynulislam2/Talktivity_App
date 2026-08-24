@@ -51,7 +51,8 @@ const TextInput: React.FC<CustomTextInputProps> = ({
 const styles = StyleSheet.create({
   label: {
     fontSize: 16,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 22,
     color: colors.text.primary,
     marginBottom: spacing.sm,

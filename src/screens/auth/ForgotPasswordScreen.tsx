@@ -412,7 +412,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 33.6,
     letterSpacing: 0.14,
     color: tokens.color.text.primary,
@@ -420,7 +421,8 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 14,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: tokens.color.text.secondary,
     marginBottom: 20,
@@ -432,7 +434,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 16,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 22.4,
     color: '#ffffff',
     marginBottom: 8,
@@ -487,7 +490,8 @@ const styles = StyleSheet.create({
   },
   submitButtonText: {
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 19.6,
     color: '#ffffff',
   },
@@ -500,7 +504,8 @@ const styles = StyleSheet.create({
   },
   backToLoginText: {
     fontSize: 14,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: tokens.color.text.secondary,
   },

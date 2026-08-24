@@ -292,12 +292,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   seeAllButton: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.primary,
   },
   listContent: {
@@ -315,13 +317,15 @@ const styles = StyleSheet.create({
   },
   emptyTitle: {
     fontSize: 16,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   emptyText: {
     fontSize: 13,
     color: colors.text.secondary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     textAlign: 'center',
   },
   dateGroup: {
@@ -339,7 +343,8 @@ const styles = StyleSheet.create({
   },
   dateText: {
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.secondary,
     paddingHorizontal: spacing.sm,
   },
@@ -371,7 +376,8 @@ const styles = StyleSheet.create({
   },
   activityTitle: {
     fontSize: 13,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.text.primary,
   },
   activityMeta: {
@@ -387,11 +393,13 @@ const styles = StyleSheet.create({
   metaText: {
     fontSize: 11,
     color: colors.text.tertiary,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   activityType: {
     fontSize: 10,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     paddingHorizontal: spacing.sm,
     paddingVertical: 2,
     borderRadius: 4,
@@ -405,7 +413,8 @@ const styles = StyleSheet.create({
   },
   scoreText: {
     fontSize: 14,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
   },
   summaryCard: {
     flexDirection: 'row',
@@ -422,11 +431,13 @@ const styles = StyleSheet.create({
   summaryLabel: {
     fontSize: 11,
     color: colors.primary,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
   },
   summaryValue: {
     fontSize: 16,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: colors.primary,
   },
   summaryDivider: {

@@ -138,7 +138,8 @@ const styles = StyleSheet.create({
   emptyText: {
     color: '#FDFDFD',
     fontSize: 14,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
   emptySubtext: {
     color: '#C6C6C6',

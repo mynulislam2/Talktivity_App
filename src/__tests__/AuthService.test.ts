@@ -4,7 +4,7 @@
  * Unit tests for authentication methods
  */
 
-import { describe, it, expect, beforeEach, jest } from '@jest/globals';
+import { describe, it, beforeEach, jest } from '@jest/globals';
 import { httpService } from '../services/http/httpservice';
 
 jest.mock('../services/http/httpservice');

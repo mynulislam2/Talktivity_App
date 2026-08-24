@@ -341,7 +341,8 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     color: colors.black,
   },
   newChatButton: {
@@ -382,7 +383,8 @@ const styles = StyleSheet.create({
   },
   contactName: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.black,
     marginBottom: spacing.xs,
   },
@@ -413,7 +415,8 @@ const styles = StyleSheet.create({
   },
   chatHeaderTitle: {
     fontSize: 16,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.black,
     marginBottom: spacing.xs,
   },
@@ -456,7 +459,8 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.secondary,
     marginTop: spacing.md,
   },

@@ -71,7 +71,8 @@ const styles = StyleSheet.create({
   },
   senderName: {
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#999',
     marginBottom: spacing.xs,
   },

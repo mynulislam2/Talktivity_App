@@ -121,7 +121,8 @@ function RankMedal({ position }: { position: number }) {
         style={{
           position: 'absolute',
           fontSize: 16,
-          fontWeight: '800', fontFamily: 'Poppins-Bold',
+          fontWeight: '800',
+          fontFamily: 'Poppins-Bold',
           color: c.text,
           textShadowColor: 'rgba(255,255,255,0.4)',
           textShadowOffset: { width: 0, height: 1 },
@@ -140,7 +141,8 @@ function RankNumber({ position }: { position: number }) {
       <Text
         style={{
           fontSize: 16,
-          fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+          fontWeight: '600',
+          fontFamily: 'Poppins-SemiBold',
           color: 'rgba(255,255,255,0.6)',
         }}
       >
@@ -257,7 +259,8 @@ const styles = StyleSheet.create({
   },
   headerText: {
     fontSize: 13,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     letterSpacing: 0.08,
     color: 'rgba(255,255,255,0.4)',
   },
@@ -303,19 +306,22 @@ const styles = StyleSheet.create({
   },
   avatarText: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   userName: {
     fontSize: 15,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: '#fff',
     flex: 1,
   },
   rowRight: {},
   xpText: {
     fontSize: 15,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#fff',
   },
   emptyContainer: {

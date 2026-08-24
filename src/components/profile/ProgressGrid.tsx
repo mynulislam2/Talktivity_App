@@ -173,12 +173,14 @@ const styles = StyleSheet.create({
   },
   cardLabel: {
     fontSize: 12,
-    fontWeight: '400', fontFamily: 'Poppins',
+    fontWeight: '400',
+    fontFamily: 'Poppins',
     color: 'rgba(255,255,255,0.55)',
   },
   cardValue: {
     fontSize: 28,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     lineHeight: 34,
     color: '#fff',
     marginTop: 12,

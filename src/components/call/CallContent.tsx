@@ -261,7 +261,8 @@ const styles = StyleSheet.create({
     paddingBottom: 8,
   },
   title: {
-    fontWeight: '800', fontFamily: 'Poppins-Bold',
+    fontWeight: '800',
+    fontFamily: 'Poppins-Bold',
     color: colors.white,
     textAlign: 'center',
     marginBottom: 12,
@@ -279,7 +280,8 @@ const styles = StyleSheet.create({
   },
   duration: {
     color: 'rgba(255, 255, 255, 0.6)',
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     textAlign: 'center',
   },
   contentSection: {

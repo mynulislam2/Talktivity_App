@@ -50,7 +50,8 @@ const sb = StyleSheet.create({
   value: {
     width: 36,
     fontSize: 12,
-    fontWeight: '500', fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
     color: tokens.color.text.primary,
     fontVariant: ['tabular-nums'] as any,
   },
@@ -134,7 +135,8 @@ const s = StyleSheet.create({
   heroLevel: {
     marginTop: 8,
     fontSize: 32,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     lineHeight: 32,
     color: tokens.color.accent.primary,
   },

@@ -59,14 +59,16 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 24,
-    fontWeight: 'bold', fontFamily: 'Poppins-Bold',
+    fontWeight: 'bold',
+    fontFamily: 'Poppins-Bold',
     marginBottom: 20,
     color: '#000',
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 18,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     marginTop: 15,
     marginBottom: 10,
     color: '#333',

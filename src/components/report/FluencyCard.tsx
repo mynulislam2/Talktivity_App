@@ -46,12 +46,14 @@ const statStyles = StyleSheet.create({
   },
   title: {
     fontSize: 18,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: tokens.color.text.primary,
   },
   value: {
     fontSize: 24,
-    fontWeight: '700', fontFamily: 'Poppins-Bold',
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
     color: tokens.color.text.primary,
     marginTop: 2,
   },

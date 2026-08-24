@@ -91,7 +91,8 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.black,
   },
   valueText: {
@@ -117,7 +118,8 @@ const styles = StyleSheet.create({
   },
   percentageText: {
     fontSize: 12,
-    fontWeight: '600', fontFamily: 'Poppins-SemiBold',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: colors.text.secondary,
     minWidth: 32,
     textAlign: 'right',

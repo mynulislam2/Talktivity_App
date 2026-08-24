@@ -91,11 +91,13 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 24,
+    fontFamily: 'Poppins',
     color: '#FFFFFF', // White icon
   },
   buttonText: {
     flex: 1,
     fontSize: 15,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     color: '#FFFFFF', // White text
   },
@@ -116,6 +118,7 @@ const styles = StyleSheet.create({
   hintText: {
     flex: 1,
     fontSize: 12,
+    fontFamily: 'Poppins-Medium',
     color: 'rgba(203, 213, 225, 1)', // slate-300
     fontWeight: '500',
     lineHeight: 18,

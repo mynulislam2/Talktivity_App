@@ -242,11 +242,13 @@ const styles = StyleSheet.create({
   },
   wordDefinition: {
     fontSize: 15,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.xs,
   },
   wordExample: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     fontStyle: 'italic',
   },

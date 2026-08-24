@@ -414,6 +414,7 @@ const styles = StyleSheet.create({
   introDescription: {
     marginTop: 16,
     fontSize: 12,
+    fontFamily: 'Poppins',
     lineHeight: 16.8,
     color: '#c6c6c6',
     textAlign: 'center',
@@ -421,6 +422,7 @@ const styles = StyleSheet.create({
   introMeta: {
     marginTop: 16,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 19.6,
     color: 'rgba(255,255,255,0.72)',
     textAlign: 'center',
@@ -435,7 +437,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(47,65,145,0.22)',
     padding: 12,
   },
-  promptText: { fontSize: 13, lineHeight: 18.85, color: '#fdfdfd' },
+  promptText: { fontSize: 13, fontFamily: 'Poppins', lineHeight: 18.85, color: '#fdfdfd' },
   liveControls: {
     flexDirection: 'row',
     alignItems: 'flex-end',
@@ -454,7 +456,7 @@ const styles = StyleSheet.create({
   },
   rightSpacer: { width: 44, height: 44 },
   muteSection: { alignItems: 'center', gap: 12 },
-  muteLabel: { fontSize: 12, lineHeight: 16.8, color: '#fff', opacity: 0.7 },
+  muteLabel: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 16.8, color: '#fff', opacity: 0.7 },
   muteButton: {
     width: 68,
     height: 68,

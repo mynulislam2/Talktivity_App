@@ -110,6 +110,7 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.md,
   },

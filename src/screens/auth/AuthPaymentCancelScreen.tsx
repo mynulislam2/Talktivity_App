@@ -69,6 +69,7 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 28,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     color: '#fff',
     marginBottom: spacing.md,
@@ -76,6 +77,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
     marginBottom: spacing['3xl'],
@@ -95,7 +97,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
   },
-  buttonText: { fontSize: 18, fontWeight: '700', color: '#fff' },
+  buttonText: { fontSize: 18, fontFamily: 'Poppins-Bold', fontWeight: '700', color: '#fff' },
 });
 
 export default AuthPaymentCancelScreen;

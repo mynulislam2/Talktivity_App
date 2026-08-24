@@ -165,12 +165,14 @@ const styles = StyleSheet.create({
   },
   headerTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-Medium',
     fontWeight: '500',
     lineHeight: 25,
     color: '#fff',
   },
   introText: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 24,
     color: '#fdfdfd',
     marginBottom: 24,
@@ -180,6 +182,7 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-Medium',
     fontWeight: '500',
     color: '#fdfdfd',
     marginBottom: 12,
@@ -193,6 +196,7 @@ const styles = StyleSheet.create({
   },
   bullet: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#8C8C8C',
     marginRight: 12,
     lineHeight: 22,
@@ -200,11 +204,13 @@ const styles = StyleSheet.create({
   bulletText: {
     flex: 1,
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 22,
     color: '#fdfdfd',
   },
   bodyText: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     lineHeight: 24,
     color: '#fdfdfd',
   },

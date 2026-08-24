@@ -91,6 +91,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
   },
   messageOwn: {
@@ -101,6 +102,7 @@ const styles = StyleSheet.create({
   },
   timestamp: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: '#999',
     marginTop: spacing.xs,
     marginHorizontal: spacing.md,

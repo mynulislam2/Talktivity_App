@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
   },
   message: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
     textAlign: 'center',
     lineHeight: 20,

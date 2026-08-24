@@ -199,6 +199,7 @@ const styles = StyleSheet.create({
   customSubtitle: {
     color: 'rgba(139,92,246,0.6)',
     fontSize: 9,
+    fontFamily: 'Poppins',
     textAlign: 'center',
     marginTop: 2,
   },

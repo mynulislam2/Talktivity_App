@@ -156,8 +156,8 @@ const rtb = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
   },
-  titleWithSub: { fontSize: 20, lineHeight: 24 },
-  titleSolo: { fontSize: 16, letterSpacing: 3.2 },
+  titleWithSub: { fontSize: 20, fontFamily: 'Poppins', lineHeight: 24 },
+  titleSolo: { fontSize: 16, fontFamily: 'Poppins', letterSpacing: 3.2 },
   subtitle: {
     fontSize: 12,
     fontFamily: 'Poppins',

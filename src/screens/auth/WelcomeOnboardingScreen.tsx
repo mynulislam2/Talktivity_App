@@ -417,7 +417,7 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingHorizontal: 16,
   },
-  skipText: { fontSize: 14, color: '#9B91BB', fontWeight: '400' },
+  skipText: { fontSize: 14, fontFamily: 'Poppins', color: '#9B91BB', fontWeight: '400' },
   slide: {
     width,
     alignItems: 'center',
@@ -427,6 +427,7 @@ const styles = StyleSheet.create({
   },
   headline: {
     fontSize: 28,
+    fontFamily: 'Poppins-Medium',
     fontWeight: '500',
     color: '#fdfdfd',
     textAlign: 'center',
@@ -437,6 +438,7 @@ const styles = StyleSheet.create({
   },
   description: {
     fontSize: 15,
+    fontFamily: 'Poppins',
     color: '#9B91BB',
     textAlign: 'center',
     lineHeight: 22,
@@ -463,6 +465,7 @@ const sJourney = StyleSheet.create({
   },
   title: {
     fontSize: 32,
+    fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     color: '#fff',
     lineHeight: 38,
@@ -470,6 +473,7 @@ const sJourney = StyleSheet.create({
   },
   subtitle: {
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#9B91BB',
     marginBottom: 40,
     lineHeight: 24,
@@ -496,6 +500,7 @@ const sJourney = StyleSheet.create({
   },
   circleText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     fontWeight: '400',
   },
   line: {
@@ -512,12 +517,14 @@ const sJourney = StyleSheet.create({
   },
   stepTitle: {
     fontSize: 18,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#fff',
     marginBottom: 6,
   },
   stepDesc: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#9B91BB',
     lineHeight: 20,
   },
@@ -533,8 +540,8 @@ const s3 = StyleSheet.create({
     alignSelf: 'center',
   },
   radarLabel: { position: 'absolute', width: 65 },
-  radarScore: { fontSize: 18, fontWeight: '500', color: '#fff' },
-  radarLabelText: { fontSize: 12, fontWeight: '400', color: '#9B91BB' },
+  radarScore: { fontSize: 18, fontFamily: 'Poppins-Medium', fontWeight: '500', color: '#fff' },
+  radarLabelText: { fontSize: 12, fontFamily: 'Poppins', fontWeight: '400', color: '#9B91BB' },
 });
 
 export default WelcomeOnboardingScreen;

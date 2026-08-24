@@ -292,6 +292,7 @@ const styles = StyleSheet.create({
   },
   xpBreakdownLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.7)',
   },
   xpBreakdownValue: {
@@ -300,6 +301,7 @@ const styles = StyleSheet.create({
   },
   xpBreakdownXP: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.5)',
   },
 });

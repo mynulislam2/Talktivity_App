@@ -192,6 +192,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#1f2937',
     color: '#fff',
     fontSize: 14,
+    fontFamily: 'Poppins',
     borderRadius: 8,
     borderWidth: 1,
     borderColor: '#374151',
@@ -203,12 +204,14 @@ const styles = StyleSheet.create({
   hint: {
     color: '#9ca3af',
     fontSize: 12,
+    fontFamily: 'Poppins',
     marginTop: 4,
     marginLeft: 4,
   },
   errorText: {
     color: '#f87171',
     fontSize: 12,
+    fontFamily: 'Poppins',
     textAlign: 'center',
     marginTop: 8,
   },

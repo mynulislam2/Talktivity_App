@@ -40,5 +40,6 @@ const styles = StyleSheet.create({
   },
   textSmall: {
     fontSize: 11,
+    fontFamily: 'Poppins',
   },
 });

@@ -173,6 +173,7 @@ const styles = StyleSheet.create({
   },
   label: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
     color: '#000',
     marginBottom: spacing.sm,
@@ -184,6 +185,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: spacing.md,
     paddingVertical: spacing.md,
     fontSize: 16,
+    fontFamily: 'Poppins',
     color: '#000',
   },
   errorContainer: {
@@ -195,6 +197,7 @@ const styles = StyleSheet.create({
   errorText: {
     color: '#c33',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   submitButton: {
     backgroundColor: colors.primary,
@@ -209,6 +212,7 @@ const styles = StyleSheet.create({
   submitButtonText: {
     color: '#fff',
     fontSize: 16,
+    fontFamily: 'Poppins-SemiBold',
     fontWeight: '600',
   },
   terms: {
@@ -217,6 +221,7 @@ const styles = StyleSheet.create({
   },
   termsText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
     textAlign: 'center',
     lineHeight: 18,
@@ -229,10 +234,12 @@ const styles = StyleSheet.create({
   },
   loginText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: '#666',
   },
   loginLink: {
     fontSize: 14,
+    fontFamily: 'Poppins-SemiBold',
     color: colors.primary,
     fontWeight: '600',
   },

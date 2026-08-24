@@ -115,6 +115,7 @@ const styles = StyleSheet.create({
   },
   status: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
   },
   level: {

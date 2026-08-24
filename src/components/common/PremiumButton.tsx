@@ -57,16 +57,19 @@ export const GradientButton: React.FC<GradientButtonProps> = ({
       paddingVertical: 8,
       paddingHorizontal: 16,
       fontSize: 14,
+      fontFamily: 'Poppins',
     },
     md: {
       paddingVertical: 12,
       paddingHorizontal: 24,
       fontSize: 16,
+      fontFamily: 'Poppins',
     },
     lg: {
       paddingVertical: 16,
       paddingHorizontal: 32,
       fontSize: 16,
+      fontFamily: 'Poppins',
     },
   };
 

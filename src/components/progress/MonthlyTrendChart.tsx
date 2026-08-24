@@ -266,6 +266,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   infoValue: {
@@ -275,6 +276,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: spacing.xs,
   },

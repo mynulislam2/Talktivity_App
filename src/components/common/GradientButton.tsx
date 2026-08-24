@@ -32,9 +32,9 @@ interface GradientButtonProps {
 const sizeValues = { small: 36, medium: 42, large: 48 };
 
 const sizeTextStyles: Record<string, TextStyle> = {
-  small: { fontSize: 14 },
-  medium: { fontSize: 16 },
-  large: { fontSize: 18 },
+  small: { fontSize: 14, fontFamily: 'Poppins' },
+  medium: { fontSize: 16, fontFamily: 'Poppins' },
+  large: { fontSize: 18, fontFamily: 'Poppins' },
 };
 
 const GradientButton: React.FC<GradientButtonProps> = ({

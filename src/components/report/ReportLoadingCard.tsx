@@ -133,8 +133,8 @@ const s = StyleSheet.create({
     justifyContent: 'space-between',
     marginBottom: 6,
   },
-  progressLabel: { fontSize: 12, lineHeight: 17, color: tokens.color.text.secondary },
-  progressValue: { fontSize: 12, lineHeight: 17, color: tokens.color.text.primary },
+  progressLabel: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: tokens.color.text.secondary },
+  progressValue: { fontSize: 12, fontFamily: 'Poppins', lineHeight: 17, color: tokens.color.text.primary },
   track: {
     height: 6,
     borderRadius: 3,
@@ -145,6 +145,7 @@ const s = StyleSheet.create({
   eyebrow: {
     marginTop: 32,
     fontSize: 12,
+    fontFamily: 'Poppins',
     letterSpacing: 2.88,
     textAlign: 'center',
     textTransform: 'uppercase',
@@ -161,6 +162,7 @@ const s = StyleSheet.create({
   loadingMsg: {
     marginTop: 8,
     fontSize: 14,
+    fontFamily: 'Poppins',
     lineHeight: 20,
     textAlign: 'center',
     color: tokens.color.text.secondary,

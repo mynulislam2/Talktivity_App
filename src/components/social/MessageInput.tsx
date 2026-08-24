@@ -90,6 +90,7 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.sm,
     marginRight: spacing.md,
     fontSize: 14,
+    fontFamily: 'Poppins',
     backgroundColor: '#f5f5f5',
     borderRadius: 20,
     borderWidth: 1,

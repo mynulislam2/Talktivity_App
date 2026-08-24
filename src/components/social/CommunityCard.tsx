@@ -146,10 +146,12 @@ const styles = StyleSheet.create({
   },
   meta: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: '#999',
   },
   description: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: '#666',
     lineHeight: 18,
     marginBottom: spacing.md,

@@ -144,12 +144,14 @@ const styles = StyleSheet.create({
   },
   cardDescription: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.secondary,
     marginBottom: spacing.md,
     lineHeight: 18,
   },
   timeRemaining: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.warning,
     marginBottom: spacing.sm,
   },

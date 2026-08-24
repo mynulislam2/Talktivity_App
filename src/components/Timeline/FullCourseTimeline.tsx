@@ -490,6 +490,7 @@ const styles = StyleSheet.create({
   },
   subtitle: {
     fontSize: 13,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     lineHeight: 18,
@@ -524,6 +525,7 @@ const styles = StyleSheet.create({
   },
   statLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   weekSelectorContainer: {
@@ -557,6 +559,7 @@ const styles = StyleSheet.create({
   },
   weekSelectorSubtitle: {
     fontSize: 11,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   weekSelectorButton: {
@@ -733,6 +736,7 @@ const styles = StyleSheet.create({
   },
   topicTitle: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.primary,
     marginTop: spacing.xs,
   },
@@ -749,6 +753,7 @@ const styles = StyleSheet.create({
   },
   metaText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   dayTypeBadge: {
@@ -774,6 +779,7 @@ const styles = StyleSheet.create({
   },
   emptyText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
   },
   authContainer: {
@@ -799,6 +805,7 @@ const styles = StyleSheet.create({
   },
   authText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     lineHeight: 20,
@@ -824,6 +831,7 @@ const styles = StyleSheet.create({
   },
   errorText: {
     fontSize: 14,
+    fontFamily: 'Poppins',
     color: colors.text.muted,
     textAlign: 'center',
     marginBottom: spacing.lg,

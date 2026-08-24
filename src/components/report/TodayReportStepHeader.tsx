@@ -58,6 +58,7 @@ const s = StyleSheet.create({
   level: {
     marginTop: 2,
     fontSize: 13,
+    fontFamily: 'Poppins',
     lineHeight: 18,
     color: tokens.color.text.secondary,
   },

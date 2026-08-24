@@ -319,6 +319,7 @@ const styles = StyleSheet.create({
   },
   lineChartLabel: {
     fontSize: 10,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     textAlign: 'center',
   },
@@ -330,6 +331,7 @@ const styles = StyleSheet.create({
   noDataText: {
     color: 'rgba(255, 255, 255, 0.6)',
     fontSize: 14,
+    fontFamily: 'Poppins',
   },
   infoSection: {
     marginTop: spacing.sm,
@@ -344,6 +346,7 @@ const styles = StyleSheet.create({
   },
   infoLabel: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.8)',
   },
   infoValue: {
@@ -353,6 +356,7 @@ const styles = StyleSheet.create({
   },
   infoText: {
     fontSize: 12,
+    fontFamily: 'Poppins',
     color: 'rgba(255, 255, 255, 0.6)',
     marginTop: spacing.xs,
   },

@@ -1,11 +1,24 @@
 /**
  * AnimatedSplashScreen Component
  *
- * Clean splash screen with solid HomeScreen background and centered logo image.
+ * Hands over from the native Expo splash: same dark ground (#09090f), same
+ * white talktivity lockup, so the two read as one screen rather than a flash.
+ * `app.json` must keep the matching `expo-splash-screen` backgroundColor —
+ * it was #ffffff, which showed a white flash before this view appeared.
  */
 
 import React, { useEffect, useRef } from 'react';
-import { View, StyleSheet, Animated, Image } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Animated,
+  Image,
+  useWindowDimensions,
+} from 'react-native';
+import { tokens } from '../../theme/tokens';
+
+/** Intrinsic aspect of talktivity-splash-logo.png (1013 x 281). */
+const LOGO_ASPECT = 1013 / 281;
 
 interface AnimatedSplashScreenProps {
   isAppReady: boolean;
@@ -19,6 +32,10 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
   const fadeAnim = useRef(new Animated.Value(0)).current;
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const containerFade = useRef(new Animated.Value(1)).current;
+  const { width } = useWindowDimensions();
+  // A fixed 120pt square left the lockup tiny on a large phone and crowded on
+  // a small one. Size from the screen, clamped so it never touches the edges.
+  const logoWidth = Math.min(Math.max(width * 0.58, 180), 260);
 
   useEffect(() => {
     Animated.parallel([
@@ -67,7 +84,7 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
       style={[styles.container, { opacity: containerFade }]}
       pointerEvents={isAppReady ? 'none' : 'auto'}
     >
-      <View style={styles.solid}>
+      <View testID="splash-solid" style={styles.solid}>
         <Animated.View
           style={[
             styles.content,
@@ -75,8 +92,8 @@ export const AnimatedSplashScreen: React.FC<AnimatedSplashScreenProps> = ({
           ]}
         >
           <Image
-            source={require('../../assets/images/talktivity-logo.png')}
-            style={styles.logo}
+            source={require('../../assets/images/talktivity-splash-logo.png')}
+            style={{ width: logoWidth, height: logoWidth / LOGO_ASPECT }}
             resizeMode="contain"
           />
         </Animated.View>
@@ -91,11 +108,7 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#09090f',
+    backgroundColor: tokens.color.bg.screen,
   },
   content: { alignItems: 'center' },
-  logo: {
-    width: 120,
-    height: 120,
-  },
 });

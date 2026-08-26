@@ -24,7 +24,7 @@ import * as SplashScreen from 'expo-splash-screen';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NavigationContainer } from '@react-navigation/native';
 import { appNavigationTheme } from './src/theme/navigationTheme';
-import { applyGlobalFontDefaults } from './src/theme/fonts';
+import { applyGlobalFontDefaults, applyGlobalTextScaling } from './src/theme/fonts';
 
 import { store, persistor } from '@/store';
 import { AlertProvider } from '@/contexts/AlertContext';
@@ -40,6 +40,9 @@ SplashScreen.preventAutoHideAsync().catch(() => {});
 // this works under React 19. Nothing renders until `isReady` below, so it's
 // safe to set this once here rather than after fonts resolve.
 applyGlobalFontDefaults();
+// Cap the OS font-size setting so an enlarged-text device cannot force RN to
+// break labels inside a word. See theme/responsive.ts MAX_FONT_SCALE.
+applyGlobalTextScaling();
 
 // Setup LiveKit for React Native
 if (Platform.OS !== 'web') {

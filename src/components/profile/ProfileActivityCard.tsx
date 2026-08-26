@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { useResponsive } from '@/theme/responsive';
 import { Ionicons } from '@expo/vector-icons';
 import Svg, { Path } from 'react-native-svg';
 import type { ProgressStats } from '@/types/profile';
@@ -45,6 +46,12 @@ export function ProfileActivityCard({
     )
   );
 
+  const { narrow, s } = useResponsive();
+  // The stat row is label + icon on one line. On a 360pt phone that leaves the
+  // label ~64pt, which is narrower than the word "Learning" — so RN broke the
+  // word itself. Shrink the decoration and the card's own padding instead.
+  const statIconSize = narrow ? 30 : 44;
+
   const learningLabel = formatMinutes(totalPracticeTime);
   const lessonsLabel = String(completedDays);
   const note =
@@ -59,22 +66,40 @@ export function ProfileActivityCard({
         <Text style={styles.subtitle}>All Time</Text>
       </View>
 
-      <View style={styles.grid}>
+      <View style={[styles.grid, narrow && styles.gridNarrow]}>
         {/* Learning Time */}
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{learningLabel}</Text>
-          <View style={styles.statFooter}>
-            <Text style={styles.statLabel}>Learning Time</Text>
-            <Ionicons name="time-outline" size={44} color="#a78bfa" />
+        <View style={[styles.statCard, narrow && styles.statCardNarrow]}>
+          <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+            {learningLabel}
+          </Text>
+          <View style={[styles.statFooter, narrow && styles.statFooterStacked]}>
+            <Text style={[styles.statLabel, narrow ? styles.statLabelStacked : styles.statLabelInline]}>
+              Learning Time
+            </Text>
+            <Ionicons
+              name="time-outline"
+              size={statIconSize}
+              color="#a78bfa"
+              style={[styles.statIcon, narrow && styles.statIconStacked]}
+            />
           </View>
         </View>
 
         {/* Lessons Complete */}
-        <View style={styles.statCard}>
-          <Text style={styles.statValue}>{lessonsLabel}</Text>
-          <View style={styles.statFooter}>
-            <Text style={styles.statLabel}>Lessons complete</Text>
-            <Ionicons name="checkmark-done-outline" size={44} color="#a78bfa" />
+        <View style={[styles.statCard, narrow && styles.statCardNarrow]}>
+          <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
+            {lessonsLabel}
+          </Text>
+          <View style={[styles.statFooter, narrow && styles.statFooterStacked]}>
+            <Text style={[styles.statLabel, narrow ? styles.statLabelStacked : styles.statLabelInline]}>
+              Lessons complete
+            </Text>
+            <Ionicons
+              name="checkmark-done-outline"
+              size={statIconSize}
+              color="#a78bfa"
+              style={[styles.statIcon, narrow && styles.statIconStacked]}
+            />
           </View>
         </View>
       </View>
@@ -82,8 +107,8 @@ export function ProfileActivityCard({
       <Text style={styles.note}>{note}</Text>
 
       {/* SVG wave path matching frontend */}
-      <View style={styles.waveContainer}>
-        <Svg viewBox="0 0 272 70" width={272} height={70} fill="none">
+      <View style={[styles.waveContainer, { height: s(70) }]}>
+        <Svg viewBox="0 0 272 70" width="100%" height="100%" fill="none">
           <Path
             d="M16 48C58 48 66 28 96 28C126 28 128 54 160 54C191 54 206 18 255 18"
             stroke="#9D7AFF"
@@ -93,13 +118,13 @@ export function ProfileActivityCard({
           />
         </Svg>
         <View style={styles.waveIconLeft}>
-          <PhoneBubbleIcon size={26} />
+          <PhoneBubbleIcon size={s(26)} />
         </View>
         <View style={styles.waveIconCenter}>
-          <WaveBubbleIcon size={52} />
+          <WaveBubbleIcon size={s(52)} />
         </View>
         <View style={styles.waveIconRight}>
-          <MicBubbleIcon size={34} />
+          <MicBubbleIcon size={s(34)} />
         </View>
       </View>
     </View>
@@ -138,14 +163,22 @@ const styles = StyleSheet.create({
     gap: 16,
     marginBottom: 24,
   },
+  gridNarrow: {
+    gap: 10,
+  },
   statCard: {
     flex: 1,
+    minWidth: 0,
     borderWidth: 1,
     borderColor: '#3d3e50',
     borderRadius: 6,
     backgroundColor: 'rgba(255,255,255,0.10)',
     paddingHorizontal: 16,
     paddingVertical: 24,
+  },
+  statCardNarrow: {
+    paddingHorizontal: 12,
+    paddingVertical: 18,
   },
   statValue: {
     fontSize: 28,
@@ -159,14 +192,44 @@ const styles = StyleSheet.create({
     alignItems: 'flex-end',
     justifyContent: 'space-between',
     marginTop: 24,
-    gap: 12,
+    gap: 8,
+  },
+  statFooterStacked: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    marginTop: 16,
+    gap: 4,
   },
   statLabel: {
+    // No `maxWidth`. The former hardcoded 88 was wider than the space the icon
+    // actually leaves on a narrow phone, so it did nothing except stop
+    // flexbox from solving the row. Width now comes from the variant below.
+    minWidth: 0,
     fontSize: 14,
     fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
-    maxWidth: 88,
+  },
+  /** Roomy screens: share the row with the icon. */
+  statLabelInline: {
+    flex: 1,
+  },
+  /**
+   * Narrow screens: the label gets the whole card width and the icon moves
+   * below it. Sharing the row leaves ~62pt here, and "complete" needs more
+   * than that at any font size the design would accept — the only honest fix
+   * is to stop sharing.
+   */
+  statLabelStacked: {
+    alignSelf: 'stretch',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  statIcon: {
+    flexShrink: 0,
+  },
+  statIconStacked: {
+    alignSelf: 'flex-end',
   },
   note: {
     fontSize: 14,
@@ -177,23 +240,25 @@ const styles = StyleSheet.create({
   },
   waveContainer: {
     position: 'relative',
-    width: 272,
-    height: 70,
-    maxWidth: '100%',
+    // Was a fixed 272pt box, so on a narrower card the SVG kept its width and
+    // the absolutely-placed bubbles drifted off the dashed path. Percentages
+    // keep the bubbles on the curve at every width.
+    width: '100%',
+    alignSelf: 'stretch',
   },
   waveIconLeft: {
     position: 'absolute',
     left: 0,
-    top: 35,
+    top: '50%',
   },
   waveIconCenter: {
     position: 'absolute',
-    left: 90,
-    top: 7,
+    left: '33%',
+    top: '10%',
   },
   waveIconRight: {
     position: 'absolute',
-    right: 4,
-    top: 2,
+    right: '1.5%',
+    top: '3%',
   },
 });

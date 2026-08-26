@@ -377,8 +377,12 @@ const styles = StyleSheet.create({
   content: {
     flex: 1,
     justifyContent: 'space-between',
-    marginHorizontal: 20,
-    maxWidth: 353,
+    // `width: '100%'` plus `marginHorizontal` resolves to the parent's full
+    // width AND the margins, so the form ran to both edges on a narrow screen
+    // instead of sitting inside a 20pt gutter. Padding inside a capped box
+    // gives the same 353pt of content with gutters that always hold.
+    paddingHorizontal: 20,
+    maxWidth: 393,
     alignSelf: 'center',
     width: '100%',
     paddingTop: 16,

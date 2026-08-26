@@ -86,7 +86,9 @@ function FigmaTimelineCard({ card }: { card: TimelineActionCardData }) {
           {isCompleted ? (
             <>
               <Feather name="check" size={16} color="#34d399" />
-              <Text style={styles.completedText}>Completed</Text>
+              <Text style={styles.completedText} numberOfLines={1}>
+                Completed
+              </Text>
             </>
           ) : (
             <>
@@ -96,6 +98,7 @@ function FigmaTimelineCard({ card }: { card: TimelineActionCardData }) {
                 color={card.buttonLabel ? 'rgba(255,255,255,0.7)' : '#facc15'}
               />
               <Text
+                numberOfLines={2}
                 style={[
                   styles.helperText,
                   card.buttonLabel ? styles.helperTextWhite : styles.helperTextYellow,
@@ -406,6 +409,7 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   headerTitle: {
+    flexShrink: 1,
     fontSize: 24,
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
@@ -515,9 +519,15 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     marginTop: 16,
     gap: 12,
+    // "Start Speaking" plus the "5 min" chip needs ~200pt. On a narrow phone
+    // the row could not hold both, and RN broke the chip into "5 / min".
+    // Wrapping drops the chip to its own line instead.
+    flexWrap: 'wrap',
+    rowGap: 8,
   },
   timelineCardButton: {
     marginTop: 0,
+    flexShrink: 1,
   },
   timelineCardButtonText: {
     fontSize: 14,
@@ -533,6 +543,8 @@ const styles = StyleSheet.create({
     gap: 4,
     marginTop: 0,
     flexShrink: 1,
+    // Keeps the clock + label together as one unit when the row wraps.
+    flexGrow: 0,
   },
   completedText: {
     fontSize: 14,

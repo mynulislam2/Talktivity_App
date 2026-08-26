@@ -10,6 +10,7 @@ import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
+import { useResponsive } from '@/theme/responsive';
 
 export interface HomeViewToggleProps {
   viewMode: 'today' | 'timeline';
@@ -20,6 +21,11 @@ export const HomeViewToggle: React.FC<HomeViewToggleProps> = ({
   viewMode,
   onViewModeChange,
 }) => {
+  const { narrow } = useResponsive();
+  // Two labelled tabs share the row. At the original 24pt side padding + 12pt
+  // icon gap the pair needed ~322pt of a 328pt row on a 360pt phone, so
+  // "Today's Plan" wrapped onto two lines. Tighten the chrome, not the label.
+  const tabInner = narrow ? styles.tabCompact : null;
   return (
     <View style={styles.container}>
       <View style={styles.inner}>
@@ -35,7 +41,7 @@ export const HomeViewToggle: React.FC<HomeViewToggleProps> = ({
               colors={['#2C5BFF', '#A45DFF']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.tabActiveGradient}
+              style={[styles.tabActiveGradient, tabInner]}
             >
               <Feather
                 name="calendar"
@@ -43,17 +49,21 @@ export const HomeViewToggle: React.FC<HomeViewToggleProps> = ({
                 color="#fff"
                 style={styles.icon}
               />
-              <Text style={styles.tabTextActive}>Today&apos;s Plan</Text>
+              <Text style={styles.tabTextActive} numberOfLines={1}>
+                Today&apos;s Plan
+              </Text>
             </LinearGradient>
           ) : (
-            <View style={styles.tabInactive}>
+            <View style={[styles.tabInactive, tabInner]}>
               <Feather
                 name="calendar"
                 size={16}
                 color="rgba(255,255,255,0.5)"
                 style={styles.icon}
               />
-              <Text style={styles.tabTextInactive}>Today&apos;s Plan</Text>
+              <Text style={styles.tabTextInactive} numberOfLines={1}>
+                Today&apos;s Plan
+              </Text>
             </View>
           )}
         </TouchableOpacity>
@@ -70,7 +80,7 @@ export const HomeViewToggle: React.FC<HomeViewToggleProps> = ({
               colors={['#2C5BFF', '#A45DFF']}
               start={{ x: 0, y: 0 }}
               end={{ x: 1, y: 1 }}
-              style={styles.tabActiveGradient}
+              style={[styles.tabActiveGradient, tabInner]}
             >
               <Feather
                 name="bar-chart-2"
@@ -78,17 +88,21 @@ export const HomeViewToggle: React.FC<HomeViewToggleProps> = ({
                 color="#fff"
                 style={styles.icon}
               />
-              <Text style={styles.tabTextActive}>Full Timeline</Text>
+              <Text style={styles.tabTextActive} numberOfLines={1}>
+                Full Timeline
+              </Text>
             </LinearGradient>
           ) : (
-            <View style={styles.tabInactive}>
+            <View style={[styles.tabInactive, tabInner]}>
               <Feather
                 name="bar-chart-2"
                 size={16}
                 color="rgba(255,255,255,0.5)"
                 style={styles.icon}
               />
-              <Text style={styles.tabTextInactive}>Full Timeline</Text>
+              <Text style={styles.tabTextInactive} numberOfLines={1}>
+                Full Timeline
+              </Text>
             </View>
           )}
         </TouchableOpacity>
@@ -111,7 +125,8 @@ const styles = StyleSheet.create({
   },
   tabWrapper: {
     flex: 1,
-    marginHorizontal: 8,
+    minWidth: 0,
+    marginHorizontal: 4,
     borderRadius: 6,
     overflow: 'hidden',
   },
@@ -119,8 +134,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    paddingHorizontal: 24,
+    gap: 8,
+    paddingHorizontal: 12,
     paddingVertical: 12,
     position: 'relative',
     overflow: 'hidden',
@@ -134,15 +149,20 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    gap: 12,
-    paddingHorizontal: 24,
+    gap: 8,
+    paddingHorizontal: 12,
     paddingVertical: 12,
     borderRadius: 6,
+  },
+  tabCompact: {
+    gap: 6,
+    paddingHorizontal: 6,
   },
   icon: {
     zIndex: 1,
   },
   tabTextActive: {
+    flexShrink: 1,
     fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',
@@ -150,6 +170,7 @@ const styles = StyleSheet.create({
     zIndex: 1,
   },
   tabTextInactive: {
+    flexShrink: 1,
     fontSize: 14,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',

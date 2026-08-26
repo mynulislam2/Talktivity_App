@@ -14,6 +14,7 @@ import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { tokens } from '@/theme/tokens';
+import { useResponsive } from '@/theme/responsive';
 
 type ProgressTab = 'profile' | 'achievements' | 'leaderboard';
 
@@ -29,6 +30,11 @@ const TAB_CONFIG: { key: ProgressTab; label: string }[] = [
 
 export function ProgressScreenTabs({ activeTab }: ProgressScreenTabsProps) {
   const navigation = useNavigation<any>();
+  // Three equal tabs on a 320pt screen give each label ~76pt, which is
+  // narrower than "Achievements" at 14pt — it rendered as "Achieve...".
+  // `adjustsFontSizeToFit` covers this on iOS/Android but is a no-op under
+  // react-native-web, so the size has to come down explicitly too.
+  const { narrow } = useResponsive();
 
   const handleTabPress = (tab: ProgressTab) => {
     if (tab === 'profile') {
@@ -41,7 +47,7 @@ export function ProgressScreenTabs({ activeTab }: ProgressScreenTabsProps) {
   };
 
   return (
-    <View style={styles.tabsRow}>
+    <View style={[styles.tabsRow, narrow && styles.tabsRowNarrow]}>
       {TAB_CONFIG.map((tab) => {
         const isActive = tab.key === activeTab;
         return (
@@ -56,11 +62,12 @@ export function ProgressScreenTabs({ activeTab }: ProgressScreenTabsProps) {
                 colors={[tokens.color.accent.primary, '#b55cff']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
-                style={styles.tabActiveGradient}
+                style={[styles.tabActiveGradient, narrow && styles.tabPaddingNarrow]}
               >
                 <Text
                   style={[
                     styles.tabText,
+                    narrow && styles.tabTextNarrow,
                     tab.key === 'profile' && styles.tabTextSmall,
                     styles.tabTextActive,
                   ]}
@@ -72,10 +79,11 @@ export function ProgressScreenTabs({ activeTab }: ProgressScreenTabsProps) {
                 </Text>
               </LinearGradient>
             ) : (
-              <View style={styles.tab}>
+              <View style={[styles.tab, narrow && styles.tabPaddingNarrow]}>
                 <Text
                   style={[
                     styles.tabText,
+                    narrow && styles.tabTextNarrow,
                     tab.key === 'profile' && styles.tabTextSmall,
                   ]}
                   numberOfLines={1}
@@ -98,6 +106,16 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: 8,
     marginBottom: 24,
+  },
+  // "Achievements" is 12 characters and the row has to hold three tabs. At a
+  // 320pt width the default gap and padding leave it ~76pt, which is exactly
+  // its own width — so it rendered as "Achieve...". Six points back from the
+  // gaps and eight from the padding is enough for the whole word.
+  tabsRowNarrow: {
+    gap: 6,
+  },
+  tabPaddingNarrow: {
+    paddingHorizontal: 4,
   },
   tabWrapper: {
     flex: 1,
@@ -132,6 +150,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     color: tokens.color.text.primary,
     textAlign: 'center',
+  },
+  tabTextNarrow: {
+    fontSize: 11.5,
   },
   tabTextSmall: {
     fontSize: 12,

@@ -34,14 +34,18 @@ export function LogoutModal({
               onPress={onClose}
               activeOpacity={0.7}
             >
-              <Text style={styles.cancelText}>Cancel</Text>
+              <Text style={styles.cancelText} numberOfLines={1} adjustsFontSizeToFit>
+                Cancel
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.endBtn}
               onPress={onConfirm}
               activeOpacity={0.7}
             >
-              <Text style={styles.endText}>Log Out</Text>
+              <Text style={styles.endText} numberOfLines={1} adjustsFontSizeToFit>
+                Log Out
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -92,11 +96,13 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   cancelBtn: {
     flex: 1,
+    minWidth: 0,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#3d3e50',
@@ -105,6 +111,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelText: {
+    textAlign: 'center',
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
@@ -112,7 +119,9 @@ const styles = StyleSheet.create({
   },
   endBtn: {
     flex: 1,
+    minWidth: 0,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255,68,68,0.3)',
@@ -121,6 +130,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   endText: {
+    textAlign: 'center',
     color: '#ff4444',
     fontSize: 14,
     fontWeight: '600',

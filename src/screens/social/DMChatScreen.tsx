@@ -391,7 +391,9 @@ const DMChatScreen: React.FC<DMChatScreenProps> = () => {
               color="rgba(255,255,255,0.8)"
             />
           </TouchableOpacity>
-          <Text style={styles.headerTitle}>{otherUser.name || 'Chat'}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {otherUser.name || 'Chat'}
+          </Text>
         </View>
 
         {/* Online status bar — matches frontend */}
@@ -549,6 +551,13 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     lineHeight: 25,
     color: '#FFFFFF',
+    // The back button is absolute at left:16 and 42pt wide, so a centred title
+    // grows outwards in both directions and a long name ends up underneath it.
+    // 42pt of margin inside the row's 16pt padding stops the title exactly at
+    // the button's edge; numberOfLines then ellipsises instead of overlapping.
+    flexShrink: 1,
+    marginHorizontal: 42,
+    textAlign: 'center',
   },
   statusBar: {
     flexDirection: 'row',

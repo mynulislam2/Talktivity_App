@@ -134,6 +134,8 @@ export function ThemedAlert({
                       style={styles.button}
                     >
                       <Text
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
                         style={[
                           styles.buttonText,
                           getButtonTextStyle(button.style),
@@ -145,6 +147,8 @@ export function ThemedAlert({
                   ) : (
                     <View style={[styles.button, buttonStyle]}>
                       <Text
+                        numberOfLines={1}
+                        adjustsFontSizeToFit
                         style={[
                           styles.buttonText,
                           getButtonTextStyle(button.style),
@@ -216,13 +220,16 @@ const styles = StyleSheet.create({
   },
   multiButton: {
     flex: 1,
+    minWidth: 0,
   },
   button: {
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 10,
     alignItems: 'center',
   },
   buttonText: {
+    textAlign: 'center',
     fontSize: 15,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',

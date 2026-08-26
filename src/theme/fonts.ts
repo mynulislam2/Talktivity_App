@@ -1,3 +1,4 @@
+import { MAX_FONT_SCALE } from './responsive';
 import { Text as RNText, TextInput as RNTextInput } from 'react-native';
 
 /**
@@ -78,4 +79,29 @@ export function applyGlobalFontDefaults(): void {
     ...(inputDefaults.defaultProps ?? {}),
     style: [{ fontFamily: 'Poppins' }, inputDefaults.defaultProps?.style],
   };
+}
+
+/**
+ * Caps how far the OS "Font size" / "Display size" setting can enlarge text.
+ *
+ * Android allows up to 2.0x. Every row in this app that fits on a 360pt phone
+ * fits with little to spare, so at 1.3x and above RN has no way to lay a label
+ * out except to break inside a word — which is exactly what a tester on a
+ * small phone with enlarged text reported ("Lear / ning / Time"). Capping at
+ * `MAX_FONT_SCALE` keeps text genuinely larger for users who need it while
+ * leaving the layouts solvable.
+ *
+ * Set through `defaultProps`, the same mechanism as the font family above and
+ * verified by the same test: `maxFontSizeMultiplier` is a scalar prop that no
+ * screen passes, so `defaultProps` fills it every time. (The `style` caveat
+ * that applies to the family — defaultProps fills only *undefined* props and
+ * does not merge into a supplied `style` — does not apply to a scalar.)
+ *
+ * Call once, at module load, alongside `applyGlobalFontDefaults`.
+ */
+export function applyGlobalTextScaling(maxFontSizeMultiplier = MAX_FONT_SCALE): void {
+  for (const Component of [RNText, RNTextInput]) {
+    const target = Component as unknown as { defaultProps?: Record<string, unknown> };
+    target.defaultProps = { ...(target.defaultProps ?? {}), maxFontSizeMultiplier };
+  }
 }

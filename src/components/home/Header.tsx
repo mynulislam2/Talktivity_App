@@ -15,6 +15,7 @@ import { useAppSelector } from '@/store/hooks';
 import { selectCurrentSubscription } from '@/store/slices/subscriptionSlice';
 import { getUpgradeActionState } from '@/utils/subscriptionStatus';
 import { tokens } from '@/theme/tokens';
+import { useResponsive } from '@/theme/responsive';
 import Svg, {
   Path,
   Defs,
@@ -81,6 +82,8 @@ function getFirstName(name?: string | null) {
 
 export function Header() {
   const insets = useSafeAreaInsets();
+  const { narrow, s } = useResponsive();
+  const avatarSize = s(46);
   const { user } = useHeaderProfile();
   const { streak, loading } = useHeaderStreak();
   const profilePicture = resolveApiAssetUrl(user?.profile_picture);
@@ -102,9 +105,17 @@ export function Header() {
       <View style={styles.container}>
         {/* Left: avatar + greeting */}
         <View style={styles.leftSection}>
-          <View style={styles.avatarContainer}>
+          <View
+            style={[
+              styles.avatarContainer,
+              { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 },
+            ]}
+          >
             {profilePicture ? (
-              <Image source={{ uri: profilePicture }} style={styles.avatar} />
+              <Image
+                source={{ uri: profilePicture }}
+                style={{ width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }}
+              />
             ) : (
               <View style={styles.avatarPlaceholder}>
                 <Text style={styles.avatarInitial}>
@@ -118,12 +129,14 @@ export function Header() {
             <Text style={styles.greetingLine} numberOfLines={1}>
               Hey {firstName}
             </Text>
-            <Text style={styles.greetingSub}>{greeting}</Text>
+            <Text style={styles.greetingSub} numberOfLines={1}>
+              {greeting}
+            </Text>
           </View>
         </View>
 
         {/* Right: streak + upgrade pill */}
-        <View style={styles.rightSection}>
+        <View style={[styles.rightSection, narrow && styles.rightSectionNarrow]}>
           <View style={styles.streakContainer}>
             <MiniFlameIcon />
             <Text style={styles.streakText}>{streakCount}</Text>
@@ -137,12 +150,16 @@ export function Header() {
               style={styles.upgradeChip}
             >
               <UpgradeSparkIcon />
-              <Text style={styles.upgradeChipText}>{upgradeLabel}</Text>
+              <Text style={styles.upgradeChipText} numberOfLines={1}>
+                {upgradeLabel}
+              </Text>
             </LinearGradient>
           ) : (
             <View style={[styles.upgradeChip, styles.upgradeChipDisabled]}>
               <UpgradeSparkIcon />
-              <Text style={styles.upgradeChipText}>{upgradeLabel}</Text>
+              <Text style={styles.upgradeChipText} numberOfLines={1}>
+                {upgradeLabel}
+              </Text>
             </View>
           )}
         </View>
@@ -166,23 +183,20 @@ const styles = StyleSheet.create({
   leftSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    // `flexShrink: 1` (not just `flex: 1`) is what actually lets this column
+    // give width back to the streak + upgrade chip on a narrow screen. With
+    // `flex: 1` alone the greeting kept its measured width and painted over
+    // the chip.
     flex: 1,
+    flexShrink: 1,
     minWidth: 0,
   },
   avatarContainer: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
     backgroundColor: 'rgba(255,255,255,0.1)',
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
-  },
-  avatar: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
   },
   avatarPlaceholder: {
     width: '100%',
@@ -197,8 +211,9 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.92)',
   },
   textSection: {
+    flex: 1,
+    flexShrink: 1,
     minWidth: 0,
-    lineHeight: 20,
   },
   greetingLine: {
     fontSize: 18,
@@ -217,7 +232,13 @@ const styles = StyleSheet.create({
   rightSection: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 12,
+    gap: 10,
+    // The streak and the upgrade chip are the fixed part of this row; the
+    // greeting is the part that should give.
+    flexShrink: 0,
+  },
+  rightSectionNarrow: {
+    gap: 6,
   },
   upgradeChip: {
     flexDirection: 'row',

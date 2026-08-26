@@ -157,6 +157,13 @@ const JourneyVisual = () => {
   );
 };
 
+/**
+ * Wide enough for the longest axis label. At the previous 65pt,
+ * "Pronunciation" (~76pt at 12pt Poppins) and "Vocabulary" broke inside the
+ * word — on every screen size, including a Pixel 9.
+ */
+const RADAR_LABEL_WIDTH = 86;
+
 /** Slide 3: Radar chart */
 const RadarVisual = () => {
   const LABEL_RADIUS = RADAR_RADIUS + 30;
@@ -241,14 +248,19 @@ const RadarVisual = () => {
         </Svg>
         {radarAxes.map((axis) => {
           const isLeft = axis.pos.x < RADAR_CENTER.x;
-          let leftPos = axis.pos.x - 75;
+          // The label box is RADAR_LABEL_WIDTH wide; the offsets below were
+          // tuned against the old 65pt box, so right-aligned (left-hand)
+          // labels shift left by the extra width to keep their right edge in
+          // the same place against the chart.
+          const extra = RADAR_LABEL_WIDTH - 65;
+          let leftPos = axis.pos.x - 75 - extra;
           let topPos = axis.pos.y - 20;
           if (axis.key === 'pronunciation') {
-            leftPos = axis.pos.x - 40;
+            leftPos = axis.pos.x - 40 - extra;
             topPos = axis.pos.y - 12;
           }
           if (axis.key === 'discourse') {
-            leftPos = axis.pos.x - 25;
+            leftPos = axis.pos.x - 25 - extra;
             topPos = axis.pos.y - 5;
           }
           if (axis.key === 'fluency') {
@@ -539,7 +551,7 @@ const s3 = StyleSheet.create({
     height: 310,
     alignSelf: 'center',
   },
-  radarLabel: { position: 'absolute', width: 65 },
+  radarLabel: { position: 'absolute', width: RADAR_LABEL_WIDTH },
   radarScore: { fontSize: 18, fontFamily: 'Poppins-Medium', fontWeight: '500', color: '#fff' },
   radarLabelText: { fontSize: 12, fontFamily: 'Poppins', fontWeight: '400', color: '#9B91BB' },
 });

@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView, Image } from 'react-native';
+import { scale } from '@/theme/responsive';
 import Svg, {
   Path,
   Circle,
@@ -262,7 +263,9 @@ function BadgeToken({
     : badge.progress != null
     ? `${Math.round(badge.progress)}%`
     : '0/1';
-  const size = 124;
+  // Two 124pt hexagons plus a 28pt gap need 276pt. A 320pt phone leaves the
+  // card ~252pt of content, so the pair used to run past its right edge.
+  const size = scale(124);
 
   return (
     <View style={styles.badgeToken}>
@@ -374,6 +377,9 @@ const styles = StyleSheet.create({
     gap: 28,
     marginTop: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+    rowGap: 16,
   },
   badgeToken: {
     flexDirection: 'column',
@@ -386,8 +392,8 @@ const styles = StyleSheet.create({
   },
   badgeIconOverlay: {
     position: 'absolute',
-    width: 62,
-    height: 62,
+    width: '50%',
+    height: '50%',
     justifyContent: 'center',
     alignItems: 'center',
   },

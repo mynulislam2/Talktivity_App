@@ -210,7 +210,9 @@ function SeekBar({
 
   return (
     <View style={sb.container}>
-      <Text style={sb.time}>{formatAudioTime(currentTime)}</Text>
+      <Text style={sb.time} numberOfLines={1}>
+        {formatAudioTime(currentTime)}
+      </Text>
       <View
         ref={barRef}
         onLayout={onLayout}
@@ -221,7 +223,9 @@ function SeekBar({
         <View style={[sb.fill, { width: `${progressRatio * 100}%` }] as any} />
         <View style={[sb.thumb, { left: `${progressRatio * 100}%` }] as any} />
       </View>
-      <Text style={sb.time}>{formatAudioTime(duration)}</Text>
+      <Text style={sb.time} numberOfLines={1}>
+        {formatAudioTime(duration)}
+      </Text>
     </View>
   );
 }
@@ -234,7 +238,10 @@ const sb = StyleSheet.create({
     width: '100%',
   },
   time: {
-    width: 31,
+    // "00:00" is ~34pt at 12pt Poppins, so the old fixed 31pt width wrapped
+    // the clock onto two lines — on every screen size, not just small ones.
+    minWidth: 36,
+    flexShrink: 0,
     fontSize: 12,
     fontWeight: '400',
     fontFamily: 'Poppins',

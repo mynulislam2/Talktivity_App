@@ -72,15 +72,15 @@ export function ProfileActivityCard({
           <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
             {learningLabel}
           </Text>
-          <View style={styles.statFooter}>
-            <Text style={[styles.statLabel, narrow && styles.statLabelNarrow]}>
+          <View style={[styles.statFooter, narrow && styles.statFooterStacked]}>
+            <Text style={[styles.statLabel, narrow ? styles.statLabelStacked : styles.statLabelInline]}>
               Learning Time
             </Text>
             <Ionicons
               name="time-outline"
               size={statIconSize}
               color="#a78bfa"
-              style={styles.statIcon}
+              style={[styles.statIcon, narrow && styles.statIconStacked]}
             />
           </View>
         </View>
@@ -90,15 +90,15 @@ export function ProfileActivityCard({
           <Text style={styles.statValue} numberOfLines={1} adjustsFontSizeToFit>
             {lessonsLabel}
           </Text>
-          <View style={styles.statFooter}>
-            <Text style={[styles.statLabel, narrow && styles.statLabelNarrow]}>
+          <View style={[styles.statFooter, narrow && styles.statFooterStacked]}>
+            <Text style={[styles.statLabel, narrow ? styles.statLabelStacked : styles.statLabelInline]}>
               Lessons complete
             </Text>
             <Ionicons
               name="checkmark-done-outline"
               size={statIconSize}
               color="#a78bfa"
-              style={styles.statIcon}
+              style={[styles.statIcon, narrow && styles.statIconStacked]}
             />
           </View>
         </View>
@@ -194,23 +194,42 @@ const styles = StyleSheet.create({
     marginTop: 24,
     gap: 8,
   },
+  statFooterStacked: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    marginTop: 16,
+    gap: 4,
+  },
   statLabel: {
-    // `flex: 1` + `minWidth: 0` so the label takes whatever the icon leaves
-    // instead of the former hardcoded `maxWidth: 88`, which was wider than the
-    // space actually available on a 360pt screen and forced a mid-word break.
-    flex: 1,
+    // No `maxWidth`. The former hardcoded 88 was wider than the space the icon
+    // actually leaves on a narrow phone, so it did nothing except stop
+    // flexbox from solving the row. Width now comes from the variant below.
     minWidth: 0,
     fontSize: 14,
     fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
   },
-  statLabelNarrow: {
+  /** Roomy screens: share the row with the icon. */
+  statLabelInline: {
+    flex: 1,
+  },
+  /**
+   * Narrow screens: the label gets the whole card width and the icon moves
+   * below it. Sharing the row leaves ~62pt here, and "complete" needs more
+   * than that at any font size the design would accept — the only honest fix
+   * is to stop sharing.
+   */
+  statLabelStacked: {
+    alignSelf: 'stretch',
     fontSize: 13,
     lineHeight: 18,
   },
   statIcon: {
     flexShrink: 0,
+  },
+  statIconStacked: {
+    alignSelf: 'flex-end',
   },
   note: {
     fontSize: 14,

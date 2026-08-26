@@ -61,11 +61,11 @@ export function ProfileHeroStats({ progressStats }: ProfileHeroStatsProps) {
             <Text style={styles.value} numberOfLines={1} adjustsFontSizeToFit>
               {card.value}
             </Text>
-            <View style={styles.cardFooter}>
-              <Text style={[styles.label, narrow && styles.labelNarrow]}>
+            <View style={[styles.cardFooter, narrow && styles.cardFooterStacked]}>
+              <Text style={[styles.label, narrow ? styles.labelStacked : styles.labelInline]}>
                 {card.label}
               </Text>
-              <View style={styles.icon}>
+              <View style={[styles.icon, narrow && styles.iconStacked]}>
                 <Icon size={orbSize} />
               </View>
             </View>
@@ -113,22 +113,33 @@ const styles = StyleSheet.create({
     marginTop: 24,
     gap: 8,
   },
+  cardFooterStacked: {
+    flexDirection: 'column',
+    alignItems: 'stretch',
+    marginTop: 16,
+    gap: 4,
+  },
   label: {
-    // Same fix as ProfileActivityCard: the former `maxWidth: 88` was wider
-    // than the space the orb icon actually leaves on a narrow phone, so the
-    // label broke inside a word. Let flexbox decide the width instead.
-    flex: 1,
+    // Same shape as ProfileActivityCard, and stacked on narrow screens for
+    // the same reason — see the comment on `statLabelStacked` there.
     minWidth: 0,
     fontSize: 15,
     fontFamily: 'Poppins',
     lineHeight: 20,
     color: '#c6c6c6',
   },
-  labelNarrow: {
+  labelInline: {
+    flex: 1,
+  },
+  labelStacked: {
+    alignSelf: 'stretch',
     fontSize: 13,
     lineHeight: 18,
   },
   icon: {
     flexShrink: 0,
+  },
+  iconStacked: {
+    alignSelf: 'flex-end',
   },
 });

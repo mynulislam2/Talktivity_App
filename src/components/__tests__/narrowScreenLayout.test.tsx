@@ -41,17 +41,43 @@ describe('narrow-screen layout', () => {
   afterEach(() => jest.clearAllMocks());
 
   describe('ProfileActivityCard stat labels', () => {
-    it('lets the label take the width the icon leaves, at any screen size', () => {
+    it('never caps the label at a fixed width', () => {
+      // The former `maxWidth: 88` was wider than the space actually available
+      // on a narrow phone, so it did nothing but stop flexbox from helping.
+      for (const width of [320, 360, 412]) {
+        setScreen(width);
+        const label = styleOfText(
+          render(<ProfileActivityCard progressStats={PROGRESS_STATS} />),
+          'Learning Time'
+        );
+        expect(label.maxWidth).toBeUndefined();
+        expect(label.minWidth).toBe(0);
+      }
+    });
+
+    it('shares the row with the icon when there is room', () => {
+      setScreen(412);
+
+      const label = styleOfText(
+        render(<ProfileActivityCard progressStats={PROGRESS_STATS} />),
+        'Learning Time'
+      );
+
+      expect(label.flex).toBe(1);
+    });
+
+    it('takes the whole card and drops the icon below once there is not', () => {
       setScreen(360);
 
-      const tree = render(<ProfileActivityCard progressStats={PROGRESS_STATS} />);
-      const label = styleOfText(tree, 'Learning Time');
+      const label = styleOfText(
+        render(<ProfileActivityCard progressStats={PROGRESS_STATS} />),
+        'Lessons complete'
+      );
 
-      // The former `maxWidth: 88` was wider than the ~64pt actually available
-      // here, so the cap did nothing except stop flexbox from helping.
-      expect(label.maxWidth).toBeUndefined();
-      expect(label.flex).toBe(1);
-      expect(label.minWidth).toBe(0);
+      // Sharing the row leaves ~62pt here, and "complete" needs more than that
+      // at any font size the design would accept, so it stops sharing.
+      expect(label.flex).toBeUndefined();
+      expect(label.alignSelf).toBe('stretch');
     });
 
     it('shrinks the decorative icon on a narrow screen but not on a roomy one', () => {

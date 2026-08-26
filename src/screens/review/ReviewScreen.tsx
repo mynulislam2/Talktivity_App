@@ -1505,6 +1505,10 @@ const ss = StyleSheet.create({
     paddingBottom: 28,
   },
   startBtnWrap: {
-    width: 280,
+    // Was a flat 280pt, which overflows once the screen drops below ~312pt of
+    // content width. Cap instead of fix, so it still stops at 280 on a phone
+    // that has the room.
+    width: '100%',
+    maxWidth: 280,
   },
 });

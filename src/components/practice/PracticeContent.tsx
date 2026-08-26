@@ -459,6 +459,11 @@ const styles = StyleSheet.create({
   },
   promptText: { fontSize: 13, fontFamily: 'Poppins', lineHeight: 18.85, color: '#fdfdfd' },
   liveControls: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
+    zIndex: 10,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,

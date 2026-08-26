@@ -58,7 +58,7 @@ export function TranscriptList({ messages }: { messages: TranscriptMessage[] }) 
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  content: { paddingHorizontal: 20, paddingVertical: 12, gap: 8 },
+  content: { paddingHorizontal: 20, paddingTop: 12, paddingBottom: 120, gap: 8 },
   userRow: { alignItems: 'flex-end', marginBottom: 4 },
   userBubble: {
     maxWidth: 224,

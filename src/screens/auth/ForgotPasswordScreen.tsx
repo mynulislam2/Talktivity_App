@@ -462,7 +462,8 @@ const styles = StyleSheet.create({
   },
   input: {
     flex: 1,
-    height: 42,
+    height: '100%',
+    paddingVertical: 0,
     paddingRight: 12,
     fontSize: 14,
     fontFamily: 'Poppins',

@@ -281,6 +281,8 @@ const RadarVisual = () => {
               style={[s3.radarLabel, { left: leftPos, top: topPos }]}
             >
               <Text
+                numberOfLines={1}
+                maxFontSizeMultiplier={1}
                 style={[
                   s3.radarScore,
                   { textAlign: isLeft ? 'right' : 'left' },
@@ -289,6 +291,15 @@ const RadarVisual = () => {
                 {axis.score}%
               </Text>
               <Text
+                numberOfLines={1}
+                // "Pronunciation" measures 83.2pt at 12pt Poppins — 97% of the
+                // 86pt box. One notch up on Android's font-size setting takes
+                // it to 99.8pt and it breaks inside the word. The box cannot
+                // grow: left-hand labels are anchored by their right edge and
+                // already start at x≈1 inside the chart, so a wider box runs
+                // off the screen instead. Pinning the chart labels to 1x is
+                // what keeps them on one line.
+                maxFontSizeMultiplier={1}
                 style={[
                   s3.radarLabelText,
                   { textAlign: isLeft ? 'right' : 'left' },

@@ -481,7 +481,9 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
             />
           </TouchableOpacity>
           <View style={styles.headerSpacer} />
-          <Text style={styles.headerTitle}>{group.name || 'Group'}</Text>
+          <Text style={styles.headerTitle} numberOfLines={1}>
+            {group.name || 'Group'}
+          </Text>
           <View style={styles.headerSpacer} />
           <TouchableOpacity
             onPress={() => setGroupProfileOpen(true)}
@@ -735,7 +737,19 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  headerTitle: { fontSize: 18, fontWeight: '500', fontFamily: 'Poppins-Medium', color: '#FFFFFF' },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    color: '#FFFFFF',
+    // Same shape as DMChatScreen: the back button is absolute at left:16 and
+    // 42pt wide, so a long group name spreads out from the centre and ends up
+    // underneath it. Clearing the button on the left and capping to one line
+    // keeps the name inside the space the header actually has.
+    flexShrink: 1,
+    marginLeft: 42,
+    textAlign: 'center',
+  },
   headerSpacer: { flex: 1 },
   headerMenuButton: {
     width: 36,

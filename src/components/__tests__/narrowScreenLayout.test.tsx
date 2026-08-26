@@ -5,10 +5,12 @@ import { Text, TextInput, useWindowDimensions } from 'react-native';
 import { ProfileActivityCard } from '../profile/ProfileActivityCard';
 import { HomeViewToggle } from '../home/HomeViewToggle';
 import { OTPInput } from '../auth/OTPInput';
+import WelcomeOnboardingScreen from '../../screens/auth/WelcomeOnboardingScreen';
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions');
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }));
 jest.mock('@expo/vector-icons/Feather', () => 'Feather');
+jest.mock('@react-navigation/native', () => ({ useNavigation: () => ({ navigate: jest.fn() }) }));
 
 const mockedDimensions = useWindowDimensions as unknown as jest.Mock;
 const setScreen = (width: number) =>
@@ -104,6 +106,24 @@ describe('narrow-screen layout', () => {
       for (const label of ["Today's Plan", 'Full Timeline']) {
         const node = tree.UNSAFE_getAllByType(Text).find((candidate) => hasText(candidate, label));
         expect(node?.props.numberOfLines).toBe(1);
+      }
+    });
+  });
+
+  describe('WelcomeOnboarding radar labels', () => {
+    it('pins the chart labels to 1x and one line', () => {
+      // "Pronunciation" measures 83.2pt at 12pt Poppins against an 86pt box
+      // (docs/design/text-width.js). One notch up on Android's font-size
+      // setting is 99.8pt and the word breaks. The box cannot grow — the
+      // left-hand labels are anchored by their right edge and already start
+      // at the chart's left edge — so the scale is what has to be pinned.
+      const tree = render(<WelcomeOnboardingScreen />);
+
+      for (const label of ['Pronunciation', 'Vocabulary', 'Discourse', 'Accuracy']) {
+        const node = tree.UNSAFE_getAllByType(Text).find((candidate) => hasText(candidate, label));
+        expect(node).toBeDefined();
+        expect(node?.props.numberOfLines).toBe(1);
+        expect(node?.props.maxFontSizeMultiplier).toBe(1);
       }
     });
   });

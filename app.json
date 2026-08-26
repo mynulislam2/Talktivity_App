@@ -46,10 +46,10 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/images/splash-icon.png",
+          "image": "./src/assets/images/talktivity-logo.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#09090f"
+          "backgroundColor": "#ffffff"
         }
       ],
       "expo-font"

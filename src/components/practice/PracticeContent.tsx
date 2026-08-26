@@ -130,7 +130,6 @@ function LiveControls({
   return (
     <View style={styles.liveControls}>
       <View style={styles.muteSection}>
-        <Text style={styles.muteLabel}>Speak with Alina</Text>
         <TouchableOpacity
           onPress={handleToggleMute}
           style={styles.muteButton}
@@ -171,22 +170,6 @@ function LiveControls({
             <Feather name="mic" size={28} color="#fff" style={{ zIndex: 1 }} />
           )}
         </TouchableOpacity>
-        <View style={styles.volumeBars}>
-          {visualHeights.map((height, index) => (
-            <View
-              key={index}
-              style={[
-                styles.volumeBar,
-                {
-                  height: isMuted
-                    ? 6
-                    : height + activityStrength * (10 + (index % 3) * 4),
-                  opacity: isMuted ? 0.35 : 0.48 + activityStrength * 0.52,
-                },
-              ]}
-            />
-          ))}
-        </View>
       </View>
     </View>
   );
@@ -479,8 +462,8 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 20,
-    paddingBottom: 32,
-    paddingTop: 16,
+    paddingBottom: 24,
+    paddingTop: 32,
   },
 
   muteSection: { alignItems: 'center', gap: 12 },

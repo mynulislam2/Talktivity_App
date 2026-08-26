@@ -147,7 +147,13 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   input: {
-    width: 42,
+    // Six boxes at a fixed 42pt plus five 8pt gaps need 292pt; a 320pt screen
+    // inside a 20pt gutter has 280pt, so the last box ran off the edge.
+    // Sharing the row keeps them square-ish everywhere and identical to the
+    // old 42pt once there is room for it.
+    flex: 1,
+    minWidth: 0,
+    maxWidth: 42,
     height: 52,
     borderRadius: 8,
     borderWidth: 1,

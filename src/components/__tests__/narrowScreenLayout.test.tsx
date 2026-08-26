@@ -1,9 +1,10 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
-import { Text, useWindowDimensions } from 'react-native';
+import { Text, TextInput, useWindowDimensions } from 'react-native';
 
 import { ProfileActivityCard } from '../profile/ProfileActivityCard';
 import { HomeViewToggle } from '../home/HomeViewToggle';
+import { OTPInput } from '../auth/OTPInput';
 
 jest.mock('react-native/Libraries/Utilities/useWindowDimensions');
 jest.mock('@expo/vector-icons', () => ({ Ionicons: 'Ionicons' }));
@@ -103,6 +104,24 @@ describe('narrow-screen layout', () => {
       for (const label of ["Today's Plan", 'Full Timeline']) {
         const node = tree.UNSAFE_getAllByType(Text).find((candidate) => hasText(candidate, label));
         expect(node?.props.numberOfLines).toBe(1);
+      }
+    });
+  });
+
+  describe('OTPInput on narrow screens', () => {
+    it('shares row with flex: 1 and caps at maxWidth: 42', () => {
+      // 6 boxes with fixed 42pt + 5 gaps of 8pt need 292pt, exceeding 280pt content on 320pt screens
+      setScreen(320);
+      const tree = render(<OTPInput length={6} value="" onChange={() => {}} />);
+      const inputs = tree.UNSAFE_getAllByType(TextInput);
+      expect(inputs.length).toBe(6);
+
+      for (const input of inputs) {
+        const style = flat(input.props.style);
+        expect(style.flex).toBe(1);
+        expect(style.maxWidth).toBe(42);
+        expect(style.minWidth).toBe(0);
+        expect(style.width).toBeUndefined();
       }
     });
   });

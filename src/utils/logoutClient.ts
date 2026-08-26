@@ -6,7 +6,6 @@ import { resetLifecycle } from '@/store/slices/lifecycleSlice';
 import { clearCallState } from '@/store/slices/callSlice';
 import { clearReport } from '@/store/slices/reportSlice';
 import { resetSubscription } from '@/store/slices/subscriptionSlice';
-import { resetPayment } from '@/store/slices/paymentSlice';
 import { resetTodayReport } from '@/store/slices/todayReportSlice';
 import { resetQuiz } from '@/store/slices/quizSlice';
 import { resetChat } from '@/store/slices/chatSlice';
@@ -54,7 +53,6 @@ export async function performGlobalLogout(
       () => store.dispatch(clearCallState()),
       () => store.dispatch(clearReport()),
       () => store.dispatch(resetSubscription()),
-      () => store.dispatch(resetPayment()),
       () => store.dispatch(resetTodayReport()),
       () => store.dispatch(resetQuiz()),
       () => store.dispatch(resetChat()),

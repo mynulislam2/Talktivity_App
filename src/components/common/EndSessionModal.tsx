@@ -34,14 +34,18 @@ export function EndSessionModal({
               onPress={onClose}
               activeOpacity={0.7}
             >
-              <Text style={styles.cancelText}>Continue Call</Text>
+              <Text style={styles.cancelText} numberOfLines={1} adjustsFontSizeToFit>
+                Continue Call
+              </Text>
             </TouchableOpacity>
             <TouchableOpacity
               style={styles.endBtn}
               onPress={onConfirm}
               activeOpacity={0.7}
             >
-              <Text style={styles.endText}>End Call</Text>
+              <Text style={styles.endText} numberOfLines={1} adjustsFontSizeToFit>
+                End Call
+              </Text>
             </TouchableOpacity>
           </View>
         </View>
@@ -61,11 +65,11 @@ const styles = StyleSheet.create({
     ...StyleSheet.absoluteFillObject,
   },
   card: {
-    width: '85%',
+    width: '88%',
     maxWidth: 340,
     backgroundColor: '#1c1f38',
     borderRadius: 24,
-    padding: 24,
+    padding: 20,
     borderWidth: 1,
     borderColor: '#3d3e50',
     shadowColor: '#000',
@@ -92,11 +96,13 @@ const styles = StyleSheet.create({
   },
   actions: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 10,
   },
   cancelBtn: {
     flex: 1,
+    minWidth: 0,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#3d3e50',
@@ -105,6 +111,10 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   cancelText: {
+    // The buttons are equal-width, so "Continue Call" is the one that runs
+    // out of room first. Centred + single-line keeps it reading as a button
+    // label instead of left-aligned wrapped body text.
+    textAlign: 'center',
     color: '#fff',
     fontSize: 14,
     fontWeight: '500',
@@ -112,7 +122,9 @@ const styles = StyleSheet.create({
   },
   endBtn: {
     flex: 1,
+    minWidth: 0,
     paddingVertical: 12,
+    paddingHorizontal: 8,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: 'rgba(255,68,68,0.3)',
@@ -121,6 +133,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   endText: {
+    textAlign: 'center',
     color: '#ff4444',
     fontSize: 14,
     fontWeight: '600',

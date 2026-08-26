@@ -13,6 +13,7 @@ import { Image as ExpoImage } from 'expo-image';
 
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import { getUtcToday } from '@/utils/timezoneUtils';
+import { useResponsive } from '@/theme/responsive';
 import { useAppSelector } from '@/store/hooks';
 
 interface HomeDashboardScreenProps {
@@ -42,6 +43,11 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   onStartGeneralPractice,
 }) => {
   const weekdayItems = useMemo(() => getWeekdayItems(), []);
+  const { narrow, s } = useResponsive();
+  // Seven day chips have to share the row whatever the screen is. The chips
+  // used to be a fixed 38pt wide with a 14pt gap (350pt of content inside a
+  // 328pt row on a 360pt phone), so "Wed" wrapped to "We / d".
+  const dayCircle = s(26);
   const subscriptionState = useAppSelector((state) => state.subscription);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
   const planType =
@@ -64,6 +70,11 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               <View
                 style={[
                   styles.weekdayCircle,
+                  {
+                    width: dayCircle,
+                    height: dayCircle,
+                    borderRadius: dayCircle / 2,
+                  },
                   item.isToday
                     ? styles.weekdayCircleActive
                     : styles.weekdayCircleInactive,
@@ -72,15 +83,19 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
                 {item.isToday && (
                   <Feather
                     name="check"
-                    size={16}
+                    size={s(16)}
                     color="#fff"
                     strokeWidth={2.5}
                   />
                 )}
               </View>
               <Text
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.75}
                 style={[
                   styles.weekdayLabel,
+                  narrow && styles.weekdayLabelNarrow,
                   item.isToday
                     ? styles.weekdayLabelActive
                     : styles.weekdayLabelInactive,
@@ -113,8 +128,9 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         </View>
         <ExpoImage
           source={require('../../../assets/avatar_intro.svg')}
-          style={styles.todayPlanHero}
+          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
           contentFit="contain"
+          pointerEvents="none"
         />
       </LinearGradient>
 
@@ -164,7 +180,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
           </View>
           <Image
             source={require('../../../assets/figma/home/coach-vocabulary.png')}
-            style={styles.coachImage}
+            style={[styles.coachImage, { width: s(114), height: s(92) }]}
             resizeMode="contain"
           />
         </View>
@@ -188,19 +204,17 @@ const styles = StyleSheet.create({
   },
   weekdaysRow: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     alignItems: 'center',
-    gap: 14,
   },
   weekdayItem: {
-    width: 38,
+    // Share the row evenly instead of claiming a fixed 38pt each, so seven
+    // chips always fit whatever the screen width is.
+    flex: 1,
+    minWidth: 0,
     alignItems: 'center',
     gap: 4,
   },
   weekdayCircle: {
-    width: 26,
-    height: 26,
-    borderRadius: 13,
     borderWidth: 1.5,
     alignItems: 'center',
     justifyContent: 'center',
@@ -217,6 +231,11 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins',
     lineHeight: 22.4,
+    textAlign: 'center',
+  },
+  weekdayLabelNarrow: {
+    fontSize: 14,
+    lineHeight: 19.6,
   },
   weekdayLabelActive: {
     color: '#fff',
@@ -234,7 +253,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   todayPlanContent: {
-    maxWidth: 228,
+    // Was a fixed 228pt, which on a 360pt phone left the copy 100pt narrower
+    // than the card. A share of the card keeps the same relationship to the
+    // hero illustration at every width.
+    maxWidth: '62%',
     zIndex: 1,
   },
   todayPlanTitle: {
@@ -267,8 +289,6 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -20,
     right: -18,
-    width: 170,
-    height: 170,
   },
   coachSection: {
     marginTop: 28,
@@ -306,8 +326,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
+    maxWidth: '72%',
   },
   coachCardTitle: {
+    flexShrink: 1,
     fontSize: 20,
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
@@ -328,7 +350,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins',
     lineHeight: 21,
     color: '#c6c6c6',
-    maxWidth: 220,
+    maxWidth: '66%',
   },
   coachCardButton: {
     marginTop: 16,
@@ -362,7 +384,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 16,
     right: 6,
-    width: 114,
-    height: 92,
   },
 });

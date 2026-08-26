@@ -28,6 +28,7 @@ import {
 } from '@/components/navigation/BottomTabIcons';
 
 import { MainStackParamList } from './types';
+import { useResponsive } from '@/theme/responsive';
 
 const Tab = createBottomTabNavigator<MainStackParamList>();
 
@@ -35,6 +36,10 @@ const TAB_ICON_SIZE = 22.61;
 
 const MainNavigator: React.FC = () => {
   const insets = useSafeAreaInsets();
+  const { short } = useResponsive();
+  // A 76pt bar plus its safe-area padding is a tenth of a 915pt Pixel but a
+  // seventh of a 640pt phone, where every screen is already short on room.
+  const barHeight = (short ? 62 : 76) + 12;
 
   return (
     <Tab.Navigator
@@ -42,8 +47,8 @@ const MainNavigator: React.FC = () => {
         headerShown: false,
         tabBarStyle: {
           ...styles.tabBar,
-          paddingBottom: Math.max(insets.bottom, 12) + 6,
-          height: 76 + 12,
+          paddingBottom: Math.max(insets.bottom, short ? 8 : 12) + 6,
+          height: barHeight,
         },
         tabBarShowLabel: false,
         tabBarActiveTintColor: '#5462ff',

@@ -5,40 +5,22 @@
  */
 
 import React from 'react';
-import { View, StyleSheet, ScrollView } from 'react-native';
-import { colors } from '@/styles/colors';
-import { spacing } from '@/styles/spacing';
-import { SkeletonListItem, SkeletonCard } from '@/components/common/skeletons';
+import { View, ActivityIndicator, StyleSheet } from 'react-native';
+import { tokens } from '@/theme/tokens';
 
 export function CommunityLoadingState() {
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
-      {/* Groups section skeleton */}
-      <View style={styles.section}>
-        <SkeletonCard />
-        <SkeletonCard />
-      </View>
-
-      {/* DM list skeleton */}
-      <View style={styles.section}>
-        {Array.from({ length: 5 }).map((_, index) => (
-          <SkeletonListItem key={index} />
-        ))}
-      </View>
-    </ScrollView>
+    <View style={styles.container}>
+      <ActivityIndicator size="large" color={tokens.color.accent.primary} />
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: 'transparent',
-  },
-  content: {
-    paddingVertical: spacing.lg,
-  },
-  section: {
-    paddingHorizontal: spacing.lg,
-    marginBottom: spacing.xl,
+    minHeight: 300,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

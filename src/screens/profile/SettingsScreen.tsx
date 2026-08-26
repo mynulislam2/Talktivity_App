@@ -25,7 +25,7 @@ import {
   loadSubscriptionStatus,
   selectCurrentSubscription,
 } from '@/store/slices/subscriptionSlice';
-import { ThemedAlert } from '@/components/shared/ThemedAlert';
+import { LogoutModal } from '@/components/profile/LogoutModal';
 import {
   COACH_SPEECH_RATE_OPTIONS,
   formatCoachSpeechRate,
@@ -312,24 +312,10 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         </View>
       </ScrollView>
 
-      <ThemedAlert
+      <LogoutModal
         visible={isLogoutModalVisible}
-        title="Logout"
-        message="Are you sure you want to logout?"
-        type="warning"
         onClose={() => setIsLogoutModalVisible(false)}
-        buttons={[
-          {
-            text: 'Cancel',
-            style: 'cancel',
-            onPress: () => setIsLogoutModalVisible(false),
-          },
-          {
-            text: 'Logout',
-            style: 'destructive',
-            onPress: confirmLogout,
-          },
-        ]}
+        onConfirm={confirmLogout}
       />
       </SafeAreaView>
     </ScreenBackground>

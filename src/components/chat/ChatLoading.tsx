@@ -8,7 +8,7 @@ export interface ChatLoadingProps {
 }
 
 export const ChatLoading: React.FC<ChatLoadingProps> = ({
-  message = 'Loading conversation...',
+  message,
 }) => {
   return (
     <View style={styles.container}>
@@ -17,7 +17,7 @@ export const ChatLoading: React.FC<ChatLoadingProps> = ({
         color={colors.primary}
         style={styles.spinner}
       />
-      <Text style={styles.message}>{message}</Text>
+      {!!message && <Text style={styles.message}>{message}</Text>}
     </View>
   );
 };

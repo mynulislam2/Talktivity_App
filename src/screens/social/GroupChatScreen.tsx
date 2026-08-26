@@ -423,7 +423,7 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
   if (loading) {
     return (
       <ScreenBackground>
-        <ChatLoading message="Loading group chat..." />
+        <ChatLoading />
       </ScreenBackground>
     );
   }

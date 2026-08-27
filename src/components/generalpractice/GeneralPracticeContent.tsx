@@ -22,6 +22,8 @@ import {
 import { LiveKitRoom, AgentState, useRoomContext } from '@livekit/react-native';
 import Feather from '@expo/vector-icons/Feather';
 import { Ionicons } from '@expo/vector-icons';
+import { tokens } from '@/theme/tokens';
+import { DevicePermissionsModal } from '@/components/common/DevicePermissionsModal';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import type { ConnectionDetails } from '@/types/call';
 import type { PracticeSessionState } from '@/types/practice';
@@ -187,6 +189,8 @@ export function GeneralPracticeContent({
     sessionState.agentState !== 'disconnected' || Boolean(connectionDetails);
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
+  const { setUserVolumeStrength, setAgentVolumeStrength } = useVoiceVolume();
+  const [showPermModal, setShowPermModal] = useState(false);
   const [showEndModal, setShowEndModal] = useState(false);
 
   // Configure AudioSession for loudspeaker output during LiveKit general practice
@@ -226,17 +230,16 @@ export function GeneralPracticeContent({
     }
   };
 
-  useEffect(() => {
-    const requestPermission = async () => {
-      if (Platform.OS !== 'android' || !connectionDetails) return;
-      try {
-        await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
-        );
-      } catch {}
-    };
-    requestPermission();
-  }, [connectionDetails]);
+  const handleStartSession = async () => {
+    if (Platform.OS === 'android') {
+      const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!hasPermission) {
+        setShowPermModal(true);
+        return;
+      }
+    }
+    onConnect();
+  };
 
   if (!hasLiveConversation) {
     return (
@@ -273,7 +276,7 @@ export function GeneralPracticeContent({
 
         <View style={styles.buttonSection}>
           <FigmaPrimaryButton
-            onPress={onConnect}
+            onPress={handleStartSession}
             disabled={!canStartSession || timeLoading}
             style={{ height: 50, borderRadius: 10, width: '100%' }}
           >
@@ -351,6 +354,11 @@ export function GeneralPracticeContent({
           setShowEndModal(false);
           onDisconnect();
         }}
+      />
+      <DevicePermissionsModal
+        visible={showPermModal}
+        onClose={() => setShowPermModal(false)}
+        onGranted={onConnect}
       />
     </View>
   );

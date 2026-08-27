@@ -15,6 +15,7 @@ import {
 import { LiveKitRoom, AgentState, useRoomContext } from '@livekit/react-native';
 import Feather from '@expo/vector-icons/Feather';
 import { Ionicons } from '@expo/vector-icons';
+import { DevicePermissionsModal } from '@/components/common/DevicePermissionsModal';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import type { ConnectionDetails } from '@/types/call';
 import type { PracticeSessionState } from '@/types/practice';
@@ -67,6 +68,7 @@ function LiveControls({
   const pulseAnim = useRef(new Animated.Value(1)).current;
   const outerPulseAnim = useRef(new Animated.Value(1)).current;
   const { agentVolumeStrength, userVolumeStrength } = useVoiceVolume();
+  const [showPermModal, setShowPermModal] = useState(false);
   const isAssistantSpeaking =
     agentState === 'speaking' || agentVolumeStrength > 0.08;
   const isUserSpeaking = userVolumeStrength > 0.08;
@@ -164,6 +166,10 @@ function LiveControls({
           )}
         </TouchableOpacity>
       </View>
+      <DevicePermissionsModal
+        visible={showPermModal}
+        onClose={() => setShowPermModal(false)}
+      />
     </View>
   );
 }
@@ -188,6 +194,7 @@ export function RoleplayContent({
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
   const [showEndModal, setShowEndModal] = useState(false);
+  const [showPermModal, setShowPermModal] = useState(false);
 
   // Configure AudioSession for loudspeaker output during LiveKit roleplay
   useLoudspeakerAudioSession(hasLiveConversation);
@@ -224,17 +231,16 @@ export function RoleplayContent({
     }
   };
 
-  useEffect(() => {
-    const requestPermission = async () => {
-      if (Platform.OS !== 'android' || !connectionDetails) return;
-      try {
-        await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
-        );
-      } catch {}
-    };
-    requestPermission();
-  }, [connectionDetails]);
+  const handleStartSession = async () => {
+    if (Platform.OS === 'android') {
+      const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!hasPermission) {
+        setShowPermModal(true);
+        return;
+      }
+    }
+    onConnect();
+  };
 
   if (!hasLiveConversation) {
     return (
@@ -274,7 +280,7 @@ export function RoleplayContent({
 
         <View style={styles.buttonSection}>
           <FigmaPrimaryButton
-            onPress={onConnect}
+            onPress={handleStartSession}
             disabled={!canStartSession || timeLoading}
             style={{ height: 50, borderRadius: 10, width: '100%' }}
           >
@@ -282,6 +288,12 @@ export function RoleplayContent({
             <Text style={styles.startButtonText}>{startButtonLabel}</Text>
           </FigmaPrimaryButton>
         </View>
+
+        <DevicePermissionsModal
+          visible={showPermModal}
+          onClose={() => setShowPermModal(false)}
+          onGranted={onConnect}
+        />
       </View>
     );
   }

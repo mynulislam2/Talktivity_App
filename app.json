@@ -10,6 +10,11 @@
       "com.googleusercontent.apps.845075130244-6buns0pih3ihqlusmoeh25s3q0enc2t0"
     ],
     "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./src/assets/images/talktivity-splash-logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#09090f"
+    },
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
@@ -32,7 +37,7 @@
         "android.permission.WAKE_LOCK",
         "android.permission.BLUETOOTH"
       ],
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "resize"
     },
     "web": {
       "bundler": "metro",

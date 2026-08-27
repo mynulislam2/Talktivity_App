@@ -426,7 +426,7 @@ const EditProfileScreen: React.FC = () => {
           >
             <Pressable style={styles.overlay} onPress={closeEditor}>
               <Pressable
-                style={styles.bottomSheet}
+                style={[styles.bottomSheet, { paddingBottom: Math.max(insets.bottom + 20, 40) }]}
                 onPress={(e) => e.stopPropagation()}
               >
                 <View style={styles.sheetHeader}>

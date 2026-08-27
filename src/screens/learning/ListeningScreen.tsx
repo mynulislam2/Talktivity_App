@@ -27,6 +27,7 @@ import { courseService } from '@/services/course';
 import { progressService } from '@/services/progress';
 import { AppBackground } from '../../components/common/AppBackground';
 import { tokens } from '../../theme/tokens';
+import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 
 const WAVE_BARS = [12, 18, 28, 20, 34, 42, 30, 22, 36, 18, 12];
 const COACH_IMG = require('../../../assets/figma/coach/alina-intro.png');
@@ -730,23 +731,17 @@ export default function ListeningScreen() {
             ) : null}
 
             {canContinue ? (
-              <TouchableOpacity
+              <FigmaPrimaryButton
                 onPress={handleContinue}
                 disabled={isCompleting}
+                loading={isCompleting}
                 style={s.continueBtn}
               >
-                <LinearGradient
-                  colors={[tokens.color.accent.primary, tokens.color.accent.primary]}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 0 }}
-                  style={s.continueGradient}
-                >
-                  <Text style={s.continueText}>
-                    {isCompleting ? 'Saving progress...' : 'Continue to Quiz'}
-                  </Text>
-                  <Ionicons name="chevron-forward" size={18} color="#fff" />
-                </LinearGradient>
-              </TouchableOpacity>
+                <Text style={s.continueText}>
+                  {isCompleting ? 'Saving progress...' : 'Continue to Quiz'}
+                </Text>
+                <Ionicons name="chevron-forward" size={18} color="#fff" style={{ marginLeft: 4 }} />
+              </FigmaPrimaryButton>
             ) : (
               <Text style={s.lockedText}>
                 Finish the listening to unlock the quiz.

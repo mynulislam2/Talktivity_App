@@ -7,8 +7,9 @@
  * each re-declaring its own gradient pill button.
  */
 import React from 'react';
-import { Text, TouchableOpacity, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
+import { Text, StyleSheet, type StyleProp, type ViewStyle } from 'react-native';
 import { tokens } from '@/theme/tokens';
+import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 
 export interface ReportCTAButtonProps {
   label: string;
@@ -18,9 +19,9 @@ export interface ReportCTAButtonProps {
 
 export function ReportCTAButton({ label, onPress, style }: ReportCTAButtonProps) {
   return (
-    <TouchableOpacity onPress={onPress} activeOpacity={0.85} style={[s.button, style]}>
+    <FigmaPrimaryButton onPress={onPress} style={[s.button, style]}>
       <Text style={s.label}>{label}</Text>
-    </TouchableOpacity>
+    </FigmaPrimaryButton>
   );
 }
 
@@ -28,13 +29,11 @@ const s = StyleSheet.create({
   button: {
     marginTop: 24,
     height: tokens.control.height,
-    borderRadius: tokens.radius.sm,
-    backgroundColor: tokens.color.accent.primary,
     alignItems: 'center',
     justifyContent: 'center',
   },
   label: {
-    color: tokens.color.text.primary,
+    color: '#ffffff',
     fontSize: 16,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',

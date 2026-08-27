@@ -23,6 +23,7 @@ import { SimpleVoiceAssistant } from '@/components/livekit';
 import { useVoiceVolume } from './CallVisualizerLayout';
 import { ControlBar } from './ControlBar';
 import { normalizeUrl } from '@/lib/network/urlNormalizer';
+import { DevicePermissionsModal } from '@/components/common/DevicePermissionsModal';
 import { colors } from '@/styles/colors';
 import { useLoudspeakerAudioSession } from '@/hooks/useLoudspeakerAudioSession';
 import { useBackgroundSessionCleanup } from '@/hooks/useBackgroundSessionCleanup';
@@ -57,6 +58,7 @@ export function CallContent({
 }: CallContentProps) {
   const { width } = useWindowDimensions();
   const { setUserVolumeStrength, setAgentVolumeStrength } = useVoiceVolume();
+  const [showPermModal, setShowPermModal] = useState(false);
 
   // Configure AudioSession for loudspeaker output during LiveKit call
   useLoudspeakerAudioSession(!!connectionDetails);
@@ -109,60 +111,16 @@ export function CallContent({
     }
   }, [connectionDetails, normalizedServerUrl]);
 
-  // Request microphone permission on Android
-  React.useEffect(() => {
-    const requestPermission = async () => {
-      if (Platform.OS !== 'android') {
-        console.log(
-          'ℹ️  [CallContent] Platform is',
-          Platform.OS,
-          '- skipping Android permission request'
-        );
+  const handleStartCall = async () => {
+    if (Platform.OS === 'android') {
+      const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!hasPermission) {
+        setShowPermModal(true);
         return;
       }
-
-      if (!connectionDetails) {
-        console.log(
-          'ℹ️  [CallContent] No connection details yet - skipping permission request'
-        );
-        return;
-      }
-
-      try {
-        console.log(
-          '📱 [CallContent] Requesting microphone permission on Android'
-        );
-
-        const granted = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          {
-            title: 'Microphone Permission Required',
-            message:
-              'This app needs access to your microphone to listen to you during calls.',
-            buttonNeutral: 'Ask Me Later',
-            buttonNegative: 'Cancel',
-            buttonPositive: 'OK',
-          }
-        );
-
-        console.log('📱 [CallContent] Permission result:', granted);
-
-        if (granted === PermissionsAndroid.RESULTS.GRANTED) {
-          console.log('✅ [CallContent] Microphone permission granted');
-        } else if (granted === PermissionsAndroid.RESULTS.DENIED) {
-          console.warn('⚠️  [CallContent] Microphone permission denied');
-          Alert.alert(
-            'Permission Denied',
-            'Microphone permission is required for voice calls. Please enable it in app settings.'
-          );
-        }
-      } catch (err) {
-        console.error('❌ [CallContent] Permission request error:', err);
-      }
-    };
-
-    requestPermission();
-  }, [connectionDetails]);
+    }
+    onConnect();
+  };
 
   return (
     <View style={styles.container}>
@@ -220,7 +178,7 @@ export function CallContent({
                 />
 
                 <ControlBar
-                  onConnect={onConnect}
+                  onConnect={handleStartCall}
                   onDisconnect={onDisconnect}
                   agentState={sessionState.agentState}
                   canStartCall={canStartCall}
@@ -233,7 +191,7 @@ export function CallContent({
           ) : (
             // Show control bar even before we have connection details so user can start the call
             <ControlBar
-              onConnect={onConnect}
+              onConnect={handleStartCall}
               onDisconnect={onDisconnect}
               agentState={sessionState.agentState}
               canStartCall={canStartCall}
@@ -244,6 +202,11 @@ export function CallContent({
           )}
         </View>
       </View>
+      <DevicePermissionsModal
+        visible={showPermModal}
+        onClose={() => setShowPermModal(false)}
+        onGranted={onConnect}
+      />
     </View>
   );
 }

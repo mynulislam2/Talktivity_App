@@ -625,7 +625,7 @@ const styles = StyleSheet.create({
     right: 0,
     paddingHorizontal: 16,
     paddingTop: 12,
-    backgroundColor: tokens.color.bg.screen,
+    backgroundColor: 'transparent',
   },
   ctaButton: {
     height: tokens.control.height,

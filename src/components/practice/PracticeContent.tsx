@@ -18,6 +18,7 @@ import {
   Image,
   Animated,
 } from 'react-native';
+import { DevicePermissionsModal } from '@/components/common/DevicePermissionsModal';
 import { LinearGradient } from 'expo-linear-gradient';
 import { LiveKitRoom, AgentState, useRoomContext } from '@livekit/react-native';
 import Feather from '@expo/vector-icons/Feather';
@@ -195,6 +196,7 @@ export function PracticeContent({
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
   const [showEndModal, setShowEndModal] = useState(false);
+  const [showPermModal, setShowPermModal] = useState(false);
 
   // Configure AudioSession for loudspeaker output during LiveKit session
   useLoudspeakerAudioSession(hasLiveConversation);
@@ -238,17 +240,16 @@ export function PracticeContent({
     }
   };
 
-  useEffect(() => {
-    const requestPermission = async () => {
-      if (Platform.OS !== 'android' || !connectionDetails) return;
-      try {
-        await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
-        );
-      } catch {}
-    };
-    requestPermission();
-  }, [connectionDetails]);
+  const handleStartSession = async () => {
+    if (Platform.OS === 'android') {
+      const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+      if (!hasPermission) {
+        setShowPermModal(true);
+        return;
+      }
+    }
+    onConnect();
+  };
 
   const startButtonLabel = timeLoading
     ? 'Checking...'
@@ -294,7 +295,7 @@ export function PracticeContent({
         </ScrollView>
         <View style={styles.buttonSection}>
           <FigmaPrimaryButton
-            onPress={onConnect}
+            onPress={handleStartSession}
             disabled={!canStartSession || timeLoading}
             style={{ height: 50, borderRadius: 10, width: '100%' }}
           >
@@ -369,6 +370,11 @@ export function PracticeContent({
           setShowEndModal(false);
           onDisconnect();
         }}
+      />
+      <DevicePermissionsModal
+        visible={showPermModal}
+        onClose={() => setShowPermModal(false)}
+        onGranted={onConnect}
       />
     </View>
   );

@@ -37,6 +37,7 @@ import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 import { tokens } from '@/theme/tokens';
 import ScreenBackground from '../../components/common/ScreenBackground';
+import { DevicePermissionsModal } from '@/components/common/DevicePermissionsModal';
 
 interface SettingsScreenProps {
   navigation: any;
@@ -98,6 +99,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
   const [coachSpeechRateState, setCoachSpeechRateState] = useState(1);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [isLogoutModalVisible, setIsLogoutModalVisible] = useState(false);
+  const [isPermissionsModalVisible, setIsPermissionsModalVisible] = useState(false);
 
   const currentSubscription = useAppSelector(selectCurrentSubscription);
   const subscriptionDetails = (currentSubscription as any)?.subscription;
@@ -265,6 +267,13 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
           {/* Help & Support Section */}
           <SettingsSection title="Help & Support">
             <SettingsRow
+              label="Permissions & Audio Check"
+              onPress={() => setIsPermissionsModalVisible(true)}
+              trailing={
+                <Ionicons name="mic-outline" size={20} color="#fff" />
+              }
+            />
+            <SettingsRow
               label="Terms"
               onPress={() =>
                 navigation.navigate('ProfileStack', { screen: 'Terms' })
@@ -316,6 +325,11 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
         visible={isLogoutModalVisible}
         onClose={() => setIsLogoutModalVisible(false)}
         onConfirm={confirmLogout}
+      />
+      
+      <DevicePermissionsModal
+        visible={isPermissionsModalVisible}
+        onClose={() => setIsPermissionsModalVisible(false)}
       />
       </SafeAreaView>
     </ScreenBackground>

@@ -14,12 +14,7 @@ export function DevicePermissionsModal({ visible, onClose, onGranted }: DevicePe
     if (Platform.OS === 'android') {
       try {
         const result = await PermissionsAndroid.request(
-          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          {
-            title: 'Microphone Access',
-            message: 'Talktivity needs microphone access so you can speak to Aleena.',
-            buttonPositive: 'Allow',
-          }
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
         );
         if (result === PermissionsAndroid.RESULTS.GRANTED) {
           onGranted?.();
@@ -52,8 +47,8 @@ export function DevicePermissionsModal({ visible, onClose, onGranted }: DevicePe
                 Skip
               </Text>
             </TouchableOpacity>
-            <View style={{ flex: 1 }}>
-              <FigmaPrimaryButton onPress={requestPermissions} style={{ paddingVertical: 12, height: 'auto', minHeight: 46 }}>
+            <View style={styles.continueBtnWrapper}>
+              <FigmaPrimaryButton onPress={requestPermissions}>
                 <Text style={styles.continueText} numberOfLines={1} adjustsFontSizeToFit>
                   Continue
                 </Text>
@@ -129,6 +124,9 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '500',
     fontFamily: 'Poppins-Medium',
+  },
+  continueBtnWrapper: {
+    flex: 1,
   },
   continueText: {
     textAlign: 'center',

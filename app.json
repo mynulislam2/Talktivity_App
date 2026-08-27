@@ -51,12 +51,12 @@
       [
         "expo-splash-screen",
         {
-          "image": "./src/assets/images/talktivity-splash-logo.png",
+          "image": "./src/assets/images/talktivity-splash-logo-transparent-padded.png",
           "imageWidth": 220,
           "resizeMode": "contain",
           "backgroundColor": "#09090f",
           "dark": {
-            "image": "./src/assets/images/talktivity-splash-logo.png",
+            "image": "./src/assets/images/talktivity-splash-logo-transparent-padded.png",
             "backgroundColor": "#09090f"
           }
         }

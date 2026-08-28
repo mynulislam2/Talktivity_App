@@ -112,6 +112,30 @@ export const googleOAuth = createAsyncThunk(
 );
 
 /**
+ * Async thunk for native Google Sign-In (ID token)
+ *
+ * Exists so Google sign-in lands in redux through exactly the same door as
+ * loginUser: user, accessToken and refreshToken all set together. The screen
+ * used to dispatch setUser() alone, which left accessToken null and skipped
+ * the subscription refresh that form login performs.
+ */
+export const googleSignIn = createAsyncThunk(
+  'auth/googleSignIn',
+  async (data: { idToken: string }, { rejectWithValue }) => {
+    try {
+      const response = await authService.googleIdToken(data);
+      if (response.success && response.data) {
+        return response.data;
+      }
+      return rejectWithValue('Google authentication failed: Invalid response');
+    } catch (error) {
+      const errorMessage = extractErrorMessage(error);
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
+/**
  * Async thunk for user logout
  */
 export const logoutUser = createAsyncThunk(
@@ -264,6 +288,35 @@ const authSlice = createSlice({
         }
       )
       .addCase(googleOAuth.rejected, (state, action) => {
+        state.googleAuthLoading = false;
+        state.isLoading = false;
+        state.googleAuthError =
+          (action.payload as string) || 'Google authentication failed';
+        state.error =
+          (action.payload as string) || 'Google authentication failed';
+      });
+
+    // Google Sign-In (native ID token)
+    builder
+      .addCase(googleSignIn.pending, (state) => {
+        state.googleAuthLoading = true;
+        state.googleAuthError = null;
+        state.isLoading = true;
+      })
+      .addCase(
+        googleSignIn.fulfilled,
+        (state, action: PayloadAction<AuthResponseData>) => {
+          state.googleAuthLoading = false;
+          state.isLoading = false;
+          state.user = action.payload.user;
+          state.accessToken = action.payload.accessToken;
+          state.refreshToken = action.payload.refreshToken || null;
+          state.isAuthenticated = true;
+          state.googleAuthError = null;
+          state.error = null;
+        }
+      )
+      .addCase(googleSignIn.rejected, (state, action) => {
         state.googleAuthLoading = false;
         state.isLoading = false;
         state.googleAuthError =

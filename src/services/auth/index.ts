@@ -19,8 +19,10 @@ import {
   RefreshTokenResponse,
   User,
   AuthResponseData,
+  AuthErrorCode,
 } from '@/types/auth';
 import { toAuthError } from '@/lib/auth/errorHandler';
+import { AuthError } from '@/lib/auth/errors';
 import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
 
 class AuthService {
@@ -48,6 +50,15 @@ class AuthService {
 
   /**
    * Clears all authentication data
+   *
+   * The app records "logged in" in two places: these AsyncStorage keys and the
+   * redux `auth` slice, which redux-persist writes to disk. Clearing only the
+   * first leaves `isAuthenticated: true` on disk, so the next launch opens
+   * straight into Main with no token and every request comes back
+   * "No token provided". Both halves have to go together.
+   *
+   * The store is required lazily because the store module imports the slices,
+   * which import this service — a static import would be a cycle.
    * @private
    */
   private async clearAuthData(): Promise<void> {
@@ -55,6 +66,14 @@ class AuthService {
       await asyncStorageManager.clearAuthData();
     } catch (error) {
       // Failed to clear auth data
+    }
+
+    try {
+      const { store } = require('@/store');
+      const { clearAuth } = require('@/store/slices/authSlice');
+      store.dispatch(clearAuth());
+    } catch (error) {
+      // Store not initialised (e.g. called before the provider mounts).
     }
   }
 
@@ -239,6 +258,69 @@ class AuthService {
 
       throw new Error('Invalid response format from Google OAuth API');
     } catch (error) {
+      throw toAuthError(error);
+    }
+  }
+
+  /**
+   * Authenticates a user with a Google ID token (native Google Sign-In)
+   *
+   * Deliberately parallel to `googleOAuth` above and to `login`: it normalises
+   * the token field, stores the session, and reports whether the backend
+   * treated this as a new account. The app has no sign-up screen, so it sends
+   * `mode: 'login'` and the backend refuses to create an account rather than
+   * turning a login press into a silent registration.
+   *
+   * @param data - The Google ID token returned by GoogleSignin.signIn()
+   * @returns Promise resolving to authentication response with tokens and user data
+   * @throws {AuthError} If the account does not exist or authentication fails
+   */
+  async googleIdToken(data: { idToken: string }): Promise<AuthResponse> {
+    try {
+      const response = await httpService.post(API_URLS.AUTH.GOOGLE_TOKEN, {
+        idToken: data.idToken,
+        mode: 'login',
+      });
+
+      if (response.data && response.data.success && response.data.data) {
+        const backendData = response.data.data;
+
+        const accessToken = backendData.accessToken || backendData.token;
+        if (!accessToken) {
+          throw new Error('Missing access token in Google sign-in response');
+        }
+
+        const authData: AuthResponseData = {
+          user: backendData.user,
+          accessToken,
+          token: backendData.token,
+          refreshToken: backendData.refreshToken,
+          expiresIn: backendData.expiresIn,
+          isNewUser: backendData.isNew,
+        };
+
+        await this.storeAuthData(authData);
+
+        return {
+          success: true,
+          data: authData,
+          message: response.data.message,
+        };
+      }
+
+      throw new Error('Invalid response format from Google sign-in API');
+    } catch (error) {
+      const code = (error as { response?: { data?: { code?: string } } })
+        ?.response?.data?.code;
+
+      if (code === 'ACCOUNT_NOT_FOUND') {
+        throw new AuthError(
+          'No account found for this Google account. Please sign up first, then log in here.',
+          AuthErrorCode.NOT_FOUND,
+          404
+        );
+      }
+
       throw toAuthError(error);
     }
   }

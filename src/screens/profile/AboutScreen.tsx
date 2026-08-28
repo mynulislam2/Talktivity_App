@@ -19,6 +19,7 @@ import {
   Linking,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 import { AppBackground } from '../../components/common/AppBackground';
@@ -29,6 +30,7 @@ interface AboutScreenProps {
 }
 
 const AboutScreen: React.FC<AboutScreenProps> = ({ navigation }) => {
+  const insets = useSafeAreaInsets();
   const appVersion = '1.0.0';
 
   const handleSocialPress = (url: string) => {
@@ -43,7 +45,13 @@ const AboutScreen: React.FC<AboutScreenProps> = ({ navigation }) => {
     <AppBackground>
       <ScrollView
         style={styles.container}
-        contentContainerStyle={styles.contentContainer}
+        // The only screen in this stack that started its content at y = 0, so
+        // the hero sat under the status bar. Same measure the sibling screens
+        // (RefundScreen, PrivacyScreen) already use.
+        contentContainerStyle={[
+          styles.contentContainer,
+          { paddingTop: Math.max(insets.top + 16, 61) },
+        ]}
         showsVerticalScrollIndicator={false}
       >
         {/* Hero Section */}

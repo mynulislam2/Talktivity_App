@@ -1,7 +1,7 @@
 import { useCallback, useState, useEffect } from 'react';
 import { useAppDispatch } from '@/store/hooks';
-import { setUser } from '@/store/slices/authSlice';
-import { authService } from '@/services/auth';
+import { googleSignIn } from '@/store/slices/authSlice';
+import { loadSubscriptionStatus } from '@/store/slices/subscriptionSlice';
 import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
 
 export interface UseAuthGoogleLoginNativeReturn {
@@ -38,18 +38,27 @@ export function useAuthGoogleLoginNative(options?: {
     setLoading(true);
     setError(null);
     try {
-      const result = await authService.googleToken({ idToken });
+      // Same door as form login: the thunk normalises the token, writes it to
+      // storage and mirrors user + accessToken + refreshToken into redux.
+      const result = await dispatch(googleSignIn({ idToken }));
 
-      if (result.success && result.data) {
-        // Store auth data
-        const { asyncStorageManager } = require('@/lib/auth/asyncStorageManager');
-        await asyncStorageManager.storeAuthData(result.data);
-        // Update redux state
-        dispatch(setUser(result.data.user));
-      } else {
-        throw new Error(result.error || 'Google authentication failed');
+      if (!googleSignIn.fulfilled.match(result)) {
+        throw new Error(
+          (result.payload as string) || 'Google authentication failed'
+        );
       }
+
+      // Form login does this in useAuthSubmitNative and the web Google flow
+      // does it too. The subscription slice is in the redux-persist whitelist,
+      // so without it a previous session's plan stays on screen and an expired
+      // subscription can look active until something else happens to refresh.
+      await dispatch(loadSubscriptionStatus());
     } catch (err: any) {
+      // Drop the cached Google account as well, otherwise the next press
+      // silently reuses the account that was just rejected instead of showing
+      // the chooser.
+      await GoogleSignin.signOut().catch(() => {});
+
       const errorMsg = err?.message || 'Google login failed';
       setError(errorMsg);
       options?.onError?.(errorMsg);

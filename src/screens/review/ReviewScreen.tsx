@@ -488,6 +488,7 @@ function ReviewCardComponent({
   totalCards,
   onTapToSay,
   onClearTranscript,
+  onCheckAnswer,
   isListening,
   transcript,
   isValidating,
@@ -500,6 +501,7 @@ function ReviewCardComponent({
   totalCards: number;
   onTapToSay: () => void;
   onClearTranscript: () => void;
+  onCheckAnswer: () => void;
   isListening: boolean;
   transcript: string;
   isValidating: boolean;
@@ -579,21 +581,67 @@ function ReviewCardComponent({
         </View>
       ) : null}
       <View style={rcc.bottomBtn}>
-        <FigmaPrimaryButton
-          onPress={onTapToSay}
-          disabled={isValidating || isCoachSpeaking}
-          style={{ height: 50, borderRadius: 10, width: '100%' }}
-        >
-          <Ionicons
-            name="mic-outline"
-            size={20}
-            color="#fff"
-            style={{ marginRight: 4 }}
-          />
-          <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
-            {actionLabel}
-          </Text>
-        </FigmaPrimaryButton>
+        {isValidating ? (
+          <View style={rcc.twoBtnRow}>
+            <FigmaPrimaryButton
+              onPress={() => {}}
+              disabled={true}
+              style={{ flex: 1, height: 50, borderRadius: 10, backgroundColor: '#4b5563' }}
+            >
+              <ActivityIndicator color="#fff" style={{ marginRight: 8 }} />
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
+                Checking...
+              </Text>
+            </FigmaPrimaryButton>
+            <TouchableOpacity
+              onPress={onClearTranscript}
+              style={rcc.secondaryBtn}
+            >
+              <Text style={rcc.secondaryBtnText}>Stop & Say Again</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (transcript || isListening) && !isCoachSpeaking ? (
+          <View style={rcc.twoBtnRow}>
+            <FigmaPrimaryButton
+              onPress={onCheckAnswer}
+              disabled={!transcript}
+              style={{ flex: 1, height: 50, borderRadius: 10, backgroundColor: !transcript ? '#4b5563' : undefined }}
+            >
+              <Ionicons
+                name="checkmark-circle-outline"
+                size={20}
+                color="#fff"
+                style={{ marginRight: 4 }}
+              />
+              <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
+                Check Answer
+              </Text>
+            </FigmaPrimaryButton>
+            <TouchableOpacity
+              onPress={onClearTranscript}
+              style={rcc.secondaryBtn}
+            >
+              <Ionicons name="refresh-outline" size={18} color="#fff" style={{ marginRight: 4 }} />
+              <Text style={rcc.secondaryBtnText}>Say Again</Text>
+            </TouchableOpacity>
+          </View>
+        ) : (
+          <FigmaPrimaryButton
+            onPress={onTapToSay}
+            disabled={isCoachSpeaking}
+            style={{ height: 50, borderRadius: 10, width: '100%' }}
+          >
+            <Ionicons
+              name="mic-outline"
+              size={20}
+              color="#fff"
+              style={{ marginRight: 4 }}
+            />
+            <Text style={{ color: '#fff', fontSize: 16, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
+              {isCoachSpeaking ? 'Coach is speaking...' : 'Tap to Say It'}
+            </Text>
+          </FigmaPrimaryButton>
+        )}
       </View>
     </View>
   );
@@ -768,6 +816,26 @@ const rcc = StyleSheet.create({
   bottomBtn: {
     marginTop: 16,
     marginBottom: 32,
+  },
+  twoBtnRow: {
+    flexDirection: 'column',
+    gap: 12,
+  },
+  secondaryBtn: {
+    flexDirection: 'row',
+    height: 50,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.2)',
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  secondaryBtnText: {
+    color: '#fff',
+    fontSize: 16,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
   },
 });
 
@@ -1060,8 +1128,10 @@ export const ReviewScreen: React.FC = () => {
     [currentReviewItem]
   );
 
+  const validationGenRef = useRef(0);
+
   const callCoachFeedback = useCallback(
-    async (result: ValidationResult, cardIndex: number, totalCards: number) => {
+    async (result: ValidationResult, cardIndex: number, totalCards: number, generation: number) => {
       setCoachMessage('');
       setIsThinking(true);
       try {
@@ -1073,6 +1143,8 @@ export const ReviewScreen: React.FC = () => {
           cardIndex,
           totalCards,
         });
+        if (validationGenRef.current !== generation) return null;
+        
         const text = res.text || result.feedback || '';
         setIsThinking(false);
         streamMessage(text);
@@ -1080,10 +1152,14 @@ export const ReviewScreen: React.FC = () => {
         try {
           await playBase64Audio(res.audioBase64, res.text || text);
         } finally {
-          setIsCoachSpeaking(false);
+          if (validationGenRef.current === generation) {
+            setIsCoachSpeaking(false);
+          }
         }
         return text;
       } catch {
+        if (validationGenRef.current !== generation) return null;
+        
         const fallback =
           result.feedback ||
           'Try again. Focus on matching the corrected version.';
@@ -1097,13 +1173,17 @@ export const ReviewScreen: React.FC = () => {
 
   const handleValidation = useCallback(
     async (result: ValidationResult) => {
+      const currentGen = ++validationGenRef.current;
       try {
         setIsValidating(true);
         stopListening();
-        await callCoachFeedback(result, currentCardIndex, reviewItems.length);
+        await callCoachFeedback(result, currentCardIndex, reviewItems.length, currentGen);
+        if (validationGenRef.current !== currentGen) return;
+
         if (result.isValid) {
           if (currentCardIndex < reviewItems.length - 1) {
             setTimeout(() => {
+              if (validationGenRef.current !== currentGen) return;
               setCurrentCardIndex((p) => p + 1);
               resetTranscript();
               lastValidatedRef.current = '';
@@ -1127,6 +1207,7 @@ export const ReviewScreen: React.FC = () => {
           setIsValidating(false);
         }
       } catch {
+        if (validationGenRef.current !== currentGen) return;
         resetTranscript();
         setIsValidating(false);
       }
@@ -1140,34 +1221,15 @@ export const ReviewScreen: React.FC = () => {
     ]
   );
 
-  useEffect(() => {
-    if (
-      userActivated &&
-      !listening &&
-      transcript.trim().length > 0 &&
-      !isValidating &&
-      currentReviewItem &&
-      transcript !== lastValidatedRef.current
-    ) {
-      const timer = setTimeout(() => {
-        lastValidatedRef.current = transcript;
-        const result = validate(transcript);
-        (result as any).userAnswer = transcript;
-        (result as any).corrected = currentReviewItem.corrected;
-        (result as any).original = currentReviewItem.original;
-        handleValidation(result);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [
-    userActivated,
-    listening,
-    transcript,
-    isValidating,
-    currentReviewItem,
-    validate,
-    handleValidation,
-  ]);
+  const handleCheckAnswer = useCallback(() => {
+    if (!transcript.trim() || !currentReviewItem) return;
+    lastValidatedRef.current = transcript;
+    const result = validate(transcript);
+    (result as any).userAnswer = transcript;
+    (result as any).corrected = currentReviewItem.corrected;
+    (result as any).original = currentReviewItem.original;
+    handleValidation(result);
+  }, [transcript, currentReviewItem, validate, handleValidation]);
 
   const handleTapToSay = useCallback(() => {
     if (!speechSupported) return;
@@ -1187,10 +1249,22 @@ export const ReviewScreen: React.FC = () => {
   ]);
 
   const handleClearTranscript = useCallback(() => {
+    validationGenRef.current += 1;
+    stopCoachAudio();
+    setIsThinking(false);
+    setIsCoachSpeaking(false);
+    setCoachMessage('');
+    setIsValidating(false);
     stopListening();
     resetTranscript();
     lastValidatedRef.current = '';
-  }, [stopListening, resetTranscript]);
+    
+    // Automatically restart listening for "Say Again"
+    setTimeout(() => {
+      setUserActivated(true);
+      startListening();
+    }, 100);
+  }, [stopListening, resetTranscript, startListening]);
 
   const goBack = useCallback(() => {
     navigation.goBack();
@@ -1368,6 +1442,7 @@ export const ReviewScreen: React.FC = () => {
               totalCards={reviewItems.length}
               onTapToSay={handleTapToSay}
               onClearTranscript={handleClearTranscript}
+              onCheckAnswer={handleCheckAnswer}
               isListening={userActivated && listening}
               transcript={userActivated ? transcript : ''}
               isValidating={isValidating}
@@ -1491,7 +1566,7 @@ const ss = StyleSheet.create({
     borderRadius: 6,
     borderWidth: 1,
     borderColor: '#636370',
-    backgroundColor: 'rgba(255,255,255,0.18)',
+    backgroundColor: '#484960',
     paddingHorizontal: 6,
     paddingVertical: 2,
   },

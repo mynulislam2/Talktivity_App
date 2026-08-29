@@ -256,7 +256,7 @@ const RadarVisual = () => {
           let leftPos = axis.pos.x - 75 - extra;
           let topPos = axis.pos.y - 20;
           if (axis.key === 'pronunciation') {
-            leftPos = axis.pos.x - 40 - extra;
+            leftPos = Math.max(10, axis.pos.x - 25 - extra);
             topPos = axis.pos.y - 12;
           }
           if (axis.key === 'discourse') {
@@ -268,11 +268,11 @@ const RadarVisual = () => {
             topPos = axis.pos.y - 45;
           }
           if (axis.key === 'vocabulary') {
-            leftPos = axis.pos.x + 22;
+            leftPos = axis.pos.x + 18;
             topPos = axis.pos.y - 30;
           }
           if (axis.key === 'accuracy') {
-            leftPos = axis.pos.x + 35;
+            leftPos = axis.pos.x + 28;
             topPos = axis.pos.y - 5;
           }
           return (

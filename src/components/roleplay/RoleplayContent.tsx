@@ -26,6 +26,7 @@ import { useVoiceVolume } from './RoleplayVisualizerLayout';
 import { useLoudspeakerAudioSession } from '@/hooks/useLoudspeakerAudioSession';
 import { useBackgroundSessionCleanup } from '@/hooks/useBackgroundSessionCleanup';
 import { useBackHandlerConfirmation } from '@/hooks/useBackHandlerConfirmation';
+import { RoleplayControlBar } from './RoleplayControlBar';
 
 const COACH_AVATAR = require('../../../assets/figma/coach/alina-intro.png');
 
@@ -44,135 +45,7 @@ export interface RoleplayContentProps {
   onBack?: () => void;
 }
 
-function LiveControls({
-  agentState,
-  onDisconnect,
-}: {
-  agentState: AgentState;
-  onDisconnect: () => void;
-}) {
-  const [isMuted, setIsMuted] = useState(false);
-  const room = useRoomContext();
-
-  const handleToggleMute = useCallback(() => {
-    setIsMuted((prev) => {
-      const nextMuted = !prev;
-      if (room?.localParticipant) {
-        room.localParticipant.setMicrophoneEnabled(!nextMuted).catch((err) => {
-          console.warn('[RoleplayControls] Mute toggle error:', err);
-        });
-      }
-      return nextMuted;
-    });
-  }, [room]);
-  const pulseAnim = useRef(new Animated.Value(1)).current;
-  const outerPulseAnim = useRef(new Animated.Value(1)).current;
-  const { agentVolumeStrength, userVolumeStrength } = useVoiceVolume();
-  const [showPermModal, setShowPermModal] = useState(false);
-  const isAssistantSpeaking =
-    agentState === 'speaking' || agentVolumeStrength > 0.08;
-  const isUserSpeaking = userVolumeStrength > 0.08;
-  const activityStrength = Math.max(
-    userVolumeStrength,
-    agentVolumeStrength,
-    isAssistantSpeaking ? 0.26 : 0,
-    isUserSpeaking ? 0.18 : 0
-  );
-  const visualHeights = [8, 14, 20, 26, 20, 14, 8];
-
-  useEffect(() => {
-    if (isAssistantSpeaking || isUserSpeaking) {
-      const anim = Animated.loop(
-        Animated.sequence([
-          Animated.timing(pulseAnim, {
-            toValue: 1.12,
-            duration: 850,
-            useNativeDriver: true,
-          }),
-          Animated.timing(pulseAnim, {
-            toValue: 1,
-            duration: 850,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      const outerAnim = Animated.loop(
-        Animated.sequence([
-          Animated.timing(outerPulseAnim, {
-            toValue: 1.18,
-            duration: 1100,
-            useNativeDriver: true,
-          }),
-          Animated.timing(outerPulseAnim, {
-            toValue: 1,
-            duration: 1100,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-      anim.start();
-      outerAnim.start();
-      return () => {
-        anim.stop();
-        outerAnim.stop();
-      };
-    } else {
-      pulseAnim.setValue(1);
-      outerPulseAnim.setValue(1);
-    }
-  }, [isAssistantSpeaking, isUserSpeaking, pulseAnim, outerPulseAnim]);
-
-  return (
-    <View style={styles.liveControls}>
-      <View style={styles.muteSection}>
-        <TouchableOpacity
-          onPress={handleToggleMute}
-          style={styles.muteButton}
-          activeOpacity={0.85}
-        >
-          {!isMuted && (
-            <>
-              <Animated.View
-                style={[
-                  styles.muteRingInner,
-                  {
-                    transform: [{ scale: pulseAnim }],
-                    opacity: isAssistantSpeaking || isUserSpeaking ? 0.42 : 0.2,
-                  },
-                ]}
-              />
-              <Animated.View
-                style={[
-                  styles.muteRingOuter,
-                  {
-                    transform: [{ scale: outerPulseAnim }],
-                    opacity:
-                      isAssistantSpeaking || isUserSpeaking ? 0.24 : 0.12,
-                  },
-                ]}
-              />
-            </>
-          )}
-          <View style={styles.muteGlow} />
-          {isMuted ? (
-            <Feather
-              name="mic-off"
-              size={28}
-              color="#fff"
-              style={{ zIndex: 1 }}
-            />
-          ) : (
-            <Feather name="mic" size={28} color="#fff" style={{ zIndex: 1 }} />
-          )}
-        </TouchableOpacity>
-      </View>
-      <DevicePermissionsModal
-        visible={showPermModal}
-        onClose={() => setShowPermModal(false)}
-      />
-    </View>
-  );
-}
+// Inline LiveControls removed in favor of RoleplayControlBar
 
 export function RoleplayContent({
   topicTitle,
@@ -331,9 +204,7 @@ export function RoleplayContent({
             { height: heroHeight },
           ]}
         >
-          <TouchableOpacity onPress={requestEndSession} style={styles.endSessionButton} activeOpacity={0.7}>
-            <Feather name="x" size={20} color="#fff" />
-          </TouchableOpacity>
+
           <Image
             source={COACH_AVATAR}
             style={styles.coachImageAbsolute}
@@ -351,10 +222,16 @@ export function RoleplayContent({
           )}
         </View>
 
-        <LiveControls
-          agentState={sessionState.agentState}
-          onDisconnect={requestEndSession}
-        />
+        <View style={styles.liveControls}>
+          <RoleplayControlBar
+            onConnect={handleStartSession}
+            onDisconnect={requestEndSession}
+            agentState={sessionState.agentState}
+            canStartSession={canStartSession}
+            timeLoading={timeLoading}
+            enableMicControl={true}
+          />
+        </View>
       </LiveKitRoom>
 
       <EndSessionModal

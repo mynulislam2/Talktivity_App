@@ -202,7 +202,7 @@ export function RoleplayControlBar({
         >
           <Ionicons
             name={isMuted ? 'mic-off-outline' : 'mic-outline'}
-            size={iconSize + 4}
+            size={iconSize}
             color="#fff"
           />
         </TouchableOpacity>
@@ -214,8 +214,8 @@ export function RoleplayControlBar({
         >
           <Ionicons
             name="call"
-            size={iconSize + 6}
-            color="#93000a"
+            size={iconSize + 2}
+            color="#fff"
             style={{ transform: [{ rotate: '135deg' }] }}
           />
         </TouchableOpacity>
@@ -227,7 +227,7 @@ export function RoleplayControlBar({
         >
           <Ionicons
             name={isSpeakerOn ? 'volume-high-outline' : 'volume-mute-outline'}
-            size={iconSize + 4}
+            size={iconSize}
             color="#fff"
           />
         </TouchableOpacity>
@@ -278,9 +278,9 @@ const styles = StyleSheet.create({
   },
 
   squircleButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -291,10 +291,10 @@ const styles = StyleSheet.create({
   },
 
   endCallButton: {
-    width: 80,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: '#ffb4ab',
+    width: 72,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#93000a',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

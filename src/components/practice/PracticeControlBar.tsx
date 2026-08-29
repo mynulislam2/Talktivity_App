@@ -136,7 +136,7 @@ export function PracticeControlBar({
         >
           <Ionicons
             name={isMuted ? 'mic-off-outline' : 'mic-outline'}
-            size={iconSize + 4}
+            size={iconSize}
             color="#fff"
           />
         </TouchableOpacity>
@@ -148,8 +148,8 @@ export function PracticeControlBar({
         >
           <Ionicons
             name="call"
-            size={iconSize + 6}
-            color="#93000a"
+            size={iconSize + 2}
+            color="#fff"
             style={{ transform: [{ rotate: '135deg' }] }}
           />
         </TouchableOpacity>
@@ -161,18 +161,10 @@ export function PracticeControlBar({
         >
           <Ionicons
             name={isSpeakerOn ? 'volume-high-outline' : 'volume-mute-outline'}
-            size={iconSize + 4}
+            size={iconSize}
             color="#fff"
           />
         </TouchableOpacity>
-      </View>
-
-      {/* Status text */}
-      <View style={styles.statusContainer}>
-        <Text style={styles.statusText}>Session Active</Text>
-        <Text style={styles.guidanceText}>
-          Speak naturally and practice your English
-        </Text>
       </View>
     </View>
   );
@@ -224,9 +216,9 @@ const styles = StyleSheet.create({
   },
 
   squircleButton: {
-    width: 64,
-    height: 64,
-    borderRadius: 20,
+    width: 52,
+    height: 52,
+    borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -237,10 +229,10 @@ const styles = StyleSheet.create({
   },
 
   endCallButton: {
-    width: 80,
-    height: 64,
-    borderRadius: 20,
-    backgroundColor: '#ffb4ab',
+    width: 72,
+    height: 52,
+    borderRadius: 16,
+    backgroundColor: '#93000a',
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',

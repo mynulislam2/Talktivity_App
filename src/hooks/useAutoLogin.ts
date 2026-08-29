@@ -10,6 +10,7 @@ import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
 import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
 import {
+  clearAuth,
   setUser,
   setLoading as setAuthLoading,
 } from '@/store/slices/authSlice';
@@ -35,6 +36,7 @@ export const useAutoLogin = (): UseAutoLoginReturn => {
 
         // If no token, skip the full auth check and go straight to login
         if (!token) {
+          dispatch(clearAuth());
           setIsCheckingAuth(false);
           setIsLoading(false);
           dispatch(setAuthLoading(false));
@@ -49,13 +51,23 @@ export const useAutoLogin = (): UseAutoLoginReturn => {
           const user = await asyncStorageManager.getUser();
           if (user) {
             dispatch(setUser(user));
+          } else {
+            await asyncStorageManager.clearAuthData();
+            dispatch(clearAuth());
           }
+        } else {
+          // The stored session is unusable. `auth` is in the redux-persist
+          // whitelist, so doing nothing here leaves the previous session's
+          // `isAuthenticated: true` rehydrated and RootNavigator opens Main
+          // with no credentials — every screen then renders the backend's
+          // "No token provided". Drop both halves together.
+          await asyncStorageManager.clearAuthData();
+          dispatch(clearAuth());
         }
-        // If not authenticated, Redux auth state will remain empty
-        // User will be redirected to LoginScreen by RootNavigator
       } catch (error) {
-        // Silent fail - user will be logged out
+        // Storage is unreadable, so there is no session we can trust.
         console.error('Auto-login check failed:', error);
+        dispatch(clearAuth());
       } finally {
         setIsCheckingAuth(false);
         setIsLoading(false);

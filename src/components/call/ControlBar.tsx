@@ -165,29 +165,70 @@ export function ControlBar({
     );
   }
 
+  const [isSpeakerOn, setIsSpeakerOn] = useState(true);
+
+  const toggleSpeaker = useCallback(() => {
+    setIsSpeakerOn((prev) => {
+      const nextSpeakerOn = !prev;
+      // AudioSession is not directly exported in the top scope, it's inside @livekit/react-native
+      // We need to import it or use the context, but wait we imported AgentState and useRoomContext.
+      // Let's require it locally if not imported.
+      const { AudioSession } = require('@livekit/react-native');
+      const { Platform } = require('react-native');
+      const setOutput = async () => {
+        try {
+          if (Platform.OS === 'ios') {
+            await AudioSession.selectAudioOutput(nextSpeakerOn ? 'force_speaker' : 'default');
+          } else {
+            await AudioSession.selectAudioOutput(nextSpeakerOn ? 'speaker' : 'earpiece');
+          }
+        } catch (err) {
+          console.warn('[ControlBar] Speaker toggle error:', err);
+        }
+      };
+      setOutput();
+      return nextSpeakerOn;
+    });
+  }, []);
+
   // Connected state - show disconnect and mute controls
   return (
     <View style={styles.container}>
       {/* Control buttons row */}
       <View style={styles.connectedControls}>
         <TouchableOpacity
-          style={[styles.circleButton, styles.disconnectButton]}
-          onPress={onDisconnect}
-          activeOpacity={0.85}
-        >
-          <Ionicons name="close" size={iconSize} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity
-          style={[
-            styles.circleButton,
-            isMuted ? styles.mutedButton : styles.unmutedButton,
-          ]}
+          style={[styles.squircleButton, styles.controlButton]}
           onPress={toggleMute}
           activeOpacity={0.85}
         >
           <Ionicons
-            name={isMuted ? 'mic-off' : 'mic'}
-            size={iconSize}
+            name={isMuted ? 'mic-off-outline' : 'mic-outline'}
+            size={iconSize + 4}
+            color="#fff"
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={styles.endCallButton}
+          onPress={onDisconnect}
+          activeOpacity={0.85}
+        >
+          <Ionicons
+            name="call"
+            size={iconSize + 6}
+            color="#93000a"
+            style={{ transform: [{ rotate: '135deg' }] }}
+          />
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          style={[styles.squircleButton, styles.controlButton]}
+          onPress={toggleSpeaker}
+          activeOpacity={0.85}
+        >
+          <Ionicons
+            name={isSpeakerOn ? 'volume-high-outline' : 'volume-mute-outline'}
+            size={iconSize + 4}
             color="#fff"
           />
         </TouchableOpacity>
@@ -269,10 +310,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
   },
 
-  circleButton: {
-    width: 56,
-    height: 56,
-    borderRadius: 28,
+  squircleButton: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
     alignItems: 'center',
     justifyContent: 'center',
     shadowColor: '#000',
@@ -282,16 +323,22 @@ const styles = StyleSheet.create({
     elevation: 8,
   },
 
-  disconnectButton: {
-    backgroundColor: colors.error,
+  endCallButton: {
+    width: 80,
+    height: 64,
+    borderRadius: 20,
+    backgroundColor: '#ffb4ab',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.3,
+    shadowRadius: 8,
+    elevation: 8,
   },
 
-  unmutedButton: {
-    backgroundColor: colors.success,
-  },
-
-  mutedButton: {
-    backgroundColor: '#6b7280', // gray-500
+  controlButton: {
+    backgroundColor: '#3b404a',
   },
 
   // Status text

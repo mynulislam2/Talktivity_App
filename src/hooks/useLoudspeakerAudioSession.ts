@@ -15,7 +15,6 @@ export function useLoudspeakerAudioSession(active: boolean = true) {
 
     const configureAndStartSession = async () => {
       try {
-        await AudioSession.startAudioSession();
         if (isMounted) {
           await AudioSession.configureAudio({
             android: {
@@ -26,6 +25,16 @@ export function useLoudspeakerAudioSession(active: boolean = true) {
               defaultOutput: 'speaker',
             },
           });
+        }
+        await AudioSession.startAudioSession();
+        
+        // Force select the loudspeaker output if possible
+        if (isMounted) {
+          if (Platform.OS === 'ios') {
+            await AudioSession.selectAudioOutput('force_speaker').catch(() => {});
+          } else if (Platform.OS === 'android') {
+            await AudioSession.selectAudioOutput('speaker').catch(() => {});
+          }
         }
       } catch (err) {
         console.warn('⚠️ [AudioSession] Failed to configure loudspeaker audio session:', err);

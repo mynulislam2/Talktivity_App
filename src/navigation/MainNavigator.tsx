@@ -37,9 +37,8 @@ const TAB_ICON_SIZE = 22.61;
 const MainNavigator: React.FC = () => {
   const insets = useSafeAreaInsets();
   const { short } = useResponsive();
-  // A 76pt bar plus its safe-area padding is a tenth of a 915pt Pixel but a
-  // seventh of a 640pt phone, where every screen is already short on room.
-  const barHeight = (short ? 62 : 76) + 17; // Added 5px
+  const bottomPadding = Math.max(insets.bottom, short ? 12 : 16);
+  const barHeight = (short ? 56 : 64) + bottomPadding;
 
   return (
     <Tab.Navigator
@@ -47,7 +46,7 @@ const MainNavigator: React.FC = () => {
         headerShown: false,
         tabBarStyle: {
           ...styles.tabBar,
-          paddingBottom: Math.max(insets.bottom, short ? 8 : 12) + 11, // Added 5px
+          paddingBottom: bottomPadding,
           height: barHeight,
         },
         tabBarShowLabel: false,

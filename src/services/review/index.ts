@@ -81,6 +81,48 @@ class ReviewService {
       };
     }
   }
+
+  async evaluateAudio(params: {
+    audioBase64: string;
+    mimeType?: string;
+    original: string;
+    corrected: string;
+    explanation?: string;
+    cardIndex: number;
+    totalCards: number;
+  }): Promise<{
+    success: boolean;
+    isValid: boolean;
+    accuracyScore: number;
+    userSpokenText: string;
+    feedbackText: string;
+    audioBase64: string;
+    audioAvailable: boolean;
+  }> {
+    try {
+      const response = await httpService.post(API_URLS.REVIEW.EVALUATE_AUDIO, {
+        audio: params.audioBase64,
+        mimeType: params.mimeType || 'audio/m4a',
+        original: params.original,
+        corrected: params.corrected,
+        explanation: params.explanation || '',
+        cardIndex: params.cardIndex,
+        totalCards: params.totalCards,
+      });
+      return response.data;
+    } catch (err: any) {
+      console.warn('[ReviewService] evaluateAudio failed:', err?.message);
+      return {
+        success: false,
+        isValid: false,
+        accuracyScore: 0,
+        userSpokenText: '',
+        feedbackText: "I couldn't hear clearly. Please try saying it one more time.",
+        audioBase64: '',
+        audioAvailable: false,
+      };
+    }
+  }
 }
 
 export const reviewService = new ReviewService();

@@ -16,7 +16,11 @@ export interface UseRoleplaySessionReturn {
   updateAgentState: (state: string) => void;
 }
 
-export function useRoleplaySession(): UseRoleplaySessionReturn {
+export interface UseRoleplaySessionOptions {
+  isGeneralPractice?: boolean;
+}
+
+export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRoleplaySessionReturn {
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [connectionDetails, setConnectionDetails] =
     useState<ConnectionDetails | null>(null);
@@ -40,6 +44,7 @@ export function useRoleplaySession(): UseRoleplaySessionReturn {
   };
 
   const loadTopic = useCallback(async () => {
+    if (options?.isGeneralPractice) return;
     try {
       const topicData = await AsyncStorage.getItem('selectedRoleplayTopic');
       if (topicData) {
@@ -52,7 +57,7 @@ export function useRoleplaySession(): UseRoleplaySessionReturn {
         } catch {}
       }
     } catch {}
-  }, []);
+  }, [options?.isGeneralPractice]);
 
   const endSession = useCallback(async () => {
     isStartingRef.current = false;
@@ -73,16 +78,19 @@ export function useRoleplaySession(): UseRoleplaySessionReturn {
     }
 
     try {
-      if (!topic) {
-        await loadTopic();
-      }
+      let currentTopic = topic;
+      if (!options?.isGeneralPractice) {
+        if (!topic) {
+          await loadTopic();
+        }
 
-      const rawTopic = await AsyncStorage.getItem('selectedRoleplayTopic');
-      const parsedTopic = rawTopic ? JSON.parse(rawTopic) : null;
-      const currentTopic = topic || parsedTopic;
+        const rawTopic = await AsyncStorage.getItem('selectedRoleplayTopic');
+        const parsedTopic = rawTopic ? JSON.parse(rawTopic) : null;
+        currentTopic = topic || parsedTopic;
 
-      if (!currentTopic?.title) {
-        throw new Error('Please select a roleplay topic and try again.');
+        if (!currentTopic?.title) {
+          throw new Error('Please select a roleplay topic and try again.');
+        }
       }
 
       if (isMountedRef.current) {
@@ -92,7 +100,7 @@ export function useRoleplaySession(): UseRoleplaySessionReturn {
 
       const details = await connectionDetailsService.getConnectionDetails({
         userId: typeof user.id === 'string' ? parseInt(user.id, 10) : user.id,
-        sessionType: 'roleplay',
+        sessionType: options?.isGeneralPractice ? 'practice' : 'roleplay',
         topic: currentTopic,
       });
 

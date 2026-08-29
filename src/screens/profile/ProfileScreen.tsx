@@ -111,7 +111,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   if (isLoading) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
           <ProfileLoadingState />
         </SafeAreaView>
       </ScreenBackground>
@@ -121,7 +121,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
   if (error) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
           <ProfileErrorState error={error} onRetry={refresh} />
         </SafeAreaView>
       </ScreenBackground>
@@ -130,7 +130,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <ProgressPageShell
         activeTab="profile"
         header={
@@ -345,3 +345,4 @@ const styles = StyleSheet.create({
 });
 
 export default ProfileScreen;
+

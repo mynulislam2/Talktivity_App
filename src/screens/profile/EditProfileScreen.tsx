@@ -351,7 +351,7 @@ const EditProfileScreen: React.FC = () => {
 
   return (
     <AppBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
         {/* Header */}
         <View style={[styles.header, { paddingTop: Math.max(insets.top, 16) }]}>
           <TouchableOpacity
@@ -868,3 +868,4 @@ const styles = StyleSheet.create({
 });
 
 export default EditProfileScreen;
+

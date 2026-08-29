@@ -15,7 +15,7 @@ import {
   Alert,
   useWindowDimensions,
 } from 'react-native';
-import { AgentState, useRoomContext } from '@livekit/react-native';
+import { AgentState, useLocalParticipant } from '@livekit/react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { colors } from '@/styles/colors';
 
@@ -40,7 +40,7 @@ export function ControlBar({
 }: ControlBarProps) {
   const { width } = useWindowDimensions();
   const [isMuted, setIsMuted] = useState(false);
-  const room = useRoomContext();
+  const { localParticipant } = useLocalParticipant();
 
   /**
    * Toggle microphone on/off on the active LiveKit room local participant
@@ -48,14 +48,14 @@ export function ControlBar({
   const toggleMute = useCallback(() => {
     setIsMuted((prev) => {
       const nextMuted = !prev;
-      if (room?.localParticipant) {
-        room.localParticipant.setMicrophoneEnabled(!nextMuted).catch((err) => {
+      if (localParticipant) {
+        localParticipant.setMicrophoneEnabled(!nextMuted).catch((err: any) => {
           console.warn('[ControlBar] Mute toggle error:', err);
         });
       }
       return nextMuted;
     });
-  }, [room]);
+  }, [localParticipant]);
 
   const handleStart = () => {
     if (!canStartCall) {

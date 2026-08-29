@@ -34,7 +34,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
   if (isLoading) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
           <ProgressLoadingState />
         </SafeAreaView>
       </ScreenBackground>
@@ -44,7 +44,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
   if (error) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
           <ProgressErrorState error={error} onRetry={refresh} />
         </SafeAreaView>
       </ScreenBackground>
@@ -53,7 +53,7 @@ const ProgressScreen: React.FC<ProgressScreenProps> = () => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <ProgressPageShell
         activeTab="achievements"
         header={
@@ -85,3 +85,4 @@ const styles = StyleSheet.create({
 });
 
 export default ProgressScreen;
+

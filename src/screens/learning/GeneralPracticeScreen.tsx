@@ -39,7 +39,7 @@ export default function GeneralPracticeScreen() {
     startSession,
     endSession,
     updateAgentState,
-  } = useRoleplaySession();
+  } = useRoleplaySession({ isGeneralPractice: true });
 
   const { stateColor, sessionLabel } = useRoleplayDerivedState({
     sessionState,
@@ -74,7 +74,7 @@ export default function GeneralPracticeScreen() {
 
   return (
     <AppBackground>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['left', 'right']}>
         <PracticeVisualizerLayout>
           <View style={styles.container}>
             <GeneralPracticeContent
@@ -102,3 +102,4 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+

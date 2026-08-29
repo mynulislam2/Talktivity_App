@@ -460,7 +460,7 @@ const GroupChatScreen: React.FC<GroupChatScreenProps> = () => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
       <View style={[styles.safeTop, { paddingTop: Math.max(insets.top, 0) }]} />
       <KeyboardAvoidingView
         style={styles.container}
@@ -968,3 +968,4 @@ const styles = StyleSheet.create({
 });
 
 export default GroupChatScreen;
+

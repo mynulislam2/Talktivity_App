@@ -139,7 +139,7 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
         <Header />
       {isLoading ? (
         <TopicsLoadingState />
@@ -210,3 +210,4 @@ const styles = StyleSheet.create({
 });
 
 export default TopicsScreen;
+

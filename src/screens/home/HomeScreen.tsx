@@ -85,7 +85,7 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
       requireSubscription={true}
     >
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
         {isLoading && <HomeLoadingState />}
 
         {!isLoading && error && (
@@ -140,3 +140,4 @@ const styles = StyleSheet.create({
 });
 
 export default HomeScreen;
+

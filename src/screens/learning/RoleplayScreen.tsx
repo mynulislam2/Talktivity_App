@@ -73,7 +73,7 @@ export default function RoleplayScreen() {
 
   return (
     <AppBackground>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['bottom']}>
+      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['left', 'right']}>
         <RoleplayVisualizerLayout>
           <View style={styles.container}>
             <RoleplayContent
@@ -102,3 +102,4 @@ const styles = StyleSheet.create({
     flex: 1,
   },
 });
+

@@ -18,7 +18,7 @@ import { AgentState } from '@livekit/react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { showErrorAlert } from '@/lib/errorHandler';
-import { useLocalParticipant } from '@/hooks/livekit-native';
+import { useLocalParticipant } from '@livekit/react-native';
 
 export interface RoleplayControlBarProps {
   onConnect: () => void;

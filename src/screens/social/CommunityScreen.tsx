@@ -113,7 +113,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = () => {
       <ScreenBackground>
         <View style={styles.root}>
           <View style={styles.bgBase} />
-          <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+          <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
             <CommunityHeader title="Community" />
             <CommunityLoadingState />
           </SafeAreaView>
@@ -127,7 +127,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = () => {
       <ScreenBackground>
         <View style={styles.root}>
           <View style={styles.bgBase} />
-          <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+          <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
             <CommunityHeader title="Community" />
             <CommunityErrorState error={error} onRetry={refresh} />
           </SafeAreaView>
@@ -140,7 +140,7 @@ const CommunityScreen: React.FC<CommunityScreenProps> = () => {
     <ScreenBackground>
       <View style={styles.root}>
       <View style={styles.bgBase} />
-      <SafeAreaView style={styles.safeArea} edges={['bottom']}>
+      <SafeAreaView style={styles.safeArea} edges={['left', 'right']}>
         <CommunityHeader title="Community" />
         <CommunityTabs
           activeTab={activeTab}
@@ -216,3 +216,4 @@ const styles = StyleSheet.create({
 });
 
 export default CommunityScreen;
+

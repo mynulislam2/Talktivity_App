@@ -143,7 +143,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
@@ -477,3 +477,4 @@ const styles = StyleSheet.create({
 });
 
 export default SettingsScreen;
+

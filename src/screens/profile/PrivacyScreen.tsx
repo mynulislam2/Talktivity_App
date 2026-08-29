@@ -22,7 +22,7 @@ const PrivacyScreen: React.FC<PrivacyScreenProps> = ({ navigation }) => {
   const insets = useSafeAreaInsets();
   return (
     <ScreenBackground>
-      <SafeAreaView style={s.container} edges={['bottom']}>
+      <SafeAreaView style={s.container} edges={['left', 'right']}>
         <View style={[s.header, { paddingTop: Math.max(insets.top + 8, 16) }]}>
           <TouchableOpacity
             onPress={() => navigation.goBack()}
@@ -86,3 +86,4 @@ const s = StyleSheet.create({
 });
 
 export default PrivacyScreen;
+

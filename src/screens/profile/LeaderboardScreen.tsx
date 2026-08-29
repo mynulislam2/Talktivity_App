@@ -62,7 +62,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
   if (isLoading) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
           <View style={styles.loadingContainer}>
             <ActivityIndicator
               size="large"
@@ -77,7 +77,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
   if (error) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['bottom']}>
+        <SafeAreaView style={styles.container} edges={['left', 'right']}>
           <ProgressPageShell
             activeTab="leaderboard"
             header={
@@ -99,7 +99,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
       <ProgressPageShell
         activeTab="leaderboard"
         header={
@@ -329,3 +329,4 @@ const styles = StyleSheet.create({
 });
 
 export default LeaderboardScreen;
+

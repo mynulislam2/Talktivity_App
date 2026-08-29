@@ -23,7 +23,7 @@ const TermsScreen: React.FC<TermsScreenProps> = ({ navigation }) => {
 
   return (
     <ScreenBackground>
-      <SafeAreaView style={styles.container} edges={['bottom']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
         <View
           style={[styles.header, { paddingTop: Math.max(insets.top + 8, 16) }]}
         >
@@ -94,3 +94,4 @@ const styles = StyleSheet.create({
 });
 
 export default TermsScreen;
+

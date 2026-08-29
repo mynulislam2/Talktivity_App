@@ -15,7 +15,7 @@ import {
   Alert,
   useWindowDimensions,
 } from 'react-native';
-import { AgentState } from '@livekit/react-native';
+import { AgentState, useLocalParticipant } from '@livekit/react-native';
 import { Ionicons } from '@expo/vector-icons';
 import type { PracticeSessionType } from '@/types/practice';
 
@@ -39,14 +39,22 @@ export function PracticeControlBar({
   const { width } = useWindowDimensions();
   const [isMuted, setIsMuted] = useState(false);
 
+  const { localParticipant } = useLocalParticipant();
+
   /**
-   * Toggle microphone on/off.
-   * NOTE: In React Native, this currently updates local UI state only.
-   * TODO: Wire this to the LiveKit RN room local participant when available.
+   * Toggle microphone on/off on the active LiveKit room local participant
    */
   const toggleMute = useCallback(() => {
-    setIsMuted((prev) => !prev);
-  }, []);
+    setIsMuted((prev) => {
+      const nextMuted = !prev;
+      if (localParticipant) {
+        localParticipant.setMicrophoneEnabled(!nextMuted).catch((err: any) => {
+          console.warn('[PracticeControlBar] Mute toggle error:', err);
+        });
+      }
+      return nextMuted;
+    });
+  }, [localParticipant]);
 
   const [isSpeakerOn, setIsSpeakerOn] = useState(true);
 

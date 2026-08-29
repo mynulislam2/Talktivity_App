@@ -38,6 +38,7 @@ export const API_URLS = {
     ITEMS: '/review/items',
     GREET: '/review/greet',
     FEEDBACK: '/review/feedback',
+    EVALUATE_AUDIO: '/review/evaluate-audio',
   },
   GEO: {
     LOCATION: '/geo/location',

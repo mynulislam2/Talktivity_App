@@ -1104,6 +1104,7 @@ export const ReviewScreen: React.FC = () => {
       ExpoSpeechRecognitionModule.start({
         lang: 'en-US',
         interimResults: true,
+        continuous: true,
       });
     } catch (e) {
       console.error('[ReviewScreen] startListening error:', e);

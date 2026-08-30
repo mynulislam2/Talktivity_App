@@ -72,6 +72,11 @@ export class HttpService {
       api.includes('/ai/generate-report') ||
       api.includes('/report/generate-report') ||
       api.includes('/daily-reports/generate') ||
+      api.includes('/review/items') ||
+      api.includes('/review/greet') ||
+      // Uploads the recorded answer, then waits on a multimodal evaluation and
+      // a TTS synthesis before responding — comfortably past the 15s default.
+      api.includes('/review/evaluate-audio') ||
       api.includes('/reports/call') ||
       api.includes('/reports/daily')
     ) {

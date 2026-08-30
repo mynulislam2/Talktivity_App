@@ -39,6 +39,7 @@ export const API_URLS = {
     GREET: '/review/greet',
     FEEDBACK: '/review/feedback',
     EVALUATE_AUDIO: '/review/evaluate-audio',
+    RECORDING: '/review/recording',
   },
   GEO: {
     LOCATION: '/geo/location',

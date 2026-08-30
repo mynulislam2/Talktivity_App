@@ -30,11 +30,18 @@ import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import { AppBackground } from '../../components/common/AppBackground';
 import GradientButton from '../../components/common/GradientButton';
 import { tokens } from '@/theme/tokens';
+import { MistakePlayback } from '@/components/review/MistakePlayback';
 
-const AudioRecording = (Audio as any).Recording;
-const AudioRecordingOptionsPresets = (Audio as any).RecordingOptionsPresets;
-const requestAudioPermissionsAsync = (Audio as any).requestPermissionsAsync;
-const setAudioModeAsync = (Audio as any).setAudioModeAsync;
+const AudioRecording = Audio.Recording;
+const AudioRecordingOptionsPresets = Audio.RecordingOptionsPresets;
+const requestAudioPermissionsAsync = Audio.requestPermissionsAsync;
+const setAudioModeAsync = Audio.setAudioModeAsync;
+
+// A review answer is one sentence. Cap the recording so a stuck mic can't
+// build a payload the API will reject: the request body limit is 10MB, and
+// base64 inflates by ~33%.
+const MAX_RECORDING_MS = 45000;
+const MAX_AUDIO_BASE64_CHARS = 8 * 1024 * 1024;
 
 const COACH_AVATAR = 'https://i.ibb.co.com/rGMrg0j3/Teacher.png';
 const COACH_IMG = require('../../../assets/figma/coach/alina-intro.png');
@@ -537,6 +544,17 @@ function ReviewCardComponent({
           </View>
           <Text style={rcc.originalText}>{'“'}{item.original}{'”'}</Text>
         </View>
+        {/* Sits with what they said, not the correction — it plays the
+            learner's own voice from the conversation. Renders nothing when the
+            recording or the timings are unavailable. */}
+        <View style={rcc.playbackRow}>
+          <MistakePlayback
+            audioStart={item.audioStart}
+            audioEnd={item.audioEnd}
+            audioRoom={item.audioRoom}
+            disabled={isCoachSpeaking || isListening}
+          />
+        </View>
         <View style={rcc.correctedSection}>
           <View style={rcc.iconGreen}>
             <Ionicons name="checkmark" size={18} color={tokens.color.state.success} />
@@ -644,6 +662,7 @@ function ReviewCardComponent({
 }
 
 const rcc = StyleSheet.create({
+  playbackRow: { paddingHorizontal: 10, paddingBottom: 14, paddingLeft: 50 },
   outer: { paddingHorizontal: 20, paddingTop: 20 },
   coachImageWrap: {
     // Only the bottom corners are rounded — matches web (`rounded-b-[6px]`).
@@ -1005,9 +1024,13 @@ export const ReviewScreen: React.FC = () => {
 
   const [transcript, setTranscript] = useState('');
   const [isRecording, setIsRecording] = useState(false);
-  const recordingRef = useRef<any>(null);
+  const recordingRef = useRef<Audio.Recording | null>(null);
   const [userActivated, setUserActivated] = useState(false);
   const validationGenRef = useRef(0);
+  const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lets the max-duration timer trigger the same stop-and-upload path the user
+  // gets when they tap, without capturing a stale copy of the callback.
+  const tapToSayRef = useRef<() => void>(() => {});
   const pendingGreetRef = useRef<{ text: string; audioBase64: string } | null>(
     null
   );
@@ -1053,6 +1076,10 @@ export const ReviewScreen: React.FC = () => {
     init();
     return () => {
       cancelled = true;
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
       if (recordingRef.current) {
         recordingRef.current.stopAndUnloadAsync().catch(() => {});
         recordingRef.current = null;
@@ -1093,6 +1120,11 @@ export const ReviewScreen: React.FC = () => {
         setIsThinking(true);
         setCoachMessage('Evaluating your speech with Alina...');
 
+        if (maxDurationTimerRef.current) {
+          clearTimeout(maxDurationTimerRef.current);
+          maxDurationTimerRef.current = null;
+        }
+
         const recording = recordingRef.current;
         recordingRef.current = null;
         if (!recording) {
@@ -1110,6 +1142,21 @@ export const ReviewScreen: React.FC = () => {
         const base64Audio = await FileSystem.readAsStringAsync(uri, {
           encoding: FileSystem.EncodingType.Base64,
         });
+
+        if (!base64Audio) {
+          setIsValidating(false);
+          setIsThinking(false);
+          streamMessage("I didn't catch any audio. Tap the mic and try again.");
+          return;
+        }
+        if (base64Audio.length > MAX_AUDIO_BASE64_CHARS) {
+          // Would be rejected by the API's body limit; say so rather than
+          // firing a doomed request and reporting it as a wrong answer.
+          setIsValidating(false);
+          setIsThinking(false);
+          streamMessage('That recording was too long. Tap the mic and say just the sentence.');
+          return;
+        }
 
         const evalResult = await reviewService.evaluateAudio({
           audioBase64: base64Audio,
@@ -1197,6 +1244,10 @@ export const ReviewScreen: React.FC = () => {
         AudioRecordingOptionsPresets?.HIGH_QUALITY
       );
       recordingRef.current = recording;
+      maxDurationTimerRef.current = setTimeout(() => {
+        // Same path as a user tap, so the answer still gets submitted.
+        tapToSayRef.current();
+      }, MAX_RECORDING_MS);
       setIsRecording(true);
       setUserActivated(true);
       setTranscript('');
@@ -1207,6 +1258,11 @@ export const ReviewScreen: React.FC = () => {
       setCoachMessage('Failed to start microphone. Please try again.');
     }
   }, [currentReviewItem, isValidating, isRecording, currentCardIndex, reviewItems.length, streamMessage]);
+
+  // Keep the max-duration timer pointed at the current callback.
+  useEffect(() => {
+    tapToSayRef.current = handleTapToSay;
+  }, [handleTapToSay]);
 
   const handleClearTranscript = useCallback(() => {
     validationGenRef.current += 1;

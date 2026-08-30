@@ -53,6 +53,47 @@ declare module 'expo-av' {
       playThroughEarpieceAndroid?: boolean;
     }): Promise<void>;
     function setIsAudioEnabledAsync(enabled: boolean): Promise<void>;
+
+    // Recording. Previously absent from this shim, so every caller reached it
+    // through `as any` and the whole record-and-upload path went unchecked —
+    // a typo or a misused API would only surface on a real device. Mirrors the
+    // members used against expo-av 16.x.
+    interface RecordingStatus {
+      canRecord: boolean;
+      isRecording: boolean;
+      isDoneRecording: boolean;
+      durationMillis: number;
+    }
+
+    class Recording {
+      static createAsync(
+        options?: RecordingOptions,
+        onRecordingStatusUpdate?: (status: RecordingStatus) => void,
+        progressUpdateIntervalMillis?: number
+      ): Promise<{ recording: Recording; status: RecordingStatus }>;
+      prepareToRecordAsync(options?: RecordingOptions): Promise<RecordingStatus>;
+      startAsync(): Promise<RecordingStatus>;
+      pauseAsync(): Promise<RecordingStatus>;
+      stopAndUnloadAsync(): Promise<RecordingStatus>;
+      getStatusAsync(): Promise<RecordingStatus>;
+      /** null until the recording has been stopped and unloaded. */
+      getURI(): string | null;
+    }
+
+    interface RecordingOptions {
+      isMeteringEnabled?: boolean;
+      android?: Record<string, unknown>;
+      ios?: Record<string, unknown>;
+      web?: Record<string, unknown>;
+    }
+
+    const RecordingOptionsPresets: {
+      HIGH_QUALITY: RecordingOptions;
+      LOW_QUALITY: RecordingOptions;
+    };
+
+    function requestPermissionsAsync(): Promise<{ granted: boolean; status: string }>;
+    function getPermissionsAsync(): Promise<{ granted: boolean; status: string }>;
   }
   export const Video: any;
 }

@@ -82,6 +82,25 @@ class ReviewService {
     }
   }
 
+  /**
+   * Short-lived signed URL for the practice recording a review card points at,
+   * so the learner can hear the moment they made the mistake. Returns null
+   * whenever playback is unavailable — no recording bucket, recording already
+   * expired, or the room isn't theirs — so callers just hide the control.
+   */
+  async recordingUrl(roomName: string): Promise<string | null> {
+    try {
+      const response = await httpService.get(
+        `${API_URLS.REVIEW.RECORDING}?roomName=${encodeURIComponent(roomName)}`
+      );
+      const data = response.data as { available?: boolean; url?: string };
+      return data?.available && data.url ? data.url : null;
+    } catch (err: any) {
+      console.warn('[ReviewService] recordingUrl failed:', err?.message);
+      return null;
+    }
+  }
+
   async evaluateAudio(params: {
     audioBase64: string;
     mimeType?: string;

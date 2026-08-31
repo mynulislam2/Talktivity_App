@@ -107,7 +107,12 @@ describe('native splash configuration', () => {
   });
 
   it('shows the white lockup, not the squares-only mark', () => {
-    expect(splash.image).toBe('./src/assets/images/talktivity-splash-logo.png');
+    // The padded transparent variant. Android 12+ masks the splash icon, so
+    // the lockup ships inside a square canvas with room around it instead of
+    // being cropped into the mask.
+    expect(splash.image).toBe(
+      './src/assets/images/talktivity-splash-logo-transparent-padded.png'
+    );
     expect(splash.dark.image).toBe(splash.image);
   });
 

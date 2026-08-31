@@ -2,6 +2,8 @@
  * Validation utilities for review answer validation (Mobile)
  */
 
+import { doubleMetaphone } from 'double-metaphone';
+
 import type { ReviewItem, ValidationResult } from '@/types/review';
 
 /**
@@ -131,31 +133,103 @@ export function normalizeText(text: string): string {
 /**
  * Fuzzy token match - handles similar words and STT errors
  */
+/**
+ * Levenshtein edit distance between two raw tokens. Kept separate from
+ * `computeLevenshteinSimilarity` (which normalizes whole sentences first) so
+ * `fuzzyTokenMatch` can measure single tokens without re-normalizing them.
+ */
+function levenshteinDistance(str1: string, str2: string): number {
+  const len1 = str1.length;
+  const len2 = str2.length;
+  if (len1 === 0) return len2;
+  if (len2 === 0) return len1;
+
+  const matrix: number[][] = [];
+  for (let i = 0; i <= len1; i++) {
+    matrix[i] = [i];
+  }
+  for (let j = 0; j <= len2; j++) {
+    matrix[0][j] = j;
+  }
+
+  for (let i = 1; i <= len1; i++) {
+    for (let j = 1; j <= len2; j++) {
+      const cost = str1[i - 1] === str2[j - 1] ? 0 : 1;
+      matrix[i][j] = Math.min(
+        matrix[i - 1][j] + 1, // deletion
+        matrix[i][j - 1] + 1, // insertion
+        matrix[i - 1][j - 1] + cost // substitution
+      );
+    }
+  }
+
+  return matrix[len1][len2];
+}
+
+/**
+ * Cheap phonetic equality. Two words match if their Double-Metaphone
+ * primary or secondary codes overlap. Catches accent-driven STT
+ * mishearings ("feeling"/"filling" → both `FLNK`, "v"/"w" swaps,
+ * "th"/"d" swaps). Skips words shorter than 3 chars where Metaphone
+ * produces too many collisions.
+ */
+function phoneticTokenMatch(token1: string, token2: string): boolean {
+  if (token1.length < 3 || token2.length < 3) return false;
+  const [p1, s1] = doubleMetaphone(token1);
+  const [p2, s2] = doubleMetaphone(token2);
+  if (!p1 || !p2) return false;
+  // Compare every pairing — Metaphone returns primary + secondary codes
+  // and a phonetic match against either side counts.
+  return p1 === p2 || p1 === s2 || s1 === p2 || (s1 !== '' && s1 === s2);
+}
+
+/**
+ * Fuzzy token match — accepts the token as a match if any of:
+ *   1. Exact equality.
+ *   2. Length-proportional Levenshtein distance (catches single-vowel
+ *      swaps and short consonant slips).
+ *   3. Substring containment for long tokens (handles plural / suffix
+ *      stripping by the STT, "running" / "run").
+ *   4. Identical phonetic code (handles accent-driven mishearings
+ *      where edit distance is too high but the word sounds the same).
+ *
+ * Kept in step with the web implementation (talktivity_frontend
+ * Utils/validation.ts) — a learner should not be graded more harshly for
+ * having an accent just because they are on a phone.
+ */
 function fuzzyTokenMatch(token1: string, token2: string): boolean {
   if (token1 === token2) return true;
 
-  // Check if tokens are very similar (1-2 character difference)
   const len1 = token1.length;
   const len2 = token2.length;
-  if (Math.abs(len1 - len2) > 2) return false;
-
-  // Simple edit distance check for short tokens
-  if (len1 <= 4 && len2 <= 4) {
-    let diff = 0;
-    const minLen = Math.min(len1, len2);
-    for (let i = 0; i < minLen; i++) {
-      if (token1[i] !== token2[i]) diff++;
-    }
-    diff += Math.abs(len1 - len2);
-    return diff <= 1; // Allow 1 character difference for short words
+  // Reject obvious length mismatches early.
+  if (Math.abs(len1 - len2) > 3) {
+    // Long words can still phonetically match even if lengths drift.
+    return phoneticTokenMatch(token1, token2);
   }
 
-  // For longer tokens, check if one contains the other (handles partial matches)
-  if (len1 >= 5 && len2 >= 5) {
-    if (token1.includes(token2) || token2.includes(token1)) return true;
+  const maxLen = Math.max(len1, len2);
+  // Length-proportional edit-distance budget:
+  //   1-2 chars  → exact only (short words are too ambiguous)
+  //   3-4 chars  → 1 edit
+  //   5+ chars   → 2 edits
+  //   8+ chars   → 2 edits OR substring containment
+  let allowedDistance: number;
+  if (maxLen <= 2) allowedDistance = 0;
+  else if (maxLen <= 4) allowedDistance = 1;
+  else allowedDistance = 2;
+
+  if (allowedDistance > 0 && levenshteinDistance(token1, token2) <= allowedDistance) {
+    return true;
   }
 
-  return false;
+  if (maxLen >= 8 && (token1.includes(token2) || token2.includes(token1))) {
+    return true;
+  }
+
+  // Phonetic fallback last — the most generous lane, but still narrow
+  // enough that genuinely different words don't slip through.
+  return phoneticTokenMatch(token1, token2);
 }
 
 /**
@@ -189,8 +263,9 @@ function computeTokenMatch(userText: string, targetText: string): number {
     }
   }
 
-  // Exact matches count fully, fuzzy matches count as 0.7
-  const totalMatches = exactMatches + fuzzyMatches * 0.7;
+  // Exact matches count fully, fuzzy matches count as 0.85 — same weighting
+  // as web, so the two platforms score an identical answer identically.
+  const totalMatches = exactMatches + fuzzyMatches * 0.85;
   return totalMatches / targetTokens.length;
 }
 
@@ -205,32 +280,8 @@ function computeLevenshteinSimilarity(str1: string, str2: string): number {
   if (s1.length === 0) return 0.0;
   if (s2.length === 0) return 0.0;
 
-  const matrix: number[][] = [];
-  const len1 = s1.length;
-  const len2 = s2.length;
-
-  // Initialize matrix
-  for (let i = 0; i <= len1; i++) {
-    matrix[i] = [i];
-  }
-  for (let j = 0; j <= len2; j++) {
-    matrix[0][j] = j;
-  }
-
-  // Fill matrix
-  for (let i = 1; i <= len1; i++) {
-    for (let j = 1; j <= len2; j++) {
-      const cost = s1[i - 1] === s2[j - 1] ? 0 : 1;
-      matrix[i][j] = Math.min(
-        matrix[i - 1][j] + 1, // deletion
-        matrix[i][j - 1] + 1, // insertion
-        matrix[i - 1][j - 1] + cost // substitution
-      );
-    }
-  }
-
-  const distance = matrix[len1][len2];
-  const maxLen = Math.max(len1, len2);
+  const distance = levenshteinDistance(s1, s2);
+  const maxLen = Math.max(s1.length, s2.length);
   return 1 - distance / maxLen;
 }
 

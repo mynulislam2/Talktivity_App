@@ -37,6 +37,13 @@ export function DevicePermissionsModal({ visible, onClose, onGranted }: DevicePe
           <Text style={styles.message}>
             Allow microphone access and turn up your volume to hear Aleena clearly.
           </Text>
+          {/* Recordings are kept for the rest of the day so the review can
+              replay the moment of each mistake, then deleted. Users are told
+              plainly rather than discovering it. */}
+          <Text style={styles.privacyNote}>
+            Your practice session is recorded so you can hear your own mistakes in
+            today&apos;s review. It is deleted automatically after that.
+          </Text>
           <View style={styles.actions}>
             <TouchableOpacity
               style={styles.cancelBtn}
@@ -99,6 +106,14 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.7)',
     textAlign: 'center',
     lineHeight: 20,
+    marginBottom: 12,
+  },
+  privacyNote: {
+    fontSize: 12,
+    fontFamily: 'Poppins',
+    color: 'rgba(255,255,255,0.5)',
+    textAlign: 'center',
+    lineHeight: 17,
     marginBottom: 24,
   },
   actions: {

@@ -81,6 +81,67 @@ class ReviewService {
       };
     }
   }
+
+  /**
+   * Short-lived signed URL for the practice recording a review card points at,
+   * so the learner can hear the moment they made the mistake. Returns null
+   * whenever playback is unavailable — no recording bucket, recording already
+   * expired, or the room isn't theirs — so callers just hide the control.
+   */
+  async recordingUrl(roomName: string): Promise<string | null> {
+    try {
+      const response = await httpService.get(
+        `${API_URLS.REVIEW.RECORDING}?roomName=${encodeURIComponent(roomName)}`
+      );
+      const data = response.data as { available?: boolean; url?: string };
+      return data?.available && data.url ? data.url : null;
+    } catch (err: any) {
+      console.warn('[ReviewService] recordingUrl failed:', err?.message);
+      return null;
+    }
+  }
+
+  async evaluateAudio(params: {
+    audioBase64: string;
+    mimeType?: string;
+    original: string;
+    corrected: string;
+    explanation?: string;
+    cardIndex: number;
+    totalCards: number;
+  }): Promise<{
+    success: boolean;
+    isValid: boolean;
+    accuracyScore: number;
+    userSpokenText: string;
+    feedbackText: string;
+    audioBase64: string;
+    audioAvailable: boolean;
+  }> {
+    try {
+      const response = await httpService.post(API_URLS.REVIEW.EVALUATE_AUDIO, {
+        audio: params.audioBase64,
+        mimeType: params.mimeType || 'audio/m4a',
+        original: params.original,
+        corrected: params.corrected,
+        explanation: params.explanation || '',
+        cardIndex: params.cardIndex,
+        totalCards: params.totalCards,
+      });
+      return response.data;
+    } catch (err: any) {
+      console.warn('[ReviewService] evaluateAudio failed:', err?.message);
+      return {
+        success: false,
+        isValid: false,
+        accuracyScore: 0,
+        userSpokenText: '',
+        feedbackText: "I couldn't hear clearly. Please try saying it one more time.",
+        audioBase64: '',
+        audioAvailable: false,
+      };
+    }
+  }
 }
 
 export const reviewService = new ReviewService();

@@ -18,27 +18,30 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
+import { Audio } from 'expo-av';
 import * as Speech from 'expo-speech';
 import * as FileSystem from 'expo-file-system';
 import { playCoachAudioFile, stopCoachAudio } from '@/services/CoachAudio';
 import { Ionicons } from '@expo/vector-icons';
 import { reviewService } from '@/services/review';
 import { progressService } from '@/services/progress';
-import type { ReviewItem, ValidationResult } from '@/types/review';
-import { validateAnswer } from '@/utils/validation';
+import type { ReviewItem } from '@/types/review';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import { AppBackground } from '../../components/common/AppBackground';
 import GradientButton from '../../components/common/GradientButton';
 import { tokens } from '@/theme/tokens';
-let ExpoSpeechRecognitionModule: any = null;
-let useSpeechRecognitionEvent: any = () => {};
-try {
-  const speechModule = require('expo-speech-recognition');
-  ExpoSpeechRecognitionModule = speechModule.ExpoSpeechRecognitionModule;
-  useSpeechRecognitionEvent = speechModule.useSpeechRecognitionEvent;
-} catch {
-  console.warn('[ReviewScreen] expo-speech-recognition not available');
-}
+import { MistakePlayback } from '@/components/review/MistakePlayback';
+
+const AudioRecording = Audio.Recording;
+const AudioRecordingOptionsPresets = Audio.RecordingOptionsPresets;
+const requestAudioPermissionsAsync = Audio.requestPermissionsAsync;
+const setAudioModeAsync = Audio.setAudioModeAsync;
+
+// A review answer is one sentence. Cap the recording so a stuck mic can't
+// build a payload the API will reject: the request body limit is 10MB, and
+// base64 inflates by ~33%.
+const MAX_RECORDING_MS = 45000;
+const MAX_AUDIO_BASE64_CHARS = 8 * 1024 * 1024;
 
 const COACH_AVATAR = 'https://i.ibb.co.com/rGMrg0j3/Teacher.png';
 const COACH_IMG = require('../../../assets/figma/coach/alina-intro.png');
@@ -541,6 +544,17 @@ function ReviewCardComponent({
           </View>
           <Text style={rcc.originalText}>{'“'}{item.original}{'”'}</Text>
         </View>
+        {/* Sits with what they said, not the correction — it plays the
+            learner's own voice from the conversation. Renders nothing when the
+            recording or the timings are unavailable. */}
+        <View style={rcc.playbackRow}>
+          <MistakePlayback
+            audioStart={item.audioStart}
+            audioEnd={item.audioEnd}
+            audioRoom={item.audioRoom}
+            disabled={isCoachSpeaking || isListening}
+          />
+        </View>
         <View style={rcc.correctedSection}>
           <View style={rcc.iconGreen}>
             <Ionicons name="checkmark" size={18} color={tokens.color.state.success} />
@@ -648,6 +662,7 @@ function ReviewCardComponent({
 }
 
 const rcc = StyleSheet.create({
+  playbackRow: { paddingHorizontal: 10, paddingBottom: 14, paddingLeft: 50 },
   outer: { paddingHorizontal: 20, paddingTop: 20 },
   coachImageWrap: {
     // Only the bottom corners are rounded — matches web (`rounded-b-[6px]`).
@@ -1008,29 +1023,19 @@ export const ReviewScreen: React.FC = () => {
   const [isCoachSpeaking, setIsCoachSpeaking] = useState(false);
 
   const [transcript, setTranscript] = useState('');
-  const [listening, setListening] = useState(false);
-  const speechSupported = !!ExpoSpeechRecognitionModule;
-
+  const [isRecording, setIsRecording] = useState(false);
+  const recordingRef = useRef<Audio.Recording | null>(null);
   const [userActivated, setUserActivated] = useState(false);
-  const lastValidatedRef = useRef('');
+  const validationGenRef = useRef(0);
+  const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Lets the max-duration timer trigger the same stop-and-upload path the user
+  // gets when they tap, without capturing a stale copy of the callback.
+  const tapToSayRef = useRef<() => void>(() => {});
   const pendingGreetRef = useRef<{ text: string; audioBase64: string } | null>(
     null
   );
 
   const currentReviewItem = reviewItems[currentCardIndex];
-
-  // `useSpeechRecognitionEvent` is always a function — either the real hook
-  // from `expo-speech-recognition` or the no-op fallback declared above —
-  // so these must be called unconditionally (React Hooks cannot be gated
-  // behind a runtime check without corrupting hook order across renders).
-  useSpeechRecognitionEvent('start', () => setListening(true));
-  useSpeechRecognitionEvent('end', () => setListening(false));
-  useSpeechRecognitionEvent('result', (event: any) => {
-    if (event.results && event.results.length > 0) {
-      setTranscript(event.results[0].transcript || '');
-    }
-  });
-  useSpeechRecognitionEvent('error', () => setListening(false));
 
   useEffect(() => {
     let cancelled = false;
@@ -1071,6 +1076,14 @@ export const ReviewScreen: React.FC = () => {
     init();
     return () => {
       cancelled = true;
+      if (maxDurationTimerRef.current) {
+        clearTimeout(maxDurationTimerRef.current);
+        maxDurationTimerRef.current = null;
+      }
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(() => {});
+        recordingRef.current = null;
+      }
     };
   }, []);
 
@@ -1095,104 +1108,98 @@ export const ReviewScreen: React.FC = () => {
     }
   }, [streamMessage]);
 
-  const startListening = useCallback(async () => {
-    if (!ExpoSpeechRecognitionModule) return;
-    setTranscript('');
-    try {
-      const perm = await ExpoSpeechRecognitionModule.requestPermissionsAsync();
-      if (!perm.granted) return;
-      ExpoSpeechRecognitionModule.start({
-        lang: 'en-US',
-        interimResults: true,
-        continuous: true,
-      });
-    } catch (e) {
-      console.error('[ReviewScreen] startListening error:', e);
-    }
-  }, []);
+  const handleTapToSay = useCallback(async () => {
+    if (!currentReviewItem || isValidating) return;
 
-  const stopListening = useCallback(() => {
-    if (!ExpoSpeechRecognitionModule) return;
-    try {
-      ExpoSpeechRecognitionModule.stop();
-    } catch {}
-  }, []);
-
-  const resetTranscript = useCallback(() => setTranscript(''), []);
-
-  const validate = useCallback(
-    (userAnswer: string): ValidationResult => {
-      if (!currentReviewItem)
-        return { isValid: false, similarity: 0, feedback: 'No review item.' };
-      return validateAnswer(userAnswer, currentReviewItem);
-    },
-    [currentReviewItem]
-  );
-
-  const validationGenRef = useRef(0);
-
-  const callCoachFeedback = useCallback(
-    async (result: ValidationResult, cardIndex: number, totalCards: number, generation: number) => {
-      setCoachMessage('');
-      setIsThinking(true);
+    // 1. IF CURRENTLY RECORDING -> STOP RECORDING & SEND TO GEMINI FOR AUDIO EVALUATION
+    if (isRecording) {
+      const currentGen = ++validationGenRef.current;
       try {
-        const res = await reviewService.feedback({
-          userAnswer: result.userAnswer || '',
-          corrected: result.corrected || '',
-          original: result.original || '',
-          isValid: result.isValid,
-          cardIndex,
-          totalCards,
+        setIsRecording(false);
+        setIsValidating(true);
+        setIsThinking(true);
+        setCoachMessage('Evaluating your speech with Alina...');
+
+        if (maxDurationTimerRef.current) {
+          clearTimeout(maxDurationTimerRef.current);
+          maxDurationTimerRef.current = null;
+        }
+
+        const recording = recordingRef.current;
+        recordingRef.current = null;
+        if (!recording) {
+          setIsValidating(false);
+          setIsThinking(false);
+          return;
+        }
+
+        await recording.stopAndUnloadAsync();
+        const uri = recording.getURI();
+        if (!uri) {
+          throw new Error('Failed to retrieve recording URI');
+        }
+
+        const base64Audio = await FileSystem.readAsStringAsync(uri, {
+          encoding: FileSystem.EncodingType.Base64,
         });
-        if (validationGenRef.current !== generation) return null;
-        
-        const text = res.text || result.feedback || '';
+
+        if (!base64Audio) {
+          setIsValidating(false);
+          setIsThinking(false);
+          streamMessage("I didn't catch any audio. Tap the mic and try again.");
+          return;
+        }
+        if (base64Audio.length > MAX_AUDIO_BASE64_CHARS) {
+          // Would be rejected by the API's body limit; say so rather than
+          // firing a doomed request and reporting it as a wrong answer.
+          setIsValidating(false);
+          setIsThinking(false);
+          streamMessage('That recording was too long. Tap the mic and say just the sentence.');
+          return;
+        }
+
+        const evalResult = await reviewService.evaluateAudio({
+          audioBase64: base64Audio,
+          mimeType: 'audio/m4a',
+          original: currentReviewItem.original,
+          corrected: currentReviewItem.corrected,
+          explanation: currentReviewItem.explanation,
+          cardIndex: currentCardIndex,
+          totalCards: reviewItems.length,
+        });
+
+        if (validationGenRef.current !== currentGen) return;
+
+        if (evalResult.userSpokenText) {
+          setTranscript(evalResult.userSpokenText);
+        }
+
         setIsThinking(false);
-        streamMessage(text);
+        const feedback = evalResult.feedbackText || (evalResult.isValid ? "Great job! That's correct." : "Try saying it one more time.");
+        streamMessage(feedback);
         setIsCoachSpeaking(true);
+
         try {
-          await playBase64Audio(res.audioBase64, res.text || text);
+          if (evalResult.audioBase64) {
+            await playBase64Audio(evalResult.audioBase64, feedback);
+          }
         } finally {
-          if (validationGenRef.current === generation) {
+          if (validationGenRef.current === currentGen) {
             setIsCoachSpeaking(false);
           }
         }
-        return text;
-      } catch {
-        if (validationGenRef.current !== generation) return null;
-        
-        const fallback =
-          result.feedback ||
-          'Try again. Focus on matching the corrected version.';
-        setIsThinking(false);
-        streamMessage(fallback);
-        return fallback;
-      }
-    },
-    [streamMessage]
-  );
 
-  const handleValidation = useCallback(
-    async (result: ValidationResult) => {
-      const currentGen = ++validationGenRef.current;
-      try {
-        setIsValidating(true);
-        stopListening();
-        await callCoachFeedback(result, currentCardIndex, reviewItems.length, currentGen);
-        if (validationGenRef.current !== currentGen) return;
-
-        if (result.isValid) {
+        if (evalResult.isValid) {
           if (currentCardIndex < reviewItems.length - 1) {
             setTimeout(() => {
               if (validationGenRef.current !== currentGen) return;
               setCurrentCardIndex((p) => p + 1);
-              resetTranscript();
-              lastValidatedRef.current = '';
+              setTranscript('');
+              setCoachMessage('');
               setUserActivated(false);
               setIsValidating(false);
-            }, 1500);
+            }, 1800);
           } else {
-            resetTranscript();
             setIsValidating(false);
             try {
               await progressService.updateDailyProgress({
@@ -1203,51 +1210,59 @@ export const ReviewScreen: React.FC = () => {
             setTimeout(() => setReviewComplete(true), 2000);
           }
         } else {
-          resetTranscript();
-          lastValidatedRef.current = '';
           setIsValidating(false);
         }
-      } catch {
+      } catch (err: any) {
+        console.error('[ReviewScreen] Audio evaluation error:', err);
         if (validationGenRef.current !== currentGen) return;
-        resetTranscript();
+        setIsThinking(false);
         setIsValidating(false);
+        setIsRecording(false);
+        streamMessage("Couldn't process your audio. Please tap to try again.");
       }
-    },
-    [
-      currentCardIndex,
-      reviewItems.length,
-      stopListening,
-      resetTranscript,
-      callCoachFeedback,
-    ]
-  );
-
-  const handleCheckAnswer = useCallback(() => {
-    if (!transcript.trim() || !currentReviewItem) return;
-    lastValidatedRef.current = transcript;
-    const result = validate(transcript);
-    (result as any).userAnswer = transcript;
-    (result as any).corrected = currentReviewItem.corrected;
-    (result as any).original = currentReviewItem.original;
-    handleValidation(result);
-  }, [transcript, currentReviewItem, validate, handleValidation]);
-
-  const handleTapToSay = useCallback(() => {
-    if (!speechSupported) return;
-    if (!currentReviewItem) return;
-    if (listening) {
-      stopListening();
       return;
     }
-    setUserActivated(true);
-    startListening();
-  }, [
-    speechSupported,
-    currentReviewItem,
-    listening,
-    stopListening,
-    startListening,
-  ]);
+
+    // 2. IF NOT RECORDING -> START RECORDING
+    try {
+      stopCoachAudio();
+      setIsCoachSpeaking(false);
+      const perm = requestAudioPermissionsAsync ? await requestAudioPermissionsAsync() : { granted: true };
+      if (!perm?.granted) {
+        setCoachMessage('Microphone permission is required to record your speech.');
+        return;
+      }
+
+      if (setAudioModeAsync) {
+        await setAudioModeAsync({
+          allowsRecordingIOS: true,
+          playsInSilentModeIOS: true,
+        });
+      }
+
+      const { recording } = await AudioRecording.createAsync(
+        AudioRecordingOptionsPresets?.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+      maxDurationTimerRef.current = setTimeout(() => {
+        // Same path as a user tap, so the answer still gets submitted.
+        tapToSayRef.current();
+      }, MAX_RECORDING_MS);
+      setIsRecording(true);
+      setUserActivated(true);
+      setTranscript('');
+      setCoachMessage('Listening... Tap "Tap to Stop" when you finish speaking.');
+    } catch (e: any) {
+      console.error('[ReviewScreen] start recording error:', e);
+      setIsRecording(false);
+      setCoachMessage('Failed to start microphone. Please try again.');
+    }
+  }, [currentReviewItem, isValidating, isRecording, currentCardIndex, reviewItems.length, streamMessage]);
+
+  // Keep the max-duration timer pointed at the current callback.
+  useEffect(() => {
+    tapToSayRef.current = handleTapToSay;
+  }, [handleTapToSay]);
 
   const handleClearTranscript = useCallback(() => {
     validationGenRef.current += 1;
@@ -1256,16 +1271,19 @@ export const ReviewScreen: React.FC = () => {
     setIsCoachSpeaking(false);
     setCoachMessage('');
     setIsValidating(false);
-    stopListening();
-    resetTranscript();
-    lastValidatedRef.current = '';
-    
-    // Automatically restart listening for "Say Again"
-    setTimeout(() => {
-      setUserActivated(true);
-      startListening();
-    }, 100);
-  }, [stopListening, resetTranscript, startListening]);
+    setIsRecording(false);
+    if (recordingRef.current) {
+      recordingRef.current.stopAndUnloadAsync().catch(() => {});
+      recordingRef.current = null;
+    }
+    setTranscript('');
+  }, []);
+
+  const handleCheckAnswer = useCallback(() => {
+    if (isRecording) {
+      handleTapToSay();
+    }
+  }, [isRecording, handleTapToSay]);
 
   const goBack = useCallback(() => {
     navigation.goBack();
@@ -1444,13 +1462,13 @@ export const ReviewScreen: React.FC = () => {
               onTapToSay={handleTapToSay}
               onClearTranscript={handleClearTranscript}
               onCheckAnswer={handleCheckAnswer}
-              isListening={userActivated && listening}
-              transcript={userActivated ? transcript : ''}
+              isListening={isRecording}
+              transcript={transcript}
               isValidating={isValidating}
               isThinking={isThinking || (!coachMessage && isCoachSpeaking)}
               isCoachSpeaking={isCoachSpeaking}
               coachMessage={
-                userActivated && listening ? 'Listening...' : coachMessage
+                isRecording ? 'Listening... Tap to Stop when done' : coachMessage
               }
             />
           )}

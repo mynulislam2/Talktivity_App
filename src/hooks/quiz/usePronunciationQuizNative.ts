@@ -1,13 +1,34 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { Audio } from 'expo-av';
+import * as FileSystem from 'expo-file-system';
 import type { QuizQuestion } from '@/types/quiz';
 import { quizService } from '@/services/quiz';
+import { reviewService } from '@/services/review';
 import { useQuizEngine } from './useQuizEngine';
+
+const AudioRecording = Audio.Recording;
+const AudioRecordingOptionsPresets = Audio.RecordingOptionsPresets;
+const requestAudioPermissionsAsync = Audio.requestPermissionsAsync;
+
+// A single spoken word. Well under any payload limit, but capped so a stuck
+// mic cannot build a request the API will reject.
+const MAX_RECORDING_MS = 15000;
 
 export function usePronunciationQuizNative() {
   const [loading, setLoading] = useState(true);
   const [loadingMessage, setLoadingMessage] = useState('Initializing...');
   const [quizError, setQuizError] = useState<string>('');
   const [questions, setQuestions] = useState<QuizQuestion[]>([]);
+
+  const [listening, setListening] = useState(false);
+  const [userSpeech, setUserSpeech] = useState('');
+  const [micAvailable, setMicAvailable] = useState(true);
+  const recordingRef = useRef<Audio.Recording | null>(null);
+  const maxDurationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // The server decides whether the word was said correctly; hold that verdict
+  // so `submitAnswer` scores from the actual audio rather than re-guessing
+  // from the transcript.
+  const lastVerdictRef = useRef<boolean>(false);
 
   const engine = useQuizEngine(questions);
 
@@ -45,28 +66,120 @@ export function usePronunciationQuizNative() {
     };
   }, []);
 
+  const targetWord = useCallback(
+    (q: QuizQuestion | undefined) =>
+      String(q?.meta?.targetWord?.text || q?.meta?.target_word?.text || '').trim(),
+    []
+  );
+
+  const startListening = useCallback(async () => {
+    if (listening || !AudioRecording) return;
+    try {
+      const perm = requestAudioPermissionsAsync
+        ? await requestAudioPermissionsAsync()
+        : { granted: true };
+      if (!perm?.granted) {
+        setMicAvailable(false);
+        return;
+      }
+      setMicAvailable(true);
+      setUserSpeech('');
+      lastVerdictRef.current = false;
+
+      const { recording } = await AudioRecording.createAsync(
+        AudioRecordingOptionsPresets?.HIGH_QUALITY
+      );
+      recordingRef.current = recording;
+      setListening(true);
+      maxDurationTimerRef.current = setTimeout(() => {
+        stopListeningRef.current();
+      }, MAX_RECORDING_MS);
+    } catch (e: any) {
+      console.warn('[PronunciationQuiz] start recording failed:', e?.message);
+      setListening(false);
+    }
+  }, [listening]);
+
+  const stopListening = useCallback(async () => {
+    if (maxDurationTimerRef.current) {
+      clearTimeout(maxDurationTimerRef.current);
+      maxDurationTimerRef.current = null;
+    }
+    const recording = recordingRef.current;
+    recordingRef.current = null;
+    setListening(false);
+    if (!recording) return;
+
+    try {
+      await recording.stopAndUnloadAsync();
+      const uri = recording.getURI();
+      if (!uri) return;
+
+      const base64Audio = await FileSystem.readAsStringAsync(uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      if (!base64Audio) return;
+
+      const word = targetWord(engine.currentQuestion);
+      const result = await reviewService.evaluateAudio({
+        audioBase64: base64Audio,
+        mimeType: 'audio/m4a',
+        original: '',
+        corrected: word,
+        explanation: `Pronounce the word "${word}" clearly.`,
+        cardIndex: 0,
+        totalCards: 1,
+      });
+
+      lastVerdictRef.current = Boolean(result.isValid);
+      // Surface what was heard so the Submit button un-gates and the learner
+      // can see the attempt was registered. Fall back to the word itself when
+      // the model returned a verdict but no transcript.
+      setUserSpeech(result.userSpokenText || (result.success ? word : ''));
+    } catch (e: any) {
+      console.warn('[PronunciationQuiz] evaluate failed:', e?.message);
+    }
+  }, [engine.currentQuestion, targetWord]);
+
+  // startListening's timeout needs the latest stopListening without making the
+  // two callbacks circularly dependent.
+  const stopListeningRef = useRef(stopListening);
+  useEffect(() => {
+    stopListeningRef.current = stopListening;
+  }, [stopListening]);
+
+  useEffect(
+    () => () => {
+      if (maxDurationTimerRef.current) clearTimeout(maxDurationTimerRef.current);
+      if (recordingRef.current) {
+        recordingRef.current.stopAndUnloadAsync().catch(() => {});
+        recordingRef.current = null;
+      }
+    },
+    []
+  );
+
   const submitAnswerWithFeedback = useCallback(() => {
     const q = engine.currentQuestion;
     const rawType = String(q?.meta?.type || '').toLowerCase();
 
     if (rawType === 'pronunciation') {
-      const target = String(
-        q?.meta?.targetWord?.text || q?.meta?.target_word?.text || ''
-      )
-        .trim()
-        .toLowerCase()
-        .replace(/[.,!?;:]/g, '');
-      const spoken = ''
-        .trim()
-        .toLowerCase()
-        .replace(/[.,!?;:]/g, '');
-      const ok = target.length > 0 && spoken.length > 0 && spoken === target;
-      engine.submitPronunciation(ok);
+      // Scored from the recorded audio by the server, not by string-matching a
+      // transcript: an STT engine autocorrects to the intended word, so it can
+      // never tell a good attempt from a poor one.
+      engine.submitPronunciation(lastVerdictRef.current);
       return;
     }
 
     engine.submitAnswer();
   }, [engine]);
+
+  // Clear the previous attempt when the question changes, so a stale verdict
+  // can never score the next word.
+  useEffect(() => {
+    setUserSpeech('');
+    lastVerdictRef.current = false;
+  }, [engine.currentIndex]);
 
   const steps = useMemo(
     () => [
@@ -101,12 +214,14 @@ export function usePronunciationQuizNative() {
     loadingMessage,
     quizError,
     steps,
-    browserSupportsSpeechRecognition: false,
-    isMicrophoneAvailable: false,
-    listening: false,
-    userSpeech: '',
-    startListening: () => {},
-    stopListening: () => {},
+    // Native records audio and the server evaluates it, so the capability no
+    // longer depends on a browser speech API being present.
+    browserSupportsSpeechRecognition: Boolean(AudioRecording),
+    isMicrophoneAvailable: micAvailable,
+    listening,
+    userSpeech,
+    startListening,
+    stopListening,
     ...engine,
     submitAnswer: submitAnswerWithFeedback,
   };

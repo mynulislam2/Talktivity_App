@@ -37,12 +37,12 @@ export function DevicePermissionsModal({ visible, onClose, onGranted }: DevicePe
           <Text style={styles.message}>
             Allow microphone access and turn up your volume to hear Aleena clearly.
           </Text>
-          {/* Recordings are kept for a day so the review can replay the moment
-              of each mistake, then deleted. Users are told plainly rather than
-              discovering it. */}
+          {/* Recordings are kept for the rest of the day so the review can
+              replay the moment of each mistake, then deleted. Users are told
+              plainly rather than discovering it. */}
           <Text style={styles.privacyNote}>
-            Your practice session is recorded and kept for 24 hours, so you can hear
-            your own mistakes in the review. It is deleted automatically after that.
+            Your practice session is recorded so you can hear your own mistakes in
+            today&apos;s review. It is deleted automatically after that.
           </Text>
           <View style={styles.actions}>
             <TouchableOpacity

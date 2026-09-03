@@ -82,9 +82,8 @@ export function PracticeContent({
 
   useEffect(() => {
     if (
-      sessionState.isConnecting ||
-      sessionState.agentState !== 'disconnected' ||
-      connectionDetails
+      Boolean(connectionDetails) ||
+      (sessionState.agentState !== 'disconnected' && sessionState.agentState !== 'connecting')
     ) {
       wasActiveRef.current = true;
     } else if (
@@ -142,14 +141,21 @@ export function PracticeContent({
   };
 
   const handleStartSession = async () => {
+    setIsSessionInitiated(true);
     if (Platform.OS === 'android') {
-      const hasPermission = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
-      if (!hasPermission) {
-        setShowPermModal(true);
-        return;
+      try {
+        const hasPermission = await PermissionsAndroid.check(
+          PermissionsAndroid.PERMISSIONS.RECORD_AUDIO
+        );
+        if (!hasPermission) {
+          setIsSessionInitiated(false);
+          setShowPermModal(true);
+          return;
+        }
+      } catch {
+        // Continue if check fails
       }
     }
-    setIsSessionInitiated(true);
     onConnect();
   };
 
@@ -231,6 +237,9 @@ export function PracticeContent({
       >
         <SimpleVoiceAssistant
           onStateChange={(state) => {
+            if (state === 'disconnected' && isSessionInitiated && !connectionDetails) {
+              return;
+            }
             setAgentState(state);
             onStateChange(state);
           }}

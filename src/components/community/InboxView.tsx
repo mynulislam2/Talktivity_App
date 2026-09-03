@@ -201,14 +201,27 @@ export function InboxView({
   return (
     <View style={styles.container}>
       <View style={styles.searchBar}>
-        <Ionicons name="search" size={18} color="rgba(255,255,255,0.58)" />
+        <Ionicons
+          name="search"
+          size={16}
+          color="#C6C6C6"
+          style={styles.searchIcon}
+        />
         <TextInput
           style={styles.searchInput}
           placeholder="Search"
-          placeholderTextColor="rgba(255,255,255,0.46)"
+          placeholderTextColor="#C6C6C6"
           value={searchQuery}
           onChangeText={setSearchQuery}
         />
+        {searchQuery.length > 0 && (
+          <TouchableOpacity
+            onPress={() => setSearchQuery('')}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="close" size={14} color="#C6C6C6" />
+          </TouchableOpacity>
+        )}
       </View>
 
       <View>
@@ -381,22 +394,18 @@ const styles = StyleSheet.create({
   searchBar: {
     flexDirection: 'row',
     alignItems: 'center',
-    height: 56,
-    borderRadius: 10,
+    borderRadius: 6,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',
-    paddingHorizontal: 16,
-    shadowColor: 'rgba(7,10,25,0.18)',
-    shadowOffset: { width: 0, height: 20 },
-    shadowOpacity: 0.18,
-    shadowRadius: 40,
-    elevation: 8,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+  },
+  searchIcon: {
+    marginRight: 8,
   },
   searchInput: {
     flex: 1,
-    marginLeft: 12,
-    height: '100%',
     color: '#fff',
     fontSize: 14,
     fontFamily: 'Poppins',

@@ -10,6 +10,9 @@
       "com.googleusercontent.apps.845075130244-6buns0pih3ihqlusmoeh25s3q0enc2t0"
     ],
     "userInterfaceStyle": "dark",
+    "runtimeVersion": {
+      "policy": "fingerprint"
+    },
     "splash": {
       "image": "./src/assets/images/talktivity-splash-logo.png",
       "resizeMode": "contain",

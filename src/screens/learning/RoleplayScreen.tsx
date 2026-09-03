@@ -29,6 +29,7 @@ export default function RoleplayScreen() {
     canStartSession,
     remainingTime,
     isLoading: statusLoading,
+    refreshStatus,
   } = useRoleplayStatus();
 
   const {
@@ -65,9 +66,13 @@ export default function RoleplayScreen() {
     }
   }, [canStartSession, sessionLabel, startSession, showAlert]);
 
-  const handleDisconnect = useCallback(() => {
-    endSession();
-  }, [endSession]);
+  const handleDisconnect = useCallback(async () => {
+    try {
+      await endSession();
+    } finally {
+      await refreshStatus();
+    }
+  }, [endSession, refreshStatus]);
 
   const topicTitle = topic?.title || 'General Conversation';
 

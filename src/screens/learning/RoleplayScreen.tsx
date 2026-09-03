@@ -28,6 +28,7 @@ export default function RoleplayScreen() {
   const {
     canStartSession,
     remainingTime,
+    remainingTimeSeconds,
     isLoading: statusLoading,
     refreshStatus,
   } = useRoleplayStatus();
@@ -78,7 +79,7 @@ export default function RoleplayScreen() {
 
   return (
     <AppBackground>
-      <SafeAreaView style={{ flex: 1, backgroundColor: 'transparent' }} edges={['left', 'right']}>
+      <SafeAreaView style={styles.container} edges={['left', 'right']}>
         <RoleplayVisualizerLayout>
           <View style={styles.container}>
             <RoleplayContent
@@ -91,6 +92,7 @@ export default function RoleplayScreen() {
               canStartSession={canStartSession}
               timeLoading={statusLoading}
               remainingTime={remainingTime}
+              remainingTimeSeconds={remainingTimeSeconds}
               stateColor={stateColor}
               onDeviceFailure={handleDeviceFailure}
               onBack={() => navigation.goBack()}

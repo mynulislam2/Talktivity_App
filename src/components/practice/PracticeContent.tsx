@@ -47,6 +47,7 @@ export interface PracticeContentProps {
   canStartSession: boolean;
   timeLoading: boolean;
   remainingTime: string;
+  remainingTimeSeconds?: number;
   stateColor?: string;
   onDeviceFailure?: (error?: any) => void;
   onBack?: () => void;
@@ -64,6 +65,7 @@ export function PracticeContent({
   canStartSession,
   timeLoading,
   remainingTime,
+  remainingTimeSeconds,
   stateColor,
   onDeviceFailure,
   onBack,
@@ -79,6 +81,36 @@ export function PracticeContent({
   const [showEndModal, setShowEndModal] = useState(false);
   const [showPermModal, setShowPermModal] = useState(false);
   const wasActiveRef = useRef(false);
+  const sessionStartTimeRef = useRef<number | null>(null);
+
+  // Auto-finish session when the remaining time runs down to 30 seconds or 0
+  useEffect(() => {
+    const isLive =
+      sessionState.agentState === 'connected' ||
+      sessionState.agentState === 'speaking' ||
+      sessionState.agentState === 'listening';
+
+    if (!isLive) {
+      sessionStartTimeRef.current = null;
+      return;
+    }
+
+    if (sessionStartTimeRef.current === null) {
+      sessionStartTimeRef.current = Date.now();
+    }
+
+    if (!remainingTimeSeconds || remainingTimeSeconds <= 0) return;
+
+    const allowedSessionMs = Math.max(5, remainingTimeSeconds - 30) * 1000;
+    const elapsedMs = Date.now() - sessionStartTimeRef.current;
+    const remainingTimerMs = Math.max(500, allowedSessionMs - elapsedMs);
+
+    const timer = setTimeout(() => {
+      onDisconnect();
+    }, remainingTimerMs);
+
+    return () => clearTimeout(timer);
+  }, [sessionState.agentState, remainingTimeSeconds, onDisconnect]);
 
   useEffect(() => {
     if (

@@ -90,17 +90,21 @@ export function useDailyProgress(
     const p = data?.progress;
     if (!p) return getDefaultBooleans();
 
-    const speakingCompleted = Boolean(p.speaking_completed);
+    const speakingRemaining = data?.remaining?.speaking_seconds;
     const speakingDurationSec = Number(p.speaking_duration_seconds || 0);
+    const speakingCompleted =
+      Boolean(p.speaking_completed) ||
+      (typeof speakingRemaining === 'number' && speakingRemaining === 0 && speakingDurationSec > 0);
 
-    // Review unlocks when speaking is done AND user spoke for at least 5 minutes
-    // (same as backend condition REVIEW_UNLOCK_SECONDS = 300).
-    // We derive this frontend-side so the card enables immediately once the
-    // session duration threshold is met, without waiting for the backend's
-    // hasCurrentPracticeConversation() check (which requires a matching
-    // conversations row that may not exist yet or ever).
+    const roleplayRemaining = data?.remaining?.roleplay_seconds;
+    const roleplayDurationSec = Number(p.roleplay_duration_seconds || 0);
+    const roleplayCompleted =
+      Boolean(p.roleplay_completed) ||
+      (typeof roleplayRemaining === 'number' && roleplayRemaining === 0 && roleplayDurationSec > 0);
+
+    // Review unlocks when speaking is done (or duration >= 270s)
     const reviewUnlocked =
-      speakingCompleted && speakingDurationSec >= 300;
+      speakingCompleted || speakingDurationSec >= 270;
 
     return {
       speakingCompleted,
@@ -108,7 +112,7 @@ export function useDailyProgress(
       quizCompleted: Boolean(p.speaking_quiz_completed),
       listeningCompleted: Boolean(p.listening_completed),
       listeningQuizCompleted: Boolean(p.listening_quiz_completed),
-      roleplayCompleted: Boolean(p.roleplay_completed),
+      roleplayCompleted,
     };
   }, [data]);
 

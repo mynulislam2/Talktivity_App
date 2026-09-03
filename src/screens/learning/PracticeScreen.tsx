@@ -105,6 +105,7 @@ export default function PracticeScreen() {
             canStartSession={canStartSession}
             timeLoading={statusLoading}
             remainingTime={remainingTime}
+            remainingTimeSeconds={remainingTimeSeconds}
             stateColor={stateColor}
             onDeviceFailure={handleDeviceFailure}
             onBack={() => navigation.goBack()}

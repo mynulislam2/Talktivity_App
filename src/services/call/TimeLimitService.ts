@@ -68,8 +68,9 @@ class TimeLimitService {
           : 300;
 
       if (sessionType === 'practice') {
-        const remainingSeconds = Math.max(0, speakingRemaining);
-        const canStart = remainingSeconds > 0;
+        const rawRemaining = Math.max(0, speakingRemaining);
+        const canStart = rawRemaining > 30;
+        const remainingSeconds = canStart ? rawRemaining : 0;
         const remainingTimeFormatted =
           remainingSeconds >= 60
             ? `${Math.round(remainingSeconds / 60)}m`
@@ -83,8 +84,9 @@ class TimeLimitService {
       }
 
       if (sessionType === 'roleplay') {
-        const remainingSeconds = Math.max(0, roleplayRemaining);
-        const canStart = remainingSeconds > 0;
+        const rawRemaining = Math.max(0, roleplayRemaining);
+        const canStart = rawRemaining > 30;
+        const remainingSeconds = canStart ? rawRemaining : 0;
         const remainingTimeFormatted =
           remainingSeconds >= 60
             ? `${Math.round(remainingSeconds / 60)}m`
@@ -121,26 +123,13 @@ class TimeLimitService {
   async canStartSession(
     sessionType: 'practice' | 'roleplay' = 'practice'
   ): Promise<boolean> {
-    // Check daily_progress to see if session is already completed
     try {
-      const progressResponse = await progressService.getTodayProgress();
-      if (!progressResponse.success || !progressResponse.data) {
-        return true; // Can't check, assume yes (server will enforce)
-      }
-
-      const progress = progressResponse.data.progress;
-      if (sessionType === 'practice') {
-        return progress?.speaking_completed !== true;
-      }
-      if (sessionType === 'roleplay') {
-        return progress?.roleplay_completed !== true;
-      }
+      const status = await this.getRemainingTime(undefined, sessionType);
+      return status.canStartCall;
     } catch (error) {
-      // Error checking if can start session
+      // Default: allow (server will enforce limits)
+      return true;
     }
-
-    // Default: allow (server will enforce limits)
-    return true;
   }
 }
 

@@ -48,8 +48,11 @@ export function useDailyBudgetMinutes(): DailyBudgetMinutes {
     (typeof planType === 'string' && planType.startsWith('International_')) ||
     planType === 'BD_1Month' ||
     planType === 'BD_3Month';
+  const isQuarterlyOrInternational =
+    planType === 'BD_3Month' ||
+    (typeof planType === 'string' && planType.startsWith('International_'));
   const legacyPracticeSec = isProTier ? 600 : 300;
-  const legacyRoleplaySec = isProTier ? 600 : 300;
+  const legacyRoleplaySec = isQuarterlyOrInternational ? 1200 : isProTier ? 600 : 300;
 
   if (obj && obj.daily_seconds) {
     const ds = obj.daily_seconds;
@@ -68,7 +71,7 @@ export function useDailyBudgetMinutes(): DailyBudgetMinutes {
     return {
       practiceMinutes: Math.floor(practiceSec / 60),
       roleplayMinutes: Math.floor(roleplaySec / 60),
-      isUnlimitedRoleplay: combinedSec != null || roleplaySec >= 5400,
+      isUnlimitedRoleplay: false,
     };
   }
 

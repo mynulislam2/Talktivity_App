@@ -27,6 +27,7 @@ export default function PracticeScreen() {
   const {
     canStartSession,
     remainingTime,
+    remainingTimeSeconds,
     isLoading: statusLoading,
     refreshStatus,
   } = usePracticeStatus('practice');

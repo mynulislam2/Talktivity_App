@@ -15,13 +15,7 @@ function asFeaturesObject(features: any): Record<string, any> | null {
   return features as Record<string, any>;
 }
 
-export function userHasGeneralPractice(features: any): boolean {
-  const obj = asFeaturesObject(features);
-  return !!(obj && obj.general_practice === true);
-}
-
 export interface PlanFeaturesView {
-  hasGeneralPractice: boolean;
   planType: string | null;
   features: any | null;
 }
@@ -31,7 +25,6 @@ export function usePlanFeatures(): PlanFeaturesView {
   const sub = subscriptionStatus?.subscription;
   const features = sub?.features ?? null;
   return {
-    hasGeneralPractice: userHasGeneralPractice(features),
     planType: sub?.plan_type ?? null,
     features,
   };
@@ -75,7 +68,7 @@ export function useDailyBudgetMinutes(): DailyBudgetMinutes {
     return {
       practiceMinutes: Math.floor(practiceSec / 60),
       roleplayMinutes: Math.floor(roleplaySec / 60),
-      isUnlimitedRoleplay: combinedSec != null,
+      isUnlimitedRoleplay: combinedSec != null || roleplaySec >= 5400,
     };
   }
 

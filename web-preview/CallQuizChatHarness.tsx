@@ -28,7 +28,6 @@ import { AppBackground } from '../src/components/common/AppBackground';
 import { ProgressPageShell } from '../src/components/profile/ProgressPageShell';
 import { CEFRProgressCard } from '../src/components/profile/CEFRProgressCard';
 import { PracticeContent } from '../src/components/practice/PracticeContent';
-import { GeneralPracticeContent } from '../src/components/generalpractice/GeneralPracticeContent';
 import { RoleplayContent } from '../src/components/roleplay/RoleplayContent';
 import { QuizShell } from '../src/components/quiz/QuizShell';
 import { ProgressHeader } from '../src/components/quiz/ProgressHeader';
@@ -159,22 +158,6 @@ export default function CallQuizChatHarness() {
                     canStartSession
                     timeLoading={false}
                     remainingTime="10:00"
-                    onBack={() => {}}
-                  />
-                </View>
-              </Section>
-
-              <Section title="general-practice">
-                <View style={styles.screenHost}>
-                  <GeneralPracticeContent
-                    topicTitle={LONG_TOPIC}
-                    sessionState={IDLE_SESSION}
-                    connectionDetails={null}
-                    onConnect={() => {}}
-                    onDisconnect={() => {}}
-                    onStateChange={() => {}}
-                    canStartSession
-                    timeLoading={false}
                     onBack={() => {}}
                   />
                 </View>

@@ -6,8 +6,7 @@ import {
   StyleSheet,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation, useFocusEffect } from '@react-navigation/native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useFocusEffect } from '@react-navigation/native';
 import { useAppSelector } from '@/store/hooks';
 import { useHomeData } from '@/hooks/home/useHomeData';
 import { useHomeViewMode } from '@/hooks/home/useHomeViewMode';
@@ -27,16 +26,9 @@ import { RouteGuard } from '@/components/navigation/RouteGuard';
 import type { HomeScreenProps } from '@/navigation/types';
 
 const HomeScreen: React.FC<HomeScreenProps> = () => {
-  const navigation = useNavigation<any>();
   const { courseStatus, isLoading, error, retry } = useHomeData();
   const { viewMode, setViewMode } = useHomeViewMode();
   const { booleans, refresh: refreshDailyProgress } = useDailyProgress(courseStatus);
-  const subscriptionState = useAppSelector((state) => state.subscription);
-  const planType =
-    subscriptionState?.currentSubscription?.subscription?.plan_type;
-  const hasGeneralPractice =
-    planType === 'BD_3Month' ||
-    (typeof planType === 'string' && planType.startsWith('International_'));
 
   const {
     remainingTime,
@@ -49,15 +41,6 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
   const practiceMinutes = String(budgetMinutes || 10);
   const remainingTimeDisplay = remainingTime || '5m';
   const hasSpeakingTimeLeft = canStartSession !== false;
-
-  const handleStartGeneralPractice = useCallback(() => {
-    if (!hasGeneralPractice) return;
-    AsyncStorage.setItem(
-      'selectedTopic',
-      JSON.stringify({ title: 'General Practice', id: 'general' })
-    );
-    navigation.navigate('GeneralPracticeScreen');
-  }, [hasGeneralPractice, navigation]);
 
   const handleBack = useCallback(() => {
     setViewMode('dashboard');
@@ -100,7 +83,6 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
                 <HomeDashboardScreen
                   practiceMinutes={practiceMinutes}
                   onOpenTodayPlan={() => setViewMode('today')}
-                  onStartGeneralPractice={handleStartGeneralPractice}
                 />
               </>
             )}

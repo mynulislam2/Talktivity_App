@@ -12,7 +12,6 @@ import { createNativeStackNavigator } from '@react-navigation/native-stack';
 
 import HomeScreen from '../screens/home/HomeScreen';
 import HomePracticeScreen from '../screens/home/HomePracticeScreen';
-import GeneralPracticeScreen from '../screens/learning/GeneralPracticeScreen';
 import QuizScreen from '../screens/learning/QuizScreen';
 import { ReviewScreen } from '../screens/review/ReviewScreen';
 import ListeningScreen from '../screens/learning/ListeningScreen';
@@ -34,7 +33,6 @@ const HomeNavigator: React.FC = () => {
     >
       <Stack.Screen name="HomeScreen" component={HomeScreen as any} />
       <Stack.Screen name="PracticeScreen" component={HomePracticeScreen} />
-      <Stack.Screen name="GeneralPracticeScreen" component={GeneralPracticeScreen} />
       <Stack.Screen
         name="QuizScreen"
         component={QuizScreen}

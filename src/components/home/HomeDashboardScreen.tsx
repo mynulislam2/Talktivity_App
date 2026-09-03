@@ -2,9 +2,7 @@ import React, { useMemo } from 'react';
 import {
   View,
   Text,
-  TouchableOpacity,
   StyleSheet,
-  Image,
   ScrollView,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -19,7 +17,6 @@ import { useAppSelector } from '@/store/hooks';
 interface HomeDashboardScreenProps {
   practiceMinutes: string;
   onOpenTodayPlan: () => void;
-  onStartGeneralPractice?: () => void;
 }
 
 function getWeekdayItems() {
@@ -40,7 +37,6 @@ function getWeekdayItems() {
 export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   practiceMinutes,
   onOpenTodayPlan,
-  onStartGeneralPractice,
 }) => {
   const weekdayItems = useMemo(() => getWeekdayItems(), []);
   const { narrow, s } = useResponsive();
@@ -50,12 +46,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const dayCircle = s(26);
   const subscriptionState = useAppSelector((state) => state.subscription);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
-  const planType =
-    subscriptionState?.currentSubscription?.subscription?.plan_type;
-  const hasGeneralPractice =
-    !isExpired &&
-    (planType === 'BD_3Month' ||
-    (typeof planType === 'string' && planType.startsWith('International_')));
 
   return (
     <ScrollView
@@ -133,59 +123,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
           pointerEvents="none"
         />
       </LinearGradient>
-
-      <View style={styles.coachSection}>
-        <Text style={styles.coachSectionTitle}>Pick your Coach</Text>
-        <Text style={styles.coachSectionDesc}>What are we learning today</Text>
-
-        <View style={styles.coachCard}>
-          <View style={styles.coachCardContent}>
-            <View style={styles.coachCardHeader}>
-              <Text style={styles.coachCardTitle}>General Practice</Text>
-              {!hasGeneralPractice && (
-                <View style={styles.lockChip}>
-                  <Feather
-                    name="lock"
-                    size={14}
-                    color="rgba(255,255,255,0.7)"
-                  />
-                </View>
-              )}
-            </View>
-            <Text style={styles.coachCardDesc}>
-              Talk about anything — your coach adapts as you go
-            </Text>
-            <TouchableOpacity
-              style={[
-                styles.coachCardButton,
-                !hasGeneralPractice && styles.coachCardButtonLocked,
-              ]}
-              onPress={onStartGeneralPractice}
-              activeOpacity={0.85}
-            >
-              <Text
-                style={[
-                  styles.coachCardButtonText,
-                  !hasGeneralPractice && styles.coachCardButtonTextLocked,
-                ]}
-              >
-                {hasGeneralPractice ? 'Practice Now' : 'Unlock'}
-              </Text>
-              <Feather
-                name="arrow-right"
-                size={14}
-                color={hasGeneralPractice ? '#fff' : 'rgba(255,255,255,0.8)'}
-              />
-            </TouchableOpacity>
-          </View>
-          <Image
-            source={require('../../../assets/figma/home/coach-vocabulary.png')}
-            style={[styles.coachImage, { width: s(114), height: s(92) }]}
-            resizeMode="contain"
-          />
-        </View>
-      </View>
-
     </ScrollView>
   );
 };

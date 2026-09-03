@@ -9,7 +9,7 @@
  * These modules cannot run under react-native-web: they require native
  * views (`requireNativeComponent`) or platform APIs that do not exist in a
  * browser. Screens that genuinely depend on them (Practice, Roleplay,
- * GeneralPractice, and Review's speech recognition) will render their
+ * and Review's speech recognition) will render their
  * layout but will not function — which is fine, because this harness exists
  * to check colour, typography, spacing and layout, not behaviour.
  */

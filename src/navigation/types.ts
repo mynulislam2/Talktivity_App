@@ -21,7 +21,6 @@ export type AuthStackParamList = {
 export type HomeStackParamList = {
   HomeScreen: undefined;
   PracticeScreen: { topicId?: string; topicName?: string } | undefined;
-  GeneralPracticeScreen: undefined;
   QuizScreen: { topicId?: string; topicName?: string } | undefined;
   ReviewScreen: undefined;
   ListeningScreen: { roomName?: string } | undefined;

@@ -17,7 +17,7 @@ export interface UseRoleplaySessionReturn {
 }
 
 export interface UseRoleplaySessionOptions {
-  isGeneralPractice?: boolean;
+  // Reserved for future options
 }
 
 export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRoleplaySessionReturn {
@@ -44,7 +44,6 @@ export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRole
   };
 
   const loadTopic = useCallback(async () => {
-    if (options?.isGeneralPractice) return;
     try {
       const topicData = await AsyncStorage.getItem('selectedRoleplayTopic');
       if (topicData) {
@@ -57,7 +56,7 @@ export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRole
         } catch {}
       }
     } catch {}
-  }, [options?.isGeneralPractice]);
+  }, []);
 
   const endSession = useCallback(async () => {
     isStartingRef.current = false;
@@ -71,6 +70,11 @@ export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRole
     if (isStartingRef.current) return;
     isStartingRef.current = true;
 
+    if (isMountedRef.current) {
+      setConnectionDetails(null);
+      setAgentState('connecting');
+    }
+
     const user = await authService.getUser();
     if (!user?.id) {
       isStartingRef.current = false;
@@ -79,18 +83,16 @@ export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRole
 
     try {
       let currentTopic = topic;
-      if (!options?.isGeneralPractice) {
-        if (!topic) {
-          await loadTopic();
-        }
+      if (!topic) {
+        await loadTopic();
+      }
 
-        const rawTopic = await AsyncStorage.getItem('selectedRoleplayTopic');
-        const parsedTopic = rawTopic ? JSON.parse(rawTopic) : null;
-        currentTopic = topic || parsedTopic;
+      const rawTopic = await AsyncStorage.getItem('selectedRoleplayTopic');
+      const parsedTopic = rawTopic ? JSON.parse(rawTopic) : null;
+      currentTopic = topic || parsedTopic;
 
-        if (!currentTopic?.title) {
-          throw new Error('Please select a roleplay topic and try again.');
-        }
+      if (!currentTopic?.title) {
+        throw new Error('Please select a roleplay topic and try again.');
       }
 
       if (isMountedRef.current) {
@@ -100,7 +102,7 @@ export function useRoleplaySession(options?: UseRoleplaySessionOptions): UseRole
 
       const details = await connectionDetailsService.getConnectionDetails({
         userId: typeof user.id === 'string' ? parseInt(user.id, 10) : user.id,
-        sessionType: options?.isGeneralPractice ? 'practice' : 'roleplay',
+        sessionType: 'roleplay',
         topic: currentTopic,
       });
 

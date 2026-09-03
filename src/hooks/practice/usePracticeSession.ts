@@ -104,6 +104,11 @@ export function usePracticeSession(
     if (isStartingRef.current) return;
     isStartingRef.current = true;
 
+    if (isMountedRef.current) {
+      setConnectionDetails(null);
+      setAgentState('connecting');
+    }
+
     const user = await authService.getUser();
     if (!user?.id) {
       isStartingRef.current = false;

@@ -69,12 +69,34 @@ export function PracticeContent({
   onBack,
 }: PracticeContentProps) {
   const { width, height: windowHeight } = useWindowDimensions();
+  const [isSessionInitiated, setIsSessionInitiated] = useState(false);
   const hasLiveConversation =
-    sessionState.agentState !== 'disconnected' || Boolean(connectionDetails);
+    isSessionInitiated ||
+    sessionState.agentState !== 'disconnected' ||
+    Boolean(connectionDetails);
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
   const [showEndModal, setShowEndModal] = useState(false);
   const [showPermModal, setShowPermModal] = useState(false);
+  const wasActiveRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      sessionState.isConnecting ||
+      sessionState.agentState !== 'disconnected' ||
+      connectionDetails
+    ) {
+      wasActiveRef.current = true;
+    } else if (
+      wasActiveRef.current &&
+      sessionState.agentState === 'disconnected' &&
+      !sessionState.isConnecting &&
+      !connectionDetails
+    ) {
+      setIsSessionInitiated(false);
+      wasActiveRef.current = false;
+    }
+  }, [sessionState.agentState, sessionState.isConnecting, connectionDetails]);
 
   // Configure AudioSession for loudspeaker output during LiveKit session
   useLoudspeakerAudioSession(hasLiveConversation);
@@ -86,6 +108,7 @@ export function PracticeContent({
     if (hasLiveConversation) {
       setShowEndModal(true);
     } else {
+      setIsSessionInitiated(false);
       onBack?.();
     }
   }, [hasLiveConversation, onBack]);
@@ -126,6 +149,7 @@ export function PracticeContent({
         return;
       }
     }
+    setIsSessionInitiated(true);
     onConnect();
   };
 
@@ -134,7 +158,9 @@ export function PracticeContent({
     : !canStartSession
     ? 'Practice Limit Reached'
     : 'Start Conversation';
-  const livePrompt = `Let's practice ${topicTitle}. Tell me what you think about this topic and I'll guide the conversation.`;
+  const livePrompt = topicTitle
+    ? `Hi! So today we're going to practice ${topicTitle.replace(/[.?! ]+$/, '')}. Does that sound good?`
+    : "Hi! So today we're going to practice English. Does that sound good?";
   const heroHeight = hasLiveConversation
     ? Math.min(258, Math.max(188, windowHeight * 0.29))
     : Math.min(292, Math.max(216, windowHeight * 0.34));
@@ -237,7 +263,11 @@ export function PracticeContent({
           <PracticeControlBar
             onConnect={handleStartSession}
             onDisconnect={requestEndSession}
-            agentState={sessionState.agentState}
+            agentState={
+              isSessionInitiated && sessionState.agentState === 'disconnected'
+                ? 'connecting'
+                : sessionState.agentState
+            }
             canStartSession={canStartSession}
             timeLoading={timeLoading}
             sessionType="practice"

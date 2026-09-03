@@ -62,12 +62,34 @@ export function RoleplayContent({
   onBack,
 }: RoleplayContentProps) {
   const { height: windowHeight } = useWindowDimensions();
+  const [isSessionInitiated, setIsSessionInitiated] = useState(false);
   const hasLiveConversation =
-    sessionState.agentState !== 'disconnected' || Boolean(connectionDetails);
+    isSessionInitiated ||
+    sessionState.agentState !== 'disconnected' ||
+    Boolean(connectionDetails);
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [transcripts, setTranscripts] = useState<TranscriptMessage[]>([]);
   const [showEndModal, setShowEndModal] = useState(false);
   const [showPermModal, setShowPermModal] = useState(false);
+  const wasActiveRef = useRef(false);
+
+  useEffect(() => {
+    if (
+      sessionState.isConnecting ||
+      sessionState.agentState !== 'disconnected' ||
+      connectionDetails
+    ) {
+      wasActiveRef.current = true;
+    } else if (
+      wasActiveRef.current &&
+      sessionState.agentState === 'disconnected' &&
+      !sessionState.isConnecting &&
+      !connectionDetails
+    ) {
+      setIsSessionInitiated(false);
+      wasActiveRef.current = false;
+    }
+  }, [sessionState.agentState, sessionState.isConnecting, connectionDetails]);
 
   // Configure AudioSession for loudspeaker output during LiveKit roleplay
   useLoudspeakerAudioSession(hasLiveConversation);
@@ -79,6 +101,7 @@ export function RoleplayContent({
     if (hasLiveConversation) {
       setShowEndModal(true);
     } else {
+      setIsSessionInitiated(false);
       onBack?.();
     }
   }, [hasLiveConversation, onBack]);
@@ -86,7 +109,9 @@ export function RoleplayContent({
   // Intercept Android hardware back button mid-roleplay
   useBackHandlerConfirmation(hasLiveConversation, requestEndSession);
 
-  const livePrompt = `Let's roleplay ${topicTitle}. Stay in character, respond naturally, and I will guide the scenario with you.`;
+  const livePrompt = topicTitle
+    ? `Hi! So today we're going to practice ${topicTitle.replace(/[.?! ]+$/, '')}. Does that sound good?`
+    : "Hi! So today we're going to practice English. Does that sound good?";
   const startButtonLabel = timeLoading
     ? 'Checking...'
     : !canStartSession
@@ -112,6 +137,7 @@ export function RoleplayContent({
         return;
       }
     }
+    setIsSessionInitiated(true);
     onConnect();
   };
 
@@ -226,7 +252,11 @@ export function RoleplayContent({
           <RoleplayControlBar
             onConnect={handleStartSession}
             onDisconnect={requestEndSession}
-            agentState={sessionState.agentState}
+            agentState={
+              isSessionInitiated && sessionState.agentState === 'disconnected'
+                ? 'connecting'
+                : sessionState.agentState
+            }
             canStartSession={canStartSession}
             timeLoading={timeLoading}
             enableMicControl={true}

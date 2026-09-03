@@ -170,9 +170,9 @@ const styles = StyleSheet.create({
     height: 20,
   },
   searchToggle: {
-    width: 40,
-    height: 40,
-    borderRadius: 6,
+    width: 38,
+    height: 38,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',
@@ -182,12 +182,12 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    borderRadius: 6,
+    height: 38,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
     backgroundColor: 'rgba(255,255,255,0.08)',
     paddingHorizontal: 12,
-    paddingVertical: 12,
   },
   searchIcon: {
     marginRight: 8,
@@ -195,7 +195,9 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     color: '#fff',
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Poppins',
+    paddingVertical: 0,
+    height: '100%',
   },
 });

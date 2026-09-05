@@ -22,6 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { ProfileData } from '@/types/profile';
 import type { ProficiencyResult } from '@/types/proficiency';
+import { scoreToIeltsBand, startingLevelToIeltsBand } from '@/lib/report/cefrProficiency';
 import { tokens } from '@/theme/tokens';
 import { ProfileCameraBadgeIcon, UpgradeMagicIcon } from './ProfileVisualIcons';
 
@@ -79,14 +80,19 @@ export function ProfileCard({
   // render the button visibly disabled rather than let it look tappable
   // and silently do nothing.
   const upgradeDisabled = isProActive || !onUpgradePress;
-  const selfRatedLevel = getStartingLevelCefr(profile?.startingLevel);
-  const ratingLine = selfRatedLevel
-    ? `CEFR ${selfRatedLevel} Self Rated`
-    : proficiency &&
-      proficiency.confidence !== 'none' &&
-      proficiency.overallLevel !== 'Not yet assessed'
-    ? `CEFR ${proficiency.overallLevel} AI Rated`
-    : 'CEFR Not Yet Assessed';
+  const selfRatedBand = startingLevelToIeltsBand(profile?.startingLevel);
+  const assessedBand =
+    proficiency &&
+    proficiency.confidence !== 'none' &&
+    proficiency.overallLevel !== 'Not yet assessed'
+      ? (proficiency.ieltsBand || scoreToIeltsBand(proficiency.overallScore))
+      : null;
+
+  const ratingLine = assessedBand
+    ? `IELTS Band ${assessedBand} AI Rated`
+    : selfRatedBand
+    ? `IELTS Band ${selfRatedBand} Self Rated`
+    : 'IELTS Not Yet Assessed';
 
   return (
     <View style={styles.card}>

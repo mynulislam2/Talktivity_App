@@ -56,7 +56,7 @@ export function ProfileActivityCard({
   const lessonsLabel = String(completedDays);
   const note =
     totalPracticeTime > 0
-      ? 'You are building momentum. Keep practicing to sharpen your live CEFR profile.'
+      ? 'You are building momentum. Keep practicing to sharpen your live IELTS speaking profile.'
       : "You haven't practiced in the last few days. Start practicing now to check your progress.";
 
   return (

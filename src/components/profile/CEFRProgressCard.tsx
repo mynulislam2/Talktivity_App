@@ -1,7 +1,7 @@
 /**
- * CEFRProgressCard Component (React Native)
+ * IELTSProgressCard / CEFRProgressCard Component (React Native)
  *
- * CEFR proficiency level progress card with level bar — matches frontend.
+ * IELTS Speaking Proficiency card with milestone band bar and IELTS criteria radar.
  */
 
 import React from 'react';
@@ -10,14 +10,19 @@ import { LinearGradient } from 'expo-linear-gradient';
 import Svg, { Polygon, Circle, Line } from 'react-native-svg';
 import { useNavigation } from '@react-navigation/native';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import {
+  IELTS_MILESTONES,
+  scoreToIeltsBand,
+  getIeltsDescriptor,
+  getIeltsBarFillPercentage,
+  startingLevelToIeltsBand,
+} from '@/lib/report/cefrProficiency';
 import type { ProficiencyResult } from '@/types/proficiency';
 
 interface CEFRProgressCardProps {
   proficiency: ProficiencyResult | null;
   startingLevel?: string | null;
 }
-
-const CEFR_LEVELS = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
 const RADAR_CENTER = { x: 162, y: 116 };
 const RADAR_RADIUS = 58;
 const GRID_SCALES = [1, 0.75, 0.5, 0.25];
@@ -64,58 +69,84 @@ function scalePolygon(scale: number, count = 5) {
 }
 
 const CONFIDENCE_NOTES: Record<string, string> = {
-  none: 'Finish a few sessions to unlock your CEFR assessment.',
-  preliminary:
-    "Keep it up! You've unlocked some scores. A few more sessions will make them more reliable.",
-  developing:
-    "Keep it up! You've unlocked some scores. Keep learning to unlock the rest.",
-  established:
-    "Keep it up! You've unlocked some scores. Keep learning to unlock the rest.",
+  none: 'Complete a few sessions to assess your band.',
+  preliminary: 'Complete a few more sessions to refine your band.',
+  developing: 'Keep practicing to improve your band.',
+  established: 'Keep speaking daily to reach your target band.',
 };
 
 function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
+  const overallBand =
+    proficiency.ieltsBand || scoreToIeltsBand(proficiency.overallScore);
+  const vocabBand =
+    proficiency.skills.vocabulary.ieltsBand ||
+    scoreToIeltsBand(proficiency.skills.vocabulary.score);
+  const grammarBand =
+    proficiency.skills.grammar.ieltsBand ||
+    scoreToIeltsBand(proficiency.skills.grammar.score);
+  const fluencyBand =
+    proficiency.skills.fluency.ieltsBand ||
+    scoreToIeltsBand(proficiency.skills.fluency.score);
+  const discourseBand =
+    proficiency.skills.discourse.ieltsBand ||
+    scoreToIeltsBand(proficiency.skills.discourse.score);
+
   const radarAxes = [
     {
       key: 'overall',
       score: proficiency.overallScore,
-      label: 'Overall',
+      band: overallBand,
+      label: 'Overall Band',
       left: '50%',
+      marginLeft: -55,
+      width: 110,
       top: 0,
       textAlign: 'center' as const,
+      alignItems: 'center' as const,
     },
     {
       key: 'vocabulary',
       score: proficiency.skills.vocabulary.score,
-      label: 'Vocabulary',
-      left: 'auto',
-      right: 0,
+      band: vocabBand,
+      label: 'Lexical Resource',
+      left: 250,
+      width: 75,
       top: 76,
       textAlign: 'left' as const,
+      alignItems: 'flex-start' as const,
     },
     {
       key: 'grammar',
       score: proficiency.skills.grammar.score,
+      band: grammarBand,
       label: 'Grammar',
-      left: 'auto',
-      right: 17,
+      left: 244,
+      width: 75,
       top: 147,
       textAlign: 'left' as const,
+      alignItems: 'flex-start' as const,
     },
     {
       key: 'fluency',
       score: proficiency.skills.fluency.score,
+      band: fluencyBand,
       label: 'Fluency',
-      left: 14,
+      left: 22,
+      width: 85,
       top: 147,
-      textAlign: 'right' as const,
+      textAlign: 'left' as const,
+      alignItems: 'flex-start' as const,
     },
     {
       key: 'discourse',
       score: proficiency.skills.discourse.score,
+      band: discourseBand,
       label: 'Discourse',
-      left: 0,
+      left: 12,
+      width: 85,
       top: 76,
-      textAlign: 'right' as const,
+      textAlign: 'left' as const,
+      alignItems: 'flex-start' as const,
     },
   ];
 
@@ -197,11 +228,18 @@ function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
               left: (axis as any).left,
               right: (axis as any).right,
               top: axis.top,
+              width: axis.width,
+              marginLeft: (axis as any).marginLeft,
+              alignItems: axis.alignItems,
             },
           ]}
         >
-          <Text style={styles.radarScore}>{axis.score}%</Text>
-          <Text style={styles.radarLabelText}>{axis.label}</Text>
+          <Text style={[styles.radarScore, { textAlign: axis.textAlign }]}>
+            {axis.band}
+          </Text>
+          <Text style={[styles.radarLabelText, { textAlign: axis.textAlign }]}>
+            {axis.label}
+          </Text>
         </View>
       ))}
     </View>
@@ -209,30 +247,34 @@ function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
 }
 
 function formatStartingLevel(level?: string | null) {
-  switch (level) {
-    case 'beginner':
-      return 'Beginner';
-    case 'intermediate':
-      return 'Intermediate';
-    case 'upper':
-      return 'Upper-Intermediate';
-    case 'advanced':
-      return 'Advanced';
-    default:
-      return level || null;
+  const band = startingLevelToIeltsBand(level);
+  if (band) {
+    switch (level?.toLowerCase()) {
+      case 'beginner':
+      case 'a1':
+        return `Band ${band} (Beginner)`;
+      case 'elementary':
+      case 'a2':
+        return `Band ${band} (Elementary)`;
+      case 'intermediate':
+      case 'b1':
+        return `Band ${band} (Intermediate)`;
+      case 'upper':
+      case 'upper-intermediate':
+      case 'upper_intermediate':
+      case 'b2':
+        return `Band ${band} (Upper-Intermediate)`;
+      case 'advanced':
+      case 'c1':
+        return `Band ${band} (Advanced)`;
+      case 'proficiency':
+      case 'c2':
+        return `Band ${band} (Proficient)`;
+      default:
+        return `Band ${band}`;
+    }
   }
-}
-
-function getLevelFillPercentage(level: string) {
-  const index = CEFR_LEVELS.indexOf(level);
-  if (index < 0) return 0;
-  return ((index + 1) / CEFR_LEVELS.length) * 100;
-}
-
-function getCefrCategory(level: string) {
-  if (level === 'A1' || level === 'A2') return 'Basic';
-  if (level === 'B1' || level === 'B2') return 'Independent';
-  return 'Proficient';
+  return level || null;
 }
 
 export function CEFRProgressCard({
@@ -249,13 +291,11 @@ export function CEFRProgressCard({
   ) {
     return (
       <View style={styles.card}>
-        <Text style={styles.title}>Your Proficiency</Text>
+        <Text style={styles.title}>IELTS Speaking Proficiency</Text>
         <Text style={styles.description}>{CONFIDENCE_NOTES.none}</Text>
         {formattedStartingLevel && (
           <Text style={styles.startedAt}>
-            Started at:{' '}
-            <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>{' '}
-            <Text style={styles.selfReported}>(self-reported)</Text>
+            Started at: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
           </Text>
         )}
         <FigmaPrimaryButton
@@ -264,38 +304,43 @@ export function CEFRProgressCard({
           }
           style={{ width: '100%', marginTop: 16 }}
         >
-          <Text style={{ color: '#fff', fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
-            Go to Lessons
+          <Text
+            style={{
+              color: '#fff',
+              fontSize: 14,
+              fontWeight: '500',
+              fontFamily: 'Poppins-Medium',
+            }}
+          >
+            Practice IELTS Speaking
           </Text>
         </FigmaPrimaryButton>
       </View>
     );
   }
 
-  const fillPercentage = getLevelFillPercentage(proficiency.overallLevel);
-  const descriptor = getCefrCategory(proficiency.overallLevel);
-  const currentLevelIndex = Math.max(
-    0,
-    CEFR_LEVELS.indexOf(proficiency.overallLevel)
-  );
+  const currentBand =
+    proficiency.ieltsBand || scoreToIeltsBand(proficiency.overallScore);
+  const fillPercentage = getIeltsBarFillPercentage(currentBand);
+  const descriptor =
+    proficiency.ieltsDescriptor || getIeltsDescriptor(currentBand);
+  const currentBandNumeric = parseFloat(currentBand);
 
   return (
     <View style={styles.card}>
       <View style={styles.header}>
-        <Text style={styles.title}>Your Proficiency</Text>
+        <Text style={styles.title}>IELTS Speaking Proficiency</Text>
         <Text style={styles.description}>
           {CONFIDENCE_NOTES[proficiency.confidence]}
         </Text>
         {formattedStartingLevel && (
           <Text style={styles.startedAt}>
-            Started at:{' '}
-            <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>{' '}
-            <Text style={styles.selfReported}>(self-reported)</Text>
+            Started at: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
           </Text>
         )}
       </View>
 
-      {/* Level Bar */}
+      {/* IELTS Milestone Level Bar */}
       <View style={styles.levelBar}>
         <View style={styles.levelBarTrack}>
           {fillPercentage > 0 && (
@@ -307,27 +352,31 @@ export function CEFRProgressCard({
             />
           )}
           <View style={styles.levelBarLabels}>
-            {CEFR_LEVELS.map((level, index) => (
-              <View key={level} style={styles.levelLabelItem}>
-                <Text
-                  style={[
-                    styles.levelLabelText,
-                    index <= currentLevelIndex && styles.levelLabelTextActive,
-                  ]}
-                >
-                  {level}
-                </Text>
-              </View>
-            ))}
+            {IELTS_MILESTONES.map((milestone) => {
+              const milestoneNumeric = parseFloat(milestone);
+              const isActive = currentBandNumeric >= milestoneNumeric;
+              return (
+                <View key={milestone} style={styles.levelLabelItem}>
+                  <Text
+                    style={[
+                      styles.levelLabelText,
+                      isActive && styles.levelLabelTextActive,
+                    ]}
+                  >
+                    {milestone}
+                  </Text>
+                </View>
+              );
+            })}
           </View>
         </View>
         <Text style={styles.levelDescriptor}>
           {descriptor}{' '}
-          <Text style={styles.levelHighlight}>{proficiency.overallLevel}</Text>
+          <Text style={styles.levelHighlight}>Band {currentBand}</Text>
         </Text>
       </View>
 
-      {/* Radar Chart — matching frontend */}
+      {/* Radar Chart — matching official IELTS criteria */}
       <SkillRadarChart proficiency={proficiency} />
 
       <FigmaPrimaryButton
@@ -336,13 +385,23 @@ export function CEFRProgressCard({
         }
         style={{ width: '100%', marginTop: 16 }}
       >
-        <Text style={{ color: '#fff', fontSize: 14, fontWeight: '500', fontFamily: 'Poppins-Medium' }}>
-          Go to Lessons
+        <Text
+          style={{
+            color: '#fff',
+            fontSize: 14,
+            fontWeight: '500',
+            fontFamily: 'Poppins-Medium',
+          }}
+        >
+          Practice IELTS Speaking
         </Text>
       </FigmaPrimaryButton>
     </View>
   );
 }
+
+// Export alias for callers using IELTS naming
+export const IELTSProgressCard = CEFRProgressCard;
 
 const styles = StyleSheet.create({
   card: {
@@ -382,7 +441,9 @@ const styles = StyleSheet.create({
     color: 'rgba(255,255,255,0.5)',
   },
   levelBar: {
-    gap: 8,
+    marginTop: 12,
+    marginBottom: 4,
+    gap: 14,
   },
   levelBarTrack: {
     height: 42,
@@ -426,6 +487,8 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Medium',
     color: '#fff',
     textAlign: 'center',
+    marginTop: 4,
+    marginBottom: 16,
   },
   levelHighlight: {
     color: '#2879ff',
@@ -434,17 +497,18 @@ const styles = StyleSheet.create({
     position: 'relative',
     width: '100%',
     maxWidth: 323,
-    height: 189,
+    height: 195,
     alignSelf: 'center',
+    marginTop: 14,
+    marginBottom: 8,
   },
   radarLabel: {
     position: 'absolute',
-    width: 98,
   },
   radarScore: {
     fontSize: 18,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
     color: '#2879ff',
   },
   radarLabelText: {

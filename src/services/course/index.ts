@@ -211,13 +211,12 @@ class CourseService {
       const analytics = overview?.analytics?.progress || {};
 
       return {
-        progress: {
-          speaking_days: analytics.speaking_days || 0,
-          quiz_days: analytics.quiz_days || 0,
-          listening_days: analytics.listening_days || 0,
-          avg_quiz_score: analytics.avg_quiz_score || 0,
-          avg_listening_quiz_score: analytics.avg_listening_quiz_score || 0,
-        },
+        course: overview?.analytics?.course || undefined,
+        progress: overview?.analytics?.progress || {},
+        weeklyExams: overview?.analytics?.weeklyExams || [],
+        speakingSessions: overview?.analytics?.speakingSessions || [],
+        monthlyTrends: overview?.analytics?.monthlyTrends || [],
+        skillTrends: overview?.analytics?.skillTrends || [],
       };
     } catch (error: any) {
       // Return empty analytics on error (graceful degradation)

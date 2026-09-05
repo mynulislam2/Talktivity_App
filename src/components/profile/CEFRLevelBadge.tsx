@@ -14,12 +14,15 @@ interface CEFRLevelBadgeProps {
 
 export function CEFRLevelBadge({ level, size = 'md' }: CEFRLevelBadgeProps) {
   const isSmall = size === 'sm';
+  const displayLevel = /^\d+(\.\d+)?$/.test(level) ? `Band ${level}` : level;
   return (
     <View style={[styles.badge, isSmall && styles.badgeSmall]}>
-      <Text style={[styles.text, isSmall && styles.textSmall]}>{level}</Text>
+      <Text style={[styles.text, isSmall && styles.textSmall]}>{displayLevel}</Text>
     </View>
   );
 }
+
+export const IELTSBandBadge = CEFRLevelBadge;
 
 const styles = StyleSheet.create({
   badge: {

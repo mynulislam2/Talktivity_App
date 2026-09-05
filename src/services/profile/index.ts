@@ -6,6 +6,7 @@
  */
 
 import { httpService } from '../http/httpservice';
+import { lifecycleService } from '../lifecycle';
 import { API_URLS } from '@/services/urls';
 
 export interface ProfileData {
@@ -13,6 +14,7 @@ export interface ProfileData {
   email: string;
   full_name: string;
   profile_picture?: string;
+  startingLevel?: string;
   created_at?: string;
   lifecycle?: {
     onboardingCompleted: boolean;
@@ -50,6 +52,12 @@ class ProfileService {
   async getProfile(): Promise<ProfileResponse> {
     try {
       const response = await httpService.get(API_URLS.AUTH.ME);
+      const lifecycleResponse = await lifecycleService
+        .getLifecycle()
+        .catch(() => null);
+      const startingLevel =
+        (lifecycleResponse?.data?.onboarding?.data?.current_level as string) ??
+        null;
 
       // Backend returns { success: true, data: { ... }, message?: string }
       if (response.data?.success && response.data?.data) {
@@ -63,6 +71,7 @@ class ProfileService {
             full_name: userData.fullName || userData.full_name || '',
             profile_picture: userData.profile_picture || undefined,
             created_at: userData.created_at || undefined,
+            startingLevel: startingLevel || undefined,
             lifecycle: userData.lifecycle || undefined,
           },
         };
@@ -78,6 +87,7 @@ class ProfileService {
             full_name: response.data.fullName || response.data.full_name || '',
             profile_picture: response.data.profile_picture || undefined,
             created_at: response.data.created_at || undefined,
+            startingLevel: startingLevel || undefined,
             lifecycle: response.data.lifecycle || undefined,
           },
         };

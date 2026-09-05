@@ -24,15 +24,37 @@ export interface SessionScore {
   vocabBreakdown: VocabBreakdown;
 }
 
+export type IeltsBand =
+  | '1.0'
+  | '1.5'
+  | '2.0'
+  | '2.5'
+  | '3.0'
+  | '3.5'
+  | '4.0'
+  | '4.5'
+  | '5.0'
+  | '5.5'
+  | '6.0'
+  | '6.5'
+  | '7.0'
+  | '7.5'
+  | '8.0'
+  | '8.5'
+  | '9.0';
+
 export interface ProficiencySkillResult {
   score: number;
   level: CefrLevel;
+  ieltsBand?: IeltsBand;
   trend: ProficiencyTrend;
 }
 
 export interface ProficiencyResult {
   overallScore: number;
   overallLevel: CefrLevel | 'Not yet assessed';
+  ieltsBand?: IeltsBand;
+  ieltsDescriptor?: string;
   confidence: ProficiencyConfidence;
   skills: {
     fluency: ProficiencySkillResult;

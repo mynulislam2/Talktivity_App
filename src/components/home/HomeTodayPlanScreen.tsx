@@ -16,7 +16,6 @@ import type { CourseStatus } from '@/services/course';
 import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HomeStackParamList } from '@/navigation/types';
-import { persistListeningTopic } from '@/lib/listeningTopic';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 interface HomeTodayPlanScreenProps {
@@ -127,11 +126,8 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
   const navigation = useNavigation<HomeNav>();
   const { course } = courseStatus;
   const allActivitiesComplete =
-    course.dayType === 'all_activities'
-      ? booleans.speakingCompleted &&
-        booleans.quizCompleted &&
-        booleans.listeningCompleted &&
-        booleans.listeningQuizCompleted
+    course.dayType === 'speaking_exam'
+      ? booleans.speakingCompleted
       : booleans.speakingCompleted && booleans.quizCompleted;
 
   const startSpeaking = useCallback(async () => {
@@ -155,20 +151,6 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
   const startReview = useCallback(() => {
     navigation.navigate('ReviewScreen' as any);
   }, [navigation]);
-
-  const startListening = useCallback(() => {
-    if (course.todayListeningTopic) {
-      persistListeningTopic(course.todayListeningTopic as any);
-    }
-    navigation.navigate('ListeningScreen' as any);
-  }, [course.todayListeningTopic, navigation]);
-
-  const startListeningQuiz = useCallback(() => {
-    if (course.todayListeningTopic) {
-      persistListeningTopic(course.todayListeningTopic as any);
-    }
-    navigation.navigate('ListeningQuizScreen' as any);
-  }, [course.todayListeningTopic, navigation]);
 
   const cards: TimelineActionCardData[] =
     course.dayType === 'speaking_exam'
@@ -275,58 +257,14 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
                 : startReview,
           },
           {
-            id: 'listening',
-            title: course.todayListeningTopic?.title || 'Listening Zone',
-            description: `Listening to: ${
-              course.todayListeningTopic?.title || 'Today listening activity'
-            }`,
-            helper: booleans.quizCompleted
-              ? 'Open listening practice'
-              : 'Complete Quiz Practice first',
-            status: booleans.listeningCompleted
-              ? 'completed'
-              : booleans.quizCompleted
-              ? 'active'
-              : 'locked',
-            buttonLabel:
-              booleans.listeningCompleted || !booleans.quizCompleted
-                ? undefined
-                : 'Start Listening',
-            action:
-              booleans.listeningCompleted || !booleans.quizCompleted
-                ? undefined
-                : startListening,
-          },
-          {
-            id: 'listening-quiz',
-            title: 'Listening Quiz',
-            description: 'Take a quiz to test your listening comprehension',
-            helper: booleans.listeningCompleted
-              ? 'Open your listening quiz'
-              : 'Complete Speaking Zone first',
-            status: booleans.listeningQuizCompleted
-              ? 'completed'
-              : booleans.listeningCompleted
-              ? 'active'
-              : 'locked',
-            buttonLabel:
-              booleans.listeningQuizCompleted || !booleans.listeningCompleted
-                ? undefined
-                : 'Start Quiz',
-            action:
-              booleans.listeningQuizCompleted || !booleans.listeningCompleted
-                ? undefined
-                : startListeningQuiz,
-          },
-          {
             id: 'report',
             title: "Today's Report",
             description: allActivitiesComplete
               ? "Get your detailed performance report for today's activities"
-              : "Complete all today's activities to unlock your report",
+              : "Complete speaking and review to unlock your report",
             helper: allActivitiesComplete
               ? 'Report ready to open'
-              : 'Complete all activities first',
+              : 'Complete speaking and review first',
             status: allActivitiesComplete ? 'active' : 'locked',
             buttonLabel: allActivitiesComplete ? 'View Report' : undefined,
             action: allActivitiesComplete

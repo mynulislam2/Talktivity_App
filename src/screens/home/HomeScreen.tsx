@@ -83,6 +83,8 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
                 <HomeDashboardScreen
                   practiceMinutes={practiceMinutes}
                   onOpenTodayPlan={() => setViewMode('today')}
+                  courseStatus={courseStatus}
+                  booleans={booleans}
                 />
               </>
             )}

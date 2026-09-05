@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useCallback } from 'react';
 import {
   View,
   Text,
@@ -8,15 +8,21 @@ import {
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
 import { Image as ExpoImage } from 'expo-image';
+import { useNavigation } from '@react-navigation/native';
 
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import { getUtcToday } from '@/utils/timezoneUtils';
 import { useResponsive } from '@/theme/responsive';
 import { useAppSelector } from '@/store/hooks';
+import type { CourseStatus } from '@/services/course';
+import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
+import { persistListeningTopic } from '@/lib/listeningTopic';
 
 interface HomeDashboardScreenProps {
   practiceMinutes: string;
   onOpenTodayPlan: () => void;
+  courseStatus?: CourseStatus | null;
+  booleans?: DailyProgressBooleans;
 }
 
 function getWeekdayItems() {
@@ -37,6 +43,8 @@ function getWeekdayItems() {
 export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   practiceMinutes,
   onOpenTodayPlan,
+  courseStatus,
+  booleans,
 }) => {
   const weekdayItems = useMemo(() => getWeekdayItems(), []);
   const { narrow, s } = useResponsive();
@@ -46,6 +54,19 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const dayCircle = s(26);
   const subscriptionState = useAppSelector((state) => state.subscription);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
+
+  const navigation = useNavigation<any>();
+  const todayListeningTopic = courseStatus?.course?.todayListeningTopic;
+  const isListeningCompleted = Boolean(booleans?.listeningCompleted);
+  const isQuizCompleted = Boolean(booleans?.listeningQuizCompleted);
+  const isAllListeningDone = isListeningCompleted && isQuizCompleted;
+
+  const handleOpenListening = useCallback(() => {
+    if (todayListeningTopic) {
+      persistListeningTopic(todayListeningTopic as any);
+    }
+    navigation.navigate('ListeningScreen');
+  }, [navigation, todayListeningTopic]);
 
   return (
     <ScrollView
@@ -118,6 +139,38 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         </View>
         <ExpoImage
           source={require('../../../assets/avatar_intro.svg')}
+          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
+          contentFit="contain"
+          pointerEvents="none"
+        />
+      </LinearGradient>
+
+      <LinearGradient
+        colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
+        style={[styles.todayPlanCard, { marginTop: 16 }]}
+      >
+        <View style={styles.todayPlanContent}>
+          <Text style={styles.todayPlanTitle}>Listening Practice</Text>
+          <Text style={styles.todayPlanDesc}>
+            5-minute listening practice on your daily topic.
+          </Text>
+          <FigmaPrimaryButton
+            onPress={handleOpenListening}
+            style={styles.todayPlanButton}
+            disabled={isExpired}
+          >
+            <Text style={styles.todayPlanButtonText}>
+              {isAllListeningDone
+                ? 'Review'
+                : isListeningCompleted
+                ? 'Continue'
+                : 'Start Listening'}
+            </Text>
+            <Feather name="arrow-right" size={14} color="#fff" />
+          </FigmaPrimaryButton>
+        </View>
+        <ExpoImage
+          source={require('../../../assets/listening_hero.png')}
           style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
           contentFit="contain"
           pointerEvents="none"
@@ -321,5 +374,100 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: 16,
     right: 6,
+  },
+  listeningCard: {
+    marginTop: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    minHeight: 148,
+    padding: 16,
+    overflow: 'hidden',
+    position: 'relative',
+  },
+  listeningContent: {
+    maxWidth: '65%',
+    zIndex: 1,
+  },
+  listeningHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  listeningIconBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    backgroundColor: 'rgba(197,93,254,0.18)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  listeningCategoryText: {
+    fontSize: 12,
+    fontFamily: 'Poppins-Medium',
+    fontWeight: '600',
+    letterSpacing: 0.8,
+    color: '#c55dfe',
+  },
+  completedChip: {
+    marginLeft: 'auto',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    backgroundColor: 'rgba(52,211,153,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  completedChipText: {
+    fontSize: 11,
+    fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    color: '#34d399',
+  },
+  inProgressChip: {
+    marginLeft: 'auto',
+    backgroundColor: 'rgba(250,204,21,0.15)',
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: 10,
+  },
+  inProgressChipText: {
+    fontSize: 11,
+    fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+    color: '#facc15',
+  },
+  listeningTitle: {
+    marginTop: 8,
+    fontSize: 20,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    lineHeight: 24,
+    color: '#fff',
+    letterSpacing: 0.12,
+  },
+  listeningDesc: {
+    marginTop: 5,
+    fontSize: 14,
+    fontFamily: 'Poppins',
+    lineHeight: 19.5,
+    color: '#c6c6c6',
+  },
+  listeningButton: {
+    marginTop: 14,
+    alignSelf: 'flex-start',
+  },
+  listeningButtonText: {
+    fontSize: 14,
+    lineHeight: 16.8,
+    color: '#fff',
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+  },
+  listeningHero: {
+    position: 'absolute',
+    bottom: -15,
+    right: -10,
   },
 });

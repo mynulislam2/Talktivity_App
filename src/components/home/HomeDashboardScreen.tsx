@@ -157,16 +157,20 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
           <FigmaPrimaryButton
             onPress={handleOpenListening}
             style={styles.todayPlanButton}
-            disabled={isExpired}
+            disabled={isExpired || isAllListeningDone}
           >
             <Text style={styles.todayPlanButtonText}>
               {isAllListeningDone
-                ? 'Review'
+                ? 'Completed'
                 : isListeningCompleted
                 ? 'Continue'
                 : 'Start Listening'}
             </Text>
-            <Feather name="arrow-right" size={14} color="#fff" />
+            {isAllListeningDone ? (
+              <Feather name="check" size={14} color="#fff" />
+            ) : (
+              <Feather name="arrow-right" size={14} color="#fff" />
+            )}
           </FigmaPrimaryButton>
         </View>
         <ExpoImage

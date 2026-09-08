@@ -11,9 +11,11 @@ import { EnglishScoreCard } from '@/components/report/EnglishScoreCard';
 import { FluencyCard } from '@/components/report/FluencyCard';
 import { GrammarCard } from '@/components/report/GrammarCard';
 import { VocabularyCard } from '@/components/report/VocabularyCard';
-import { DiscourseCard } from '@/components/report/DiscourseCard';
+import { PronunciationCard } from '@/components/report/PronunciationCard';
+import { ActionPlanCard } from '@/components/report/ActionPlanCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
 import { ReportErrorCard } from '@/components/report/ReportErrorCard';
+import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { ReportScreenProps } from '@/navigation/types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
 import type { HomeStackParamList } from '@/navigation/types';
@@ -23,12 +25,13 @@ type ReportScreenPropsUnion =
   | NativeStackScreenProps<HomeStackParamList, 'ReportScreen'>;
 
 function ReportScreenContent() {
+  const navigation = useNavigation<any>();
   const { reportData, phase, error, errorCode, retry } =
     useReportGeneration(true);
   const { overallScores, radarData } = useReportCalculations(reportData);
   const { currentStep, handleContinue } = useReportNavigation({
     reportData,
-    totalSteps: 5,
+    totalSteps: 6,
   });
   const { completeReport } = useReportCompletion();
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -44,6 +47,7 @@ function ReportScreenContent() {
 
   const handleFinish = async () => {
     await completeReport();
+    navigation.dispatch(CommonActions.navigate({ name: 'Home' }));
   };
 
   // PREPARING → loader
@@ -103,9 +107,14 @@ function ReportScreenContent() {
       vocabulary={reportData.vocabulary}
       onContinue={handleContinue}
     />,
-    <DiscourseCard
-      key="discourse"
-      discourse={reportData.discourse}
+    <PronunciationCard
+      key="pronunciation"
+      pronunciation={reportData.pronunciation}
+      onContinue={handleContinue}
+    />,
+    <ActionPlanCard
+      key="action_plan"
+      report={reportData}
       onFinish={handleFinish}
     />,
   ];

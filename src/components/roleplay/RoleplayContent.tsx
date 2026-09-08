@@ -79,9 +79,9 @@ export function RoleplayContent({
   // Auto-finish session when the remaining time runs down to 30 seconds or 0
   useEffect(() => {
     const isLive =
-      sessionState.agentState === 'connected' ||
       sessionState.agentState === 'speaking' ||
-      sessionState.agentState === 'listening';
+      sessionState.agentState === 'listening' ||
+      sessionState.agentState === 'thinking';
 
     if (!isLive) {
       sessionStartTimeRef.current = null;

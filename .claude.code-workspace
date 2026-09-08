@@ -1,0 +1,25 @@
+{
+	"folders": [
+		{
+			"path": "../.claude"
+		},
+		{
+			"path": "../.cursor"
+		},
+		{
+			"path": "../.qodo"
+		},
+		{
+			"path": "../Agentserver"
+		},
+		{
+			"path": "../deploy"
+		},
+		{
+			"path": "../talktivity_frontend"
+		},
+		{
+			"path": "."
+		}
+	]
+}

@@ -43,12 +43,16 @@ export interface HesitationsAndCorrections {
  * Fluency section of the report
  */
 export interface FluencyReport {
+  band?: number;
+  fluencyBand?: number;
   fluencyScore: number;
   fluencyLevel: string;
   improvementTarget: ImprovementTarget | null;
   fillerWords: FillerWords;
   wordsPerMinute: WordsPerMinute;
   hesitationsAndCorrections: HesitationsAndCorrections;
+  strengths?: string[];
+  improvements?: string[];
 }
 
 /**
@@ -56,6 +60,7 @@ export interface FluencyReport {
  */
 export interface SentenceComplexity {
   score: number;
+  complexSentenceRatio?: number;
   feedback: string;
 }
 
@@ -72,6 +77,8 @@ export interface GrammarError {
  * Grammar section of the report
  */
 export interface GrammarReport {
+  band?: number;
+  grammarBand?: number;
   grammarScore: number;
   grammarLevel: string;
   improvementTarget: ImprovementTarget | null;
@@ -79,6 +86,8 @@ export interface GrammarReport {
   improvementDescription?: string;
   grammarErrors?: Record<string, GrammarError[]>;
   sentenceComplexity: SentenceComplexity;
+  strengths?: string[];
+  improvements?: string[];
 }
 
 /**
@@ -120,21 +129,51 @@ export interface IdiomaticLanguage {
   feedback?: string;
 }
 
+export interface SentenceUpgrade {
+  original: string;
+  improved: string;
+  targetBand?: string;
+  explanation?: string;
+}
+
+export interface PronunciationStruggledWord {
+  word: string;
+  phonetic?: string;
+  syllableStress?: string;
+  tip?: string;
+}
+
+export interface PronunciationReport {
+  band?: number;
+  pronunciationBand?: number;
+  pronunciationScore?: number;
+  pronunciationLevel?: string;
+  feedback?: string;
+  struggledWords?: PronunciationStruggledWord[];
+  strengths?: string[];
+  improvements?: string[];
+}
+
 /**
  * Vocabulary section of the report
  */
 export interface VocabularyReport {
+  band?: number;
+  vocabularyBand?: number;
   vocabularyScore: number;
   vocabularyLevel: string;
   improvementTarget: ImprovementTarget | null;
   activeVocabulary: number;
   uniqueWords: number;
+  sentenceUpgrades?: SentenceUpgrade[];
   lexicalDiversity: LexicalDiversity;
   levelBreakdown?: LevelBreakdown;
   wordSuggestions?: Record<string, WordSuggestion[]>;
   exampleSentences?: Record<string, string>;
   idiomaticLanguage?: IdiomaticLanguage;
   newWords?: string[];
+  strengths?: string[];
+  improvements?: string[];
 }
 
 /**
@@ -174,10 +213,15 @@ export interface OverallScores {
  * Complete today's report structure
  */
 export interface TodayReport {
+  overall_band?: number;
+  target_band?: number;
+  band_gap?: number;
+  action_plan_priorities?: string[];
   fluency: FluencyReport;
   grammar: GrammarReport;
   vocabulary: VocabularyReport;
   discourse: DiscourseReport;
+  pronunciation?: PronunciationReport;
   report_date?: string;
   created_at?: string;
   updated_at?: string;

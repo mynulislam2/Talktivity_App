@@ -87,9 +87,10 @@ function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
   const fluencyBand =
     proficiency.skills.fluency.ieltsBand ||
     scoreToIeltsBand(proficiency.skills.fluency.score);
-  const discourseBand =
-    proficiency.skills.discourse.ieltsBand ||
-    scoreToIeltsBand(proficiency.skills.discourse.score);
+  const pronunciationBand =
+    (proficiency.skills as any).pronunciation?.ieltsBand ||
+    (proficiency.skills as any).discourse?.ieltsBand ||
+    scoreToIeltsBand((proficiency.skills as any).pronunciation?.score ?? proficiency.skills.discourse.score);
 
   const radarAxes = [
     {
@@ -138,10 +139,10 @@ function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
       alignItems: 'flex-start' as const,
     },
     {
-      key: 'discourse',
-      score: proficiency.skills.discourse.score,
-      band: discourseBand,
-      label: 'Discourse',
+      key: 'pronunciation',
+      score: (proficiency.skills as any).pronunciation?.score ?? proficiency.skills.discourse.score,
+      band: pronunciationBand,
+      label: 'Pronunciation',
       left: 12,
       width: 85,
       top: 76,

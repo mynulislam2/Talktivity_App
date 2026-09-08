@@ -1,6 +1,5 @@
 import React from 'react';
 import { View, Text, StyleSheet, ScrollView } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnglishRadarChart } from '@/components/report/EnglishRadarChart';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
@@ -9,30 +8,30 @@ import type { OverallScores } from '@/types/report';
 import type { RadarDataPoint } from '@/lib/report/calculations';
 
 const SCORE_BREAKDOWN_ORDER = [
-  { key: 'discourse' as const, label: 'Discourse' },
-  { key: 'vocabulary' as const, label: 'Vocabulary' },
-  { key: 'grammar' as const, label: 'Grammar' },
-  { key: 'fluency' as const, label: 'Fluency' },
+  { key: 'fluency' as const, label: 'Fluency & Coherence' },
+  { key: 'vocabulary' as const, label: 'Lexical Resource' },
+  { key: 'grammar' as const, label: 'Grammar & Accuracy' },
+  { key: 'discourse' as const, label: 'Pronunciation' },
 ];
 
 export interface EnglishScoreCardProps {
-  overallScores: OverallScores;
-  radarData: RadarDataPoint[];
+  overallScores?: OverallScores | null;
+  radarData?: RadarDataPoint[];
   onContinue: () => void;
   showIcons?: boolean;
   hideHeroTitle?: boolean;
 }
 
-function SkillBar({ label, value }: { label: string; value: number }) {
+function SkillBar({ label, value, band }: { label: string; value: number; band?: string }) {
   const clamped = Math.max(0, Math.min(100, Math.round(value)));
   return (
     <View style={sb.container}>
       <Text style={sb.label}>{label}</Text>
       <View style={sb.row}>
-        <Text style={sb.value}>{clamped}%</Text>
+        <Text style={sb.bandText}>{band ? `Band ${band}` : `${clamped}%`}</Text>
         <View style={sb.track}>
           <LinearGradient
-            colors={['#c084fc', '#8b5cf6', '#6366f1']}
+            colors={['#2563eb', '#3b82f6', '#60a5fa']}
             start={{ x: 0, y: 0 }}
             end={{ x: 1, y: 0 }}
             style={[sb.fill, { width: `${clamped}%` as any }]}
@@ -44,25 +43,18 @@ function SkillBar({ label, value }: { label: string; value: number }) {
 }
 
 const sb = StyleSheet.create({
-  container: { gap: 8 },
+  container: { gap: 6 },
   label: { fontSize: 13, fontWeight: '500', fontFamily: 'Poppins-Medium', lineHeight: 17, color: tokens.color.text.primary },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 10 },
-  value: {
-    width: 36,
-    fontSize: 12,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    color: tokens.color.text.primary,
-    fontVariant: ['tabular-nums'] as any,
-  },
+  bandText: { width: 56, fontSize: 12, fontWeight: '500', fontFamily: 'Poppins-Medium', color: 'rgba(255,255,255,0.9)' },
+  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
   track: {
     flex: 1,
     height: 8,
-    borderRadius: 4,
-    backgroundColor: tokens.color.surface.card,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(255,255,255,0.1)',
     overflow: 'hidden',
   },
-  fill: { height: '100%', borderRadius: 4 },
+  fill: { height: '100%', borderRadius: 9999 },
 });
 
 export function EnglishScoreCard({
@@ -70,51 +62,51 @@ export function EnglishScoreCard({
   onContinue,
   hideHeroTitle = false,
 }: EnglishScoreCardProps) {
+  const overallBand = overallScores?.overall
+    ? (Math.round((overallScores.overall / 10) * 2) / 2).toFixed(1)
+    : '6.5';
+
   const pentagonValues: [number, number, number, number, number] = [
-    overallScores.discourse,
-    overallScores.fluency,
-    overallScores.grammar,
-    overallScores.vocabulary,
-    overallScores.overall,
+    overallScores?.overall ?? 65,
+    overallScores?.fluency ?? 60,
+    overallScores?.vocabulary ?? 65,
+    overallScores?.grammar ?? 60,
+    overallScores?.discourse ?? 65,
   ];
 
   return (
     <ScrollView style={s.wrapper} contentContainerStyle={s.container}>
       {hideHeroTitle ? null : (
         <View style={s.hero}>
-          <Text style={s.heroTitle}>Your English Score</Text>
-          <Text style={s.heroLevel}>{overallScores.level}</Text>
-          <Text style={s.heroScore}>{overallScores.overall} out of 100</Text>
+          <Text style={s.heroTitle}>Your Overall Band Score</Text>
+          <Text style={s.heroLevel}>Band {overallBand}</Text>
         </View>
       )}
 
-      {hideHeroTitle ? (
-        <Text style={s.heroScoreAlt}>{overallScores.overall} out of 100</Text>
-      ) : null}
-
       <View style={{ marginTop: 8, alignItems: 'center' }}>
-        <EnglishRadarChart values={pentagonValues} />
-      </View>
-
-      <View style={s.grid}>
-        {SCORE_BREAKDOWN_ORDER.map(({ key, label }) => (
-          <View key={key} style={s.skillBarWrap}>
-            <SkillBar label={label} value={overallScores[key]} />
-          </View>
-        ))}
-      </View>
-
-      <View style={s.infoBox}>
-        <Ionicons
-          name="information-circle-outline"
-          size={16}
-          color={tokens.color.accent.rim}
-          style={{ marginTop: 2 }}
+        <EnglishRadarChart
+          values={pentagonValues}
+          metrics={['Overall', 'Fluency', 'Lexical', 'Grammar', 'Pronunciation']}
         />
-        <Text style={s.infoText}>
-          This is a deep analysis of your recent conversation. Use the detailed
-          report to focus your practice.
-        </Text>
+      </View>
+
+      <View style={s.skillsCard}>
+        <Text style={s.skillsTitle}>IELTS Criteria Breakdown</Text>
+        <View style={s.grid}>
+          {SCORE_BREAKDOWN_ORDER.map(({ key, label }) => {
+            const val = overallScores ? overallScores[key] : 65;
+            const b = (Math.round((val / 10) * 2) / 2).toFixed(1);
+            return (
+              <View key={key} style={s.skillBarWrap}>
+                <SkillBar
+                  label={label}
+                  value={val}
+                  band={b}
+                />
+              </View>
+            );
+          })}
+        </View>
       </View>
 
       <ReportCTAButton label="Explore My Deep Dive Report" onPress={onContinue} />
@@ -123,63 +115,48 @@ export function EnglishScoreCard({
 }
 
 const s = StyleSheet.create({
-  wrapper: { flex: 1 },
+  wrapper: { flex: 1, backgroundColor: 'transparent' },
   container: {
     width: '100%',
     alignSelf: 'center',
-    paddingHorizontal: 20,
+    paddingHorizontal: 16,
+    paddingTop: 14,
     paddingBottom: 28,
   },
-  hero: { alignItems: 'center' },
-  heroTitle: { fontSize: 22, fontWeight: '600', fontFamily: 'Poppins-SemiBold', lineHeight: 28, color: tokens.color.text.primary },
+  hero: { alignItems: 'center', marginBottom: 4 },
+  heroTitle: {
+    fontSize: 16,
+    fontFamily: 'Poppins-Medium',
+    lineHeight: 24,
+    color: tokens.color.text.secondary,
+  },
   heroLevel: {
-    marginTop: 8,
-    fontSize: 32,
+    marginTop: 2,
+    fontSize: 34,
+    fontWeight: '700',
+    fontFamily: 'Poppins-Bold',
+    lineHeight: 40,
+    color: '#ffffff',
+  },
+  skillsCard: {
+    marginTop: 16,
+    borderRadius: tokens.radius.sm,
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    padding: 16,
+  },
+  skillsTitle: {
+    fontSize: 15,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',
-    lineHeight: 32,
-    color: tokens.color.accent.primary,
-  },
-  heroScore: {
-    marginTop: 4,
-    fontSize: 13,
-    fontFamily: 'Poppins',
-    lineHeight: 18,
-    color: tokens.color.text.secondary,
-  },
-  heroScoreAlt: {
-    marginTop: 4,
-    fontSize: 13,
-    fontFamily: 'Poppins',
-    lineHeight: 18,
-    textAlign: 'center',
-    color: tokens.color.text.secondary,
+    color: tokens.color.text.primary,
+    marginBottom: 12,
   },
   grid: {
-    marginTop: 20,
     flexDirection: 'row',
     flexWrap: 'wrap',
     justifyContent: 'space-between',
-    rowGap: 20,
-    columnGap: 16,
+    rowGap: 16,
+    columnGap: 14,
   },
   skillBarWrap: { width: '47%' },
-  infoBox: {
-    flexDirection: 'row',
-    gap: 10,
-    marginTop: 24,
-    borderRadius: tokens.radius.xl,
-    borderWidth: 1,
-    borderColor: tokens.color.border.card,
-    backgroundColor: tokens.color.surface.card,
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-  },
-  infoText: {
-    flex: 1,
-    fontSize: 12,
-    fontFamily: 'Poppins',
-    lineHeight: 17,
-    color: tokens.color.text.secondary,
-  },
 });

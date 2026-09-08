@@ -1,7 +1,9 @@
 /**
- * VocabularyCard Component (React Native)
+ * PronunciationCard Component (React Native)
  *
- * Displays vocabulary analysis. Matches talktivity_frontend StatCard design.
+ * Page 5 of the Talktivity IELTS Speaking Report.
+ * Displays Pronunciation Band, sound clarity, sentence stress/intonation, and key priorities.
+ * Concludes the report with a clean "Back to Today's Plan" button.
  */
 
 import React from 'react';
@@ -10,39 +12,45 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
-import type { VocabularyReport } from '@/types/report';
+import type { PronunciationReport } from '@/types/report';
 
-export interface VocabularyCardProps {
-  vocabulary?: VocabularyReport;
+export interface PronunciationCardProps {
+  pronunciation?: PronunciationReport;
   onContinue: () => void;
   hideSectionHeader?: boolean;
 }
 
-export function VocabularyCard({
-  vocabulary,
+export function PronunciationCard({
+  pronunciation,
   onContinue,
   hideSectionHeader = false,
-}: VocabularyCardProps) {
-  const band = vocabulary?.band ?? vocabulary?.vocabularyBand ?? 6.0;
+}: PronunciationCardProps) {
+  const band = pronunciation?.band || pronunciation?.pronunciationBand || 6.0;
   const numBand = Number(band) || 6.0;
   const targetBand = Math.min(9.0, Number((numBand + 0.5).toFixed(1)));
-  const strengths = (vocabulary?.strengths && vocabulary.strengths.length > 0)
-    ? vocabulary.strengths
-    : ['Communicated core ideas effectively with adequate word choice'];
-  const areasForImprovement = (vocabulary?.improvements && vocabulary.improvements.length > 0)
-    ? vocabulary.improvements
-    : ['Incorporate more Band 7+ academic collocations and topical vocabulary'];
-  const sentenceUpgrades = vocabulary?.sentenceUpgrades ?? [];
+  const strengths = (pronunciation?.strengths && pronunciation.strengths.length > 0)
+    ? pronunciation.strengths
+    : [
+        'Clear word boundaries and natural speech rhythm',
+        'Vowel sounds are mostly distinct and understandable',
+      ];
+  const areasForImprovement = (pronunciation?.improvements && pronunciation.improvements.length > 0)
+    ? pronunciation.improvements
+    : [
+        'Watch syllable stress on multi-syllable academic words',
+        'Focus on clear final consonant articulation',
+      ];
+  const struggledWords = pronunciation?.struggledWords ?? [];
 
   return (
     <ScrollView style={ss.wrapper} contentContainerStyle={ss.container}>
       {hideSectionHeader ? null : (
         <View style={ss.header}>
-          <View style={[ss.iconBox, { backgroundColor: 'rgba(249,115,22,0.2)' }]}>
-            <Ionicons name="layers" size={24} color="#fb923c" />
+          <View style={[ss.iconBox, { backgroundColor: 'rgba(99,102,241,0.2)' }]}>
+            <Ionicons name="mic" size={24} color="#818cf8" />
           </View>
           <View>
-            <Text style={ss.title}>Lexical Resource</Text>
+            <Text style={ss.title}>Pronunciation</Text>
             <Text style={ss.subtitle}>Band {band}</Text>
           </View>
         </View>
@@ -50,7 +58,7 @@ export function VocabularyCard({
 
       <View style={ss.statSpace}>
         {/* 1. Official IELTS Band & Goal */}
-        <StatCard title="Lexical Resource" value={`Band ${band}`}>
+        <StatCard title="Pronunciation" value={`Band ${band}`}>
           <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
             Next Milestone: Band {targetBand} (0.5 band to go)
           </Text>
@@ -70,26 +78,26 @@ export function VocabularyCard({
           </View>
         </StatCard>
 
-        {/* 2. Useful Sentence Upgrades */}
-        {sentenceUpgrades.length > 0 ? (
-          <StatCard title="Useful Sentence Upgrades">
-            <Text style={ss.desc}>
-              Elevate simple expressions to more descriptive, Band 7.0+ vocabulary:
-            </Text>
-            {sentenceUpgrades.map((item, idx) => (
-              <View key={idx} style={ss.sentenceCard}>
-                <Text style={ss.sentenceLabelOriginal}>Before</Text>
-                <Text style={ss.sentenceTextOriginal}>"{item.original}"</Text>
-                <View style={ss.sentenceDivider} />
-                <Text style={ss.sentenceLabelUpgraded}>Upgraded (Band 7.0+)</Text>
-                <Text style={ss.sentenceTextUpgraded}>"{item.improved || (item as any).upgraded}"</Text>
+        {/* 2. Struggled Words with Phonetic Respelling & Syllable Stress */}
+        {struggledWords && struggledWords.length > 0 ? (
+          <StatCard title="Pronunciation Focus">
+            <Text style={ss.desc}>Words to articulate more clearly, with syllable stress:</Text>
+            {struggledWords.map((item: any, idx: number) => (
+              <View key={idx} style={ss.wordCard}>
+                <View style={ss.wordHeader}>
+                  <Text style={ss.wordName}>"{item.word}"</Text>
+                  <View style={ss.phoneticBadge}>
+                    <Text style={ss.phoneticText}>{item.phonetic}</Text>
+                  </View>
+                </View>
+                <Text style={ss.wordTip}>💡 {item.tip}</Text>
               </View>
             ))}
           </StatCard>
         ) : null}
       </View>
 
-      <ReportCTAButton label="Continue to Grammar & Accuracy" onPress={onContinue} />
+      <ReportCTAButton label="Continue to Action Plan" onPress={onContinue} />
     </ScrollView>
   );
 }
@@ -115,40 +123,41 @@ const ss = StyleSheet.create({
     color: tokens.color.text.primary,
     lineHeight: 19,
   },
-  sentenceCard: {
+  wordCard: {
     borderRadius: tokens.radius.sm,
     backgroundColor: 'rgba(255,255,255,0.06)',
     padding: 12,
     marginTop: 8,
-    gap: 4,
+    gap: 6,
   },
-  sentenceLabelOriginal: {
-    fontSize: 11,
+  wordHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  wordName: {
+    fontSize: 15,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',
-    color: tokens.color.text.secondary,
+    color: tokens.color.text.primary,
   },
-  sentenceTextOriginal: {
-    fontSize: 13,
-    fontFamily: 'Poppins',
-    color: 'rgba(255,255,255,0.7)',
-    fontStyle: 'italic',
+  phoneticBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 3,
+    borderRadius: tokens.radius.xs,
+    backgroundColor: 'rgba(255,255,255,0.08)',
   },
-  sentenceDivider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    marginVertical: 6,
-  },
-  sentenceLabelUpgraded: {
-    fontSize: 11,
+  phoneticText: {
+    fontSize: 12,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',
     color: tokens.color.accent.rim,
+    letterSpacing: 0.5,
   },
-  sentenceTextUpgraded: {
-    fontSize: 13,
-    fontFamily: 'Poppins-Medium',
-    fontWeight: '500',
-    color: '#fff',
+  wordTip: {
+    fontSize: 12,
+    fontFamily: 'Poppins',
+    color: tokens.color.text.secondary,
+    lineHeight: 17,
   },
 });

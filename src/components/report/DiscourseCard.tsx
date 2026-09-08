@@ -9,6 +9,7 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ProgressBar } from '@/components/report/ProgressBar';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
+import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
 import type { DiscourseReport } from '@/types/report';
 
@@ -18,37 +19,6 @@ export interface DiscourseCardProps {
   onContinue?: () => void;
   hideSectionHeader?: boolean;
 }
-
-function StatCard({
-  title,
-  value,
-  children,
-}: {
-  title: string;
-  value?: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <View style={statStyles.card}>
-      <Text style={statStyles.title}>{title}</Text>
-      {value ? <Text style={statStyles.value}>{value}</Text> : null}
-      <View style={statStyles.body}>{children}</View>
-    </View>
-  );
-}
-
-const statStyles = StyleSheet.create({
-  card: {
-    borderRadius: tokens.radius.sm,
-    borderWidth: 1,
-    borderColor: tokens.color.border.card,
-    backgroundColor: tokens.color.surface.card,
-    padding: 16,
-  },
-  title: { fontSize: 18, fontWeight: '600', fontFamily: 'Poppins-SemiBold', color: tokens.color.text.primary },
-  value: { fontSize: 24, fontWeight: '700', fontFamily: 'Poppins-Bold', color: tokens.color.text.primary, marginTop: 2 },
-  body: { marginTop: 8 },
-});
 
 export function DiscourseCard({
   discourse,

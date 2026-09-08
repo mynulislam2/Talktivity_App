@@ -53,6 +53,7 @@ export const SPEAKING_FREQUENCY_OPTIONS: StepOption[] = [
 
 // Step 5: Main goal
 export const MAIN_GOAL_OPTIONS: StepOption[] = [
+  { id: 'ielts', text: 'Prepare for IELTS exam', icon: '🎓' },
   { id: 'work', text: 'Speak confidently at work', icon: '💼' },
   { id: 'job', text: 'Find a new job', icon: '🔍' },
   { id: 'abroad', text: 'Live comfortably abroad', icon: '🏙️' },

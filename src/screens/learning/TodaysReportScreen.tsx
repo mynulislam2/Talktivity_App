@@ -1,11 +1,9 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, StyleSheet, Animated } from 'react-native';
+import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useNavigation } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
-import { LinearGradient } from 'expo-linear-gradient';
 import { Ionicons } from '@expo/vector-icons';
-import { TouchableOpacity } from 'react-native';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import {
   loadCourseStatus,
@@ -17,9 +15,9 @@ import { EnglishScoreCard } from '@/components/report/EnglishScoreCard';
 import { FluencyCard } from '@/components/report/FluencyCard';
 import { GrammarCard } from '@/components/report/GrammarCard';
 import { VocabularyCard } from '@/components/report/VocabularyCard';
-import { DiscourseCard } from '@/components/report/DiscourseCard';
+import { PronunciationCard } from '@/components/report/PronunciationCard';
+import { ActionPlanCard } from '@/components/report/ActionPlanCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
-import { ReportErrorCard } from '@/components/report/ReportErrorCard';
 import { TodayReportStepHeader } from '@/components/report/TodayReportStepHeader';
 import { tokens } from '@/theme/tokens';
 import { AppBackground } from '../../components/common/AppBackground';
@@ -32,9 +30,9 @@ export default function TodaysReportScreen() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  const { report, isLoading, error, isExamDay, refresh, complete } =
+  const { report, isLoading, isExamDay, complete } =
     useTodayReportNative();
-  const { overallScores, radarData } = useReportCalculations(report);
+  const { overallScores } = useReportCalculations(report);
 
   useEffect(() => {
     if (!courseStatus) {
@@ -42,33 +40,52 @@ export default function TodaysReportScreen() {
     }
   }, [courseStatus, dispatch]);
 
-  const goBack = useCallback(() => {
-    navigation.goBack();
-  }, [navigation]);
-
   const handleContinue = () => {
-    fadeAnim.setValue(0);
-    slideAnim.setValue(50);
-    setStep((prev) => prev + 1);
-    Animated.parallel([
-      Animated.timing(fadeAnim, {
-        toValue: 1,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-      Animated.timing(slideAnim, {
-        toValue: 0,
-        duration: 300,
-        useNativeDriver: true,
-      }),
-    ]).start();
+    if (step < 5) {
+      // Smooth horizontal transition between deep dive steps
+      Animated.parallel([
+        Animated.timing(fadeAnim, {
+          toValue: 0,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+        Animated.timing(slideAnim, {
+          toValue: -30,
+          duration: 150,
+          useNativeDriver: true,
+        }),
+      ]).start(() => {
+        setStep((prev) => prev + 1);
+        slideAnim.setValue(30);
+        Animated.parallel([
+          Animated.timing(fadeAnim, {
+            toValue: 1,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+          Animated.timing(slideAnim, {
+            toValue: 0,
+            duration: 200,
+            useNativeDriver: true,
+          }),
+        ]).start();
+      });
+    }
+  };
+
+  const goBack = () => {
+    if (step > 0) {
+      setStep((prev) => prev - 1);
+    } else {
+      navigation.goBack();
+    }
   };
 
   const handleFinish = async () => {
     if (isExamDay) {
       await complete();
     }
-    // Navigate back to Home tab
+    // Navigate back to Home / Today's Plan
     navigation.dispatch(
       CommonActions.navigate({ name: 'Home' })
     );
@@ -78,136 +95,74 @@ export default function TodaysReportScreen() {
     return (
       <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
-          <View style={ss.backBtnWrap}>
-            <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-              <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
-            </TouchableOpacity>
-          </View>
+          <TouchableOpacity
+            onPress={goBack}
+            style={ss.loadingBackBtn}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
           <ReportLoadingCard />
         </SafeAreaView>
       </AppBackground>
     );
   }
 
-  if (error || !report) {
-    return (
-      <AppBackground>
-        <SafeAreaView style={ss.safe} edges={['top']}>
-          <View style={ss.backBtnWrap}>
-            <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-              <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
-            </TouchableOpacity>
-          </View>
-          <ReportErrorCard
-            error={error}
-            title="Daily Report Not Available"
-            onRetry={refresh}
-          />
-        </SafeAreaView>
-      </AppBackground>
-    );
-  }
-
-  if (!overallScores) {
-    return (
-      <AppBackground>
-        <SafeAreaView style={ss.safe} edges={['top']}>
-          <View style={ss.backBtnWrap}>
-            <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-              <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
-            </TouchableOpacity>
-          </View>
-          <ReportErrorCard
-            error="Unable to calculate report scores"
-            title="Daily Report Not Available"
-            onRetry={refresh}
-          />
-        </SafeAreaView>
-      </AppBackground>
-    );
-  }
-
-  const stepIconNames = ['bar-chart', 'chatbubbles', 'book', 'layers', 'link'] as const;
   const stepTitles = [
-    'Your English Score',
-    'Fluency Analysis',
-    'Grammar Analysis',
-    'Vocabulary Analysis',
-    'Discourse Analysis',
+    'IELTS Speaking Score',
+    'Fluency & Coherence',
+    'Lexical Resource',
+    'Grammar & Accuracy',
+    'Pronunciation',
+    'Action Plan',
   ] as const;
-  const stepLevels = [
-    String(overallScores.level ?? ''),
-    String(report.fluency.fluencyLevel ?? ''),
-    String(report.grammar.grammarLevel ?? ''),
-    String(report.vocabulary.vocabularyLevel ?? ''),
-    String(report.discourse.discourseLevel ?? ''),
-  ] as const;
-
-  const enhancedRadarData = radarData.map((item: any, index: number) => ({
-    ...item,
-    icon: ['chatbubble', 'trending-up', 'book', 'link'][index],
-    iconColor: ['#7B70FF', '#fb923c', '#a78bfa', '#818cf8'][index],
-    bgColor: [
-      'rgba(59,130,246,0.2)',
-      'rgba(251,146,60,0.2)',
-      'rgba(167,139,250,0.2)',
-      'rgba(129,140,248,0.2)',
-    ][index],
-    description: [
-      'Fluency is the ability to speak smoothly and confidently without unnecessary pauses.',
-      'Vocabulary is the range of words you know and can use to express your thoughts clearly.',
-      'Grammar is the set of rules that structure sentences correctly and meaningfully.',
-      'Discourse refers to how ideas are connected and organized in longer speech or writing.',
-    ][index],
-  }));
 
   const pages: React.ReactNode[] = [
     <EnglishScoreCard
       key="overview"
       overallScores={overallScores}
-      radarData={enhancedRadarData}
       onContinue={handleContinue}
       showIcons
-      hideHeroTitle
     />,
     <FluencyCard
       key="fluency"
-      fluency={report.fluency}
-      onContinue={handleContinue}
-      hideSectionHeader
-    />,
-    <GrammarCard
-      key="grammar"
-      grammar={report.grammar}
+      fluency={report?.fluency}
       onContinue={handleContinue}
       hideSectionHeader
     />,
     <VocabularyCard
       key="vocabulary"
-      vocabulary={report.vocabulary}
+      vocabulary={report?.vocabulary}
       onContinue={handleContinue}
       hideSectionHeader
     />,
-    <DiscourseCard
-      key="discourse"
-      discourse={report.discourse}
+    <GrammarCard
+      key="grammar"
+      grammar={report?.grammar}
+      onContinue={handleContinue}
+      hideSectionHeader
+    />,
+    <PronunciationCard
+      key="pronunciation"
+      pronunciation={report?.pronunciation}
+      onContinue={handleContinue}
+      hideSectionHeader
+    />,
+    <ActionPlanCard
+      key="actionPlan"
+      report={report ?? undefined}
       onFinish={handleFinish}
       hideSectionHeader
     />,
-  ].filter(Boolean);
+  ];
 
   return (
     <AppBackground>
       <SafeAreaView style={ss.safe} edges={['top']}>
-        <View style={ss.backBtnWrap}>
-          <TouchableOpacity onPress={goBack} style={ss.backBtn}>
-            <Ionicons name="chevron-back" size={18} color="rgba(255,255,255,0.8)" />
-          </TouchableOpacity>
-        </View>
         <TodayReportStepHeader
           title={stepTitles[step]}
-          level={stepLevels[step]}
-          iconName={stepIconNames[step]}
+          onBack={goBack}
         />
         <Animated.View
           style={[
@@ -225,18 +180,9 @@ export default function TodaysReportScreen() {
 const ss = StyleSheet.create({
   safe: { flex: 1 },
   page: { flex: 1 },
-  backBtnWrap: {
-    paddingHorizontal: 20,
-    paddingTop: 12,
-  },
-  backBtn: {
-    width: tokens.control.height,
-    height: tokens.control.height,
-    borderRadius: tokens.radius.sm,
-    borderWidth: 1,
-    borderColor: tokens.color.border.card,
-    backgroundColor: tokens.color.surface.card,
-    alignItems: 'center',
-    justifyContent: 'center',
+  loadingBackBtn: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    alignSelf: 'flex-start',
   },
 });

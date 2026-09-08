@@ -498,6 +498,8 @@ function ReviewCardComponent({
   isThinking,
   isCoachSpeaking,
   coachMessage,
+  failedAttemptsCount = 0,
+  onContinueAnyway,
 }: {
   item: ReviewItem;
   currentIndex: number;
@@ -505,6 +507,8 @@ function ReviewCardComponent({
   onTapToSay: () => void;
   onClearTranscript: () => void;
   onCheckAnswer: () => void;
+  onContinueAnyway?: () => void;
+  failedAttemptsCount?: number;
   isListening: boolean;
   transcript: string;
   isValidating: boolean;
@@ -656,12 +660,47 @@ function ReviewCardComponent({
             </Text>
           </FigmaPrimaryButton>
         )}
+        {failedAttemptsCount >= 1 && !isValidating && !isListening && onContinueAnyway && (
+          <TouchableOpacity
+            onPress={onContinueAnyway}
+            style={rcc.continueAnywayBtn}
+            activeOpacity={0.7}
+          >
+            <Ionicons
+              name="arrow-forward-circle-outline"
+              size={18}
+              color="#93c5fd"
+              style={{ marginRight: 6 }}
+            />
+            <Text style={rcc.continueAnywayText}>
+              I said it right — Continue Anyway ➔
+            </Text>
+          </TouchableOpacity>
+        )}
       </View>
     </View>
   );
 }
 
 const rcc = StyleSheet.create({
+  continueAnywayBtn: {
+    marginTop: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    backgroundColor: 'rgba(59, 130, 246, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(59, 130, 246, 0.3)',
+  },
+  continueAnywayText: {
+    color: '#93c5fd',
+    fontSize: 14,
+    fontFamily: 'Poppins-Medium',
+    fontWeight: '500',
+  },
   playbackRow: { paddingHorizontal: 10, paddingBottom: 14, paddingLeft: 50 },
   outer: { paddingHorizontal: 20, paddingTop: 20 },
   coachImageWrap: {
@@ -1013,6 +1052,7 @@ export const ReviewScreen: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [reviewItems, setReviewItems] = useState<ReviewItem[]>([]);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [failedAttempts, setFailedAttempts] = useState<Record<number, number>>({});
   const [coachMessage, setCoachMessage] = useState('');
   const [isStreaming, setIsStreaming] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
@@ -1211,6 +1251,10 @@ export const ReviewScreen: React.FC = () => {
           }
         } else {
           setIsValidating(false);
+          setFailedAttempts((prev) => ({
+            ...prev,
+            [currentCardIndex]: (prev[currentCardIndex] || 0) + 1,
+          }));
         }
       } catch (err: any) {
         console.error('[ReviewScreen] Audio evaluation error:', err);
@@ -1284,6 +1328,33 @@ export const ReviewScreen: React.FC = () => {
       handleTapToSay();
     }
   }, [isRecording, handleTapToSay]);
+
+  const handleContinueAnyway = useCallback(() => {
+    validationGenRef.current += 1;
+    stopCoachAudio();
+    setIsThinking(false);
+    setIsCoachSpeaking(false);
+    setIsValidating(false);
+    setIsRecording(false);
+    if (recordingRef.current) {
+      recordingRef.current.stopAndUnloadAsync().catch(() => {});
+      recordingRef.current = null;
+    }
+    streamMessage("Got it! Let's keep your momentum going!");
+
+    if (currentCardIndex < reviewItems.length - 1) {
+      setCurrentCardIndex((p) => p + 1);
+      setTranscript('');
+      setCoachMessage('');
+      setUserActivated(false);
+    } else {
+      progressService.updateDailyProgress({
+        speaking_quiz_completed: true,
+        speaking_quiz_score: 100,
+      }).catch(() => {});
+      setTimeout(() => setReviewComplete(true), 1200);
+    }
+  }, [currentCardIndex, reviewItems.length, streamMessage]);
 
   const goBack = useCallback(() => {
     navigation.goBack();
@@ -1462,6 +1533,8 @@ export const ReviewScreen: React.FC = () => {
               onTapToSay={handleTapToSay}
               onClearTranscript={handleClearTranscript}
               onCheckAnswer={handleCheckAnswer}
+              onContinueAnyway={handleContinueAnyway}
+              failedAttemptsCount={failedAttempts[currentCardIndex] || 0}
               isListening={isRecording}
               transcript={transcript}
               isValidating={isValidating}

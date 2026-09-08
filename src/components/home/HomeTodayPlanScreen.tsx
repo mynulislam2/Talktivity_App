@@ -125,10 +125,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<HomeNav>();
   const { course } = courseStatus;
-  const allActivitiesComplete =
-    course.dayType === 'speaking_exam'
-      ? booleans.speakingCompleted
-      : booleans.speakingCompleted && booleans.quizCompleted;
+  const allActivitiesComplete = booleans.speakingCompleted && booleans.quizCompleted;
 
   const startSpeaking = useCallback(async () => {
     // Clear roleplay flags so PracticeScreen treats this as a practice session
@@ -216,7 +213,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
       : [
           {
             id: 'speaking',
-            title: course.todayTopic?.title || 'Speaking Zone',
+            title: course.todayTopic?.title || 'Speaking Practice',
             description: `${practiceMinutes} minutes of speaking practice: ${
               course.todayTopic?.title || 'Daily speaking topic'
             }`,
@@ -241,7 +238,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
               ? 'AI feedback ready'
               : booleans.speakingCompleted
               ? 'Review is being prepared'
-              : 'Complete Speaking Zone first',
+              : 'Complete Speaking Practice first',
             status: booleans.quizCompleted
               ? 'completed'
               : booleans.reviewUnlocked

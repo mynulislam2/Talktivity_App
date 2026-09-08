@@ -22,6 +22,8 @@ export function normalizeTodayReport(backendData: any): TodayReport {
 
   // Normalize each section with defaults
   const fluency: FluencyReport = {
+    band: reportData?.fluency?.band || reportData?.fluency?.fluencyBand,
+    fluencyBand: reportData?.fluency?.fluencyBand || reportData?.fluency?.band,
     fluencyScore:
       reportData?.fluency?.fluencyScore || reportData?.fluency?.score || 0,
     fluencyLevel:
@@ -49,9 +51,13 @@ export function normalizeTodayReport(backendData: any): TodayReport {
       rate: reportData?.fluency?.hesitationsAndCorrections?.rate || 0,
       feedback: reportData?.fluency?.hesitationsAndCorrections?.feedback || '',
     },
+    strengths: reportData?.fluency?.strengths || [],
+    improvements: reportData?.fluency?.improvements || [],
   };
 
   const grammar: GrammarReport = {
+    band: reportData?.grammar?.band || reportData?.grammar?.grammarBand,
+    grammarBand: reportData?.grammar?.grammarBand || reportData?.grammar?.band,
     grammarScore:
       reportData?.grammar?.grammarScore || reportData?.grammar?.score || 0,
     grammarLevel:
@@ -68,11 +74,18 @@ export function normalizeTodayReport(backendData: any): TodayReport {
     grammarErrors: reportData?.grammar?.grammarErrors,
     sentenceComplexity: {
       score: reportData?.grammar?.sentenceComplexity?.score || 0,
+      complexSentenceRatio:
+        reportData?.grammar?.sentenceComplexity?.complexSentenceRatio,
       feedback: reportData?.grammar?.sentenceComplexity?.feedback || '',
     },
+    strengths: reportData?.grammar?.strengths || [],
+    improvements: reportData?.grammar?.improvements || [],
   };
 
   const vocabulary: VocabularyReport = {
+    band: reportData?.vocabulary?.band || reportData?.vocabulary?.vocabularyBand,
+    vocabularyBand:
+      reportData?.vocabulary?.vocabularyBand || reportData?.vocabulary?.band,
     vocabularyScore:
       reportData?.vocabulary?.vocabularyScore ||
       reportData?.vocabulary?.score ||
@@ -90,6 +103,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
       : null,
     activeVocabulary: reportData?.vocabulary?.activeVocabulary || 0,
     uniqueWords: reportData?.vocabulary?.uniqueWords || 0,
+    sentenceUpgrades: reportData?.vocabulary?.sentenceUpgrades || [],
     lexicalDiversity: {
       score: reportData?.vocabulary?.lexicalDiversity?.score || 0,
       feedback: reportData?.vocabulary?.lexicalDiversity?.feedback || '',
@@ -98,6 +112,8 @@ export function normalizeTodayReport(backendData: any): TodayReport {
     wordSuggestions: reportData?.vocabulary?.wordSuggestions,
     exampleSentences: reportData?.vocabulary?.exampleSentences,
     idiomaticLanguage: reportData?.vocabulary?.idiomaticLanguage,
+    strengths: reportData?.vocabulary?.strengths || [],
+    improvements: reportData?.vocabulary?.improvements || [],
   };
 
   const discourse: DiscourseReport = {
@@ -126,11 +142,31 @@ export function normalizeTodayReport(backendData: any): TodayReport {
     },
   };
 
+  const pronunciation = reportData?.pronunciation
+    ? {
+        band: reportData.pronunciation.band || reportData.pronunciation.pronunciationBand,
+        pronunciationBand:
+          reportData.pronunciation.pronunciationBand || reportData.pronunciation.band,
+        pronunciationScore:
+          reportData.pronunciation.pronunciationScore || reportData.pronunciation.score || 0,
+        pronunciationLevel: reportData.pronunciation.pronunciationLevel,
+        feedback: reportData.pronunciation.feedback,
+        struggledWords: reportData.pronunciation.struggledWords || [],
+        strengths: reportData.pronunciation.strengths || [],
+        improvements: reportData.pronunciation.improvements || [],
+      }
+    : undefined;
+
   return {
+    overall_band: reportData?.overall_band,
+    target_band: reportData?.target_band,
+    band_gap: reportData?.band_gap,
+    action_plan_priorities: reportData?.action_plan_priorities,
     fluency,
     grammar,
     vocabulary,
     discourse,
+    pronunciation,
     report_date: backendData?.report_date,
     created_at: backendData?.created_at,
     updated_at: backendData?.updated_at,

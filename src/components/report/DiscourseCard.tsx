@@ -14,10 +14,14 @@ import { tokens } from '@/theme/tokens';
 import type { DiscourseReport } from '@/types/report';
 
 export interface DiscourseCardProps {
-  discourse: DiscourseReport;
+  discourse?: DiscourseReport | null;
   onFinish: () => void;
   onContinue?: () => void;
   hideSectionHeader?: boolean;
+}
+
+function finite(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 export function DiscourseCard({
@@ -27,6 +31,9 @@ export function DiscourseCard({
   hideSectionHeader = false,
 }: DiscourseCardProps) {
   const handleAction = onFinish || onContinue;
+  const discourseScore = finite(discourse?.discourseScore);
+  const cohesionScore = finite(discourse?.cohesion?.score);
+  const coherenceScore = finite(discourse?.coherence?.score);
 
   return (
     <ScrollView style={ss.wrapper} contentContainerStyle={ss.container}>
@@ -37,14 +44,19 @@ export function DiscourseCard({
           </View>
           <View>
             <Text style={ss.title}>Discourse Analysis</Text>
-            <Text style={ss.subtitle}>Level {discourse.discourseLevel}</Text>
+            {discourse?.discourseLevel ? (
+              <Text style={ss.subtitle}>Level {discourse.discourseLevel}</Text>
+            ) : null}
           </View>
         </View>
       )}
 
       <View style={ss.statSpace}>
-        <StatCard title="Discourse Score" value={`${discourse.discourseScore}%`}>
-          {discourse.improvementTarget ? (
+        <StatCard
+          title="Discourse Score"
+          value={discourseScore != null ? `${discourseScore}%` : undefined}
+        >
+          {discourse?.improvementTarget ? (
             <Text style={ss.desc}>
               You're {discourse.improvementTarget.percentToNextLevel}% away from{' '}
               {discourse.improvementTarget.nextLevel}
@@ -54,29 +66,25 @@ export function DiscourseCard({
           )}
         </StatCard>
 
-        {discourse.cohesion && (
-          <StatCard title="Cohesion" value={`${discourse.cohesion.score || 0}%`}>
-            {discourse.cohesion.feedback ? (
+        {cohesionScore != null && (
+          <StatCard title="Cohesion" value={`${cohesionScore}%`}>
+            {discourse?.cohesion?.feedback ? (
               <Text style={ss.desc}>{discourse.cohesion.feedback}</Text>
             ) : null}
-            {typeof discourse.cohesion.score === 'number' && (
-              <ProgressBar value={discourse.cohesion.score} color="#818cf8" />
-            )}
+            <ProgressBar value={cohesionScore} color="#818cf8" />
           </StatCard>
         )}
 
-        {discourse.coherence && (
-          <StatCard title="Coherence" value={`${discourse.coherence.score || 0}%`}>
-            {discourse.coherence.feedback ? (
+        {coherenceScore != null && (
+          <StatCard title="Coherence" value={`${coherenceScore}%`}>
+            {discourse?.coherence?.feedback ? (
               <Text style={ss.desc}>{discourse.coherence.feedback}</Text>
             ) : null}
-            {typeof discourse.coherence.score === 'number' && (
-              <ProgressBar value={discourse.coherence.score} color="#818cf8" />
-            )}
+            <ProgressBar value={coherenceScore} color="#818cf8" />
           </StatCard>
         )}
 
-        {(discourse as any).organization && (
+        {(discourse as any)?.organization && (
           <StatCard
             title="Organization"
             value={`${(discourse as any).organization.score}`}
@@ -87,7 +95,7 @@ export function DiscourseCard({
           </StatCard>
         )}
 
-        {(discourse as any).feedback &&
+        {(discourse as any)?.feedback &&
           Array.isArray((discourse as any).feedback) &&
           (discourse as any).feedback.length > 0 && (
             <StatCard title="Feedback">

@@ -11,27 +11,33 @@ import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
 import type { VocabularyReport } from '@/types/report';
+import type { ReportMode } from '@/lib/report/reportMode';
 
 export interface VocabularyCardProps {
   vocabulary?: VocabularyReport;
   onContinue: () => void;
   hideSectionHeader?: boolean;
+  mode?: ReportMode;
+}
+
+function finite(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 export function VocabularyCard({
   vocabulary,
   onContinue,
   hideSectionHeader = false,
+  mode = 'ielts',
 }: VocabularyCardProps) {
-  const band = vocabulary?.band ?? vocabulary?.vocabularyBand ?? 6.0;
-  const numBand = Number(band) || 6.0;
-  const targetBand = Math.min(9.0, Number((numBand + 0.5).toFixed(1)));
-  const strengths = (vocabulary?.strengths && vocabulary.strengths.length > 0)
-    ? vocabulary.strengths
-    : ['Communicated core ideas effectively with adequate word choice'];
-  const areasForImprovement = (vocabulary?.improvements && vocabulary.improvements.length > 0)
-    ? vocabulary.improvements
-    : ['Incorporate more Band 7+ academic collocations and topical vocabulary'];
+  const isIelts = mode === 'ielts';
+  const band = finite(vocabulary?.band) ?? finite(vocabulary?.vocabularyBand);
+  const targetBand =
+    band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
+  const strengths = vocabulary?.strengths ?? [];
+  const areasForImprovement = vocabulary?.improvements ?? [];
+  const score = finite(vocabulary?.vocabularyScore);
+  const improvementTarget = vocabulary?.improvementTarget;
   const sentenceUpgrades = vocabulary?.sentenceUpgrades ?? [];
 
   return (
@@ -42,46 +48,84 @@ export function VocabularyCard({
             <Ionicons name="layers" size={24} color="#fb923c" />
           </View>
           <View>
-            <Text style={ss.title}>Lexical Resource</Text>
-            <Text style={ss.subtitle}>Band {band}</Text>
+            <Text style={ss.title}>
+              {isIelts ? 'Lexical Resource' : 'Vocabulary Analysis'}
+            </Text>
+            {isIelts ? (
+              <Text style={ss.subtitle}>
+                {band != null ? `Band ${band}` : 'Band not available'}
+              </Text>
+            ) : vocabulary?.vocabularyLevel ? (
+              <Text style={ss.subtitle}>Level {vocabulary.vocabularyLevel}</Text>
+            ) : null}
           </View>
         </View>
       )}
 
       <View style={ss.statSpace}>
-        {/* 1. Official IELTS Band & Goal */}
-        <StatCard title="Lexical Resource" value={`Band ${band}`}>
-          <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-            Next Milestone: Band {targetBand} (0.5 band to go)
-          </Text>
-          <View style={{ marginTop: 8, gap: 8 }}>
-            {strengths.map((s, i) => (
-              <View key={`s-${i}`} style={ss.bulletRow}>
-                <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{s}</Text>
-              </View>
-            ))}
-            {areasForImprovement.map((imp, i) => (
-              <View key={`imp-${i}`} style={ss.bulletRow}>
-                <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{imp}</Text>
-              </View>
-            ))}
-          </View>
+        {/* 1. Score / band headline and coaching notes */}
+        <StatCard
+          title={isIelts ? 'Lexical Resource' : 'Vocabulary Score'}
+          value={
+            isIelts
+              ? band != null
+                ? `Band ${band}`
+                : undefined
+              : score != null
+                ? `${score}%`
+                : undefined
+          }
+        >
+          {isIelts ? (
+            targetBand != null ? (
+              <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
+                Next Milestone: Band {targetBand} (0.5 band to go)
+              </Text>
+            ) : (
+              <Text style={ss.desc}>Band not available</Text>
+            )
+          ) : improvementTarget ? (
+            <Text style={ss.desc}>
+              You're {improvementTarget.percentToNextLevel}% away from{' '}
+              {improvementTarget.nextLevel}
+            </Text>
+          ) : (
+            <Text style={ss.desc}>Improvement target not available</Text>
+          )}
+          {strengths.length > 0 || areasForImprovement.length > 0 ? (
+            <View style={{ marginTop: 8, gap: 8 }}>
+              {strengths.map((s, i) => (
+                <View key={`s-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{s}</Text>
+                </View>
+              ))}
+              {areasForImprovement.map((imp, i) => (
+                <View key={`imp-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{imp}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
         </StatCard>
 
         {/* 2. Useful Sentence Upgrades */}
         {sentenceUpgrades.length > 0 ? (
           <StatCard title="Useful Sentence Upgrades">
             <Text style={ss.desc}>
-              Elevate simple expressions to more descriptive, Band 7.0+ vocabulary:
+              {isIelts
+                ? 'Elevate simple expressions to more descriptive, Band 7.0+ vocabulary:'
+                : 'Elevate simple expressions to more descriptive vocabulary:'}
             </Text>
             {sentenceUpgrades.map((item, idx) => (
               <View key={idx} style={ss.sentenceCard}>
                 <Text style={ss.sentenceLabelOriginal}>Before</Text>
                 <Text style={ss.sentenceTextOriginal}>"{item.original}"</Text>
                 <View style={ss.sentenceDivider} />
-                <Text style={ss.sentenceLabelUpgraded}>Upgraded (Band 7.0+)</Text>
+                <Text style={ss.sentenceLabelUpgraded}>
+                  {isIelts ? 'Upgraded (Band 7.0+)' : 'Upgraded'}
+                </Text>
                 <Text style={ss.sentenceTextUpgraded}>"{item.improved || (item as any).upgraded}"</Text>
               </View>
             ))}
@@ -89,7 +133,12 @@ export function VocabularyCard({
         ) : null}
       </View>
 
-      <ReportCTAButton label="Continue to Grammar & Accuracy" onPress={onContinue} />
+      <ReportCTAButton
+        label={
+          isIelts ? 'Continue to Grammar & Accuracy' : 'Continue to Discourse'
+        }
+        onPress={onContinue}
+      />
     </ScrollView>
   );
 }

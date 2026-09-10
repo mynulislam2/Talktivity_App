@@ -1,7 +1,8 @@
 /**
  * ActionPlanCard Component (React Native)
  *
- * Dedicated final page: "Your Path to Band 7.0 (Key Focus)".
+ * IELTS-only final page: the general report has no action-plan section, so
+ * this card is rendered from the IELTS report flow only.
  * Summarizes the key focus areas for the next session to close the band gap.
  */
 
@@ -19,21 +20,29 @@ export interface ActionPlanCardProps {
   hideSectionHeader?: boolean;
 }
 
+function finite(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 export function ActionPlanCard({
   report,
   onFinish,
   hideSectionHeader = false,
 }: ActionPlanCardProps) {
-  const currentBand = report?.overall_band ?? 6.0;
-  const targetBand = report?.target_band ?? Math.min(9.0, Number((currentBand + 0.5).toFixed(1)));
-  const bandGap = report?.band_gap !== undefined ? `${report.band_gap} band to go` : `${(targetBand - currentBand).toFixed(1)} band to go`;
-  const priorities = (report?.action_plan_priorities && report.action_plan_priorities.length > 0)
-    ? report.action_plan_priorities
-    : [
-        "Practice speaking in sustained chunks to minimize hesitation pauses",
-        "Upgrade everyday verbs to Band 7+ collocations and idioms",
-        "Use more complex sentences with subordinating conjunctions"
-      ];
+  const currentBand = finite(report?.overall_band);
+  const targetBand =
+    finite(report?.target_band) ??
+    (currentBand != null
+      ? Math.min(9.0, Number((currentBand + 0.5).toFixed(1)))
+      : null);
+  const reportedGap = finite(report?.band_gap);
+  const bandGap =
+    reportedGap != null
+      ? `${reportedGap} band to go`
+      : targetBand != null && currentBand != null
+        ? `${(targetBand - currentBand).toFixed(1)} band to go`
+        : null;
+  const priorities = report?.action_plan_priorities ?? [];
 
   return (
     <ScrollView style={ss.wrapper} contentContainerStyle={ss.container}>
@@ -51,29 +60,44 @@ export function ActionPlanCard({
 
       <View style={ss.statSpace}>
         {/* 1. Next Milestone Banner */}
-        <StatCard title="Next Milestone" value={`Band ${targetBand}`}>
-          <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-            Current: Band {currentBand} ({bandGap})
-          </Text>
+        <StatCard
+          title="Next Milestone"
+          value={targetBand != null ? `Band ${targetBand}` : undefined}
+        >
+          {currentBand != null && bandGap ? (
+            <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
+              Current: Band {currentBand} ({bandGap})
+            </Text>
+          ) : (
+            <Text style={ss.desc}>Band not available</Text>
+          )}
           <Text style={[ss.desc, { marginTop: 6 }]}>
             Target your key focus areas in tomorrow's speaking session to close the band gap.
           </Text>
         </StatCard>
 
         {/* 2. Key Focus Priorities for Next Practice */}
-        <StatCard title={`Path to Next Milestone: Band ${targetBand} (Key Focus)`}>
-          <Text style={ss.desc}>Based on today's session, focus your next practice on:</Text>
-          <View style={{ marginTop: 8, gap: 10 }}>
-            {priorities.map((item, idx) => (
-              <View key={idx} style={ss.priorityItem}>
-                <View style={ss.priorityNumBox}>
-                  <Text style={ss.priorityNum}>{idx + 1}</Text>
+        {priorities.length > 0 ? (
+          <StatCard
+            title={
+              targetBand != null
+                ? `Path to Next Milestone: Band ${targetBand} (Key Focus)`
+                : 'Key Focus for Next Practice'
+            }
+          >
+            <Text style={ss.desc}>Based on today's session, focus your next practice on:</Text>
+            <View style={{ marginTop: 8, gap: 10 }}>
+              {priorities.map((item, idx) => (
+                <View key={idx} style={ss.priorityItem}>
+                  <View style={ss.priorityNumBox}>
+                    <Text style={ss.priorityNum}>{idx + 1}</Text>
+                  </View>
+                  <Text style={ss.priorityText}>{item}</Text>
                 </View>
-                <Text style={ss.priorityText}>{item}</Text>
-              </View>
-            ))}
-          </View>
-        </StatCard>
+              ))}
+            </View>
+          </StatCard>
+        ) : null}
       </View>
 
       <ReportCTAButton label="Back to Today's Plan" onPress={onFinish} />

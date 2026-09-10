@@ -19,7 +19,7 @@ export interface PracticeSessionState {
 export interface PracticeStatus {
   canStartSession: boolean;
   remainingTime: string;
-  remainingTimeSeconds: number;
+  remainingTimeSeconds: number | null;
   isLoading: boolean;
   error: string | null;
 }

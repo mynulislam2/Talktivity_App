@@ -206,10 +206,10 @@ const Timeline: React.FC<TimelineProps> = ({ courseStatus }) => {
                   Weekly assessment of your speaking progress
                 </Text>
                 {timeStatus &&
-                  timeStatus.remainingTimeSeconds > 0 &&
+                  timeStatus.canStartCall &&
                   !speakingCompleted && (
                     <Text style={styles.timeRemaining}>
-                      â±ï¸ Time remaining: {remainingTime}
+                      ⏱️ {remainingTime === 'Unlimited' ? 'Unlimited practice today' : `Time remaining: ${remainingTime}`}
                     </Text>
                   )}
                 {speakingCompleted ? (

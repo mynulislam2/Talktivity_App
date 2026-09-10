@@ -1,12 +1,7 @@
 import { useState, useCallback } from 'react';
-import { useAppDispatch, useAppSelector } from '@/store/hooks';
 import { AiService } from '@/services/ai';
 import { roleplayService } from '@/services/roleplay';
 import type { Topic } from '@/types/topics';
-import {
-  loadSubscriptionStatus,
-  selectCurrentSubscription,
-} from '@/store/slices/subscriptionSlice';
 
 export interface RolePlayGenerationData {
   myRole: string;
@@ -20,8 +15,6 @@ export interface UseRolePlayGenerationReturn {
 }
 
 export function useRolePlayGeneration(): UseRolePlayGenerationReturn {
-  const dispatch = useAppDispatch();
-  const currentSubscription = useAppSelector(selectCurrentSubscription);
   const [isGenerating, setIsGenerating] = useState(false);
   const aiService = AiService.getInstance();
 
@@ -29,28 +22,6 @@ export function useRolePlayGeneration(): UseRolePlayGenerationReturn {
     async (data: RolePlayGenerationData): Promise<Topic> => {
       setIsGenerating(true);
       try {
-        let planType = currentSubscription?.subscription?.plan_type as
-          | string
-          | undefined;
-        if (!planType) {
-          try {
-            const updated = await dispatch(loadSubscriptionStatus()).unwrap();
-            planType = updated?.subscription?.plan_type;
-          } catch {
-            planType = 'Basic';
-          }
-        }
-
-        if (planType !== 'Pro') {
-          const existing = await roleplayService.getRoleplays();
-          const count = (existing.data || []).length;
-          if (count >= 5) {
-            throw new Error(
-              'You can create up to 5 custom role-play scenarios on your current plan. Upgrade to Pro for unlimited.'
-            );
-          }
-        }
-
         const { myRole, otherRole, situation } = data;
 
         const {
@@ -109,7 +80,7 @@ export function useRolePlayGeneration(): UseRolePlayGenerationReturn {
         setIsGenerating(false);
       }
     },
-    [aiService, dispatch, currentSubscription]
+    [aiService]
   );
 
   return {

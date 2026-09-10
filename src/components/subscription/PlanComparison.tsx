@@ -24,29 +24,24 @@ export function PlanComparison({
   onStartFreeTrial,
   canStartFreeTrial = false,
 }: PlanComparisonProps) {
-  // Deduplicate by plan_type, keeping the first occurrence
-  const allowedPlanTypes = ['FreeTrial', 'Basic', 'Pro'];
+  // Deduplicate active plans by plan_type
   const planTypeMap = new Map<string, SubscriptionPlan>();
 
   plans.forEach((plan) => {
-    if (
-      allowedPlanTypes.includes(plan.plan_type) &&
-      !planTypeMap.has(plan.plan_type)
-    ) {
+    if (plan.is_active !== false && !planTypeMap.has(plan.plan_type)) {
       planTypeMap.set(plan.plan_type, plan);
     }
   });
 
-  // Convert back to array and sort: FreeTrial, Basic, Pro
+  // Sort by duration and price
   const displayPlans = Array.from(planTypeMap.values()).sort((a, b) => {
-    const order = ['FreeTrial', 'Basic', 'Pro'];
-    return order.indexOf(a.plan_type) - order.indexOf(b.plan_type);
+    return (a.duration_days || 0) - (b.duration_days || 0) || (Number(a.price) || 0) - (Number(b.price) || 0);
   });
 
-  // Find recommended plan (Basic is highlighted)
-  const recommendedPlan = displayPlans.find(
-    (plan) => plan.plan_type === 'Basic'
-  );
+  // Find recommended plan (30-day or 90-day plan, or first)
+  const recommendedPlan =
+    displayPlans.find((plan) => plan.duration_days === 30 || plan.duration_days === 90) ||
+    displayPlans[0];
 
   return (
     <ScrollView

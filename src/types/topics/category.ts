@@ -12,7 +12,7 @@ export interface TopicCategory {
   topics: Topic[];
   totalTopics: number;
   displayedTopics: number;
-  planType: 'Basic/FreeTrial' | 'Pro';
+  planType?: string;
   restricted: boolean;
   created_at?: string;
   updated_at?: string;

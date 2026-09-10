@@ -69,7 +69,7 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
       topics: roleplayTopics,
       totalTopics: roleplayTopics.length,
       displayedTopics: roleplayTopics.length,
-      planType: 'Basic/FreeTrial',
+      planType: 'All',
       restricted: false,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),

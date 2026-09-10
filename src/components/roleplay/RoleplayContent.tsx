@@ -40,7 +40,7 @@ export interface RoleplayContentProps {
   canStartSession: boolean;
   timeLoading: boolean;
   remainingTime: string;
-  remainingTimeSeconds?: number;
+  remainingTimeSeconds?: number | null;
   stateColor?: string;
   onDeviceFailure?: (error?: any) => void;
   onBack?: () => void;
@@ -209,7 +209,9 @@ export function RoleplayContent({
             </Text>
             {!timeLoading && (
               <Text style={styles.introMeta}>
-                Time remaining today: {remainingTime}
+                {remainingTime === 'Unlimited' || remainingTimeSeconds === null
+                  ? 'Unlimited time today'
+                  : `Time remaining today: ${remainingTime}`}
               </Text>
             )}
           </View>

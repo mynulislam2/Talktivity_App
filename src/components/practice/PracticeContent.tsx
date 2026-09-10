@@ -47,7 +47,7 @@ export interface PracticeContentProps {
   canStartSession: boolean;
   timeLoading: boolean;
   remainingTime: string;
-  remainingTimeSeconds?: number;
+  remainingTimeSeconds?: number | null;
   stateColor?: string;
   onDeviceFailure?: (error?: any) => void;
   onBack?: () => void;
@@ -230,7 +230,9 @@ export function PracticeContent({
             <Text style={styles.introDescription}>{s.description}</Text>
             {!timeLoading && (
               <Text style={styles.introMeta}>
-                Time remaining today: {remainingTime}
+                {remainingTime === 'Unlimited' || remainingTimeSeconds === null
+                  ? 'Unlimited time today'
+                  : `Time remaining today: ${remainingTime}`}
               </Text>
             )}
           </View>

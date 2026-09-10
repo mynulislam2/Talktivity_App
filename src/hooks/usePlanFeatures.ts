@@ -31,53 +31,54 @@ export function usePlanFeatures(): PlanFeaturesView {
 }
 
 export interface DailyBudgetMinutes {
-  practiceMinutes: number;
-  roleplayMinutes: number;
+  practiceMinutes: number | null;
+  roleplayMinutes: number | null;
+  isUnlimitedPractice: boolean;
   isUnlimitedRoleplay: boolean;
 }
 
 export function useDailyBudgetMinutes(): DailyBudgetMinutes {
   const subscriptionStatus = useAppSelector(selectCurrentSubscription) as any;
   const sub = subscriptionStatus?.subscription;
-  const planType = sub?.plan_type ?? null;
-  const features = sub?.features ?? null;
-  const obj = asFeaturesObject(features);
-
-  const isProTier =
-    planType === 'Pro' ||
-    (typeof planType === 'string' && planType.startsWith('International_')) ||
-    planType === 'BD_1Month' ||
-    planType === 'BD_3Month';
-  const isQuarterlyOrInternational =
-    planType === 'BD_3Month' ||
-    (typeof planType === 'string' && planType.startsWith('International_'));
-  const legacyPracticeSec = isProTier ? 600 : 300;
-  const legacyRoleplaySec = isQuarterlyOrInternational ? 1200 : isProTier ? 600 : 300;
-
-  if (obj && obj.daily_seconds) {
-    const ds = obj.daily_seconds;
-    const practiceSec =
-      typeof ds.practice === 'number' ? ds.practice : legacyPracticeSec;
-    const combinedSec =
-      typeof ds.roleplay_general_combined === 'number'
-        ? ds.roleplay_general_combined
-        : null;
-    const roleplaySec =
-      combinedSec != null
-        ? combinedSec
-        : typeof ds.roleplay === 'number'
-        ? ds.roleplay
-        : legacyRoleplaySec;
+  if (!sub) {
     return {
-      practiceMinutes: Math.floor(practiceSec / 60),
-      roleplayMinutes: Math.floor(roleplaySec / 60),
+      practiceMinutes: 0,
+      roleplayMinutes: 0,
+      isUnlimitedPractice: false,
       isUnlimitedRoleplay: false,
     };
   }
 
+  const features = sub.features ?? null;
+  const obj = asFeaturesObject(features);
+
+  if (sub.talk_time_minutes !== undefined || sub.max_scenarios !== undefined) {
+    const practiceMinutes = sub.talk_time_minutes != null ? sub.talk_time_minutes : null;
+    const roleplayMinutes = sub.max_scenarios != null ? sub.max_scenarios : null;
+    return {
+      practiceMinutes,
+      roleplayMinutes,
+      isUnlimitedPractice: sub.talk_time_minutes == null,
+      isUnlimitedRoleplay: sub.max_scenarios == null,
+    };
+  }
+
+  if (obj && obj.daily_seconds) {
+    const ds = obj.daily_seconds;
+    const practiceSec = typeof ds.practice === 'number' ? ds.practice : null;
+    const roleplaySec = typeof ds.roleplay === 'number' ? ds.roleplay : null;
+    return {
+      practiceMinutes: practiceSec != null ? Math.floor(practiceSec / 60) : null,
+      roleplayMinutes: roleplaySec != null ? Math.floor(roleplaySec / 60) : null,
+      isUnlimitedPractice: practiceSec == null,
+      isUnlimitedRoleplay: roleplaySec == null,
+    };
+  }
+
   return {
-    practiceMinutes: Math.floor(legacyPracticeSec / 60),
-    roleplayMinutes: Math.floor(legacyRoleplaySec / 60),
+    practiceMinutes: 0,
+    roleplayMinutes: 0,
+    isUnlimitedPractice: false,
     isUnlimitedRoleplay: false,
   };
 }

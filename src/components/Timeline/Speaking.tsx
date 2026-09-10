@@ -75,12 +75,12 @@ export const Speaking: React.FC<SpeakingProps> = ({
         </View>
         <Text style={styles.cardDescription}>
           {course.todayTopic
-            ? `5 minutes of speaking practice: ${course.todayTopic.title}`
-            : '5 minutes of speaking practice with Aleena'}
+            ? `Speaking practice: ${course.todayTopic.title}`
+            : 'Speaking practice with Aleena'}
         </Text>
-        {!completed && timeStatus && timeStatus.remainingTimeSeconds > 0 && (
+        {!completed && timeStatus && timeStatus.canStartCall && (
           <Text style={styles.timeRemaining}>
-            â±ï¸ Time remaining: {remainingTime}
+            ⏱️ {remainingTime === 'Unlimited' ? 'Unlimited practice today' : `Time remaining: ${remainingTime}`}
           </Text>
         )}
         {completed ? (
@@ -92,9 +92,11 @@ export const Speaking: React.FC<SpeakingProps> = ({
           <TouchableOpacity
             style={styles.actionButton}
             onPress={handleStart}
-            disabled={completed}
+            disabled={timeStatus ? !timeStatus.canStartCall : false}
           >
-            <Text style={styles.actionButtonText}>Start Speaking (5 min)</Text>
+            <Text style={styles.actionButtonText}>
+              {timeStatus && !timeStatus.canStartCall ? 'Daily Limit Reached' : 'Start Speaking'}
+            </Text>
           </TouchableOpacity>
         )}
       </View>

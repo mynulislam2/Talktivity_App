@@ -1,15 +1,15 @@
 /**
  * PlanCard Component (React Native)
- *
- * Reusable subscription plan card component.
- * Matches Next.js implementation.
+ * 
+ * Reusable dynamic subscription plan card component.
+ * 100% data-driven: renders directly from database plan attributes (name, price, duration, features).
+ * Zero hardcoded legacy plans.
  */
 
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { SubscriptionPlan } from '@/services/subscription';
-import { colors } from '@/styles/colors';
 import { spacing } from '@/styles/spacing';
 
 export interface PlanCardProps {
@@ -27,142 +27,81 @@ export function PlanCard({
   onStartFreeTrial,
   canStartFreeTrial = false,
 }: PlanCardProps) {
-  const isFreeTrial = plan.plan_type === 'FreeTrial';
-  const isPro = plan.plan_type === 'Pro';
-  const isBasic = plan.plan_type === 'Basic';
+  const isFree = Number(plan.price) === 0 && (!plan.price_usd || Number(plan.price_usd) === 0);
 
-  // Get values from environment variables (matching Next.js)
-  const basicPlanPrice = process.env.EXPO_PUBLIC_BASIC_PLAN_PRICE || '2000';
-  const proPlanPrice = process.env.EXPO_PUBLIC_PRO_PLAN_PRICE || '5000';
-  const planDurationWeeks = process.env.EXPO_PUBLIC_PLAN_DURATION_WEEKS || '12';
-  const basicPlanDailyTalkTime =
-    process.env.EXPO_PUBLIC_BASIC_PLAN_DAILY_TALK_TIME || '5';
-  const proPlanDailyTalkTime =
-    process.env.EXPO_PUBLIC_PRO_PLAN_DAILY_TALK_TIME || '60';
-  const basicPlanScenarios =
-    process.env.EXPO_PUBLIC_BASIC_PLAN_SCENARIOS || '5';
-  const proPlanScenarios =
-    process.env.EXPO_PUBLIC_PRO_PLAN_SCENARIOS || 'unlimited';
+  const priceDisplay = plan.price != null && Number(plan.price) > 0
+    ? `৳${plan.price}`
+    : plan.price_usd != null && Number(plan.price_usd) > 0
+      ? `$${plan.price_usd}`
+      : 'Free';
+
+  const durationLabel = plan.duration_days ? `${plan.duration_days} days` : '';
+
+  const features: string[] = Array.isArray(plan.features)
+    ? (plan.features as string[])
+    : [];
 
   const handleClick = () => {
-    if (isFreeTrial && onStartFreeTrial) {
+    if (isFree && onStartFreeTrial) {
       onStartFreeTrial();
     } else {
       onSelect(plan);
     }
   };
 
-  // Render FreeTrial plan
-  if (isFreeTrial) {
-    return (
-      <View style={[styles.card, styles.freeTrialCard]}>
-        <Text style={styles.price}>FREE</Text>
-        <Text style={styles.period}>7-day trial</Text>
-        <View style={styles.featuresList}>
-          <FeatureItem
-            text={`${basicPlanDailyTalkTime} minutes daily talk time`}
-          />
-          <FeatureItem text={`Create ${basicPlanScenarios} scenarios`} />
-          <FeatureItem text="5 roleplay sessions per section" />
-          <FeatureItem text="Personalized Roadmap" />
-          <FeatureItem text="Community Section" />
-        </View>
-        <View style={styles.buttonContainer}>
-          {canStartFreeTrial ? (
-            <>
-              <TouchableOpacity
-                style={styles.primaryButton}
-                onPress={handleClick}
-              >
-                <Text style={styles.primaryButtonText}>
-                  Start 7-Day Free Trial
-                </Text>
-              </TouchableOpacity>
-              <Text style={styles.noCardText}>
-                ðŸ’³ No credit card required
-              </Text>
-            </>
-          ) : (
-            <TouchableOpacity style={styles.disabledButton} disabled>
-              <Text style={styles.disabledButtonText}>Free Trial Used</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-      </View>
-    );
-  }
+  const buttonText = isFree
+    ? (canStartFreeTrial ? 'Start Free Trial' : 'Trial Used')
+    : `Buy Now - ${priceDisplay}`;
 
-  // Render Basic plan
-  if (isBasic) {
-    return (
-      <View style={[styles.card, isRecommended && styles.recommendedCard]}>
-        {isRecommended && (
-          <View style={styles.recommendedBadge}>
-            <Text style={styles.recommendedBadgeText}>MOST POPULAR</Text>
-          </View>
-        )}
-        <Text style={styles.planName}>Basic</Text>
-        <Text style={styles.price}>
-          à§³{basicPlanPrice}{' '}
-          <Text style={styles.period}>/ {planDurationWeeks} weeks</Text>
-        </Text>
-        <View style={styles.featuresList}>
-          <FeatureItem
-            text={`${basicPlanDailyTalkTime} minutes daily talk time`}
-          />
-          <FeatureItem text={`Create ${basicPlanScenarios} scenarios`} />
-          <FeatureItem text="5 roleplay sessions per section" />
-          <FeatureItem text="Personalized Roadmap" />
-          <FeatureItem text="Community Section" />
-          <FeatureItem text={`Duration: ${planDurationWeeks} weeks`} />
+  return (
+    <View style={[styles.card, isRecommended && styles.recommendedCard]}>
+      {isRecommended && (
+        <View style={styles.recommendedBadge}>
+          <Text style={styles.recommendedBadgeText}>MOST POPULAR</Text>
         </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity
+      )}
+
+      <Text style={styles.planName}>{plan.name || plan.plan_type}</Text>
+
+      {plan.description ? (
+        <Text style={styles.descriptionText}>{plan.description}</Text>
+      ) : null}
+
+      <Text style={styles.price}>
+        {priceDisplay}{' '}
+        {durationLabel ? <Text style={styles.period}>/ {durationLabel}</Text> : null}
+      </Text>
+
+      {features.length > 0 && (
+        <View style={styles.featuresList}>
+          {features.map((feature, idx) => (
+            <FeatureItem key={idx} text={feature} />
+          ))}
+        </View>
+      )}
+
+      <View style={styles.buttonContainer}>
+        <TouchableOpacity
+          style={[
+            styles.primaryButton,
+            isRecommended && styles.recommendedButton,
+            isFree && !canStartFreeTrial && styles.disabledButton,
+          ]}
+          disabled={isFree && !canStartFreeTrial}
+          onPress={handleClick}
+        >
+          <Text
             style={[
-              styles.primaryButton,
-              isRecommended && styles.recommendedButton,
+              styles.primaryButtonText,
+              isFree && !canStartFreeTrial && styles.disabledButtonText,
             ]}
-            onPress={handleClick}
           >
-            <Text style={styles.primaryButtonText}>
-              Buy Now - à§³{basicPlanPrice}
-            </Text>
-          </TouchableOpacity>
-        </View>
+            {buttonText}
+          </Text>
+        </TouchableOpacity>
       </View>
-    );
-  }
-
-  // Render Pro plan
-  if (isPro) {
-    return (
-      <View style={styles.card}>
-        <Text style={styles.planName}>Pro</Text>
-        <Text style={styles.price}>
-          à§³{proPlanPrice}{' '}
-          <Text style={styles.period}>/ {planDurationWeeks} weeks</Text>
-        </Text>
-        <View style={styles.featuresList}>
-          <FeatureItem
-            text={`${proPlanDailyTalkTime} minutes daily talk time`}
-          />
-          <FeatureItem text="Unlimited scenarios" />
-          <FeatureItem text="Unlimited roleplay sessions" />
-          <FeatureItem text="Advanced Progress Analytics" />
-          <FeatureItem text="Personalized Roadmap" />
-          <FeatureItem text="Community Section" />
-          <FeatureItem text={`Duration: ${planDurationWeeks} weeks`} />
-        </View>
-        <View style={styles.buttonContainer}>
-          <TouchableOpacity style={styles.primaryButton} onPress={handleClick}>
-            <Text style={styles.primaryButtonText}>Go Pro</Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-    );
-  }
-
-  return null;
+    </View>
+  );
 }
 
 function FeatureItem({ text }: { text: string }) {
@@ -182,10 +121,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.1)',
     flex: 1,
-    minHeight: 500,
-  },
-  freeTrialCard: {
-    // Same as regular card
+    minHeight: 460,
   },
   recommendedCard: {
     borderColor: 'rgba(59, 130, 246, 0.5)',
@@ -214,24 +150,30 @@ const styles = StyleSheet.create({
     fontFamily: 'Poppins-Bold',
     fontWeight: '700',
     color: '#fff',
-    marginBottom: spacing.md,
+    marginBottom: spacing.xs,
+  },
+  descriptionText: {
+    fontSize: 12,
+    fontFamily: 'Poppins',
+    color: 'rgba(148, 163, 184, 1)',
+    marginBottom: spacing.sm,
   },
   price: {
-    fontSize: 32,
+    fontSize: 30,
     fontFamily: 'Poppins-Bold',
     fontWeight: '800',
     color: '#fff',
     marginBottom: spacing.sm,
   },
   period: {
-    fontSize: 16,
+    fontSize: 15,
     fontFamily: 'Poppins-Medium',
     fontWeight: '500',
     color: 'rgba(203, 213, 225, 1)',
   },
   featuresList: {
-    marginTop: spacing.lg,
-    gap: spacing.md,
+    marginTop: spacing.md,
+    gap: spacing.sm,
     flex: 1,
   },
   featureItem: {
@@ -240,7 +182,7 @@ const styles = StyleSheet.create({
     gap: spacing.sm,
   },
   featureText: {
-    fontSize: 14,
+    fontSize: 13,
     fontFamily: 'Poppins',
     color: 'rgba(203, 213, 225, 1)',
     flex: 1,
@@ -266,21 +208,8 @@ const styles = StyleSheet.create({
   },
   disabledButton: {
     backgroundColor: '#4b5563',
-    paddingVertical: spacing.md,
-    borderRadius: 8,
-    alignItems: 'center',
   },
   disabledButtonText: {
     color: '#9ca3af',
-    fontSize: 14,
-    fontFamily: 'Poppins-SemiBold',
-    fontWeight: '600',
-  },
-  noCardText: {
-    fontSize: 10,
-    fontFamily: 'Poppins',
-    color: 'rgba(203, 213, 225, 1)',
-    textAlign: 'center',
-    marginTop: spacing.sm,
   },
 });

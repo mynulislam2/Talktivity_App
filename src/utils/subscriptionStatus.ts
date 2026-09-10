@@ -16,25 +16,14 @@ export function getSubscriptionPlanType(
 }
 
 export function getSubscriptionPlanLabel(planType?: string | null): string {
-  switch (planType) {
-    case 'Pro':
-      return 'Pro';
-    case 'Basic':
-      return 'Basic';
-    case 'FreeTrial':
-      return 'Free Trial';
-    case 'Free':
-    case '':
-    case null:
-    case undefined:
-      return 'Free';
-    default:
-      return planType
-        .split(/[_-]/)
-        .filter(Boolean)
-        .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-        .join(' ');
+  if (!planType || planType === 'Free') {
+    return 'Free';
   }
+  return planType
+    .split(/[_-]/)
+    .filter(Boolean)
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join(' ');
 }
 
 export function hasActiveProSubscription(
@@ -42,7 +31,7 @@ export function hasActiveProSubscription(
 ): boolean {
   if (!subscription?.active) return false;
   const planType = getSubscriptionPlanType(subscription);
-  return planType === 'Pro' || planType.startsWith('International_');
+  return planType !== 'Free' && Boolean(planType);
 }
 
 export function canUpgradeSubscription(

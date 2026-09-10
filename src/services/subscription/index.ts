@@ -3,13 +3,15 @@ import { API_URLS } from '../urls';
 
 export interface SubscriptionPlan {
   id: number;
-  plan_type: 'Basic' | 'Pro' | 'FreeTrial';
+  plan_type: string;
   name: string;
-  price_usd: number;
-  talk_time_minutes: number;
-  max_scenarios: number | null; // null = unlimited
-  features: string[];
-  description: string;
+  price?: number | null;
+  price_usd?: number | null;
+  duration_days?: number;
+  talk_time_minutes?: number | null;
+  max_scenarios?: number | null; // null = unlimited
+  features?: string[] | Record<string, unknown>;
+  description?: string;
   is_active: boolean;
 }
 

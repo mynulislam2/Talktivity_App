@@ -36,10 +36,10 @@ const HomeScreen: React.FC<HomeScreenProps> = () => {
     isLoading: statusLoading,
     refreshStatus: refreshPracticeStatus,
   } = usePracticeStatus('practice');
-  const { practiceMinutes: budgetMinutes } = useDailyBudgetMinutes();
+  const { practiceMinutes: budgetMinutes, isUnlimitedPractice } = useDailyBudgetMinutes();
 
-  const practiceMinutes = String(budgetMinutes || 10);
-  const remainingTimeDisplay = remainingTime || '5m';
+  const practiceMinutes = isUnlimitedPractice ? 'Unlimited' : budgetMinutes ? String(budgetMinutes) : '';
+  const remainingTimeDisplay = remainingTime || '';
   const hasSpeakingTimeLeft = canStartSession !== false;
 
   const handleBack = useCallback(() => {

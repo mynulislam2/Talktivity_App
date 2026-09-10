@@ -38,10 +38,9 @@ export async function updateDailyProgressAfterSession(
   // Get time limits based on plan
   const limits = getTimeLimits(subscription || null);
 
-  // Determine if session reached full time limit
   const timeLimit =
     sessionType === 'roleplay' ? limits.roleplay : limits.practice;
-  const isCompleted = sessionDuration >= timeLimit;
+  const isCompleted = timeLimit !== null && timeLimit > 0 ? sessionDuration >= timeLimit : false;
 
   const updates: DailyProgressUpdates = {};
 

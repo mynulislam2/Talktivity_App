@@ -12,10 +12,11 @@
  */
 
 import { progressService } from '../progress';
+import { callService } from './index';
 
 export interface TimeLimitStatus {
   canStartCall: boolean;
-  remainingTimeSeconds: number;
+  remainingTimeSeconds: number | null;
   remainingTimeFormatted: string;
 }
 
@@ -26,7 +27,7 @@ class TimeLimitService {
    * For practice/roleplay: Checks daily_progress to see if session is completed.
    * If not completed, assumes time is available (server will enforce actual limits).
    *
-   * For call: Always returns true (call limits are handled separately).
+   * For call: Checks real lifetime onboarding call status from GET /api/call/status.
    *
    * @param currentSessionDurationSeconds - Optional current session duration (not used, kept for compatibility)
    * @param sessionType - Type of session: 'practice', 'roleplay', or 'call'
@@ -35,13 +36,29 @@ class TimeLimitService {
     currentSessionDurationSeconds?: number,
     sessionType: 'practice' | 'roleplay' | 'call' = 'practice'
   ): Promise<TimeLimitStatus> {
-    // Call sessions are tracked separately - always allow (server enforces lifetime limit)
     if (sessionType === 'call') {
-      return {
-        canStartCall: true,
-        remainingTimeSeconds: 300, // Show 5 minutes (server will enforce actual lifetime limit)
-        remainingTimeFormatted: '5m',
-      };
+      try {
+        const callStatusResponse = await callService.getCallStatus();
+        const lifetime = callStatusResponse.data?.lifetime;
+        const canStart = lifetime?.canCall ?? false;
+        const remainingSeconds = lifetime?.remaining ?? 0;
+        const remainingTimeFormatted =
+          remainingSeconds >= 60
+            ? `${Math.round(remainingSeconds / 60)}m`
+            : `${remainingSeconds}s`;
+
+        return {
+          canStartCall: canStart,
+          remainingTimeSeconds: remainingSeconds,
+          remainingTimeFormatted,
+        };
+      } catch {
+        return {
+          canStartCall: false,
+          remainingTimeSeconds: 0,
+          remainingTimeFormatted: '0s',
+        };
+      }
     }
 
     // For practice/roleplay, check daily_progress to see if session is completed
@@ -49,25 +66,32 @@ class TimeLimitService {
       const progressResponse = await progressService.getTodayProgress();
 
       if (!progressResponse.success || !progressResponse.data) {
-        // If we can't fetch progress, assume time is available (server will enforce)
         return {
-          canStartCall: true,
-          remainingTimeSeconds: 300,
-          remainingTimeFormatted: '5m',
+          canStartCall: false,
+          remainingTimeSeconds: 0,
+          remainingTimeFormatted: '0s',
         };
       }
 
-      const { progress, remaining } = progressResponse.data;
+      const { remaining } = progressResponse.data;
       const speakingRemaining =
-        typeof remaining?.speaking_seconds === 'number'
+        remaining?.speaking_seconds !== undefined
           ? remaining.speaking_seconds
-          : 300;
+          : null;
       const roleplayRemaining =
-        typeof remaining?.roleplay_seconds === 'number'
+        remaining?.roleplay_seconds !== undefined
           ? remaining.roleplay_seconds
-          : 300;
+          : null;
 
       if (sessionType === 'practice') {
+        if (speakingRemaining === null) {
+          return {
+            canStartCall: true,
+            remainingTimeSeconds: null,
+            remainingTimeFormatted: 'Unlimited',
+          };
+        }
+
         const rawRemaining = Math.max(0, speakingRemaining);
         const canStart = rawRemaining > 30;
         const remainingSeconds = canStart ? rawRemaining : 0;
@@ -84,6 +108,14 @@ class TimeLimitService {
       }
 
       if (sessionType === 'roleplay') {
+        if (roleplayRemaining === null) {
+          return {
+            canStartCall: true,
+            remainingTimeSeconds: null,
+            remainingTimeFormatted: 'Unlimited',
+          };
+        }
+
         const rawRemaining = Math.max(0, roleplayRemaining);
         const canStart = rawRemaining > 30;
         const remainingSeconds = canStart ? rawRemaining : 0;
@@ -99,20 +131,17 @@ class TimeLimitService {
         };
       }
     } catch (error) {
-      // Error checking time limits
-      // On error, assume time is available (server will enforce)
       return {
-        canStartCall: true,
-        remainingTimeSeconds: 300,
-        remainingTimeFormatted: '5m',
+        canStartCall: false,
+        remainingTimeSeconds: 0,
+        remainingTimeFormatted: '0s',
       };
     }
 
-    // Default: assume time is available
     return {
-      canStartCall: true,
-      remainingTimeSeconds: 300,
-      remainingTimeFormatted: '5m',
+      canStartCall: false,
+      remainingTimeSeconds: 0,
+      remainingTimeFormatted: '0s',
     };
   }
 

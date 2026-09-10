@@ -8,9 +8,9 @@ export interface UseRoleplayStatusReturn extends PracticeStatus {
 
 export function useRoleplayStatus(): UseRoleplayStatusReturn {
   const [status, setStatus] = useState<PracticeStatus>({
-    canStartSession: true,
-    remainingTime: '5m',
-    remainingTimeSeconds: 300,
+    canStartSession: false,
+    remainingTime: '',
+    remainingTimeSeconds: 0,
     isLoading: true,
     error: null,
   });

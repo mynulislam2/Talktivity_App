@@ -214,13 +214,17 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
           {
             id: 'speaking',
             title: course.todayTopic?.title || 'Speaking Practice',
-            description: `${practiceMinutes} minutes of speaking practice: ${
-              course.todayTopic?.title || 'Daily speaking topic'
-            }`,
+            description: practiceMinutes === 'Unlimited'
+              ? `Unlimited speaking practice: ${course.todayTopic?.title || 'Daily speaking topic'}`
+              : `${practiceMinutes} minutes of speaking practice: ${
+                  course.todayTopic?.title || 'Daily speaking topic'
+                }`,
             helper: !hasSpeakingTimeLeft
               ? 'Time limit reached'
               : booleans.speakingCompleted
               ? `${remainingTime} left`
+              : practiceMinutes === 'Unlimited'
+              ? 'Unlimited time today'
               : `${practiceMinutes} min`,
             status: !hasSpeakingTimeLeft ? 'completed' : 'active',
             buttonLabel: !hasSpeakingTimeLeft

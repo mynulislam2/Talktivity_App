@@ -15,10 +15,12 @@ import { EnglishScoreCard } from '@/components/report/EnglishScoreCard';
 import { FluencyCard } from '@/components/report/FluencyCard';
 import { GrammarCard } from '@/components/report/GrammarCard';
 import { VocabularyCard } from '@/components/report/VocabularyCard';
+import { DiscourseCard } from '@/components/report/DiscourseCard';
 import { PronunciationCard } from '@/components/report/PronunciationCard';
 import { ActionPlanCard } from '@/components/report/ActionPlanCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
 import { TodayReportStepHeader } from '@/components/report/TodayReportStepHeader';
+import { getReportMode } from '@/lib/report/reportMode';
 import { tokens } from '@/theme/tokens';
 import { AppBackground } from '../../components/common/AppBackground';
 
@@ -33,6 +35,9 @@ export default function TodaysReportScreen() {
   const { report, isLoading, isExamDay, complete } =
     useTodayReportNative();
   const { overallScores } = useReportCalculations(report);
+  const mode = getReportMode(report);
+  const isIelts = mode === 'ielts';
+  const totalSteps = isIelts ? 6 : 5;
 
   useEffect(() => {
     if (!courseStatus) {
@@ -41,7 +46,7 @@ export default function TodaysReportScreen() {
   }, [courseStatus, dispatch]);
 
   const handleContinue = () => {
-    if (step < 5) {
+    if (step < totalSteps - 1) {
       // Smooth horizontal transition between deep dive steps
       Animated.parallel([
         Animated.timing(fadeAnim, {
@@ -109,53 +114,102 @@ export default function TodaysReportScreen() {
     );
   }
 
-  const stepTitles = [
-    'IELTS Speaking Score',
-    'Fluency & Coherence',
-    'Lexical Resource',
-    'Grammar & Accuracy',
-    'Pronunciation',
-    'Action Plan',
-  ] as const;
+  const stepTitles: readonly string[] = isIelts
+    ? [
+        'IELTS Speaking Score',
+        'Fluency & Coherence',
+        'Lexical Resource',
+        'Grammar & Accuracy',
+        'Pronunciation',
+        'Action Plan',
+      ]
+    : [
+        'Your English Score',
+        'Fluency Analysis',
+        'Grammar Analysis',
+        'Vocabulary Analysis',
+        'Discourse Analysis',
+      ];
 
-  const pages: React.ReactNode[] = [
-    <EnglishScoreCard
-      key="overview"
-      overallScores={overallScores}
-      onContinue={handleContinue}
-      showIcons
-    />,
-    <FluencyCard
-      key="fluency"
-      fluency={report?.fluency}
-      onContinue={handleContinue}
-      hideSectionHeader
-    />,
-    <VocabularyCard
-      key="vocabulary"
-      vocabulary={report?.vocabulary}
-      onContinue={handleContinue}
-      hideSectionHeader
-    />,
-    <GrammarCard
-      key="grammar"
-      grammar={report?.grammar}
-      onContinue={handleContinue}
-      hideSectionHeader
-    />,
-    <PronunciationCard
-      key="pronunciation"
-      pronunciation={report?.pronunciation}
-      onContinue={handleContinue}
-      hideSectionHeader
-    />,
-    <ActionPlanCard
-      key="actionPlan"
-      report={report ?? undefined}
-      onFinish={handleFinish}
-      hideSectionHeader
-    />,
-  ];
+  const pages: React.ReactNode[] = isIelts
+    ? [
+        <EnglishScoreCard
+          key="overview"
+          overallScores={overallScores}
+          onContinue={handleContinue}
+          showIcons
+          mode={mode}
+        />,
+        <FluencyCard
+          key="fluency"
+          fluency={report?.fluency}
+          onContinue={handleContinue}
+          hideSectionHeader
+          mode={mode}
+        />,
+        <VocabularyCard
+          key="vocabulary"
+          vocabulary={report?.vocabulary}
+          onContinue={handleContinue}
+          hideSectionHeader
+          mode={mode}
+        />,
+        <GrammarCard
+          key="grammar"
+          grammar={report?.grammar}
+          onContinue={handleContinue}
+          hideSectionHeader
+          mode={mode}
+        />,
+        <PronunciationCard
+          key="pronunciation"
+          pronunciation={report?.pronunciation}
+          onContinue={handleContinue}
+          hideSectionHeader
+        />,
+        <ActionPlanCard
+          key="actionPlan"
+          report={report ?? undefined}
+          onFinish={handleFinish}
+          hideSectionHeader
+        />,
+      ]
+    : [
+        <EnglishScoreCard
+          key="overview"
+          overallScores={overallScores}
+          onContinue={handleContinue}
+          showIcons
+          mode={mode}
+        />,
+        <FluencyCard
+          key="fluency"
+          fluency={report?.fluency}
+          onContinue={handleContinue}
+          hideSectionHeader
+          mode={mode}
+        />,
+        <GrammarCard
+          key="grammar"
+          grammar={report?.grammar}
+          onContinue={handleContinue}
+          hideSectionHeader
+          mode={mode}
+        />,
+        <VocabularyCard
+          key="vocabulary"
+          vocabulary={report?.vocabulary}
+          onContinue={handleContinue}
+          hideSectionHeader
+          mode={mode}
+        />,
+        <DiscourseCard
+          key="discourse"
+          discourse={report?.discourse}
+          onFinish={handleFinish}
+          hideSectionHeader
+        />,
+      ];
 
   return (
     <AppBackground>

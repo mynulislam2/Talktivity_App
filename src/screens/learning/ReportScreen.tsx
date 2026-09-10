@@ -11,10 +11,12 @@ import { EnglishScoreCard } from '@/components/report/EnglishScoreCard';
 import { FluencyCard } from '@/components/report/FluencyCard';
 import { GrammarCard } from '@/components/report/GrammarCard';
 import { VocabularyCard } from '@/components/report/VocabularyCard';
+import { DiscourseCard } from '@/components/report/DiscourseCard';
 import { PronunciationCard } from '@/components/report/PronunciationCard';
 import { ActionPlanCard } from '@/components/report/ActionPlanCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
 import { ReportErrorCard } from '@/components/report/ReportErrorCard';
+import { getReportMode } from '@/lib/report/reportMode';
 import { useNavigation, CommonActions } from '@react-navigation/native';
 import type { ReportScreenProps } from '@/navigation/types';
 import type { NativeStackScreenProps } from '@react-navigation/native-stack';
@@ -29,9 +31,11 @@ function ReportScreenContent() {
   const { reportData, phase, error, errorCode, retry } =
     useReportGeneration(true);
   const { overallScores, radarData } = useReportCalculations(reportData);
+  const mode = getReportMode(reportData);
+  const isIelts = mode === 'ielts';
   const { currentStep, handleContinue } = useReportNavigation({
     reportData,
-    totalSteps: 6,
+    totalSteps: isIelts ? 6 : 5,
   });
   const { completeReport } = useReportCompletion();
   const fadeAnim = useRef(new Animated.Value(1)).current;
@@ -85,39 +89,76 @@ function ReportScreenContent() {
     );
   }
 
-  const pages: React.ReactNode[] = [
-    <EnglishScoreCard
-      key="english"
-      overallScores={overallScores}
-      radarData={radarData}
-      onContinue={handleContinue}
-    />,
-    <FluencyCard
-      key="fluency"
-      fluency={reportData.fluency}
-      onContinue={handleContinue}
-    />,
-    <GrammarCard
-      key="grammar"
-      grammar={reportData.grammar}
-      onContinue={handleContinue}
-    />,
-    <VocabularyCard
-      key="vocabulary"
-      vocabulary={reportData.vocabulary}
-      onContinue={handleContinue}
-    />,
-    <PronunciationCard
-      key="pronunciation"
-      pronunciation={reportData.pronunciation}
-      onContinue={handleContinue}
-    />,
-    <ActionPlanCard
-      key="action_plan"
-      report={reportData}
-      onFinish={handleFinish}
-    />,
-  ];
+  const pages: React.ReactNode[] = isIelts
+    ? [
+        <EnglishScoreCard
+          key="english"
+          overallScores={overallScores}
+          radarData={radarData}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <FluencyCard
+          key="fluency"
+          fluency={reportData.fluency}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <GrammarCard
+          key="grammar"
+          grammar={reportData.grammar}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <VocabularyCard
+          key="vocabulary"
+          vocabulary={reportData.vocabulary}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <PronunciationCard
+          key="pronunciation"
+          pronunciation={reportData.pronunciation}
+          onContinue={handleContinue}
+        />,
+        <ActionPlanCard
+          key="action_plan"
+          report={reportData}
+          onFinish={handleFinish}
+        />,
+      ]
+    : [
+        <EnglishScoreCard
+          key="english"
+          overallScores={overallScores}
+          radarData={radarData}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <FluencyCard
+          key="fluency"
+          fluency={reportData.fluency}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <GrammarCard
+          key="grammar"
+          grammar={reportData.grammar}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <VocabularyCard
+          key="vocabulary"
+          vocabulary={reportData.vocabulary}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <DiscourseCard
+          key="discourse"
+          discourse={reportData.discourse}
+          onFinish={handleFinish}
+        />,
+      ];
 
   return (
     <AppBackground>

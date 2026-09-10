@@ -11,30 +11,37 @@ import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
 import type { GrammarReport } from '@/types/report';
+import type { ReportMode } from '@/lib/report/reportMode';
 
 export interface GrammarCardProps {
   grammar?: GrammarReport;
   onContinue: () => void;
   hideSectionHeader?: boolean;
+  mode?: ReportMode;
+}
+
+function finite(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 export function GrammarCard({
   grammar,
   onContinue,
   hideSectionHeader = false,
+  mode = 'ielts',
 }: GrammarCardProps) {
-  const band = grammar?.band ?? grammar?.grammarBand ?? 6.0;
-  const numBand = Number(band) || 6.0;
-  const targetBand = Math.min(9.0, Number((numBand + 0.5).toFixed(1)));
-  const strengths = (grammar?.strengths && grammar.strengths.length > 0)
-    ? grammar.strengths
-    : ['Basic sentence structure is consistently accurate'];
-  const areasForImprovement = (grammar?.improvements && grammar.improvements.length > 0)
-    ? grammar.improvements
-    : ['Use more complex and compound sentences with subordinating conjunctions'];
+  const isIelts = mode === 'ielts';
+  const band = finite(grammar?.band) ?? finite(grammar?.grammarBand);
+  const targetBand =
+    band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
+  const strengths = grammar?.strengths ?? [];
+  const areasForImprovement = grammar?.improvements ?? [];
+  const score = finite(grammar?.grammarScore);
+  const improvementTarget = grammar?.improvementTarget;
 
-  const complexRatio = grammar?.sentenceComplexity?.complexSentenceRatio ?? 40;
-  const simpleRatio = Math.max(0, 100 - complexRatio);
+  const complexRatio = finite(grammar?.sentenceComplexity?.complexSentenceRatio);
+  const simpleRatio = complexRatio != null ? Math.max(0, 100 - complexRatio) : null;
+  const complexityFeedback = grammar?.sentenceComplexity?.feedback;
 
   const errorsList: Array<{ category: string; incorrect: string; corrected: string; rule: string }> = [];
   if (grammar?.grammarErrors) {
@@ -60,38 +67,76 @@ export function GrammarCard({
             <Ionicons name="layers" size={24} color="#a855f7" />
           </View>
           <View>
-            <Text style={ss.title}>Grammar & Accuracy</Text>
-            <Text style={ss.subtitle}>Band {band}</Text>
+            <Text style={ss.title}>
+              {isIelts ? 'Grammar & Accuracy' : 'Grammar Analysis'}
+            </Text>
+            {isIelts ? (
+              <Text style={ss.subtitle}>
+                {band != null ? `Band ${band}` : 'Band not available'}
+              </Text>
+            ) : grammar?.grammarLevel ? (
+              <Text style={ss.subtitle}>Level {grammar.grammarLevel}</Text>
+            ) : null}
           </View>
         </View>
       )}
 
       <View style={ss.statSpace}>
-        {/* 1. Official IELTS Band & Goal */}
-        <StatCard title="Grammatical Range & Accuracy" value={`Band ${band}`}>
-          <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-            Next Milestone: Band {targetBand} (0.5 band to go)
-          </Text>
-          <View style={{ marginTop: 8, gap: 8 }}>
-            {strengths.map((s, i) => (
-              <View key={`s-${i}`} style={ss.bulletRow}>
-                <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{s}</Text>
-              </View>
-            ))}
-            {areasForImprovement.map((imp, i) => (
-              <View key={`imp-${i}`} style={ss.bulletRow}>
-                <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{imp}</Text>
-              </View>
-            ))}
-          </View>
+        {/* 1. Score / band headline and coaching notes */}
+        <StatCard
+          title={isIelts ? 'Grammatical Range & Accuracy' : 'Grammar Score'}
+          value={
+            isIelts
+              ? band != null
+                ? `Band ${band}`
+                : undefined
+              : score != null
+                ? `${score}%`
+                : undefined
+          }
+        >
+          {isIelts ? (
+            targetBand != null ? (
+              <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
+                Next Milestone: Band {targetBand} (0.5 band to go)
+              </Text>
+            ) : (
+              <Text style={ss.desc}>Band not available</Text>
+            )
+          ) : improvementTarget ? (
+            <Text style={ss.desc}>
+              You're {improvementTarget.percentToNextLevel}% away from{' '}
+              {improvementTarget.nextLevel}
+            </Text>
+          ) : (
+            <Text style={ss.desc}>Improvement target not available</Text>
+          )}
+          {strengths.length > 0 || areasForImprovement.length > 0 ? (
+            <View style={{ marginTop: 8, gap: 8 }}>
+              {strengths.map((s, i) => (
+                <View key={`s-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{s}</Text>
+                </View>
+              ))}
+              {areasForImprovement.map((imp, i) => (
+                <View key={`imp-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{imp}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
         </StatCard>
 
         {/* 2. Exact Grammar Errors (❌ vs ✅) */}
         {errorsList.length > 0 ? (
           <StatCard title="Key Grammar Corrections">
-            <Text style={ss.desc}>Specific sentence patterns to improve for Band 7.0:</Text>
+            <Text style={ss.desc}>
+              {isIelts
+                ? 'Specific sentence patterns to improve for Band 7.0:'
+                : 'Specific sentence patterns to improve:'}
+            </Text>
             {errorsList.map((item, idx) => (
               <View key={idx} style={ss.errorBox}>
                 <View style={ss.categoryBadge}>
@@ -112,65 +157,74 @@ export function GrammarCard({
         ) : null}
 
         {/* 3. Complex vs Simple Sentence Ratio */}
-        <StatCard title="Sentence Structure Complexity">
-          <View style={ss.structureBox}>
-            {/* Dual metric tiles */}
-            <View style={ss.metricGrid}>
-              <View style={ss.metricTile}>
-                <View style={ss.metricHeader}>
-                  <View style={[ss.metricDot, { backgroundColor: tokens.color.accent.rim }]} />
-                  <Text style={ss.metricLabel}>Complex</Text>
-                </View>
-                <Text style={[ss.metricVal, { color: tokens.color.accent.rim }]}>
-                  {complexRatio}%
-                </Text>
-              </View>
+        {complexRatio != null || complexityFeedback ? (
+          <StatCard title="Sentence Structure Complexity">
+            <View style={ss.structureBox}>
+              {complexRatio != null && simpleRatio != null ? (
+                <>
+                  {/* Dual metric tiles */}
+                  <View style={ss.metricGrid}>
+                    <View style={ss.metricTile}>
+                      <View style={ss.metricHeader}>
+                        <View style={[ss.metricDot, { backgroundColor: tokens.color.accent.rim }]} />
+                        <Text style={ss.metricLabel}>Complex</Text>
+                      </View>
+                      <Text style={[ss.metricVal, { color: tokens.color.accent.rim }]}>
+                        {complexRatio}%
+                      </Text>
+                    </View>
 
-              <View style={ss.metricTile}>
-                <View style={ss.metricHeader}>
-                  <View style={[ss.metricDot, { backgroundColor: '#94a3b8' }]} />
-                  <Text style={ss.metricLabel}>Simple</Text>
-                </View>
-                <Text style={[ss.metricVal, { color: '#ffffff' }]}>
-                  {simpleRatio}%
-                </Text>
-              </View>
-            </View>
+                    <View style={ss.metricTile}>
+                      <View style={ss.metricHeader}>
+                        <View style={[ss.metricDot, { backgroundColor: '#94a3b8' }]} />
+                        <Text style={ss.metricLabel}>Simple</Text>
+                      </View>
+                      <Text style={[ss.metricVal, { color: '#ffffff' }]}>
+                        {simpleRatio}%
+                      </Text>
+                    </View>
+                  </View>
 
-            {/* Segmented Dual Bar */}
-            <View style={ss.segmentedBar}>
-              <View
-                style={[
-                  ss.segmentedBarFill,
-                  {
-                    width: `${complexRatio}%`,
-                    backgroundColor: '#3b82f6',
-                  },
-                ]}
-              />
-              <View
-                style={[
-                  ss.segmentedBarFill,
-                  {
-                    width: `${simpleRatio}%`,
-                    backgroundColor: 'rgba(255,255,255,0.15)',
-                  },
-                ]}
-              />
+                  {/* Segmented Dual Bar */}
+                  <View style={ss.segmentedBar}>
+                    <View
+                      style={[
+                        ss.segmentedBarFill,
+                        {
+                          width: `${complexRatio}%`,
+                          backgroundColor: '#3b82f6',
+                        },
+                      ]}
+                    />
+                    <View
+                      style={[
+                        ss.segmentedBarFill,
+                        {
+                          width: `${simpleRatio}%`,
+                          backgroundColor: 'rgba(255,255,255,0.15)',
+                        },
+                      ]}
+                    />
+                  </View>
+                </>
+              ) : null}
+              {complexityFeedback ? (
+                <View style={ss.structureTipBox}>
+                  <View style={ss.tipIconWrap}>
+                    <Ionicons name="bulb" size={13} color={tokens.color.accent.rim} />
+                  </View>
+                  <Text style={ss.structureTipText}>{complexityFeedback}</Text>
+                </View>
+              ) : null}
             </View>
-            <View style={ss.structureTipBox}>
-              <View style={ss.tipIconWrap}>
-                <Ionicons name="bulb" size={13} color={tokens.color.accent.rim} />
-              </View>
-              <Text style={ss.structureTipText}>
-                {grammar?.sentenceComplexity?.feedback || 'Practice using more relative clauses and conditionals to increase your complex sentence ratio.'}
-              </Text>
-            </View>
-          </View>
-        </StatCard>
+          </StatCard>
+        ) : null}
       </View>
 
-      <ReportCTAButton label="Continue to Pronunciation" onPress={onContinue} />
+      <ReportCTAButton
+        label={isIelts ? 'Continue to Pronunciation' : 'Continue to Vocabulary'}
+        onPress={onContinue}
+      />
     </ScrollView>
   );
 }

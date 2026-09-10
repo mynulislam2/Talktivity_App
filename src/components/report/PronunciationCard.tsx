@@ -1,9 +1,9 @@
 /**
  * PronunciationCard Component (React Native)
  *
- * Page 5 of the Talktivity IELTS Speaking Report.
+ * IELTS-only page: the general report has no pronunciation section, so this
+ * card is rendered from the IELTS report flow only.
  * Displays Pronunciation Band, sound clarity, sentence stress/intonation, and key priorities.
- * Concludes the report with a clean "Back to Today's Plan" button.
  */
 
 import React from 'react';
@@ -20,26 +20,21 @@ export interface PronunciationCardProps {
   hideSectionHeader?: boolean;
 }
 
+function finite(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
+}
+
 export function PronunciationCard({
   pronunciation,
   onContinue,
   hideSectionHeader = false,
 }: PronunciationCardProps) {
-  const band = pronunciation?.band || pronunciation?.pronunciationBand || 6.0;
-  const numBand = Number(band) || 6.0;
-  const targetBand = Math.min(9.0, Number((numBand + 0.5).toFixed(1)));
-  const strengths = (pronunciation?.strengths && pronunciation.strengths.length > 0)
-    ? pronunciation.strengths
-    : [
-        'Clear word boundaries and natural speech rhythm',
-        'Vowel sounds are mostly distinct and understandable',
-      ];
-  const areasForImprovement = (pronunciation?.improvements && pronunciation.improvements.length > 0)
-    ? pronunciation.improvements
-    : [
-        'Watch syllable stress on multi-syllable academic words',
-        'Focus on clear final consonant articulation',
-      ];
+  const band =
+    finite(pronunciation?.band) ?? finite(pronunciation?.pronunciationBand);
+  const targetBand =
+    band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
+  const strengths = pronunciation?.strengths ?? [];
+  const areasForImprovement = pronunciation?.improvements ?? [];
   const struggledWords = pronunciation?.struggledWords ?? [];
 
   return (
@@ -51,31 +46,42 @@ export function PronunciationCard({
           </View>
           <View>
             <Text style={ss.title}>Pronunciation</Text>
-            <Text style={ss.subtitle}>Band {band}</Text>
+            <Text style={ss.subtitle}>
+              {band != null ? `Band ${band}` : 'Band not available'}
+            </Text>
           </View>
         </View>
       )}
 
       <View style={ss.statSpace}>
         {/* 1. Official IELTS Band & Goal */}
-        <StatCard title="Pronunciation" value={`Band ${band}`}>
-          <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-            Next Milestone: Band {targetBand} (0.5 band to go)
-          </Text>
-          <View style={{ marginTop: 8, gap: 8 }}>
-            {strengths.map((s, i) => (
-              <View key={`s-${i}`} style={ss.bulletRow}>
-                <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{s}</Text>
-              </View>
-            ))}
-            {areasForImprovement.map((imp, i) => (
-              <View key={`imp-${i}`} style={ss.bulletRow}>
-                <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{imp}</Text>
-              </View>
-            ))}
-          </View>
+        <StatCard
+          title="Pronunciation"
+          value={band != null ? `Band ${band}` : undefined}
+        >
+          {targetBand != null ? (
+            <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
+              Next Milestone: Band {targetBand} (0.5 band to go)
+            </Text>
+          ) : (
+            <Text style={ss.desc}>Band not available</Text>
+          )}
+          {strengths.length > 0 || areasForImprovement.length > 0 ? (
+            <View style={{ marginTop: 8, gap: 8 }}>
+              {strengths.map((s, i) => (
+                <View key={`s-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{s}</Text>
+                </View>
+              ))}
+              {areasForImprovement.map((imp, i) => (
+                <View key={`imp-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{imp}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
         </StatCard>
 
         {/* 2. Struggled Words with Phonetic Respelling & Syllable Stress */}
@@ -86,11 +92,13 @@ export function PronunciationCard({
               <View key={idx} style={ss.wordCard}>
                 <View style={ss.wordHeader}>
                   <Text style={ss.wordName}>"{item.word}"</Text>
-                  <View style={ss.phoneticBadge}>
-                    <Text style={ss.phoneticText}>{item.phonetic}</Text>
-                  </View>
+                  {item.phonetic ? (
+                    <View style={ss.phoneticBadge}>
+                      <Text style={ss.phoneticText}>{item.phonetic}</Text>
+                    </View>
+                  ) : null}
                 </View>
-                <Text style={ss.wordTip}>💡 {item.tip}</Text>
+                {item.tip ? <Text style={ss.wordTip}>💡 {item.tip}</Text> : null}
               </View>
             ))}
           </StatCard>

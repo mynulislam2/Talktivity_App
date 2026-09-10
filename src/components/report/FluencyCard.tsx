@@ -11,36 +11,44 @@ import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
 import type { FluencyReport } from '@/types/report';
+import type { ReportMode } from '@/lib/report/reportMode';
 
 export interface FluencyCardProps {
   fluency?: FluencyReport;
   onContinue: () => void;
   hideSectionHeader?: boolean;
+  mode?: ReportMode;
+}
+
+function finite(value: unknown): number | null {
+  return typeof value === 'number' && Number.isFinite(value) ? value : null;
 }
 
 export function FluencyCard({
   fluency,
   onContinue,
   hideSectionHeader = false,
+  mode = 'ielts',
 }: FluencyCardProps) {
-  const band = fluency?.band ?? fluency?.fluencyBand ?? 6.0;
-  const numBand = Number(band) || 6.0;
-  const targetBand = Math.min(9.0, Number((numBand + 0.5).toFixed(1)));
-  const strengths = (fluency?.strengths && fluency.strengths.length > 0)
-    ? fluency.strengths
-    : ['Maintained consistent rhythm with intelligible pacing'];
-  const areasForImprovement = (fluency?.improvements && fluency.improvements.length > 0)
-    ? fluency.improvements
-    : ['Minimize pauses when connecting compound clauses'];
-  const wpm = fluency?.wordsPerMinute?.value ?? 110;
-  const wpmEmoji = fluency?.wordsPerMinute?.emoji ?? '👍';
-  const fillerCount = fluency?.fillerWords?.percentage ?? 2;
-  const hesitationRate = fluency?.hesitationsAndCorrections?.rate ?? 3;
+  const isIelts = mode === 'ielts';
+  const band = finite(fluency?.band) ?? finite(fluency?.fluencyBand);
+  const targetBand =
+    band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
+  const strengths = fluency?.strengths ?? [];
+  const areasForImprovement = fluency?.improvements ?? [];
+  const score = finite(fluency?.fluencyScore);
+  const improvementTarget = fluency?.improvementTarget;
+  const wpm = finite(fluency?.wordsPerMinute?.value);
+  const wpmEmoji = fluency?.wordsPerMinute?.emoji;
+  const fillerCount = finite(fluency?.fillerWords?.percentage);
+  const hesitationRate = finite(fluency?.hesitationsAndCorrections?.rate);
+  const hasTelemetry =
+    wpm != null || fillerCount != null || hesitationRate != null;
   const topFillersMap = fluency?.fillerWords?.topFillers;
   const topFillersList = topFillersMap
     ? Object.entries(topFillersMap).map(([word, count]) => ({ word, count }))
     : [];
-  const fillerTip = fluency?.fillerWords?.feedback || 'Replace filler words with brief silent pauses for greater clarity.';
+  const fillerTip = fluency?.fillerWords?.feedback;
 
   return (
     <ScrollView style={ss.wrapper} contentContainerStyle={ss.container}>
@@ -50,77 +58,127 @@ export function FluencyCard({
             <Ionicons name="chatbubbles" size={24} color="#60a5fa" />
           </View>
           <View>
-            <Text style={ss.title}>Fluency & Coherence</Text>
-            <Text style={ss.subtitle}>Band {band}</Text>
+            <Text style={ss.title}>
+              {isIelts ? 'Fluency & Coherence' : 'Fluency Analysis'}
+            </Text>
+            {isIelts ? (
+              <Text style={ss.subtitle}>
+                {band != null ? `Band ${band}` : 'Band not available'}
+              </Text>
+            ) : fluency?.fluencyLevel ? (
+              <Text style={ss.subtitle}>Level {fluency.fluencyLevel}</Text>
+            ) : null}
           </View>
         </View>
       )}
 
       <View style={ss.statSpace}>
-        {/* 1. Official IELTS Band & Goal */}
-        <StatCard title="Fluency & Coherence" value={`Band ${band}`}>
-          <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-            Next Milestone: Band {targetBand} (0.5 band to go)
-          </Text>
-          <View style={{ marginTop: 8, gap: 8 }}>
-            {strengths.map((s, i) => (
-              <View key={`s-${i}`} style={ss.bulletRow}>
-                <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{s}</Text>
-              </View>
-            ))}
-            {areasForImprovement.map((imp, i) => (
-              <View key={`imp-${i}`} style={ss.bulletRow}>
-                <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
-                <Text style={ss.bulletText}>{imp}</Text>
-              </View>
-            ))}
-          </View>
+        {/* 1. Score / band headline and coaching notes */}
+        <StatCard
+          title={isIelts ? 'Fluency & Coherence' : 'Fluency Score'}
+          value={
+            isIelts
+              ? band != null
+                ? `Band ${band}`
+                : undefined
+              : score != null
+                ? `${score}%`
+                : undefined
+          }
+        >
+          {isIelts ? (
+            targetBand != null ? (
+              <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
+                Next Milestone: Band {targetBand} (0.5 band to go)
+              </Text>
+            ) : (
+              <Text style={ss.desc}>Band not available</Text>
+            )
+          ) : improvementTarget ? (
+            <Text style={ss.desc}>
+              You are {improvementTarget.percentToNextLevel}% away from{' '}
+              {improvementTarget.nextLevel}
+            </Text>
+          ) : (
+            <Text style={ss.desc}>Improvement target not available</Text>
+          )}
+          {strengths.length > 0 || areasForImprovement.length > 0 ? (
+            <View style={{ marginTop: 8, gap: 8 }}>
+              {strengths.map((s, i) => (
+                <View key={`s-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="checkmark-circle" size={16} color="#34d399" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{s}</Text>
+                </View>
+              ))}
+              {areasForImprovement.map((imp, i) => (
+                <View key={`imp-${i}`} style={ss.bulletRow}>
+                  <Ionicons name="alert-circle" size={16} color="#fb923c" style={{ marginTop: 2 }} />
+                  <Text style={ss.bulletText}>{imp}</Text>
+                </View>
+              ))}
+            </View>
+          ) : null}
         </StatCard>
 
         {/* 2. Talktivity AI Telemetry: Pauses, Fillers & Pace */}
-        <StatCard title="Speaking Patterns & Telemetry">
-          <View style={ss.telemetryGrid}>
-            <View style={ss.telemetryBox}>
-              <Text style={ss.telemetryLabel}>Hesitations</Text>
-              <Text style={ss.telemetryValue}>{hesitationRate}</Text>
-              <Text style={ss.telemetrySub}>rate / min</Text>
+        {hasTelemetry ? (
+          <StatCard title="Speaking Patterns & Telemetry">
+            <View style={ss.telemetryGrid}>
+              {hesitationRate != null ? (
+                <View style={ss.telemetryBox}>
+                  <Text style={ss.telemetryLabel}>Hesitations</Text>
+                  <Text style={ss.telemetryValue}>{hesitationRate}</Text>
+                  <Text style={ss.telemetrySub}>rate / min</Text>
+                </View>
+              ) : null}
+              {fillerCount != null ? (
+                <View style={ss.telemetryBox}>
+                  <Text style={ss.telemetryLabel}>Filler Words</Text>
+                  <Text style={ss.telemetryValue}>{fillerCount}%</Text>
+                  <Text style={ss.telemetrySub}>of speech</Text>
+                </View>
+              ) : null}
+              {wpm != null ? (
+                <View style={ss.telemetryBox}>
+                  <Text style={ss.telemetryLabel}>Speaking Pace</Text>
+                  <Text style={ss.telemetryValue}>
+                    {wpm}
+                    {wpmEmoji ? ` ${wpmEmoji}` : ''}
+                  </Text>
+                  <Text style={ss.telemetrySub}>words / min</Text>
+                </View>
+              ) : null}
             </View>
-            <View style={ss.telemetryBox}>
-              <Text style={ss.telemetryLabel}>Filler Words</Text>
-              <Text style={ss.telemetryValue}>{fillerCount}%</Text>
-              <Text style={ss.telemetrySub}>of speech</Text>
-            </View>
-            <View style={ss.telemetryBox}>
-              <Text style={ss.telemetryLabel}>Speaking Pace</Text>
-              <Text style={ss.telemetryValue}>{wpm} {wpmEmoji}</Text>
-              <Text style={ss.telemetrySub}>words / min</Text>
-            </View>
-          </View>
 
-          {/* Top Fillers Breakdown */}
-          {topFillersList && topFillersList.length > 0 ? (
-            <View style={ss.fillerBreakdown}>
-              <Text style={ss.subLabel}>Top Fillers Detected:</Text>
-              <View style={ss.fillerChipRow}>
-                {topFillersList.map((item, idx) => (
-                  <View key={idx} style={ss.fillerChip}>
-                    <Text style={ss.fillerChipWord}>"{item.word}"</Text>
-                    <Text style={ss.fillerChipCount}>{item.count}x</Text>
-                  </View>
-                ))}
+            {/* Top Fillers Breakdown */}
+            {topFillersList && topFillersList.length > 0 ? (
+              <View style={ss.fillerBreakdown}>
+                <Text style={ss.subLabel}>Top Fillers Detected:</Text>
+                <View style={ss.fillerChipRow}>
+                  {topFillersList.map((item, idx) => (
+                    <View key={idx} style={ss.fillerChip}>
+                      <Text style={ss.fillerChipWord}>"{item.word}"</Text>
+                      <Text style={ss.fillerChipCount}>{item.count}x</Text>
+                    </View>
+                  ))}
+                </View>
               </View>
-            </View>
-          ) : null}
+            ) : null}
 
-          <View style={ss.tipBox}>
-            <Ionicons name="bulb-outline" size={16} color={tokens.color.accent.rim} style={{ marginTop: 2 }} />
-            <Text style={ss.tipText}>{fillerTip}</Text>
-          </View>
-        </StatCard>
+            {fillerTip ? (
+              <View style={ss.tipBox}>
+                <Ionicons name="bulb-outline" size={16} color={tokens.color.accent.rim} style={{ marginTop: 2 }} />
+                <Text style={ss.tipText}>{fillerTip}</Text>
+              </View>
+            ) : null}
+          </StatCard>
+        ) : null}
       </View>
 
-      <ReportCTAButton label="Continue to Lexical Resource" onPress={onContinue} />
+      <ReportCTAButton
+        label={isIelts ? 'Continue to Lexical Resource' : 'Continue to Grammar'}
+        onPress={onContinue}
+      />
     </ScrollView>
   );
 }

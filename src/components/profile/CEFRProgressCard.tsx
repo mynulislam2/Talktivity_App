@@ -296,7 +296,7 @@ export function CEFRProgressCard({
         <Text style={styles.description}>{CONFIDENCE_NOTES.none}</Text>
         {formattedStartingLevel && (
           <Text style={styles.startedAt}>
-            Started at: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
+            Self-rated start: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
           </Text>
         )}
         <FigmaPrimaryButton
@@ -336,7 +336,7 @@ export function CEFRProgressCard({
         </Text>
         {formattedStartingLevel && (
           <Text style={styles.startedAt}>
-            Started at: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
+            Self-rated start: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
           </Text>
         )}
       </View>

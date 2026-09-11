@@ -58,14 +58,15 @@ const TYPING_SPEED_MS = 50;
  */
 async function playBase64Audio(
   audioBase64: string,
-  fallbackText?: string
+  _fallbackText?: string
 ): Promise<void> {
   const TAG = '[ReviewScreen]';
 
   // —— try server audio ——
   if (audioBase64) {
     try {
-      const fileUri = `${FileSystem.cacheDirectory}coach_${Date.now()}.mp3`;
+      const ext = audioBase64.startsWith('UklGR') ? 'wav' : 'mp3';
+      const fileUri = `${FileSystem.cacheDirectory}coach_${Date.now()}.${ext}`;
       await FileSystem.writeAsStringAsync(fileUri, audioBase64, {
         encoding: FileSystem.EncodingType.Base64,
       });
@@ -75,20 +76,6 @@ async function playBase64Audio(
     } catch (err) {
       console.warn(TAG, 'server audio failed:', (err as any)?.message);
     }
-  }
-
-  // —— fallback: device TTS ——
-  if (fallbackText) {
-    return new Promise<void>((resolve) => {
-      Speech.speak(fallbackText, {
-        language: 'en',
-        rate: 0.8,
-        pitch: 1.0,
-        onDone: () => resolve(),
-        onError: () => resolve(),
-        onStopped: () => resolve(),
-      });
-    });
   }
 }
 

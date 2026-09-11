@@ -95,24 +95,28 @@ export function MistakePlayback({
       const startMs = Math.round((audioStart as number) * 1000);
       const endMs = Math.round((audioEnd as number) * 1000);
 
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: url },
-        { shouldPlay: true, positionMillis: startMs },
-        (status: any) => {
-          if (!status?.isLoaded) return;
-          // Stop at the end of this utterance rather than playing on into the
-          // rest of the conversation.
-          if (status.positionMillis >= endMs || status.didJustFinish) {
-            void unload();
-            setState('idle');
-          }
-        }
-      );
+      const sound = new Audio.Sound();
       soundRef.current = sound;
+
+      sound.setOnPlaybackStatusUpdate((status: any) => {
+        if (!status?.isLoaded) return;
+        // Stop at the end of this utterance rather than playing on into the
+        // rest of the conversation.
+        if (status.positionMillis >= endMs || status.didJustFinish) {
+          void unload();
+          setState('idle');
+        }
+      });
+
+      await sound.loadAsync(
+        { uri: url },
+        { shouldPlay: true, positionMillis: startMs }
+      );
       setState('playing');
     } catch (err: any) {
       console.warn('[MistakePlayback] could not play recording:', err?.message);
-      setState('unavailable');
+      await unload();
+      setState('idle');
     }
   }, [hasClip, state, audioRoom, audioStart, audioEnd, unload]);
 

@@ -3,7 +3,6 @@ import { View, Text, StyleSheet, ScrollView } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { EnglishRadarChart } from '@/components/report/EnglishRadarChart';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
-import { scoreToIeltsBand } from '@/lib/report/cefrProficiency';
 import { tokens } from '@/theme/tokens';
 import type { OverallScores } from '@/types/report';
 import type { RadarDataPoint } from '@/lib/report/calculations';
@@ -87,8 +86,8 @@ export function EnglishScoreCard({
   const overallScore = overallScores?.overall;
   const hasOverallScore =
     typeof overallScore === 'number' && Number.isFinite(overallScore);
-  const overallBand = hasOverallScore
-    ? scoreToIeltsBand(overallScore as number)
+  const overallBand = overallScores?.overall_band != null
+    ? Number(overallScores.overall_band).toFixed(1)
     : null;
 
   const pentagonValues: [number, number, number, number, number] | null =

@@ -17,10 +17,18 @@ export interface VocabBreakdown {
 
 export interface SessionScore {
   date: string;
+  overall_band?: number | string | null;
+  target_band?: number | string | null;
+  band_gap?: number | string | null;
+  fluencyBand?: number | string | null;
+  grammarBand?: number | string | null;
+  vocabularyBand?: number | string | null;
+  pronunciationBand?: number | string | null;
   fluency: number;
   grammar: number;
   vocabulary: number;
   discourse: number;
+  pronunciation?: number;
   vocabBreakdown: VocabBreakdown;
 }
 
@@ -55,12 +63,15 @@ export interface ProficiencyResult {
   overallLevel: CefrLevel | 'Not yet assessed';
   ieltsBand?: IeltsBand;
   ieltsDescriptor?: string;
+  targetBand?: number | string;
+  bandGap?: number | string;
   confidence: ProficiencyConfidence;
   skills: {
     fluency: ProficiencySkillResult;
     grammar: ProficiencySkillResult;
     vocabulary: ProficiencySkillResult;
     discourse: ProficiencySkillResult;
+    pronunciation?: ProficiencySkillResult;
   };
   progressToNextLevel: number;
   nextLevel: CefrLevel;

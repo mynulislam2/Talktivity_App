@@ -12,7 +12,6 @@ import { useNavigation } from '@react-navigation/native';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import {
   IELTS_MILESTONES,
-  scoreToIeltsBand,
   getIeltsDescriptor,
   getIeltsBarFillPercentage,
   startingLevelToIeltsBand,
@@ -76,21 +75,15 @@ const CONFIDENCE_NOTES: Record<string, string> = {
 };
 
 function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
-  const overallBand =
-    proficiency.ieltsBand || scoreToIeltsBand(proficiency.overallScore);
-  const vocabBand =
-    proficiency.skills.vocabulary.ieltsBand ||
-    scoreToIeltsBand(proficiency.skills.vocabulary.score);
-  const grammarBand =
-    proficiency.skills.grammar.ieltsBand ||
-    scoreToIeltsBand(proficiency.skills.grammar.score);
-  const fluencyBand =
-    proficiency.skills.fluency.ieltsBand ||
-    scoreToIeltsBand(proficiency.skills.fluency.score);
-  const pronunciationBand =
-    (proficiency.skills as any).pronunciation?.ieltsBand ||
+  const overallBand = String(proficiency.ieltsBand || '—');
+  const vocabBand = String(proficiency.skills.vocabulary.ieltsBand || '—');
+  const grammarBand = String(proficiency.skills.grammar.ieltsBand || '—');
+  const fluencyBand = String(proficiency.skills.fluency.ieltsBand || '—');
+  const pronunciationBand = String(
+    proficiency.skills.pronunciation?.ieltsBand ||
     (proficiency.skills as any).discourse?.ieltsBand ||
-    scoreToIeltsBand((proficiency.skills as any).pronunciation?.score ?? proficiency.skills.discourse.score);
+    '—'
+  );
 
   const radarAxes = [
     {
@@ -320,8 +313,7 @@ export function CEFRProgressCard({
     );
   }
 
-  const currentBand =
-    proficiency.ieltsBand || scoreToIeltsBand(proficiency.overallScore);
+  const currentBand = String(proficiency.ieltsBand || '1.0');
   const fillPercentage = getIeltsBarFillPercentage(currentBand);
   const descriptor =
     proficiency.ieltsDescriptor || getIeltsDescriptor(currentBand);

@@ -22,7 +22,7 @@ import { useNavigation } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { ProfileData } from '@/types/profile';
 import type { ProficiencyResult } from '@/types/proficiency';
-import { scoreToIeltsBand, startingLevelToIeltsBand } from '@/lib/report/cefrProficiency';
+import { startingLevelToIeltsBand } from '@/lib/report/cefrProficiency';
 import { tokens } from '@/theme/tokens';
 import { ProfileCameraBadgeIcon, UpgradeMagicIcon } from './ProfileVisualIcons';
 
@@ -85,7 +85,7 @@ export function ProfileCard({
     proficiency &&
     proficiency.confidence !== 'none' &&
     proficiency.overallLevel !== 'Not yet assessed'
-      ? (proficiency.ieltsBand || scoreToIeltsBand(proficiency.overallScore))
+      ? (proficiency.ieltsBand ? String(proficiency.ieltsBand) : null)
       : null;
 
   const ratingLine = assessedBand

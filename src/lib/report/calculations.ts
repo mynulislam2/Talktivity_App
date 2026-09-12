@@ -69,6 +69,9 @@ export function calculateOverallScores(
     ...scores,
     overall,
     level,
+    overall_band: (report as any).overall_band ?? undefined,
+    target_band: (report as any).target_band ?? undefined,
+    band_gap: (report as any).band_gap ?? undefined,
   };
 }
 

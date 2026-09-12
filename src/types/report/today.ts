@@ -207,6 +207,9 @@ export interface OverallScores {
   discourse: number;
   overall: number;
   level: string;
+  overall_band?: number | string;
+  target_band?: number | string;
+  band_gap?: number | string;
 }
 
 /**

@@ -170,6 +170,14 @@ export function scoreToIeltsBand(score: number): IeltsBand {
   return '1.0';
 }
 
+export function formatIeltsBand(band: unknown): IeltsBand | undefined {
+  if (band === null || band === undefined || band === '') return undefined;
+  const num = Number(band);
+  if (!Number.isFinite(num)) return undefined;
+  const clamped = Math.max(1.0, Math.min(9.0, Math.round(num * 2) / 2));
+  return clamped.toFixed(1) as IeltsBand;
+}
+
 export function getIeltsDescriptor(band?: IeltsBand | string | null): string {
   if (!band) return 'Not yet assessed';
   return IELTS_DESCRIPTORS[band] || 'Competent User';
@@ -368,39 +376,64 @@ export function calculateProficiency(
     Math.min(rawOverallScore, SCORE_RANGES[overallLevel].max)
   );
 
-  const overallIeltsBand = scoreToIeltsBand(overallScore);
+  const latestSession = sortedSessions[sortedSessions.length - 1];
+
+  // Native server IELTS bands — directly consumed without converting from CEFR
+  const overallIeltsBand = formatIeltsBand(latestSession?.overall_band);
+  const fluencyBand = formatIeltsBand(latestSession?.fluencyBand);
+  const grammarBand = formatIeltsBand(latestSession?.grammarBand);
+  const vocabularyBand = formatIeltsBand(latestSession?.vocabularyBand);
+  const pronunciationBand = formatIeltsBand(latestSession?.pronunciationBand);
+  const targetBand = formatIeltsBand(latestSession?.target_band);
+  const bandGap = latestSession?.band_gap != null ? Number(latestSession.band_gap) : undefined;
 
   return {
     overallScore,
     overallLevel,
     ieltsBand: overallIeltsBand,
     ieltsDescriptor: getIeltsDescriptor(overallIeltsBand),
+    targetBand,
+    bandGap,
     confidence: getConfidence(sortedSessions.length),
     skills: {
       fluency: {
         score: finalFluencyScore,
         level: fluencyLevel,
-        ieltsBand: scoreToIeltsBand(finalFluencyScore),
+        ieltsBand: fluencyBand,
         trend: getRecentTrend(fluencyEmaSeries),
       },
       grammar: {
         score: finalGrammarScore,
         level: grammarLevel,
-        ieltsBand: scoreToIeltsBand(finalGrammarScore),
+        ieltsBand: grammarBand,
         trend: getRecentTrend(grammarEmaSeries),
       },
       vocabulary: {
         score: finalVocabularyScore,
         level: vocabularyLevel,
-        ieltsBand: scoreToIeltsBand(finalVocabularyScore),
+        ieltsBand: vocabularyBand,
         trend: getRecentTrend(vocabularyEmaSeries),
       },
       discourse: {
         score: finalDiscourseScore,
         level: discourseLevel,
-        ieltsBand: scoreToIeltsBand(finalDiscourseScore),
+        ieltsBand: overallIeltsBand,
         trend: getRecentTrend(discourseEmaSeries),
       },
+      ...(pronunciationBand
+        ? {
+            pronunciation: {
+              score: roundScore(
+                Number(latestSession?.pronunciation || latestSession?.fluency || finalFluencyScore)
+              ),
+              level: getCefrLevelFromScore(
+                Number(latestSession?.pronunciation || latestSession?.fluency || finalFluencyScore)
+              ),
+              ieltsBand: pronunciationBand,
+              trend: 'stable' as const,
+            },
+          }
+        : {}),
     },
     progressToNextLevel: getProgressToNextLevel(overallScore, overallLevel),
     nextLevel: getNextCefrLevel(overallLevel),

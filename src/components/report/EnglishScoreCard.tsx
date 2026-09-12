@@ -7,6 +7,7 @@ import { tokens } from '@/theme/tokens';
 import type { OverallScores } from '@/types/report';
 import type { RadarDataPoint } from '@/lib/report/calculations';
 import type { ReportMode } from '@/lib/report/reportMode';
+import { scoreToIeltsBand } from '@/lib/report/cefrProficiency';
 
 const SCORE_BREAKDOWN_ORDER = [
   { key: 'fluency' as const, label: 'Fluency & Coherence' },

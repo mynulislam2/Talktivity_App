@@ -147,7 +147,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
       <ScrollView
         contentContainerStyle={[
           styles.scrollContent,
-          { paddingTop: Math.max(insets.top + 16, 61) },
+          { paddingTop: insets.top + 16 },
         ]}
         showsVerticalScrollIndicator={false}
       >

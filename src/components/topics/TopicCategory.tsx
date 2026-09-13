@@ -160,7 +160,7 @@ const styles = StyleSheet.create({
   plusButton: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 8,
     overflow: 'hidden',
     shadowColor: 'rgba(84,86,255,0.26)',
     shadowOffset: { width: 0, height: 14 },
@@ -171,14 +171,14 @@ const styles = StyleSheet.create({
   plusGradient: {
     width: 42,
     height: 42,
-    borderRadius: 21,
+    borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
   },
   scrollArrow: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.08)',
     backgroundColor: 'rgba(255,255,255,0.08)',

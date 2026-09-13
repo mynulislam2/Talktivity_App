@@ -191,13 +191,21 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
             onCreateClick={handleCustomRolePlayClick}
           />
 
-          {/* 2. Category Pill Tabs */}
+          {/* 2. Explore Topics Section Header & Category Pill Tabs */}
           {contentCategories.length > 0 && (
-            <CategoryTabs
-              categories={contentCategories}
-              activeCategoryId={activeCategoryId}
-              onSelectCategory={setSelectedCategoryId}
-            />
+            <View style={styles.exploreSection}>
+              <View style={styles.exploreHeader}>
+                <Text style={styles.exploreTitle}>Explore Topics</Text>
+                <Text style={styles.exploreCount}>
+                  {activeCategory?.topics ? `${activeCategory.topics.length} topics` : ''}
+                </Text>
+              </View>
+              <CategoryTabs
+                categories={contentCategories}
+                activeCategoryId={activeCategoryId}
+                onSelectCategory={setSelectedCategoryId}
+              />
+            </View>
           )}
 
           {/* 3. 3-Column Topics Grid */}
@@ -249,6 +257,29 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: spacing.lg,
     paddingBottom: spacing['3xl'],
+  },
+  exploreSection: {
+    marginTop: 18,
+    marginBottom: 4,
+  },
+  exploreHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 4,
+    marginBottom: 8,
+  },
+  exploreTitle: {
+    fontSize: 19,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#fff',
+    letterSpacing: -0.2,
+  },
+  exploreCount: {
+    fontSize: 13,
+    fontFamily: 'Poppins',
+    color: 'rgba(255,255,255,0.5)',
   },
   gridContainer: {
     flexDirection: 'row',

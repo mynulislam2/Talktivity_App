@@ -152,7 +152,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.04)',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 100,
+    borderRadius: 6,
     alignSelf: 'flex-start',
   },
   discussButtonText: {
@@ -181,7 +181,7 @@ const styles = StyleSheet.create({
   customIconCircle: {
     width: 36,
     height: 36,
-    borderRadius: 18,
+    borderRadius: 8,
     borderWidth: 1.5,
     borderColor: 'rgba(139,92,246,0.45)',
     backgroundColor: 'rgba(139,92,246,0.10)',

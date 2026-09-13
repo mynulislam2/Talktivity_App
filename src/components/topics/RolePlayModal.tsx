@@ -153,7 +153,7 @@ const styles = StyleSheet.create({
     width: '100%',
     maxWidth: 384,
     backgroundColor: 'rgba(17,24,39,0.7)',
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#374151',
     shadowColor: '#000',

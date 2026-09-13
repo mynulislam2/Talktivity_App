@@ -1,5 +1,6 @@
 import React, { useRef, useState, useCallback } from 'react';
 import { View, Text, Pressable, ScrollView, StyleSheet } from 'react-native';
+import { Image as ExpoImage } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
 import { LinearGradient } from 'expo-linear-gradient';
 import { TopicCard } from './TopicCard';
@@ -10,6 +11,8 @@ export interface CustomRoleplayBannerProps {
   onDiscuss: (topic: Topic, categoryName: string) => void;
   onCreateClick: () => void;
 }
+
+const alinaAvatar = require('../../../assets/avatar_intro.svg');
 
 export const CustomRoleplayBanner: React.FC<CustomRoleplayBannerProps> = ({
   roleplays,
@@ -41,87 +44,109 @@ export const CustomRoleplayBanner: React.FC<CustomRoleplayBannerProps> = ({
   return (
     <View style={styles.outerContainer}>
       <View style={styles.cardContainer}>
+        {/* Background gradient exactly matching Today's Plan card on homescreen */}
         <LinearGradient
-          colors={['rgba(41, 73, 255, 0.16)', 'rgba(181, 92, 255, 0.16)']}
+          colors={['rgba(210,131,255,0.23)', 'rgba(40,32,110,0.01)']}
           start={{ x: 0, y: 0 }}
-          end={{ x: 1, y: 1 }}
+          end={{ x: 0, y: 1 }}
           style={StyleSheet.absoluteFill}
         />
 
-        {/* Header content */}
-        <View style={styles.headerRow}>
-          <View style={styles.titleContainer}>
-            <View style={styles.titleWithIcon}>
-              <Text style={styles.emoji}>🎭</Text>
-              <Text style={styles.title}>Custom AI Roleplay</Text>
-            </View>
-            <Text style={styles.subtitle}>
-              Practice any real-world scenario with your AI partner.
+        {/* Main Banner Row: Left CTA + Right Avatar */}
+        <View style={styles.heroRow}>
+          {/* Left Column: Title, Subtitle, CTA */}
+          <View style={styles.leftColumn}>
+            {/* Title */}
+            <Text style={styles.title}>
+              Custom <Text style={styles.titleGradient}>AI Roleplay</Text>
             </Text>
-          </View>
 
-          <View style={styles.actionRow}>
-            {roleplays.length >= 4 && (
-              <View style={styles.arrowsRow}>
-                <Pressable
-                  onPress={handleScrollBack}
-                  disabled={!scrolledFromStart}
-                  style={[
-                    styles.scrollArrow,
-                    !scrolledFromStart && styles.scrollArrowDisabled,
-                  ]}
-                >
-                  <Ionicons
-                    name="chevron-back"
-                    size={16}
-                    color={
-                      scrolledFromStart
-                        ? 'rgba(255,255,255,0.8)'
-                        : 'rgba(255,255,255,0.3)'
-                    }
-                  />
-                </Pressable>
-                <Pressable
-                  onPress={handleScrollForward}
-                  disabled={scrolledToEnd}
-                  style={[
-                    styles.scrollArrow,
-                    scrolledToEnd && styles.scrollArrowDisabled,
-                  ]}
-                >
-                  <Ionicons
-                    name="chevron-forward"
-                    size={16}
-                    color={
-                      scrolledToEnd
-                        ? 'rgba(255,255,255,0.3)'
-                        : 'rgba(255,255,255,0.8)'
-                    }
-                  />
-                </Pressable>
-              </View>
-            )}
+            {/* Subtitle */}
+            <Text style={styles.subtitle}>
+              Practice any real-world scenario you imagine with your AI partner.
+            </Text>
 
-            <Pressable onPress={onCreateClick} style={styles.createButtonWrapper}>
+            {/* CTA Button (Strict radius <= 8px) */}
+            <Pressable
+              onPress={onCreateClick}
+              style={({ pressed }) => [
+                styles.createButtonWrapper,
+                pressed && styles.buttonPressed,
+              ]}
+            >
               <LinearGradient
-                colors={['#2949ff', '#b55cff']}
+                colors={['#2949ff', '#8752fe', '#b55cff']}
                 start={{ x: 0, y: 0 }}
                 end={{ x: 1, y: 0 }}
                 style={styles.createButtonGradient}
               >
-                <Ionicons name="add" size={16} color="#fff" />
+                <Ionicons name="add" size={15} color="#fff" />
                 <Text style={styles.createButtonText}>Create Roleplay</Text>
+                <Ionicons name="arrow-forward" size={13} color="#fff" />
               </LinearGradient>
             </Pressable>
+          </View>
+
+          {/* Right Column: Coach Avatar from Today's Plan reference (zoomed) */}
+          <View style={styles.avatarColumn}>
+            <ExpoImage
+              source={alinaAvatar}
+              style={styles.avatarImage}
+              contentFit="contain"
+              pointerEvents="none"
+            />
           </View>
         </View>
 
         {/* Roleplays horizontal carousel */}
         {hasRoleplays && (
           <View style={styles.carouselContainer}>
-            <Text style={styles.sectionLabel}>
-              Your Saved Scenarios ({roleplays.length})
-            </Text>
+            <View style={styles.carouselHeader}>
+              <Text style={styles.sectionLabel}>
+                Your Saved Scenarios ({roleplays.length})
+              </Text>
+
+              {roleplays.length >= 4 && (
+                <View style={styles.arrowsRow}>
+                  <Pressable
+                    onPress={handleScrollBack}
+                    disabled={!scrolledFromStart}
+                    style={[
+                      styles.scrollArrow,
+                      !scrolledFromStart && styles.scrollArrowDisabled,
+                    ]}
+                  >
+                    <Ionicons
+                      name="chevron-back"
+                      size={15}
+                      color={
+                        scrolledFromStart
+                          ? 'rgba(255,255,255,0.85)'
+                          : 'rgba(255,255,255,0.25)'
+                      }
+                    />
+                  </Pressable>
+                  <Pressable
+                    onPress={handleScrollForward}
+                    disabled={scrolledToEnd}
+                    style={[
+                      styles.scrollArrow,
+                      scrolledToEnd && styles.scrollArrowDisabled,
+                    ]}
+                  >
+                    <Ionicons
+                      name="chevron-forward"
+                      size={15}
+                      color={
+                        scrolledToEnd
+                          ? 'rgba(255,255,255,0.25)'
+                          : 'rgba(255,255,255,0.85)'
+                      }
+                    />
+                  </Pressable>
+                </View>
+              )}
+            </View>
 
             <ScrollView
               ref={scrollRef}
@@ -151,72 +176,61 @@ export const CustomRoleplayBanner: React.FC<CustomRoleplayBannerProps> = ({
 
 const styles = StyleSheet.create({
   outerContainer: {
-    paddingHorizontal: 16,
-    marginBottom: 12,
+    paddingHorizontal: 0,
+    marginBottom: 16,
   },
   cardContainer: {
-    borderRadius: 20,
+    borderRadius: 8,
     padding: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.05)',
     overflow: 'hidden',
-    backgroundColor: 'rgba(20, 20, 35, 0.4)',
   },
-  headerRow: {
-    flexDirection: 'column',
-    gap: 12,
-  },
-  titleContainer: {
-    flex: 1,
-  },
-  titleWithIcon: {
+  heroRow: {
     flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
+    alignItems: 'flex-end',
+    justifyContent: 'space-between',
+    minHeight: 148,
   },
-  emoji: {
-    fontSize: 18,
+  leftColumn: {
+    flex: 1,
+    paddingRight: 8,
+    maxWidth: '62%',
+    zIndex: 1,
   },
   title: {
     color: '#ffffff',
-    fontSize: 16,
-    fontWeight: '700',
+    fontSize: 21,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    lineHeight: 24,
+    letterSpacing: 0.12,
+    marginBottom: 4,
+  },
+  titleGradient: {
+    color: '#d283ff',
+    fontWeight: '600',
   },
   subtitle: {
-    color: 'rgba(255, 255, 255, 0.65)',
-    fontSize: 12,
-    marginTop: 4,
-  },
-  actionRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  arrowsRow: {
-    flexDirection: 'row',
-    gap: 6,
-  },
-  scrollArrow: {
-    width: 30,
-    height: 30,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.12)',
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  scrollArrowDisabled: {
-    opacity: 0.3,
+    color: 'rgba(255, 255, 255, 0.9)',
+    fontSize: 13.5,
+    fontFamily: 'Poppins',
+    lineHeight: 18.5,
+    marginBottom: 14,
   },
   createButtonWrapper: {
-    borderRadius: 12,
+    alignSelf: 'flex-start',
+    borderRadius: 8,
     overflow: 'hidden',
-    shadowColor: '#5456ff',
+    shadowColor: '#2949ff',
     shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
+    shadowOpacity: 0.35,
     shadowRadius: 8,
     elevation: 4,
+  },
+  buttonPressed: {
+    opacity: 0.9,
+    transform: [{ scale: 0.98 }],
   },
   createButtonGradient: {
     flexDirection: 'row',
@@ -224,32 +238,72 @@ const styles = StyleSheet.create({
     paddingHorizontal: 14,
     paddingVertical: 8,
     gap: 6,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.2)',
   },
   createButtonText: {
     color: '#ffffff',
-    fontSize: 12,
-    fontWeight: '700',
+    fontSize: 12.5,
+    fontWeight: '600',
+    fontFamily: 'Poppins-Medium',
+  },
+  avatarColumn: {
+    position: 'absolute',
+    bottom: -18,
+    right: -10,
+    width: 145,
+    height: 170,
+    alignItems: 'center',
+    justifyContent: 'flex-end',
+  },
+  avatarImage: {
+    width: 145,
+    height: 170,
+    transform: [{ scale: 1.15 }],
   },
   carouselContainer: {
-    marginTop: 14,
-    paddingTop: 12,
+    marginTop: 12,
+    paddingTop: 10,
     borderTopWidth: 1,
     borderTopColor: 'rgba(255, 255, 255, 0.08)',
   },
+  carouselHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
   sectionLabel: {
     color: 'rgba(181, 92, 255, 0.85)',
-    fontSize: 11,
+    fontSize: 10,
     fontWeight: '700',
     textTransform: 'uppercase',
     letterSpacing: 0.5,
-    marginBottom: 10,
+  },
+  arrowsRow: {
+    flexDirection: 'row',
+    gap: 6,
+  },
+  scrollArrow: {
+    width: 26,
+    height: 26,
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  scrollArrowDisabled: {
+    opacity: 0.25,
   },
   scrollContent: {
-    gap: 12,
+    gap: 10,
     paddingBottom: 2,
   },
   cardWrapper: {
-    width: 124,
-    height: 148,
+    width: 114,
+    height: 140,
   },
 });

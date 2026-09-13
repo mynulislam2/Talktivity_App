@@ -201,7 +201,7 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
             />
           )}
 
-          {/* 3. 2-Column Topics Grid */}
+          {/* 3. 3-Column Topics Grid */}
           {activeCategory && activeCategory.topics && activeCategory.topics.length > 0 ? (
             <View style={styles.gridContainer}>
               {activeCategory.topics
@@ -259,9 +259,9 @@ const styles = StyleSheet.create({
     paddingBottom: 24,
   },
   gridItem: {
-    width: '48%',
-    height: 180,
-    marginBottom: 12,
+    width: '31.5%',
+    height: 155,
+    marginBottom: 10,
   },
   emptyContainer: {
     flex: 1,

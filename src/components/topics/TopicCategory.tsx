@@ -62,55 +62,58 @@ export function TopicCategory({
     <View style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.categoryTitle}>{category.category_name}</Text>
-        {isRoleplayCategory ? (
-          <Pressable onPress={onCustomClick} style={styles.plusButton}>
-            <LinearGradient
-              colors={['#2949ff', '#b55cff']}
-              style={styles.plusGradient}
-            >
-              <Ionicons name="add" size={20} color="#fff" />
-            </LinearGradient>
-          </Pressable>
-        ) : sortedTopics.length > initialVisibleCount ? (
-          <View style={{ flexDirection: 'row', gap: 6 }}>
-            <Pressable
-              onPress={handleScrollBack}
-              disabled={!scrolledFromStart}
-              style={[
-                styles.scrollArrow,
-                !scrolledFromStart && styles.scrollArrowDisabled,
-              ]}
-            >
-              <Ionicons
-                name="chevron-back"
-                size={18}
-                color={
-                  scrolledFromStart
-                    ? 'rgba(255,255,255,0.8)'
-                    : 'rgba(255,255,255,0.3)'
-                }
-              />
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          {sortedTopics.length >= 4 && (
+            <View style={{ flexDirection: 'row', gap: 6 }}>
+              <Pressable
+                onPress={handleScrollBack}
+                disabled={!scrolledFromStart}
+                style={[
+                  styles.scrollArrow,
+                  !scrolledFromStart && styles.scrollArrowDisabled,
+                ]}
+              >
+                <Ionicons
+                  name="chevron-back"
+                  size={18}
+                  color={
+                    scrolledFromStart
+                      ? 'rgba(255,255,255,0.8)'
+                      : 'rgba(255,255,255,0.3)'
+                  }
+                />
+              </Pressable>
+              <Pressable
+                onPress={handleScrollForward}
+                disabled={scrolledToEnd}
+                style={[
+                  styles.scrollArrow,
+                  scrolledToEnd && styles.scrollArrowDisabled,
+                ]}
+              >
+                <Ionicons
+                  name="chevron-forward"
+                  size={18}
+                  color={
+                    scrolledToEnd
+                      ? 'rgba(255,255,255,0.3)'
+                      : 'rgba(255,255,255,0.8)'
+                  }
+                />
+              </Pressable>
+            </View>
+          )}
+          {isRoleplayCategory && (
+            <Pressable onPress={onCustomClick} style={styles.plusButton}>
+              <LinearGradient
+                colors={['#2949ff', '#b55cff']}
+                style={styles.plusGradient}
+              >
+                <Ionicons name="add" size={20} color="#fff" />
+              </LinearGradient>
             </Pressable>
-            <Pressable
-              onPress={handleScrollForward}
-              disabled={scrolledToEnd}
-              style={[
-                styles.scrollArrow,
-                scrolledToEnd && styles.scrollArrowDisabled,
-              ]}
-            >
-              <Ionicons
-                name="chevron-forward"
-                size={18}
-                color={
-                  scrolledToEnd
-                    ? 'rgba(255,255,255,0.3)'
-                    : 'rgba(255,255,255,0.8)'
-                }
-              />
-            </Pressable>
-          </View>
-        ) : null}
+          )}
+        </View>
       </View>
 
       <ScrollView

@@ -7,3 +7,5 @@ export { RolePlayModal } from './RolePlayModal';
 export type { RolePlayModalProps } from './RolePlayModal';
 export { TopicCard } from './TopicCard';
 export type { TopicCardProps } from './TopicCard';
+export { CategoryTabs } from './CategoryTabs';
+export type { CategoryTabsProps } from './CategoryTabs';

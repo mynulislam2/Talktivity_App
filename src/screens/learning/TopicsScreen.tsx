@@ -19,10 +19,14 @@ import {
   useUserRoleplays,
 } from '@/hooks/topics';
 import { Header } from '@/components/home';
-import { TopicCategory } from '@/components/topics/TopicCategory';
-import { RolePlayModal } from '@/components/topics/RolePlayModal';
-import { TopicsLoadingState } from '@/components/topics/TopicsLoadingState';
-import { TopicsErrorState } from '@/components/topics/TopicsErrorState';
+import {
+  TopicCategory,
+  TopicCard,
+  CategoryTabs,
+  RolePlayModal,
+  TopicsLoadingState,
+  TopicsErrorState,
+} from '@/components/topics';
 import type { Topic } from '@/types/topics';
 import { TopicsScreenProps } from '@/navigation/types';
 import { spacing } from '@/styles/spacing';
@@ -137,6 +141,34 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
     setIsModalOpen(true);
   }, []);
 
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string>('');
+
+  const roleplayCategory = useMemo(() => {
+    return (processedCategories as any[]).find(
+      (c) => c.category_name === 'Role Play Scenarios'
+    );
+  }, [processedCategories]);
+
+  const contentCategories = useMemo(() => {
+    return (processedCategories as any[]).filter(
+      (c) => c.category_name !== 'Role Play Scenarios'
+    );
+  }, [processedCategories]);
+
+  const activeCategoryId =
+    selectedCategoryId ||
+    (contentCategories[0]
+      ? String(contentCategories[0].id || contentCategories[0].category_name)
+      : '');
+
+  const activeCategory = useMemo(() => {
+    return (
+      contentCategories.find(
+        (c) => String(c.id || c.category_name) === activeCategoryId
+      ) || contentCategories[0]
+    );
+  }, [contentCategories, activeCategoryId]);
+
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.container} edges={['left', 'right']}>
@@ -151,23 +183,47 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {processedCategories.length > 0 ? (
-            processedCategories.map((category: any) => (
-              <TopicCategory
-                key={category.id || category.category_name}
-                category={category}
-                onDiscuss={handleDiscussClick}
-                onCustomClick={handleCustomRolePlayClick}
-              />
-            ))
-          ) : (
+          {/* 1. Custom Roleplay Section (Top) */}
+          {roleplayCategory && (
+            <TopicCategory
+              category={roleplayCategory}
+              onDiscuss={handleDiscussClick}
+              onCustomClick={handleCustomRolePlayClick}
+            />
+          )}
+
+          {/* 2. Category Pill Tabs */}
+          {contentCategories.length > 0 && (
+            <CategoryTabs
+              categories={contentCategories}
+              activeCategoryId={activeCategoryId}
+              onSelectCategory={setSelectedCategoryId}
+            />
+          )}
+
+          {/* 3. 2-Column Topics Grid */}
+          {activeCategory && activeCategory.topics && activeCategory.topics.length > 0 ? (
+            <View style={styles.gridContainer}>
+              {activeCategory.topics
+                .filter((t: any) => !t.isCustom)
+                .map((topic: any) => (
+                  <View key={topic.id || topic.title} style={styles.gridItem}>
+                    <TopicCard
+                      topic={topic}
+                      onDiscuss={handleDiscussClick}
+                      onCustomClick={handleCustomRolePlayClick}
+                      categoryName={activeCategory.category_name}
+                    />
+                  </View>
+                ))}
+            </View>
+          ) : contentCategories.length === 0 && !roleplayCategory ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyText}>
                 No topic categories found from the server.
               </Text>
-              {/* Retry button could be added here */}
             </View>
-          )}
+          ) : null}
         </ScrollView>
       )}
 
@@ -194,6 +250,18 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingTop: spacing.lg,
     paddingBottom: spacing['3xl'],
+  },
+  gridContainer: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    justifyContent: 'space-between',
+    paddingTop: 8,
+    paddingBottom: 24,
+  },
+  gridItem: {
+    width: '48%',
+    height: 180,
+    marginBottom: 12,
   },
   emptyContainer: {
     flex: 1,

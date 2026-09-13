@@ -32,13 +32,9 @@ export function TopicCard({
   const isPlaceholder =
     !!topic.imageUrl && topic.imageUrl.includes('placehold.co');
   const hasRealImage = !!topic.imageUrl && !isPlaceholder && !imageError;
-  const isRoleplay = categoryName === 'Role Play Scenarios';
-  // Only use fallback images for Role Play Scenarios category
   const imageSrc = hasRealImage
     ? topic.imageUrl!
-    : isRoleplay
-    ? getGenericTopicImageUrl(topic.id || topic.title)
-    : null;
+    : getGenericTopicImageUrl(String(topic.id || topic.title));
   const showImage = imageSrc !== null;
 
   if (topic.isCustom) {

@@ -164,6 +164,41 @@ export function subscribeToCoachingNudge(
   };
 }
 
+export interface CourseReadyPayload {
+  courseId: number;
+  batchNumber: number;
+  totalTopics: number;
+}
+
+/**
+ * Subscribe to course_ready event when background course generation completes.
+ */
+export function subscribeToCourseReady(
+  handler: (payload: CourseReadyPayload) => void
+): () => void {
+  if (!socketInstance) {
+    connectSocket().catch(() => {});
+  }
+
+  if (!socketInstance) {
+    return () => {};
+  }
+
+  if (socketInstance.connected) {
+    socketInstance.on('course_ready', handler);
+  } else {
+    socketInstance.once('connect', () => {
+      socketInstance?.on('course_ready', handler);
+    });
+  }
+
+  return () => {
+    if (socketInstance) {
+      socketInstance.off('course_ready', handler);
+    }
+  };
+}
+
 /**
  * Disconnect socket
  */

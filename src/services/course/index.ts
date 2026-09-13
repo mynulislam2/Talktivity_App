@@ -7,6 +7,8 @@ import { API_URLS } from '../urls';
  * Represents the current state of a user's active course
  */
 export interface CourseStatus {
+  status?: string;
+  message?: string;
   course: {
     id: number;
     currentWeek: number;

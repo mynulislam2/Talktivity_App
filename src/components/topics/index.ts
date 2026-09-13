@@ -9,3 +9,5 @@ export { TopicCard } from './TopicCard';
 export type { TopicCardProps } from './TopicCard';
 export { CategoryTabs } from './CategoryTabs';
 export type { CategoryTabsProps } from './CategoryTabs';
+export { CustomRoleplayBanner } from './CustomRoleplayBanner';
+export type { CustomRoleplayBannerProps } from './CustomRoleplayBanner';

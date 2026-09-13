@@ -23,6 +23,7 @@ import {
   TopicCategory,
   TopicCard,
   CategoryTabs,
+  CustomRoleplayBanner,
   RolePlayModal,
   TopicsLoadingState,
   TopicsErrorState,
@@ -183,14 +184,12 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
-          {/* 1. Custom Roleplay Section (Top) */}
-          {roleplayCategory && (
-            <TopicCategory
-              category={roleplayCategory}
-              onDiscuss={handleDiscussClick}
-              onCustomClick={handleCustomRolePlayClick}
-            />
-          )}
+          {/* 1. Custom Roleplay Hero Banner (Top) */}
+          <CustomRoleplayBanner
+            roleplays={roleplayCategory?.topics || []}
+            onDiscuss={handleDiscussClick}
+            onCreateClick={handleCustomRolePlayClick}
+          />
 
           {/* 2. Category Pill Tabs */}
           {contentCategories.length > 0 && (

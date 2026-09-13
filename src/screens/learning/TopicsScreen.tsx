@@ -18,7 +18,7 @@ import {
   useTopicSelection,
   useUserRoleplays,
 } from '@/hooks/topics';
-import { Header } from '@/components/home';
+import { CommunityHeader } from '@/components/community';
 import {
   TopicCategory,
   TopicCard,
@@ -173,7 +173,7 @@ const TopicsScreen: React.FC<TopicsScreenProps> = () => {
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.container} edges={['left', 'right']}>
-        <Header />
+        <CommunityHeader title="Topics" />
       {isLoading ? (
         <TopicsLoadingState />
       ) : error ? (

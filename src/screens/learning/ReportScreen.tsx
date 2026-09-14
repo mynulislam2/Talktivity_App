@@ -125,6 +125,7 @@ function ReportScreenContent() {
           key="action_plan"
           report={reportData}
           onFinish={handleFinish}
+          buttonLabel="Continue"
         />,
       ]
     : [

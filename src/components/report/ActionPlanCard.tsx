@@ -18,6 +18,7 @@ export interface ActionPlanCardProps {
   report?: TodayReport | null;
   onFinish: () => void;
   hideSectionHeader?: boolean;
+  buttonLabel?: string;
 }
 
 function finite(value: unknown): number | null {
@@ -28,6 +29,7 @@ export function ActionPlanCard({
   report,
   onFinish,
   hideSectionHeader = false,
+  buttonLabel,
 }: ActionPlanCardProps) {
   const currentBand = finite(report?.overall_band);
   const targetBand =
@@ -100,7 +102,7 @@ export function ActionPlanCard({
         ) : null}
       </View>
 
-      <ReportCTAButton label="Back to Today's Plan" onPress={onFinish} />
+      <ReportCTAButton label={buttonLabel || "Back to Today's Plan"} onPress={onFinish} />
     </ScrollView>
   );
 }

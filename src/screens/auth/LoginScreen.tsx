@@ -37,7 +37,6 @@ import {
   clearError,
 } from '@/store/slices/authSlice';
 import { useAuthForm } from '@/hooks/auth/useAuthForm';
-import { useAuthErrorDisplay } from '@/hooks/auth/useAuthErrorDisplay';
 import { useAuthSubmitNative as useAuthSubmit } from '@/hooks/auth/useAuthSubmitNative';
 import { useAuthGoogleLoginNative } from '@/hooks/auth/useAuthGoogleLoginNative';
 import { loginSchema } from '@/lib/validation/authSchemas';
@@ -77,12 +76,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     },
   });
 
-  const { displayError, clearError: clearDisplayError } = useAuthErrorDisplay({
-    reduxError: error,
-    googleError: googleError,
-    formErrors: form.errors,
-  });
-
   const { handleSubmit } = useAuthSubmit({
     action: loginUser,
     onError: (errorMessage: any) => {
@@ -119,11 +112,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
     form.reset();
   };
 
-  const handleErrorDismiss = () => {
-    clearDisplayError();
-    form.setErrors({});
-  };
-
   const handleFormSubmit = async () => {
     await form.handleSubmit(handleSubmit);
   };
@@ -154,21 +142,6 @@ const LoginScreen: React.FC<LoginScreenProps> = ({ navigation }) => {
               />
               <Text style={styles.title}>Start Your Journey!</Text>
             </View>
-
-            {/* Error Display */}
-            {displayError && (
-              <View style={styles.errorContainer}>
-                <View style={styles.errorContent}>
-                  <Text style={styles.errorText}>{displayError}</Text>
-                  <TouchableOpacity
-                    onPress={handleErrorDismiss}
-                    style={styles.errorDismiss}
-                  >
-                    <Ionicons name="close" size={18} color={tokens.color.state.errorText} />
-                  </TouchableOpacity>
-                </View>
-              </View>
-            )}
 
             {/* Google Sign-In */}
             <TouchableOpacity

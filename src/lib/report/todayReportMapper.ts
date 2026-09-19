@@ -11,7 +11,47 @@ import type {
   GrammarReport,
   VocabularyReport,
   DiscourseReport,
+  PronunciationReport,
 } from '@/types/report';
+
+/**
+ * Bands arrive from JSON and are sometimes strings, sometimes out of range.
+ * IELTS runs 0.0-9.0; anything else is a model error, not data. Returns
+ * undefined for absent/garbage so "no band" stays distinguishable from a score.
+ */
+function toBand(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return undefined;
+  return Math.min(9, Math.max(0, numericValue));
+}
+
+/** First band-ish value wins. Written out so a legitimate 0 is not skipped. */
+function pickBand(...values: unknown[]): number | undefined {
+  for (const value of values) {
+    const band = toBand(value);
+    if (band !== undefined) return band;
+  }
+  return undefined;
+}
+
+/** The cards call .map() on these. A non-array from the API would throw. */
+function toArray<T>(value: unknown): T[] {
+  return Array.isArray(value) ? (value as T[]) : [];
+}
+
+/**
+ * The backend contract does not pin this scale: some payloads carry a percentage
+ * (40), others a fraction (0.4). A fraction fed straight into a width renders
+ * a 0.4%-wide bar labelled "0.4% Complex".
+ */
+function toPercent(value: unknown): number | undefined {
+  if (value === null || value === undefined || value === '') return undefined;
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return undefined;
+  const scaled = numericValue > 0 && numericValue <= 1 ? numericValue * 100 : numericValue;
+  return Math.min(100, Math.max(0, Math.round(scaled)));
+}
 
 /**
  * Normalize backend report data to match frontend types
@@ -22,33 +62,38 @@ export function normalizeTodayReport(backendData: any): TodayReport {
 
   // Normalize each section with defaults
   const fluency: FluencyReport = {
-    band: reportData?.fluency?.band || reportData?.fluency?.fluencyBand,
-    fluencyBand: reportData?.fluency?.fluencyBand || reportData?.fluency?.band,
-    fluencyScore:
-      reportData?.fluency?.fluencyScore || reportData?.fluency?.score || 0,
-    fluencyLevel:
-      reportData?.fluency?.fluencyLevel || reportData?.fluency?.level || 'A1',
+    band: pickBand(reportData?.fluency?.band, reportData?.fluency?.fluencyBand),
+    fluencyBand: pickBand(reportData?.fluency?.fluencyBand, reportData?.fluency?.band),
+    fluencyScore: reportData?.fluency?.fluencyScore || reportData?.fluency?.score || 0,
+    fluencyLevel: reportData?.fluency?.fluencyLevel || reportData?.fluency?.level || 'A1',
     improvementTarget: reportData?.fluency?.improvementTarget
       ? {
-          percentToNextLevel:
-            reportData.fluency.improvementTarget.percentToNextLevel || 0,
+          percentToNextLevel: reportData.fluency.improvementTarget.percentToNextLevel || 0,
           nextLevel: reportData.fluency.improvementTarget.nextLevel || 'A2',
         }
       : null,
     fillerWords: {
-      percentage: reportData?.fluency?.fillerWords?.percentage || 0,
+      percentage:
+        typeof reportData?.fluency?.fillerWords?.percentage === 'number'
+          ? reportData.fluency.fillerWords.percentage
+          : null as any,
       feedback: reportData?.fluency?.fillerWords?.feedback || '',
       topFillers: reportData?.fluency?.fillerWords?.topFillers,
     },
     wordsPerMinute: {
-      value: reportData?.fluency?.wordsPerMinute?.value || 0,
+      value:
+        typeof reportData?.fluency?.wordsPerMinute?.value === 'number'
+          ? reportData.fluency.wordsPerMinute.value
+          : null as any,
       emoji: reportData?.fluency?.wordsPerMinute?.emoji || '📊',
       feedback: reportData?.fluency?.wordsPerMinute?.feedback || '',
-      speedBarPercent:
-        reportData?.fluency?.wordsPerMinute?.speedBarPercent || 0,
+      speedBarPercent: reportData?.fluency?.wordsPerMinute?.speedBarPercent || 0,
     },
     hesitationsAndCorrections: {
-      rate: reportData?.fluency?.hesitationsAndCorrections?.rate || 0,
+      rate:
+        typeof reportData?.fluency?.hesitationsAndCorrections?.rate === 'number'
+          ? reportData.fluency.hesitationsAndCorrections.rate
+          : null as any,
       feedback: reportData?.fluency?.hesitationsAndCorrections?.feedback || '',
     },
     strengths: reportData?.fluency?.strengths || [],
@@ -56,16 +101,13 @@ export function normalizeTodayReport(backendData: any): TodayReport {
   };
 
   const grammar: GrammarReport = {
-    band: reportData?.grammar?.band || reportData?.grammar?.grammarBand,
-    grammarBand: reportData?.grammar?.grammarBand || reportData?.grammar?.band,
-    grammarScore:
-      reportData?.grammar?.grammarScore || reportData?.grammar?.score || 0,
-    grammarLevel:
-      reportData?.grammar?.grammarLevel || reportData?.grammar?.level || 'A1',
+    band: pickBand(reportData?.grammar?.band, reportData?.grammar?.grammarBand),
+    grammarBand: pickBand(reportData?.grammar?.grammarBand, reportData?.grammar?.band),
+    grammarScore: reportData?.grammar?.grammarScore || reportData?.grammar?.score || 0,
+    grammarLevel: reportData?.grammar?.grammarLevel || reportData?.grammar?.level || 'A1',
     improvementTarget: reportData?.grammar?.improvementTarget
       ? {
-          percentToNextLevel:
-            reportData.grammar.improvementTarget.percentToNextLevel || 0,
+          percentToNextLevel: reportData.grammar.improvementTarget.percentToNextLevel || 0,
           nextLevel: reportData.grammar.improvementTarget.nextLevel || 'A2',
         }
       : null,
@@ -74,8 +116,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
     grammarErrors: reportData?.grammar?.grammarErrors,
     sentenceComplexity: {
       score: reportData?.grammar?.sentenceComplexity?.score || 0,
-      complexSentenceRatio:
-        reportData?.grammar?.sentenceComplexity?.complexSentenceRatio,
+      complexSentenceRatio: toPercent(reportData?.grammar?.sentenceComplexity?.complexSentenceRatio),
       feedback: reportData?.grammar?.sentenceComplexity?.feedback || '',
     },
     strengths: reportData?.grammar?.strengths || [],
@@ -83,27 +124,38 @@ export function normalizeTodayReport(backendData: any): TodayReport {
   };
 
   const vocabulary: VocabularyReport = {
-    band: reportData?.vocabulary?.band || reportData?.vocabulary?.vocabularyBand,
-    vocabularyBand:
-      reportData?.vocabulary?.vocabularyBand || reportData?.vocabulary?.band,
-    vocabularyScore:
-      reportData?.vocabulary?.vocabularyScore ||
-      reportData?.vocabulary?.score ||
-      0,
-    vocabularyLevel:
-      reportData?.vocabulary?.vocabularyLevel ||
-      reportData?.vocabulary?.level ||
-      'A1',
+    band: pickBand(reportData?.vocabulary?.band, reportData?.vocabulary?.vocabularyBand),
+    vocabularyBand: pickBand(reportData?.vocabulary?.vocabularyBand, reportData?.vocabulary?.band),
+    vocabularyScore: reportData?.vocabulary?.vocabularyScore || reportData?.vocabulary?.score || 0,
+    vocabularyLevel: reportData?.vocabulary?.vocabularyLevel || reportData?.vocabulary?.level || 'A1',
     improvementTarget: reportData?.vocabulary?.improvementTarget
       ? {
-          percentToNextLevel:
-            reportData.vocabulary.improvementTarget.percentToNextLevel || 0,
+          percentToNextLevel: reportData.vocabulary.improvementTarget.percentToNextLevel || 0,
           nextLevel: reportData.vocabulary.improvementTarget.nextLevel || 'A2',
         }
       : null,
     activeVocabulary: reportData?.vocabulary?.activeVocabulary || 0,
     uniqueWords: reportData?.vocabulary?.uniqueWords || 0,
-    sentenceUpgrades: reportData?.vocabulary?.sentenceUpgrades || [],
+    sentenceUpgrades: toArray(reportData?.vocabulary?.sentenceUpgrades).map((item: any) => {
+      if (typeof item === 'string') {
+        const match = item.match(/instead of ['"](.*?)['"],?\s*try ['"](.*?)['"]/i);
+        if (match) {
+          return {
+            original: match[1],
+            improved: match[2],
+            targetBand: '7.5',
+            explanation: item,
+          };
+        }
+        return {
+          original: item,
+          improved: item,
+          targetBand: '7.5',
+          explanation: '',
+        };
+      }
+      return item;
+    }),
     lexicalDiversity: {
       score: reportData?.vocabulary?.lexicalDiversity?.score || 0,
       feedback: reportData?.vocabulary?.lexicalDiversity?.feedback || '',
@@ -117,18 +169,11 @@ export function normalizeTodayReport(backendData: any): TodayReport {
   };
 
   const discourse: DiscourseReport = {
-    discourseScore:
-      reportData?.discourse?.discourseScore ||
-      reportData?.discourse?.score ||
-      0,
-    discourseLevel:
-      reportData?.discourse?.discourseLevel ||
-      reportData?.discourse?.level ||
-      'A1',
+    discourseScore: reportData?.discourse?.discourseScore || reportData?.discourse?.score || 0,
+    discourseLevel: reportData?.discourse?.discourseLevel || reportData?.discourse?.level || 'A1',
     improvementTarget: reportData?.discourse?.improvementTarget
       ? {
-          percentToNextLevel:
-            reportData.discourse.improvementTarget.percentToNextLevel || 0,
+          percentToNextLevel: reportData.discourse.improvementTarget.percentToNextLevel || 0,
           nextLevel: reportData.discourse.improvementTarget.nextLevel || 'A2',
         }
       : null,
@@ -142,24 +187,24 @@ export function normalizeTodayReport(backendData: any): TodayReport {
     },
   };
 
-  const pronunciation = reportData?.pronunciation
+  const pronunciation: PronunciationReport | undefined = reportData?.pronunciation
     ? {
-        band: reportData.pronunciation.band || reportData.pronunciation.pronunciationBand,
+        band: pickBand(reportData.pronunciation.band, reportData.pronunciation.pronunciationBand),
         pronunciationBand:
-          reportData.pronunciation.pronunciationBand || reportData.pronunciation.band,
+          pickBand(reportData.pronunciation.pronunciationBand, reportData.pronunciation.band),
         pronunciationScore:
           reportData.pronunciation.pronunciationScore || reportData.pronunciation.score || 0,
         pronunciationLevel: reportData.pronunciation.pronunciationLevel,
         feedback: reportData.pronunciation.feedback,
-        struggledWords: reportData.pronunciation.struggledWords || [],
+        struggledWords: toArray(reportData.pronunciation.struggledWords),
         strengths: reportData.pronunciation.strengths || [],
         improvements: reportData.pronunciation.improvements || [],
       }
     : undefined;
 
   return {
-    overall_band: reportData?.overall_band,
-    target_band: reportData?.target_band,
+    overall_band: toBand(reportData?.overall_band),
+    target_band: toBand(reportData?.target_band),
     band_gap: reportData?.band_gap,
     action_plan_priorities: reportData?.action_plan_priorities,
     fluency,

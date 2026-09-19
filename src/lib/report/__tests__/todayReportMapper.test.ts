@@ -97,7 +97,7 @@ describe('normalizeTodayReport in Talktivity-App', () => {
           sentenceUpgrades: ["Instead of 'good', try 'exceptional'"],
         },
       });
-      expect(report.vocabulary.sentenceUpgrades[0]).toEqual({
+      expect(report.vocabulary.sentenceUpgrades?.[0]).toEqual({
         original: 'good',
         improved: 'exceptional',
         targetBand: '7.5',

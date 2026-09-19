@@ -108,7 +108,7 @@ export function MistakePlayback({
         }
       });
 
-      await sound.loadAsync(
+      await (sound as any).loadAsync(
         { uri: url },
         { shouldPlay: true, positionMillis: startMs }
       );

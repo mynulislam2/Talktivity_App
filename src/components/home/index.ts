@@ -7,4 +7,6 @@ export { CompleteProfileCard } from './CompleteProfileCard';
 export { HomeDashboardScreen } from './HomeDashboardScreen';
 export { HomeTodayPlanScreen } from './HomeTodayPlanScreen';
 export { HomeFullTimelineScreen } from './HomeFullTimelineScreen';
+export { HomeTrackSelector } from './HomeTrackSelector';
+export type { IeltsHomeMode } from './HomeTrackSelector';
 export type { HomeErrorStateProps } from './HomeErrorState';

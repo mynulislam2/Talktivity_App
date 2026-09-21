@@ -20,11 +20,21 @@ export type AuthStackParamList = {
 // Home Stack
 export type HomeStackParamList = {
   HomeScreen: undefined;
-  PracticeScreen: { topicId?: string; topicName?: string } | undefined;
+  PracticeScreen: {
+    topicId?: string;
+    topicName?: string;
+    ieltsMasterSessionId?: number | null;
+    ieltsPart?: number;
+    targetDurationSeconds?: number;
+    prompt?: string;
+    firstPrompt?: string;
+  } | undefined;
   QuizScreen: { topicId?: string; topicName?: string } | undefined;
   ReviewScreen: undefined;
   ListeningScreen: { roomName?: string } | undefined;
   ListeningQuizScreen: { topicId?: string; topicName?: string } | undefined;
+  IeltsListeningScreen: { testId?: number; testCode?: string } | undefined;
+  IeltsSpeakingScreen: { testId?: number; testCode?: string } | undefined;
   ReportScreen: {
     sessionId: string;
     sessionType: 'practice' | 'call';
@@ -36,8 +46,18 @@ export type HomeStackParamList = {
 // Learning Stack (Topics, Practice, Call, Progress, Report, Quiz)
 export type LearningStackParamList = {
   TopicsScreen: undefined;
-  PracticeScreen: { topicId?: string; topicName?: string };
+  PracticeScreen: {
+    topicId?: string;
+    topicName?: string;
+    ieltsMasterSessionId?: number | null;
+    ieltsPart?: number;
+    targetDurationSeconds?: number;
+    prompt?: string;
+    firstPrompt?: string;
+  } | undefined;
   ProgressScreen: undefined;
+  IeltsListeningScreen: { testId?: number; testCode?: string } | undefined;
+  IeltsSpeakingScreen: { testId?: number; testCode?: string } | undefined;
   ReportScreen: {
     sessionId: string;
     sessionType: 'practice' | 'call';

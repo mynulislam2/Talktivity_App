@@ -27,8 +27,16 @@ export interface UsePracticeSessionReturn {
   updateAgentState: (state: string) => void;
 }
 
+export interface UsePracticeSessionOptions {
+  masterSessionId?: number | null;
+  ieltsPart?: number | null;
+  targetDurationSeconds?: number | null;
+  topicOverride?: any;
+}
+
 export function usePracticeSession(
-  sessionType: PracticeSessionType
+  sessionType: PracticeSessionType,
+  options?: UsePracticeSessionOptions
 ): UsePracticeSessionReturn {
   const dispatch = useAppDispatch();
   const courseStatus = useAppSelector(selectCourseStatus);
@@ -36,7 +44,7 @@ export function usePracticeSession(
   const [agentState, setAgentState] = useState<AgentState>('disconnected');
   const [connectionDetails, setConnectionDetails] =
     useState<ConnectionDetails | null>(null);
-  const [topic, setTopic] = useState<any | null>(null);
+  const [topic, setTopic] = useState<any | null>(options?.topicOverride || null);
   const isStartingRef = useRef(false);
   const isMountedRef = useRef(true);
   const connectionDetailsRef = useRef(connectionDetails);
@@ -139,7 +147,10 @@ export function usePracticeSession(
       const details = await connectionDetailsService.getConnectionDetails({
         userId,
         sessionType,
-        topic: currentTopic,
+        topic: options?.topicOverride || currentTopic,
+        masterSessionId: options?.masterSessionId,
+        ieltsPart: options?.ieltsPart,
+        targetDurationSeconds: options?.targetDurationSeconds,
       });
 
       if (sessionType === 'practice' && details.roomName) {

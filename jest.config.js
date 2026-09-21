@@ -14,6 +14,7 @@ module.exports = {
     // The more specific alias MUST come first or it never matches.
     '^@/service/(.*)$': '<rootDir>/src/services/$1',
     '^@/(.*)$': '<rootDir>/src/$1',
+    '^react-test-renderer(.*)$': '<rootDir>/node_modules/jest-expo/node_modules/react-test-renderer$1',
   },
   testMatch: [
     '**/__tests__/**/*.test.ts',

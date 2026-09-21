@@ -1,9 +1,10 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
@@ -17,6 +18,7 @@ import { useAppSelector } from '@/store/hooks';
 import type { CourseStatus } from '@/services/course';
 import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
 import { persistListeningTopic } from '@/lib/listeningTopic';
+import { HomeTrackSelector, IeltsHomeMode } from './HomeTrackSelector';
 
 interface HomeDashboardScreenProps {
   practiceMinutes: string;
@@ -48,12 +50,19 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
 }) => {
   const weekdayItems = useMemo(() => getWeekdayItems(), []);
   const { narrow, s } = useResponsive();
-  // Seven day chips have to share the row whatever the screen is. The chips
-  // used to be a fixed 38pt wide with a 14pt gap (350pt of content inside a
-  // 328pt row on a 360pt phone), so "Wed" wrapped to "We / d".
   const dayCircle = s(26);
   const subscriptionState = useAppSelector((state) => state.subscription);
+  const authUser = useAppSelector((state) => state.auth?.user);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
+
+  const isIelts =
+    authUser?.learning_track === 'ielts' ||
+    (authUser as any)?.main_goal?.toLowerCase().includes('ielts') ||
+    false;
+
+  const [ieltsMode, setIeltsMode] = useState<IeltsHomeMode>(
+    (authUser as any)?.ielts_default_focus === 'foundation' ? 'daily' : 'drills'
+  );
 
   const navigation = useNavigation<any>();
   const todayListeningTopic = courseStatus?.course?.todayListeningTopic;
@@ -68,12 +77,21 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
     navigation.navigate('ListeningScreen');
   }, [navigation, todayListeningTopic]);
 
+  const handleOpenIeltsListening = useCallback(() => {
+    navigation.navigate('IeltsListeningScreen');
+  }, [navigation]);
+
+  const handleOpenIeltsSpeaking = useCallback(() => {
+    navigation.navigate('IeltsSpeakingScreen');
+  }, [navigation]);
+
   return (
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+      {/* 7-Day Tracker */}
       <View style={styles.weekdaysRowContainer}>
         <View style={styles.weekdaysRow}>
           {weekdayItems.map((item) => (
@@ -119,67 +137,235 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         </View>
       </View>
 
-      <LinearGradient
-        colors={['rgba(210,131,255,0.23)', 'rgba(40,32,110,0.01)']}
-        style={styles.todayPlanCard}
-      >
-        <View style={styles.todayPlanContent}>
-          <Text style={styles.todayPlanTitle}>Your Today's Plan</Text>
-          <Text style={styles.todayPlanDesc}>
-            {practiceMinutes}-minute speaking practice on your daily topic.
-          </Text>
-          <FigmaPrimaryButton
-            onPress={onOpenTodayPlan}
-            style={styles.todayPlanButton}
-            disabled={isExpired}
-          >
-            <Text style={styles.todayPlanButtonText}>Continue</Text>
-            <Feather name="arrow-right" size={14} color="#fff" />
-          </FigmaPrimaryButton>
-        </View>
-        <ExpoImage
-          source={require('../../../assets/avatar_intro.svg')}
-          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-          contentFit="contain"
-          pointerEvents="none"
+      {/* IELTS Track Selector */}
+      {isIelts && (
+        <HomeTrackSelector
+          currentMode={ieltsMode}
+          onSelectMode={setIeltsMode}
         />
-      </LinearGradient>
+      )}
 
-      <LinearGradient
-        colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
-        style={[styles.todayPlanCard, { marginTop: 16 }]}
-      >
-        <View style={styles.todayPlanContent}>
-          <Text style={styles.todayPlanTitle}>Listening Practice</Text>
-          <Text style={styles.todayPlanDesc}>
-            5-minute listening practice on your daily topic.
-          </Text>
-          <FigmaPrimaryButton
-            onPress={handleOpenListening}
-            style={styles.todayPlanButton}
-            disabled={isExpired || isAllListeningDone}
+      {/* Mode 1: Daily Plan (Standard) */}
+      {(!isIelts || ieltsMode === 'daily') && (
+        <>
+          <LinearGradient
+            colors={['rgba(210,131,255,0.23)', 'rgba(40,32,110,0.01)']}
+            style={styles.todayPlanCard}
           >
-            <Text style={styles.todayPlanButtonText}>
-              {isAllListeningDone
-                ? 'Completed'
-                : isListeningCompleted
-                ? 'Continue'
-                : 'Start Listening'}
+            <View style={styles.todayPlanContent}>
+              <Text style={styles.todayPlanTitle}>Your Today's Plan</Text>
+              <Text style={styles.todayPlanDesc}>
+                {practiceMinutes}-minute speaking practice on your daily topic.
+              </Text>
+              <FigmaPrimaryButton
+                onPress={onOpenTodayPlan}
+                style={styles.todayPlanButton}
+                disabled={isExpired}
+              >
+                <Text style={styles.todayPlanButtonText}>Continue</Text>
+                <Feather name="arrow-right" size={14} color="#fff" />
+              </FigmaPrimaryButton>
+            </View>
+            <ExpoImage
+              source={require('../../../assets/avatar_intro.svg')}
+              style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
+              contentFit="contain"
+              pointerEvents="none"
+            />
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
+            style={[styles.todayPlanCard, { marginTop: 16 }]}
+          >
+            <View style={styles.todayPlanContent}>
+              <Text style={styles.todayPlanTitle}>Listening Practice</Text>
+              <Text style={styles.todayPlanDesc}>
+                5-minute listening practice on your daily topic.
+              </Text>
+              <FigmaPrimaryButton
+                onPress={handleOpenListening}
+                style={styles.todayPlanButton}
+                disabled={isExpired || isAllListeningDone}
+              >
+                <Text style={styles.todayPlanButtonText}>
+                  {isAllListeningDone
+                    ? 'Completed'
+                    : isListeningCompleted
+                    ? 'Continue'
+                    : 'Start Listening'}
+                </Text>
+                {isAllListeningDone ? (
+                  <Feather name="check" size={14} color="#fff" />
+                ) : (
+                  <Feather name="arrow-right" size={14} color="#fff" />
+                )}
+              </FigmaPrimaryButton>
+            </View>
+            <ExpoImage
+              source={require('../../../assets/listening_hero.png')}
+              style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
+              contentFit="contain"
+              pointerEvents="none"
+            />
+          </LinearGradient>
+        </>
+      )}
+
+      {/* Mode 2: IELTS Targeted Drills */}
+      {isIelts && ieltsMode === 'drills' && (
+        <View style={styles.ieltsDrillsContainer}>
+          <LinearGradient
+            colors={['rgba(168,85,247,0.25)', 'rgba(40,32,110,0.05)']}
+            style={styles.drillCard}
+          >
+            <View style={styles.drillBadgeRow}>
+              <Text style={styles.drillBadge}>Part 1 Drill</Text>
+              <Text style={styles.drillTime}>3-4 Mins</Text>
+            </View>
+            <Text style={styles.drillTitle}>Rapid Response & Fluency</Text>
+            <Text style={styles.drillDesc}>
+              Practice instant answers to everyday examiner questions without hesitation.
             </Text>
-            {isAllListeningDone ? (
-              <Feather name="check" size={14} color="#fff" />
-            ) : (
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('PracticeScreen', {
+                  topicId: 'IELTS-DRILL-P1',
+                  topicName: 'IELTS Part 1 Fluency Drill',
+                })
+              }
+              style={styles.drillStartButton}
+            >
+              <Text style={styles.drillStartText}>Start Drill</Text>
               <Feather name="arrow-right" size={14} color="#fff" />
-            )}
-          </FigmaPrimaryButton>
+            </TouchableOpacity>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['rgba(99,102,241,0.25)', 'rgba(40,32,110,0.05)']}
+            style={[styles.drillCard, { marginTop: 14 }]}
+          >
+            <View style={styles.drillBadgeRow}>
+              <Text style={[styles.drillBadge, { backgroundColor: '#4F46E5' }]}>Part 2 Drill</Text>
+              <Text style={styles.drillTime}>2-Min Monologue</Text>
+            </View>
+            <Text style={styles.drillTitle}>Cue Card Structure & Timing</Text>
+            <Text style={styles.drillDesc}>
+              Master 1-min quick note-taking and continuous structured speech.
+            </Text>
+            <TouchableOpacity
+              onPress={handleOpenIeltsSpeaking}
+              style={styles.drillStartButton}
+            >
+              <Text style={styles.drillStartText}>Start Monologue</Text>
+              <Feather name="arrow-right" size={14} color="#fff" />
+            </TouchableOpacity>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['rgba(236,72,153,0.25)', 'rgba(40,32,110,0.05)']}
+            style={[styles.drillCard, { marginTop: 14 }]}
+          >
+            <View style={styles.drillBadgeRow}>
+              <Text style={[styles.drillBadge, { backgroundColor: '#DB2777' }]}>Part 3 Drill</Text>
+              <Text style={styles.drillTime}>Deep Discussion</Text>
+            </View>
+            <Text style={styles.drillTitle}>Abstract Reasoning & Justification</Text>
+            <Text style={styles.drillDesc}>
+              Defend arguments with reasons, counterpoints, and Band 7.0+ vocabulary.
+            </Text>
+            <TouchableOpacity
+              onPress={() =>
+                navigation.navigate('PracticeScreen', {
+                  topicId: 'IELTS-DRILL-P3',
+                  topicName: 'IELTS Part 3 Abstract Reasoning',
+                })
+              }
+              style={styles.drillStartButton}
+            >
+              <Text style={styles.drillStartText}>Start Discussion</Text>
+              <Feather name="arrow-right" size={14} color="#fff" />
+            </TouchableOpacity>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['rgba(59,130,246,0.25)', 'rgba(40,32,110,0.05)']}
+            style={[styles.drillCard, { marginTop: 14 }]}
+          >
+            <View style={styles.drillBadgeRow}>
+              <Text style={[styles.drillBadge, { backgroundColor: '#2563EB' }]}>Listening Drill</Text>
+              <Text style={styles.drillTime}>5-7 Mins</Text>
+            </View>
+            <Text style={styles.drillTitle}>Cambridge Audio Comprehension</Text>
+            <Text style={styles.drillDesc}>
+              Practice authentic dialogues, sentence completion, and multiple choice questions.
+            </Text>
+            <TouchableOpacity
+              onPress={handleOpenIeltsListening}
+              style={styles.drillStartButton}
+            >
+              <Text style={styles.drillStartText}>Start Listening</Text>
+              <Feather name="arrow-right" size={14} color="#fff" />
+            </TouchableOpacity>
+          </LinearGradient>
         </View>
-        <ExpoImage
-          source={require('../../../assets/listening_hero.png')}
-          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-          contentFit="contain"
-          pointerEvents="none"
-        />
-      </LinearGradient>
+      )}
+
+      {/* Mode 3: IELTS Full Mock Exam Hub */}
+      {isIelts && ieltsMode === 'mock_exam' && (
+        <View style={styles.mockExamContainer}>
+          <LinearGradient
+            colors={['rgba(168,85,247,0.3)', 'rgba(67,56,202,0.1)']}
+            style={styles.mockExamCard}
+          >
+            <View style={styles.mockExamHeader}>
+              <View style={styles.mockExamIconBox}>
+                <Feather name="mic" size={20} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.mockExamTitle}>IELTS Speaking Mock Test</Text>
+                <Text style={styles.mockExamSubtitle}>Parts 1, 2 & 3 • Official 11-14 min test</Text>
+              </View>
+            </View>
+            <Text style={styles.mockExamDesc}>
+              Complete authentic examiner interview with instant Band score evaluation across Fluency, Lexicon, Grammar, and Pronunciation.
+            </Text>
+            <TouchableOpacity
+              onPress={handleOpenIeltsSpeaking}
+              style={styles.mockExamButton}
+            >
+              <Text style={styles.mockExamButtonText}>Take Speaking Mock</Text>
+              <Feather name="arrow-right" size={16} color="#fff" />
+            </TouchableOpacity>
+          </LinearGradient>
+
+          <LinearGradient
+            colors={['rgba(59,130,246,0.3)', 'rgba(30,58,138,0.1)']}
+            style={[styles.mockExamCard, { marginTop: 16 }]}
+          >
+            <View style={styles.mockExamHeader}>
+              <View style={[styles.mockExamIconBox, { backgroundColor: '#2563EB' }]}>
+                <Feather name="headphones" size={20} color="#FFFFFF" />
+              </View>
+              <View style={{ flex: 1, marginLeft: 12 }}>
+                <Text style={styles.mockExamTitle}>IELTS Listening Mock Test</Text>
+                <Text style={styles.mockExamSubtitle}>Sections 1-4 • 40 Questions</Text>
+              </View>
+            </View>
+            <Text style={styles.mockExamDesc}>
+              Authentic Cambridge audio recordings with multiple-choice and sentence completion questions.
+            </Text>
+            <TouchableOpacity
+              onPress={handleOpenIeltsListening}
+              style={styles.mockExamButton}
+            >
+              <Text style={styles.mockExamButtonText}>Take Listening Mock</Text>
+              <Feather name="arrow-right" size={16} color="#fff" />
+            </TouchableOpacity>
+          </LinearGradient>
+        </View>
+      )}
+
     </ScrollView>
   );
 };
@@ -473,5 +659,114 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -15,
     right: -10,
+  },
+  ieltsDrillsContainer: {
+    marginTop: 12,
+  },
+  drillCard: {
+    borderRadius: 14,
+    padding: 16,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  drillBadgeRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: 8,
+  },
+  drillBadge: {
+    backgroundColor: '#8B5CF6',
+    color: '#FFFFFF',
+    fontSize: 11,
+    fontWeight: '700',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 6,
+    textTransform: 'uppercase',
+  },
+  drillTime: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  drillTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+    marginBottom: 4,
+  },
+  drillDesc: {
+    fontSize: 13,
+    color: '#D1D5DB',
+    lineHeight: 18,
+    marginBottom: 14,
+  },
+  drillStartButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    alignSelf: 'flex-start',
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 8,
+    gap: 6,
+  },
+  drillStartText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  mockExamContainer: {
+    marginTop: 12,
+  },
+  mockExamCard: {
+    borderRadius: 16,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  mockExamHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  mockExamIconBox: {
+    width: 42,
+    height: 42,
+    borderRadius: 12,
+    backgroundColor: '#8B5CF6',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  mockExamTitle: {
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#FFFFFF',
+  },
+  mockExamSubtitle: {
+    fontSize: 12,
+    color: '#9CA3AF',
+    marginTop: 2,
+  },
+  mockExamDesc: {
+    fontSize: 13,
+    color: '#E5E7EB',
+    lineHeight: 19,
+    marginBottom: 16,
+  },
+  mockExamButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8B5CF6',
+    paddingVertical: 12,
+    borderRadius: 10,
+    gap: 6,
+  },
+  mockExamButtonText: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+    fontSize: 14,
   },
 });

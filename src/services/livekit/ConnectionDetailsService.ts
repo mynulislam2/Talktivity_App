@@ -23,13 +23,16 @@ export interface ConnectionDetailsParams {
   userId: number;
   sessionType: WebSessionType;
   topic?: WebTopicData | null;
+  masterSessionId?: number | null;
+  ieltsPart?: number | null;
+  targetDurationSeconds?: number | null;
 }
 
 class ConnectionDetailsService {
   async getConnectionDetails(
     params: ConnectionDetailsParams
   ): Promise<WebConnectionDetails> {
-    const { userId, sessionType, topic } = params;
+    const { userId, sessionType, topic, masterSessionId, ieltsPart, targetDurationSeconds } = params;
 
     const query: Record<string, string> = {
       id: String(userId),
@@ -44,6 +47,15 @@ class ConnectionDetailsService {
     }
     if (topic?.firstPrompt) {
       query.firstPrompt = topic.firstPrompt;
+    }
+    if (masterSessionId) {
+      query.masterSessionId = String(masterSessionId);
+    }
+    if (ieltsPart) {
+      query.ieltsPart = String(ieltsPart);
+    }
+    if (targetDurationSeconds) {
+      query.targetDurationSeconds = String(targetDurationSeconds);
     }
 
     const response = await httpService.get(

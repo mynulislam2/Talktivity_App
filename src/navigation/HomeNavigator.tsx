@@ -16,6 +16,8 @@ import QuizScreen from '../screens/learning/QuizScreen';
 import { ReviewScreen } from '../screens/review/ReviewScreen';
 import ListeningScreen from '../screens/learning/ListeningScreen';
 import ListeningQuizScreen from '../screens/learning/ListeningQuizScreen';
+import IeltsListeningScreen from '../screens/learning/IeltsListeningScreen';
+import IeltsSpeakingScreen from '../screens/learning/IeltsSpeakingScreen';
 import ReportScreen from '../screens/learning/ReportScreen';
 import TodaysReportScreen from '../screens/learning/TodaysReportScreen';
 
@@ -57,6 +59,20 @@ const HomeNavigator: React.FC = () => {
       <Stack.Screen
         name="ListeningQuizScreen"
         component={ListeningQuizScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="IeltsListeningScreen"
+        component={IeltsListeningScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="IeltsSpeakingScreen"
+        component={IeltsSpeakingScreen}
         options={{
           animation: 'slide_from_right',
         }}

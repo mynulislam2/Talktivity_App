@@ -20,6 +20,8 @@ import TodaysReportScreen from '../screens/learning/TodaysReportScreen';
 import QuizScreen from '../screens/learning/QuizScreen';
 import ListeningScreen from '../screens/learning/ListeningScreen';
 import ListeningQuizScreen from '../screens/learning/ListeningQuizScreen';
+import IeltsListeningScreen from '../screens/learning/IeltsListeningScreen';
+import IeltsSpeakingScreen from '../screens/learning/IeltsSpeakingScreen';
 
 import { LearningStackParamList } from './types';
 
@@ -54,8 +56,19 @@ const LearningNavigator: React.FC = () => {
         component={ListeningQuizScreen}
         options={{}}
       />
+      <Stack.Screen
+        name="IeltsListeningScreen"
+        component={IeltsListeningScreen}
+        options={{}}
+      />
+      <Stack.Screen
+        name="IeltsSpeakingScreen"
+        component={IeltsSpeakingScreen}
+        options={{}}
+      />
     </Stack.Navigator>
   );
 };
 
 export default LearningNavigator;
+

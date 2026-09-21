@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 import {
   usePracticeStatus,
@@ -24,6 +24,17 @@ import { AppBackground } from '../../components/common/AppBackground';
 
 export default function PracticeScreen() {
   const navigation = useNavigation();
+  const route = useRoute<any>();
+  const {
+    topicId,
+    topicName,
+    ieltsMasterSessionId,
+    ieltsPart,
+    targetDurationSeconds,
+    prompt,
+    firstPrompt,
+  } = route?.params || {};
+
   const {
     canStartSession,
     remainingTime,
@@ -39,7 +50,18 @@ export default function PracticeScreen() {
     startSession,
     endSession,
     updateAgentState,
-  } = usePracticeSession('practice');
+  } = usePracticeSession('practice', {
+    masterSessionId: ieltsMasterSessionId,
+    ieltsPart,
+    targetDurationSeconds,
+    topicOverride: topicName
+      ? {
+          title: topicName,
+          prompt,
+          firstPrompt,
+        }
+      : undefined,
+  });
 
   const { setSaving, setSaved, setFailed } = usePracticeSaving();
 
@@ -56,7 +78,40 @@ export default function PracticeScreen() {
     },
     onSaved: () => {
       setSaved();
-      Alert.alert('Success', 'Session saved successfully!');
+      if (ieltsMasterSessionId) {
+        if (ieltsPart === 1) {
+          Alert.alert(
+            'Part 1 Complete',
+            'Well done! Proceed to Part 2 (Cue Card monologue).',
+            [
+              {
+                text: 'Continue to Part 2',
+                onPress: () =>
+                  (navigation as any).navigate('IeltsSpeakingScreen', {
+                    initialPart: 2,
+                  }),
+              },
+            ]
+          );
+        } else if (ieltsPart === 3) {
+          Alert.alert(
+            'IELTS Speaking Complete',
+            'Your full test has been submitted for official Band score grading.',
+            [
+              {
+                text: 'View Completed Test',
+                onPress: () =>
+                  (navigation as any).navigate('IeltsSpeakingScreen', {
+                    initialPart: 3,
+                    completed: true,
+                  }),
+              },
+            ]
+          );
+        }
+      } else {
+        Alert.alert('Success', 'Session saved successfully!');
+      }
     },
     onFailed: (message: any) => {
       setFailed(message || 'Failed to save conversation.');
@@ -87,7 +142,7 @@ export default function PracticeScreen() {
     }
   }, [endSession, refreshStatus]);
 
-  const topicTitle = topic?.title || 'General Conversation';
+  const topicTitle = topicName || topic?.title || 'General Conversation';
 
   return (
     <AppBackground>

@@ -55,9 +55,15 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const authUser = useAppSelector((state) => state.auth?.user);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
 
+  const goalStr = Array.isArray((authUser as any)?.main_goal)
+    ? (authUser as any).main_goal.join(' ')
+    : typeof (authUser as any)?.main_goal === 'string'
+    ? (authUser as any).main_goal
+    : '';
+
   const isIelts =
     authUser?.learning_track === 'ielts' ||
-    (authUser as any)?.main_goal?.toLowerCase().includes('ielts') ||
+    goalStr.toLowerCase().includes('ielts') ||
     false;
 
   const [ieltsMode, setIeltsMode] = useState<IeltsHomeMode>(

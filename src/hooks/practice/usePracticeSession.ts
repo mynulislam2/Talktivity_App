@@ -144,10 +144,14 @@ export function usePracticeSession(
         setAgentState('connecting');
       }
 
+      const effectiveTopic = options?.topicOverride?.prompt
+        ? options.topicOverride
+        : (currentTopic ? { ...currentTopic, ...options?.topicOverride } : options?.topicOverride);
+
       const details = await connectionDetailsService.getConnectionDetails({
         userId,
         sessionType,
-        topic: options?.topicOverride || currentTopic,
+        topic: effectiveTopic || currentTopic,
         masterSessionId: options?.masterSessionId,
         ieltsPart: options?.ieltsPart,
         targetDurationSeconds: options?.targetDurationSeconds,

@@ -54,7 +54,7 @@ export default function PracticeScreen() {
     masterSessionId: ieltsMasterSessionId,
     ieltsPart,
     targetDurationSeconds,
-    topicOverride: topicName
+    topicOverride: (topicName && prompt)
       ? {
           title: topicName,
           prompt,

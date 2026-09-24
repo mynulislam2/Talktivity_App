@@ -470,7 +470,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
                     {isPartDone(p) ? '✓' : p}
                   </Text>
                   <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
-                    {p === 1 ? 'Part 1' : p === 2 ? 'Cue Card' : 'Discussion'}
+                    {p === 1 ? 'Part 1' : p === 2 ? 'Part 2' : 'Part 3'}
                   </Text>
                 </View>
               </React.Fragment>
@@ -583,7 +583,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
               </View>
 
               <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
-                <Feather name="phone-call" size={s(18)} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.actionButtonText}>Start Live Part 1 Call (~4 mins)</Text>
               </TouchableOpacity>
             </View>
@@ -655,8 +654,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 ) : (
                   <View style={styles.prepActionRow}>
                     <TouchableOpacity onPress={startPrep} style={styles.prepButton}>
-                      <Feather name="clock" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                      <Text style={styles.actionButtonText}>Start 1-Min Prep</Text>
+                      <Text style={styles.prepButtonText}>Start 1-Min Prep</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={startRecording} style={styles.skipPrepButton}>
                       <Text style={styles.skipPrepText}>Skip Prep & Record</Text>
@@ -680,7 +678,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
               </Text>
 
               <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
-                <Feather name="phone-call" size={s(18)} color="#FFFFFF" style={{ marginRight: 8 }} />
                 <Text style={styles.actionButtonText}>Start Live Part 3 Discussion (~4 mins)</Text>
               </TouchableOpacity>
             </View>
@@ -779,10 +776,10 @@ const styles = StyleSheet.create({
   },
   partCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 16,
+    borderRadius: 12,
     padding: 18,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   badgeRow: {
     flexDirection: 'row',
@@ -810,7 +807,7 @@ const styles = StyleSheet.create({
   },
   topicsPreviewCard: {
     backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 10,
+    borderRadius: 8,
     padding: 12,
     marginBottom: 20,
   },
@@ -836,7 +833,7 @@ const styles = StyleSheet.create({
   },
   cueCardBox: {
     backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
     borderLeftWidth: 4,
     borderLeftColor: '#8B5CF6',
@@ -911,28 +908,35 @@ const styles = StyleSheet.create({
   },
   prepActionRow: {
     flexDirection: 'row',
-    gap: 12,
+    gap: 8,
+    width: '100%',
   },
   prepButton: {
     flex: 1,
-    flexDirection: 'row',
+    height: 44,
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#8B5CF6',
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingHorizontal: 8,
+    borderRadius: 8,
+  },
+  prepButtonText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
   },
   skipPrepButton: {
-    paddingVertical: 14,
-    paddingHorizontal: 16,
-    borderRadius: 10,
+    flex: 1,
+    height: 44,
+    paddingHorizontal: 8,
+    borderRadius: 8,
     backgroundColor: 'rgba(255, 255, 255, 0.1)',
     justifyContent: 'center',
     alignItems: 'center',
   },
   skipPrepText: {
     color: '#FFFFFF',
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: '600',
   },
   stopButton: {
@@ -948,12 +952,13 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   actionButton: {
+    height: 44,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#8B5CF6',
-    paddingVertical: 14,
-    borderRadius: 10,
+    paddingHorizontal: 16,
+    borderRadius: 8,
     shadowColor: '#8B5CF6',
     shadowOpacity: 0.3,
     shadowRadius: 10,

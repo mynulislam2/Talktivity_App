@@ -1,7 +1,5 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import Feather from '@expo/vector-icons/Feather';
-import { useResponsive } from '@/theme/responsive';
 
 export type IeltsHomeMode = 'daily' | 'drills' | 'mock_exam';
 
@@ -14,7 +12,6 @@ export const HomeTrackSelector: React.FC<HomeTrackSelectorProps> = ({
   currentMode,
   onSelectMode,
 }) => {
-  const { s } = useResponsive();
 
   return (
     <View style={styles.container}>
@@ -26,19 +23,13 @@ export const HomeTrackSelector: React.FC<HomeTrackSelectorProps> = ({
         onPress={() => onSelectMode('daily')}
         activeOpacity={0.8}
       >
-        <Feather
-          name="calendar"
-          size={s(14)}
-          color={currentMode === 'daily' ? '#fff' : '#8E8E93'}
-          style={styles.tabIcon}
-        />
         <Text
           style={[
             styles.tabText,
             currentMode === 'daily' && styles.tabTextActive,
           ]}
         >
-          Daily Plan
+          Foundation
         </Text>
       </TouchableOpacity>
 
@@ -50,12 +41,6 @@ export const HomeTrackSelector: React.FC<HomeTrackSelectorProps> = ({
         onPress={() => onSelectMode('drills')}
         activeOpacity={0.8}
       >
-        <Feather
-          name="target"
-          size={s(14)}
-          color={currentMode === 'drills' ? '#fff' : '#8E8E93'}
-          style={styles.tabIcon}
-        />
         <Text
           style={[
             styles.tabText,
@@ -74,12 +59,6 @@ export const HomeTrackSelector: React.FC<HomeTrackSelectorProps> = ({
         onPress={() => onSelectMode('mock_exam')}
         activeOpacity={0.8}
       >
-        <Feather
-          name="award"
-          size={s(14)}
-          color={currentMode === 'mock_exam' ? '#fff' : '#8E8E93'}
-          style={styles.tabIcon}
-        />
         <Text
           style={[
             styles.tabText,
@@ -96,23 +75,24 @@ export const HomeTrackSelector: React.FC<HomeTrackSelectorProps> = ({
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 14,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderRadius: 10,
     padding: 4,
     marginBottom: 16,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   tabButton: {
     flex: 1,
+    height: 42,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingVertical: 8,
-    borderRadius: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
   },
   tabButtonActive: {
-    backgroundColor: 'rgba(139, 92, 246, 0.4)',
+    backgroundColor: 'rgba(147, 51, 234, 0.5)',
     borderWidth: 1,
     borderColor: 'rgba(168, 85, 247, 0.6)',
   },
@@ -120,12 +100,12 @@ const styles = StyleSheet.create({
     marginRight: 6,
   },
   tabText: {
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: '500',
-    color: '#8E8E93',
+    color: '#9CA3AF',
   },
   tabTextActive: {
     color: '#FFFFFF',
-    fontWeight: '700',
+    fontWeight: '600',
   },
 });

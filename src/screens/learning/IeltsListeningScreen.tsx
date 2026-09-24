@@ -35,7 +35,7 @@ export const IeltsListeningScreen: React.FC = () => {
   const [loadError, setLoadError] = useState<string | null>(null);
   const [test, setTest] = useState<IeltsListeningTest | null>(null);
   const [activePartIndex, setActivePartIndex] = useState(0);
-  const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
+  const [userAnswers, setUserAnswers] = useState<Record<number, string | string[]>>({});
   // Review comes only from the submit response, keyed by question number.
   const [results, setResults] = useState<Record<number, IeltsListeningResult> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -174,9 +174,23 @@ export const IeltsListeningScreen: React.FC = () => {
     setSubmitError(null);
   };
 
-  const switchPart = async (index: number) => {
+  const hasNextPart = activePartIndex < parts.length - 1;
+
+  const handleNextPart = () => {
+    if (hasNextPart) {
+      setUserAnswers({});
+      setResults(null);
+      setSummary(null);
+      setSubmitError(null);
+      switchPart(activePartIndex + 1, true);
+    } else {
+      navigation.goBack();
+    }
+  };
+
+  const switchPart = async (index: number, force = false) => {
     // A drill stays on its part once answered or graded.
-    if (tabsLocked && index !== activePartIndex) return;
+    if (!force && tabsLocked && index !== activePartIndex) return;
     setActivePartIndex(index);
     if (soundRef.current) {
       try {
@@ -211,12 +225,51 @@ export const IeltsListeningScreen: React.FC = () => {
     }
   };
 
-  const handleAnswerChange = (questionNumber: number, answer: string) => {
+  const seekToQuestion = async (seconds: number) => {
+    if (!soundRef.current) return;
+    try {
+      const pos = Math.max(0, Math.min(seconds * 1000, durationMillis));
+      await soundRef.current.setPositionAsync(pos);
+      if (!isPlaying) {
+        await soundRef.current.playAsync();
+      }
+    } catch (e) {
+      console.warn('Seek to question error:', e);
+    }
+  };
+
+  const handleAnswerChange = (questionNumber: number, answer: string | string[]) => {
     if (results) return;
     setUserAnswers((prev) => ({
       ...prev,
       [questionNumber]: answer,
     }));
+  };
+
+  const handleToggleMultiSelect = (
+    qNum: number,
+    option: string,
+    maxSelections: number = 2
+  ) => {
+    if (results) return;
+    setUserAnswers((prev) => {
+      const current = Array.isArray(prev[qNum])
+        ? (prev[qNum] as string[])
+        : prev[qNum]
+        ? [prev[qNum] as string]
+        : [];
+      let next: string[];
+      if (current.includes(option)) {
+        next = current.filter((o) => o !== option);
+      } else {
+        if (current.length >= maxSelections) {
+          next = [...current.slice(1), option];
+        } else {
+          next = [...current, option];
+        }
+      }
+      return { ...prev, [qNum]: next };
+    });
   };
 
   const handleSubmit = async () => {
@@ -225,7 +278,7 @@ export const IeltsListeningScreen: React.FC = () => {
     const gradedQuestions = isDrill
       ? activePart.questions
       : parts.flatMap((p) => p.questions);
-    const answers: Record<string, string> = {};
+    const answers: Record<string, string | string[]> = {};
     gradedQuestions.forEach((q) => {
       answers[String(q.question_number)] = userAnswers[q.question_number] || '';
     });
@@ -274,7 +327,7 @@ export const IeltsListeningScreen: React.FC = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  const renderHeader = (title: string, subtitle?: string, showSubmit = false) => (
+  const renderHeader = (title: string, subtitle?: string, showTimer = false) => (
     <View style={styles.header}>
       <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
         <Feather name="arrow-left" size={s(20)} color="#FFFFFF" />
@@ -283,24 +336,13 @@ export const IeltsListeningScreen: React.FC = () => {
         <Text style={styles.headerTitle}>{title}</Text>
         {!!subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
       </View>
-      {showSubmit && secondsLeft != null && !results && (
+      {showTimer && secondsLeft != null && !results && (
         <View style={styles.timerPill}>
           <Feather name="clock" size={s(12)} color={secondsLeft <= 300 ? '#F87171' : '#FFFFFF'} />
           <Text style={[styles.timerText, secondsLeft <= 300 && { color: '#F87171' }]}>
             {formatTime(secondsLeft * 1000)}
           </Text>
         </View>
-      )}
-      {showSubmit && (
-        <TouchableOpacity
-          onPress={handleSubmit}
-          disabled={isSubmitting || !!results}
-          style={[styles.submitHeaderButton, (isSubmitting || !!results) && { opacity: 0.5 }]}
-        >
-          <Text style={styles.submitHeaderText}>
-            {isSubmitting ? 'Submitting…' : results ? 'Submitted' : isDrill ? 'Check part' : 'Submit'}
-          </Text>
-        </TouchableOpacity>
       )}
     </View>
   );
@@ -398,45 +440,22 @@ export const IeltsListeningScreen: React.FC = () => {
             </View>
           )}
 
-          {summary && (
-            <View style={styles.resultBanner}>
-              <Text style={styles.resultTitle}>
-                {isDrill ? `Part ${activePart.part_number} checked` : 'Test submitted'}
-              </Text>
-              <Text style={styles.resultScore}>
-                Score: {summary.score} / {summary.total}
-              </Text>
-              {summary.band != null && (
-                <Text style={styles.resultBand}>
-                  Estimated band: {Number(summary.band).toFixed(1)}
+          <View style={styles.instructionsCard}>
+            <View style={styles.instructionsHeaderRow}>
+              <View style={{ flex: 1, marginRight: 8 }}>
+                <Text style={styles.partCategoryTag}>PART {activePart.part_number} • LISTENING</Text>
+                <Text style={styles.partTitle}>{activePart.title}</Text>
+              </View>
+              {summary && (
+                <Text style={styles.plainScoreText}>
+                  Score: {summary.score}/{summary.total}
                 </Text>
               )}
-              <Text style={styles.resultHint}>Review your answers below.</Text>
-              <View style={styles.bannerActions}>
-                {isDrill && (
-                  <TouchableOpacity
-                    onPress={resetDrill}
-                    style={[styles.retryButton, styles.bannerButton, styles.bannerButtonSecondary]}
-                  >
-                    <Text style={styles.submitHeaderText}>Try another part</Text>
-                  </TouchableOpacity>
-                )}
-                <TouchableOpacity
-                  onPress={() => navigation.goBack()}
-                  style={[styles.retryButton, styles.bannerButton]}
-                >
-                  <Text style={styles.submitHeaderText}>Back to Home</Text>
-                </TouchableOpacity>
-              </View>
             </View>
-          )}
-
-          <View style={styles.instructionsCard}>
-            <Text style={styles.partTitle}>{activePart.title}</Text>
             <Text style={styles.partInstructions}>
               {isDrill
-                ? 'Play the recording and answer this part, then tap "Check part".'
-                : 'Answer all four parts, then tap "Submit" for your score and band.'}
+                ? 'Play the recording and answer this part, then submit.'
+                : 'Answer all four parts, then submit for your score and band.'}
             </Text>
           </View>
 
@@ -449,22 +468,43 @@ export const IeltsListeningScreen: React.FC = () => {
                     <View style={styles.qNumBadge}>
                       <Text style={styles.qNumText}>{q.question_number}</Text>
                     </View>
-                    <Text style={styles.questionText}>{q.question_text}</Text>
+                    <View style={{ flex: 1 }}>
+                      <Text style={styles.questionText}>{q.question_text}</Text>
+                    </View>
                   </View>
+                  {q.timestamp_seconds !== undefined && (
+                    <TouchableOpacity
+                      onPress={() => seekToQuestion(q.timestamp_seconds!)}
+                      style={styles.timestampBtn}
+                    >
+                      <Feather name="volume-2" size={s(11)} color="#C55DFE" style={{ marginRight: 4 }} />
+                      <Text style={styles.timestampBtnText}>{formatTime(q.timestamp_seconds * 1000)}</Text>
+                    </TouchableOpacity>
+                  )}
                 </View>
 
-                {/* Multiple Choice Render */}
+                {/* 1. Multiple Choice Render */}
                 {q.type === 'multiple_choice' && q.options && (
                   <View style={styles.optionsList}>
                     {q.options.map((option, oIdx) => {
                       const isSelected = userAnswers[q.question_number] === option;
                       const isThisCorrect =
-                        !!result && String(result.correct_answer ?? '').trim() === option.trim();
+                        !!result && String(result.correct_answer ?? '').trim().toLowerCase() === option.trim().toLowerCase();
                       let optionStyle: any = styles.optionItem;
-                      if (isSelected) optionStyle = [styles.optionItem, styles.optionItemSelected];
+                      let radioStyle: any = styles.radioIndicator;
+
+                      if (isSelected) {
+                        optionStyle = [styles.optionItem, styles.optionItemSelected];
+                        radioStyle = [styles.radioIndicator, styles.radioIndicatorSelected];
+                      }
                       if (result) {
-                        if (isThisCorrect) optionStyle = [styles.optionItem, styles.optionItemCorrect];
-                        else if (isSelected) optionStyle = [styles.optionItem, styles.optionItemWrong];
+                        if (isThisCorrect) {
+                          optionStyle = [styles.optionItem, styles.optionItemCorrect];
+                          radioStyle = [styles.radioIndicator, styles.radioIndicatorCorrect];
+                        } else if (isSelected) {
+                          optionStyle = [styles.optionItem, styles.optionItemWrong];
+                          radioStyle = [styles.radioIndicator, styles.radioIndicatorWrong];
+                        }
                       }
 
                       return (
@@ -474,11 +514,17 @@ export const IeltsListeningScreen: React.FC = () => {
                           disabled={!!results}
                           style={optionStyle}
                         >
+                          <View style={radioStyle}>
+                            {(isSelected || (result && isThisCorrect)) ? (
+                              <View style={styles.radioInnerDot} />
+                            ) : null}
+                          </View>
                           <Text
                             style={[
                               styles.optionText,
                               isSelected && styles.optionTextSelected,
                               isThisCorrect && styles.optionTextCorrect,
+                              { flex: 1 },
                             ]}
                           >
                             {option}
@@ -489,83 +535,265 @@ export const IeltsListeningScreen: React.FC = () => {
                   </View>
                 )}
 
-                {/* Fill in the Blank Render */}
-                {q.type === 'fill_in_the_blank' && (
+                {/* 2. Multiple Select Render */}
+                {q.type === 'multiple_select' && q.options && (
+                  <View style={styles.optionsList}>
+                    <Text style={styles.multiSelectHint}>
+                      Choose {q.max_selections || 2} options • Selected:{' '}
+                      {(Array.isArray(userAnswers[q.question_number])
+                        ? (userAnswers[q.question_number] as string[]).length
+                        : userAnswers[q.question_number] ? 1 : 0)}/{q.max_selections || 2}
+                    </Text>
+                    {q.options.map((option, oIdx) => {
+                      const selectedList = Array.isArray(userAnswers[q.question_number])
+                        ? (userAnswers[q.question_number] as string[])
+                        : userAnswers[q.question_number]
+                        ? [userAnswers[q.question_number] as string]
+                        : [];
+                      const isSelected = selectedList.includes(option);
+                      const correctVariants = String(result?.correct_answer ?? '')
+                        .split(/[,;\/|]+/)
+                        .map((s) => s.trim().toLowerCase());
+                      const isThisCorrect =
+                        !!result && correctVariants.includes(option.trim().toLowerCase());
+
+                      let rowStyle: any = styles.multiOptionRow;
+                      if (isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemSelected];
+                      if (result) {
+                        if (isThisCorrect && isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemCorrect];
+                        else if (!isThisCorrect && isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemWrong];
+                        else if (isThisCorrect && !isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemMissed];
+                      }
+
+                      return (
+                        <TouchableOpacity
+                          key={oIdx}
+                          onPress={() => handleToggleMultiSelect(q.question_number, option, q.max_selections || 2)}
+                          disabled={!!results}
+                          style={rowStyle}
+                        >
+                          <View
+                            style={[
+                              styles.checkboxIndicator,
+                              isSelected && styles.checkboxIndicatorSelected,
+                              result && isThisCorrect && styles.checkboxIndicatorCorrect,
+                              result && isSelected && !isThisCorrect && styles.checkboxIndicatorWrong,
+                            ]}
+                          >
+                            {isSelected && <Feather name="check" size={s(11)} color="#FFFFFF" />}
+                          </View>
+                          <Text
+                            style={[
+                              styles.optionText,
+                              isSelected && styles.optionTextSelected,
+                              isThisCorrect && styles.optionTextCorrect,
+                              { flex: 1 },
+                            ]}
+                          >
+                            {option}
+                          </Text>
+                          {result && isThisCorrect && !isSelected && (
+                            <View style={styles.missedBadgeContainer}>
+                              <Text style={styles.missedBadgeText}>Missed</Text>
+                            </View>
+                          )}
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* 3. Matching Render */}
+                {q.type === 'matching' && q.options && (
+                  <View style={styles.optionsList}>
+                    {q.options.map((option, oIdx) => {
+                      const currentAns = String(userAnswers[q.question_number] || '');
+                      const isSelected =
+                        currentAns === option ||
+                        (currentAns.length === 1 && option.toUpperCase().startsWith(currentAns.toUpperCase()));
+
+                      const expected = String(result?.correct_answer ?? '');
+                      const isThisCorrect =
+                        !!result &&
+                        (expected === option ||
+                          (expected.length === 1 && option.toUpperCase().startsWith(expected.toUpperCase())));
+
+                      let optionStyle: any = styles.matchingRow;
+                      if (isSelected) optionStyle = [styles.matchingRow, styles.optionItemSelected];
+                      if (result) {
+                        if (isThisCorrect) optionStyle = [styles.matchingRow, styles.optionItemCorrect];
+                        else if (isSelected) optionStyle = [styles.matchingRow, styles.optionItemWrong];
+                      }
+
+                      return (
+                        <TouchableOpacity
+                          key={oIdx}
+                          onPress={() => handleAnswerChange(q.question_number, option)}
+                          disabled={!!results}
+                          style={optionStyle}
+                        >
+                          <View style={styles.matchingLetterBadge}>
+                            <Text style={styles.matchingLetterText}>{option.charAt(0)}</Text>
+                          </View>
+                          <Text
+                            style={[
+                              styles.optionText,
+                              isSelected && styles.optionTextSelected,
+                              isThisCorrect && styles.optionTextCorrect,
+                              { flex: 1 },
+                            ]}
+                          >
+                            {option}
+                          </Text>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* 4. Form Completion Render */}
+                {q.type === 'form_completion' && (
+                  <View style={styles.formCompletionRow}>
+                    {!!q.prefix_text && (
+                      <Text style={styles.formPrefixText}>{q.prefix_text}</Text>
+                    )}
+                    <TextInput
+                      value={String(userAnswers[q.question_number] || '')}
+                      onChangeText={(text) => handleAnswerChange(q.question_number, text)}
+                      editable={!results}
+                      placeholder="Type answer..."
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
+                      style={[
+                        styles.formInlineInput,
+                        result && (result.is_correct ? styles.fillBlankCorrect : styles.fillBlankWrong),
+                      ]}
+                      autoCapitalize="none"
+                    />
+                    {!!q.suffix_text && (
+                      <Text style={styles.formSuffixText}>{q.suffix_text}</Text>
+                    )}
+                  </View>
+                )}
+
+                {/* 5. Fill in the Blank Render */}
+                {!['multiple_choice', 'multiple_select', 'matching', 'form_completion'].includes(q.type) && (
                   <View style={styles.fillBlankContainer}>
                     <TextInput
-                      value={userAnswers[q.question_number] || ''}
+                      value={String(userAnswers[q.question_number] || '')}
                       onChangeText={(text) => handleAnswerChange(q.question_number, text)}
                       editable={!results}
                       placeholder="Type your answer here..."
-                      placeholderTextColor="#777"
+                      placeholderTextColor="rgba(255, 255, 255, 0.4)"
                       style={[
                         styles.fillBlankInput,
                         result && (result.is_correct ? styles.fillBlankCorrect : styles.fillBlankWrong),
                       ]}
                       autoCapitalize="none"
                     />
-                    {result && !result.is_correct && (
-                      <Text style={styles.correctAnswerHint}>
-                        Correct: {result.correct_answer}
-                      </Text>
-                    )}
+                  </View>
+                )}
+
+                {result && !result.is_correct && (
+                  <View style={styles.correctAnswerCard}>
+                    <Feather name="check-circle" size={s(14)} color="#34D399" />
+                    <Text style={styles.correctAnswerCardText}>
+                      Correct answer:{' '}
+                      <Text style={styles.correctAnswerCardBold}>{String(result.correct_answer)}</Text>
+                    </Text>
                   </View>
                 )}
               </View>
             );
           })}
-          <View style={{ height: 120 }} />
+          <View style={{ height: 200 }} />
         </ScrollView>
 
-        {/* Persistent Bottom Audio Player */}
-        <View style={styles.bottomPlayer}>
-          <View style={styles.playerInfoRow}>
-            <Text style={styles.playerPartTitle}>Part {activePart.part_number} Audio</Text>
+        {/* Fixed Footer: Action Button (Submit / New Attempt) + Audio Player */}
+        <View style={styles.footerContainer}>
+          <View style={styles.bottomActionBar}>
+            {!summary ? (
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+                style={[styles.bottomPrimaryBtn, isSubmitting && { opacity: 0.5 }]}
+              >
+                <Text style={styles.bottomPrimaryBtnText}>
+                  {isSubmitting ? 'Submitting…' : isDrill ? 'Submit Part' : 'Submit Test'}
+                </Text>
+              </TouchableOpacity>
+            ) : (
+              <View style={styles.bottomButtonsRow}>
+                <TouchableOpacity
+                  onPress={resetDrill}
+                  style={styles.bottomSecondaryBtn}
+                >
+                  <Feather name="rotate-ccw" size={s(15)} color="#C55DFE" style={{ marginRight: 6 }} />
+                  <Text style={styles.bottomSecondaryBtnText}>New Attempt</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                  onPress={handleNextPart}
+                  style={styles.bottomPrimaryBtnHalf}
+                >
+                  <Text style={styles.bottomPrimaryBtnText}>
+                    {hasNextPart ? 'Next Part' : 'Back to Home'}
+                  </Text>
+                  <Feather name="arrow-right" size={s(15)} color="#FFFFFF" style={{ marginLeft: 6 }} />
+                </TouchableOpacity>
+              </View>
+            )}
           </View>
 
-          <View style={styles.playerProgressRow}>
-            <Text style={styles.playerTime}>{formatTime(positionMillis)}</Text>
-            <View style={styles.progressBarBackground}>
-              <View
-                style={[
-                  styles.progressBarFill,
-                  { width: `${Math.min(100, (positionMillis / durationMillis) * 100)}%` },
-                ]}
-              />
+          {/* Persistent Bottom Audio Player */}
+          <View style={styles.bottomPlayer}>
+            <View style={styles.playerInfoRow}>
+              <Text style={styles.playerPartTitle}>Part {activePart.part_number} Audio</Text>
             </View>
-            <Text style={styles.playerTime}>{formatTime(durationMillis)}</Text>
-          </View>
 
-          {audioError && (
-            <TouchableOpacity onPress={reloadAudio} style={styles.audioErrorRow}>
-              <Feather name="refresh-cw" size={s(14)} color="#F87171" style={{ marginRight: 6 }} />
-              <Text style={styles.audioErrorText}>Audio couldn't load — tap to reload</Text>
-            </TouchableOpacity>
-          )}
-
-          <View style={styles.playerControlsRow}>
-            <TouchableOpacity onPress={() => seekRelative(-10000)} style={styles.skipButton}>
-              <Feather name="rotate-ccw" size={s(18)} color="#FFFFFF" />
-              <Text style={styles.skipText}>-10s</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity onPress={togglePlayPause} style={styles.playPauseButton}>
-              {isAudioLoading ? (
-                <ActivityIndicator size="small" color="#FFFFFF" />
-              ) : (
-                <Feather
-                  name={isPlaying ? 'pause' : 'play'}
-                  size={s(22)}
-                  color="#FFFFFF"
-                  style={{ marginLeft: isPlaying ? 0 : 2 }}
+            <View style={styles.playerProgressRow}>
+              <Text style={styles.playerTime}>{formatTime(positionMillis)}</Text>
+              <View style={styles.progressBarBackground}>
+                <View
+                  style={[
+                    styles.progressBarFill,
+                    { width: `${Math.min(100, (positionMillis / durationMillis) * 100)}%` },
+                  ]}
                 />
-              )}
-            </TouchableOpacity>
+              </View>
+              <Text style={styles.playerTime}>{formatTime(durationMillis)}</Text>
+            </View>
 
-            <TouchableOpacity onPress={() => seekRelative(10000)} style={styles.skipButton}>
-              <Feather name="rotate-cw" size={s(18)} color="#FFFFFF" />
-              <Text style={styles.skipText}>+10s</Text>
-            </TouchableOpacity>
+            {audioError && (
+              <TouchableOpacity onPress={reloadAudio} style={styles.audioErrorRow}>
+                <Feather name="refresh-cw" size={s(14)} color="#F87171" style={{ marginRight: 6 }} />
+                <Text style={styles.audioErrorText}>Audio couldn't load — tap to reload</Text>
+              </TouchableOpacity>
+            )}
+
+            <View style={styles.playerControlsRow}>
+              <TouchableOpacity onPress={() => seekRelative(-10000)} style={styles.skipButton}>
+                <Feather name="rotate-ccw" size={s(18)} color="#FFFFFF" />
+                <Text style={styles.skipText}>-10s</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={togglePlayPause} style={styles.playPauseButton}>
+                {isAudioLoading ? (
+                  <ActivityIndicator size="small" color="#151726" />
+                ) : (
+                  <Feather
+                    name={isPlaying ? 'pause' : 'play'}
+                    size={s(22)}
+                    color="#151726"
+                    style={{ marginLeft: isPlaying ? 0 : 2 }}
+                  />
+                )}
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={() => seekRelative(10000)} style={styles.skipButton}>
+                <Feather name="rotate-cw" size={s(18)} color="#FFFFFF" />
+                <Text style={styles.skipText}>+10s</Text>
+              </TouchableOpacity>
+            </View>
           </View>
         </View>
       </SafeAreaView>
@@ -629,41 +857,48 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
   submitHeaderButton: {
-    backgroundColor: '#8B5CF6',
-    paddingHorizontal: 14,
-    paddingVertical: 6,
+    backgroundColor: '#8C6DFF',
+    height: 36,
+    paddingHorizontal: 16,
     borderRadius: 8,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   submitHeaderText: {
     color: '#FFFFFF',
-    fontWeight: '600',
+    fontWeight: '700',
     fontSize: 13,
   },
   partTabsContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+    marginHorizontal: 16,
+    marginVertical: 8,
+    padding: 4,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
   },
   partTab: {
     flex: 1,
-    paddingVertical: 8,
+    height: 38,
     alignItems: 'center',
-    borderRadius: 8,
-    marginHorizontal: 3,
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
   },
   partTabActive: {
-    backgroundColor: 'rgba(139, 92, 246, 0.35)',
+    backgroundColor: 'rgba(147, 51, 234, 0.5)',
     borderWidth: 1,
-    borderColor: '#8B5CF6',
+    borderColor: 'rgba(168, 85, 247, 0.6)',
   },
   partTabText: {
-    fontSize: 12,
-    fontWeight: '600',
+    fontSize: 13,
+    fontWeight: '500',
     color: '#9CA3AF',
   },
   partTabTextActive: {
+    fontWeight: '600',
     color: '#FFFFFF',
   },
   contentScroll: {
@@ -672,30 +907,70 @@ const styles = StyleSheet.create({
   contentBody: {
     padding: 16,
   },
+  audioUnavailableCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    borderRadius: 10,
+    padding: 12,
+    marginBottom: 14,
+  },
+  audioUnavailableText: {
+    color: 'rgba(255, 255, 255, 0.7)',
+    fontSize: 12,
+    flex: 1,
+  },
   instructionsCard: {
     backgroundColor: 'rgba(255, 255, 255, 0.05)',
     padding: 14,
     borderRadius: 12,
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-    marginBottom: 16,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    marginBottom: 14,
+  },
+  instructionsHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 4,
+  },
+  plainScoreText: {
+    color: '#34D399',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  instructionsScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  partCategoryTag: {
+    color: '#C55DFE',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 4,
+    textTransform: 'uppercase',
   },
   partTitle: {
     fontSize: 15,
-    fontWeight: '700',
+    fontWeight: '600',
     color: '#FFFFFF',
   },
   partInstructions: {
     fontSize: 12,
-    color: '#D1D5DB',
-    marginTop: 6,
+    color: 'rgba(255, 255, 255, 0.65)',
+    marginTop: 4,
     lineHeight: 18,
   },
   questionCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderRadius: 12,
-    padding: 14,
-    marginBottom: 12,
+    padding: 16,
+    marginBottom: 14,
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
@@ -713,24 +988,48 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   qNumBadge: {
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#8C6DFF',
     width: 24,
     height: 24,
     borderRadius: 12,
     alignItems: 'center',
     justifyContent: 'center',
+    marginTop: 2,
   },
   qNumText: {
     color: '#FFFFFF',
     fontSize: 11,
     fontWeight: '700',
   },
+  questionEyebrow: {
+    color: '#C55DFE',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.6,
+    textTransform: 'uppercase',
+    marginBottom: 2,
+  },
   questionText: {
-    flex: 1,
     color: '#FFFFFF',
-    fontSize: 14,
-    lineHeight: 20,
+    fontSize: 15,
+    lineHeight: 21,
     fontWeight: '500',
+  },
+  timestampBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(140, 109, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(140, 109, 255, 0.3)',
+  },
+  timestampBtnText: {
+    color: '#C55DFE',
+    fontSize: 11,
+    fontWeight: '600',
+    fontFamily: 'monospace',
   },
   playerInfoRow: {
     flexDirection: 'row',
@@ -744,26 +1043,166 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   optionsList: {
-    gap: 8,
+    gap: 10,
+    marginTop: 8,
   },
   optionItem: {
-    padding: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
     borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
     borderWidth: 1,
-    borderColor: 'transparent',
+    borderColor: 'rgba(255, 255, 255, 0.08)',
   },
   optionItemSelected: {
-    backgroundColor: 'rgba(139, 92, 246, 0.25)',
-    borderColor: '#8B5CF6',
+    backgroundColor: 'rgba(147, 51, 234, 0.25)',
+    borderColor: 'rgba(168, 85, 247, 0.6)',
   },
   optionItemCorrect: {
-    backgroundColor: 'rgba(34, 197, 94, 0.2)',
-    borderColor: '#22C55E',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+    borderColor: '#10B981',
   },
   optionItemWrong: {
-    backgroundColor: 'rgba(239, 68, 68, 0.2)',
+    backgroundColor: 'rgba(239, 68, 68, 0.15)',
     borderColor: '#EF4444',
+  },
+  optionItemMissed: {
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderColor: '#10B981',
+    borderStyle: 'dashed',
+  },
+  radioIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  radioIndicatorSelected: {
+    borderColor: '#8C6DFF',
+    backgroundColor: '#8C6DFF',
+  },
+  radioIndicatorCorrect: {
+    borderColor: '#10B981',
+    backgroundColor: '#10B981',
+  },
+  radioIndicatorWrong: {
+    borderColor: '#EF4444',
+    backgroundColor: '#EF4444',
+  },
+  radioInnerDot: {
+    width: 6,
+    height: 6,
+    borderRadius: 3,
+    backgroundColor: '#FFFFFF',
+  },
+  checkboxIndicator: {
+    width: 16,
+    height: 16,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.3)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  checkboxIndicatorSelected: {
+    borderColor: '#8C6DFF',
+    backgroundColor: '#8C6DFF',
+  },
+  checkboxIndicatorCorrect: {
+    borderColor: '#10B981',
+    backgroundColor: '#10B981',
+  },
+  checkboxIndicatorWrong: {
+    borderColor: '#EF4444',
+    backgroundColor: '#EF4444',
+  },
+  missedBadgeContainer: {
+    backgroundColor: 'rgba(16, 185, 129, 0.2)',
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 4,
+  },
+  missedBadgeText: {
+    color: '#34D399',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  multiOptionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 12,
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  matchingRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  matchingLetterBadge: {
+    width: 24,
+    height: 24,
+    borderRadius: 6,
+    backgroundColor: 'rgba(140, 109, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(140, 109, 255, 0.4)',
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginRight: 10,
+  },
+  matchingLetterText: {
+    color: '#C55DFE',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  formCompletionRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    flexWrap: 'wrap',
+    gap: 8,
+    marginTop: 6,
+  },
+  formPrefixText: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  formSuffixText: {
+    color: 'rgba(255, 255, 255, 0.85)',
+    fontSize: 14,
+  },
+  formInlineInput: {
+    height: 40,
+    minWidth: 140,
+    flex: 1,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.12)',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    color: '#FFFFFF',
+    fontSize: 13,
+  },
+  multiSelectHint: {
+    fontSize: 11,
+    color: '#C4B5FD',
+    marginBottom: 4,
+    fontWeight: '500',
   },
   optionText: {
     color: '#E5E7EB',
@@ -774,46 +1213,117 @@ const styles = StyleSheet.create({
     fontWeight: '600',
   },
   optionTextCorrect: {
-    color: '#4ADE80',
+    color: '#34D399',
     fontWeight: '700',
   },
   fillBlankContainer: {
-    marginTop: 4,
+    marginTop: 6,
   },
   fillBlankInput: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+    height: 40,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
     borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.15)',
+    borderColor: 'rgba(255, 255, 255, 0.12)',
     borderRadius: 8,
     paddingHorizontal: 12,
-    paddingVertical: 10,
     color: '#FFFFFF',
-    fontSize: 14,
+    fontSize: 13,
   },
   fillBlankCorrect: {
-    borderColor: '#22C55E',
-    backgroundColor: 'rgba(34, 197, 94, 0.1)',
+    borderColor: '#10B981',
+    backgroundColor: 'rgba(16, 185, 129, 0.12)',
+    color: '#34D399',
   },
   fillBlankWrong: {
     borderColor: '#EF4444',
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    backgroundColor: 'rgba(239, 68, 68, 0.12)',
+    color: '#F87171',
+  },
+  correctAnswerCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: 'rgba(16, 185, 129, 0.1)',
+    borderWidth: 1,
+    borderColor: 'rgba(16, 185, 129, 0.25)',
   },
   correctAnswerHint: {
-    color: '#4ADE80',
-    fontSize: 11,
-    marginTop: 4,
+    color: '#34D399',
+    fontSize: 12,
     fontWeight: '600',
+    marginTop: 4,
   },
-  bottomPlayer: {
+  correctAnswerCardText: {
+    color: '#34D399',
+    fontSize: 12,
+    fontWeight: '500',
+  },
+  correctAnswerCardBold: {
+    color: '#FFFFFF',
+    fontWeight: '700',
+  },
+  footerContainer: {
     position: 'absolute',
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(20, 20, 30, 0.95)',
-    borderTopWidth: 1,
-    borderTopColor: 'rgba(255, 255, 255, 0.12)',
-    paddingHorizontal: 20,
+    backgroundColor: 'transparent',
+  },
+  bottomActionBar: {
+    paddingHorizontal: 16,
     paddingTop: 10,
+    paddingBottom: 4,
+  },
+  bottomPrimaryBtn: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8C6DFF',
+    height: 44,
+    borderRadius: 8,
+  },
+  bottomPrimaryBtnHalf: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#8C6DFF',
+    height: 44,
+    borderRadius: 8,
+  },
+  bottomButtonsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+  },
+  bottomSecondaryBtn: {
+    flex: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    height: 44,
+    borderRadius: 8,
+    backgroundColor: 'rgba(140, 109, 255, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(140, 109, 255, 0.4)',
+  },
+  bottomSecondaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '600',
+  },
+  bottomPrimaryBtnText: {
+    color: '#FFFFFF',
+    fontSize: 14,
+    fontWeight: '700',
+  },
+  bottomPlayer: {
+    paddingHorizontal: 20,
+    paddingTop: 6,
     paddingBottom: 24,
   },
   playerProgressRow: {
@@ -835,7 +1345,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#8C6DFF',
   },
   playerControlsRow: {
     flexDirection: 'row',
@@ -848,7 +1358,7 @@ const styles = StyleSheet.create({
     width: 46,
     height: 46,
     borderRadius: 23,
-    backgroundColor: '#8B5CF6',
+    backgroundColor: '#FFFFFF',
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -898,38 +1408,71 @@ const styles = StyleSheet.create({
     marginLeft: 12,
   },
   resultBanner: {
-    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    backgroundColor: 'rgba(30, 34, 64, 0.85)',
     borderWidth: 1,
-    borderColor: '#8B5CF6',
-    borderRadius: 12,
-    padding: 14,
+    borderColor: 'rgba(52, 211, 153, 0.35)',
+    borderRadius: 14,
+    padding: 16,
     marginBottom: 16,
   },
   resultBannerError: {
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderColor: '#EF4444',
+    backgroundColor: 'rgba(88, 32, 52, 0.45)',
+    borderColor: '#F87171',
+  },
+  resultHeaderRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 8,
+  },
+  resultBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(52, 211, 153, 0.15)',
+    borderWidth: 1,
+    borderColor: 'rgba(52, 211, 153, 0.4)',
   },
   resultTitle: {
-    color: '#C4B5FD',
+    color: '#34D399',
     fontSize: 12,
     fontWeight: '700',
-    textTransform: 'uppercase',
   },
-  resultScore: {
-    color: '#FFFFFF',
-    fontSize: 20,
+  resultBandBadge: {
+    paddingHorizontal: 10,
+    paddingVertical: 4,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(140, 109, 255, 0.2)',
+    borderWidth: 1,
+    borderColor: 'rgba(140, 109, 255, 0.4)',
+  },
+  resultBandText: {
+    color: '#C55DFE',
+    fontSize: 12,
     fontWeight: '700',
-    marginTop: 6,
   },
-  resultBand: {
+  resultScoreRow: {
+    flexDirection: 'row',
+    alignItems: 'baseline',
+    gap: 6,
+    marginTop: 4,
+  },
+  resultScoreNumber: {
     color: '#FFFFFF',
-    fontSize: 15,
-    fontWeight: '600',
-    marginTop: 2,
+    fontSize: 28,
+    fontWeight: '700',
+  },
+  resultScoreTotal: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 14,
+    fontWeight: '500',
   },
   resultHint: {
-    color: '#9CA3AF',
-    fontSize: 11,
+    color: 'rgba(255, 255, 255, 0.65)',
+    fontSize: 12,
     marginTop: 6,
   },
   resultErrorText: {
@@ -941,10 +1484,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: 8,
+    marginTop: 12,
   },
   bannerButton: {
     alignSelf: 'flex-start',
-    marginTop: 10,
   },
   bannerButtonSecondary: {
     backgroundColor: 'rgba(255, 255, 255, 0.12)',

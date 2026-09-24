@@ -26,8 +26,18 @@ export interface IeltsSpeakingTest {
 export interface IeltsListeningQuestion {
   question_number: number;
   question_text: string;
-  type: 'multiple_choice' | 'fill_in_the_blank';
+  type:
+    | 'multiple_choice'
+    | 'multiple_select'
+    | 'fill_in_the_blank'
+    | 'form_completion'
+    | 'matching';
   options?: string[];
+  max_selections?: number;
+  prefix_text?: string;
+  suffix_text?: string;
+  matching_title?: string;
+  timestamp_seconds?: number;
 }
 
 export interface IeltsListeningPart {
@@ -232,7 +242,7 @@ export class IeltsService {
 
   async submitListeningTest(data: {
     testSetId: string;
-    answers: Record<string, string>;
+    answers: Record<string, string | string[]>;
     part?: 1 | 2 | 3 | 4;
   }): Promise<IeltsListeningSubmitResponse> {
     const res = await this.http.post('ielts/listening/submit', data);

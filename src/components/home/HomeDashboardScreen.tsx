@@ -214,146 +214,88 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
 
       {/* Mode 2: IELTS Targeted Drills */}
       {isIelts && ieltsMode === 'drills' && (
-        <View style={styles.ieltsDrillsContainer}>
+        <>
           <LinearGradient
-            colors={['rgba(168,85,247,0.25)', 'rgba(40,32,110,0.05)']}
-            style={styles.drillCard}
+            colors={['rgba(168,85,247,0.22)', 'rgba(40,32,110,0.02)']}
+            style={styles.todayPlanCard}
           >
-            <View style={styles.drillBadgeRow}>
-              <Text style={styles.drillBadge}>Part 1 Drill</Text>
-              <Text style={styles.drillTime}>3-4 Mins</Text>
+            <View style={{ width: '100%', zIndex: 1 }}>
+              <Text style={styles.todayPlanTitle}>IELTS Speaking Drill</Text>
+              <Text style={styles.todayPlanDesc}>
+                Parts 1, 2 & 3 targeted practice with instant feedback.
+              </Text>
+              <FigmaPrimaryButton
+                onPress={() => openSpeaking('drill')}
+                style={styles.todayPlanButton}
+              >
+                <Text style={styles.todayPlanButtonText}>Start Speaking Drill</Text>
+                <Feather name="arrow-right" size={14} color="#fff" />
+              </FigmaPrimaryButton>
             </View>
-            <Text style={styles.drillTitle}>Rapid Response & Fluency</Text>
-            <Text style={styles.drillDesc}>
-              Practice instant answers to everyday examiner questions without hesitation.
-            </Text>
-            <TouchableOpacity
-              onPress={() => openSpeaking('drill', 1)}
-              style={styles.drillStartButton}
-            >
-              <Text style={styles.drillStartText}>Start Drill</Text>
-              <Feather name="arrow-right" size={14} color="#fff" />
-            </TouchableOpacity>
           </LinearGradient>
 
           <LinearGradient
-            colors={['rgba(99,102,241,0.25)', 'rgba(40,32,110,0.05)']}
-            style={[styles.drillCard, { marginTop: 14 }]}
+            colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
+            style={[styles.todayPlanCard, { marginTop: 16 }]}
           >
-            <View style={styles.drillBadgeRow}>
-              <Text style={[styles.drillBadge, { backgroundColor: '#4F46E5' }]}>Part 2 Drill</Text>
-              <Text style={styles.drillTime}>2-Min Monologue</Text>
+            <View style={{ width: '100%', zIndex: 1 }}>
+              <Text style={styles.todayPlanTitle}>IELTS Listening Drill</Text>
+              <Text style={styles.todayPlanDesc}>
+                5–7 min Cambridge-style practice questions.
+              </Text>
+              <FigmaPrimaryButton
+                onPress={() => openListening('drill')}
+                style={styles.todayPlanButton}
+              >
+                <Text style={styles.todayPlanButtonText}>Start Listening Drill</Text>
+                <Feather name="arrow-right" size={14} color="#fff" />
+              </FigmaPrimaryButton>
             </View>
-            <Text style={styles.drillTitle}>Cue Card Structure & Timing</Text>
-            <Text style={styles.drillDesc}>
-              Master 1-min quick note-taking and continuous structured speech.
-            </Text>
-            <TouchableOpacity
-              onPress={() => openSpeaking('drill', 2)}
-              style={styles.drillStartButton}
-            >
-              <Text style={styles.drillStartText}>Start Monologue</Text>
-              <Feather name="arrow-right" size={14} color="#fff" />
-            </TouchableOpacity>
           </LinearGradient>
-
-          <LinearGradient
-            colors={['rgba(236,72,153,0.25)', 'rgba(40,32,110,0.05)']}
-            style={[styles.drillCard, { marginTop: 14 }]}
-          >
-            <View style={styles.drillBadgeRow}>
-              <Text style={[styles.drillBadge, { backgroundColor: '#DB2777' }]}>Part 3 Drill</Text>
-              <Text style={styles.drillTime}>Deep Discussion</Text>
-            </View>
-            <Text style={styles.drillTitle}>Abstract Reasoning & Justification</Text>
-            <Text style={styles.drillDesc}>
-              Defend arguments with reasons, counterpoints, and Band 7.0+ vocabulary.
-            </Text>
-            <TouchableOpacity
-              onPress={() => openSpeaking('drill', 3)}
-              style={styles.drillStartButton}
-            >
-              <Text style={styles.drillStartText}>Start Discussion</Text>
-              <Feather name="arrow-right" size={14} color="#fff" />
-            </TouchableOpacity>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={['rgba(59,130,246,0.25)', 'rgba(40,32,110,0.05)']}
-            style={[styles.drillCard, { marginTop: 14 }]}
-          >
-            <View style={styles.drillBadgeRow}>
-              <Text style={[styles.drillBadge, { backgroundColor: '#2563EB' }]}>Listening Drill</Text>
-              <Text style={styles.drillTime}>5-7 Mins</Text>
-            </View>
-            <Text style={styles.drillTitle}>Listening Comprehension</Text>
-            <Text style={styles.drillDesc}>
-              Pick one part, answer its gap-fill and multiple-choice questions, then review your answers.
-            </Text>
-            <TouchableOpacity
-              onPress={() => openListening('drill')}
-              style={styles.drillStartButton}
-            >
-              <Text style={styles.drillStartText}>Start Listening</Text>
-              <Feather name="arrow-right" size={14} color="#fff" />
-            </TouchableOpacity>
-          </LinearGradient>
-        </View>
+        </>
       )}
 
       {/* Mode 3: IELTS Full Mock Exam Hub */}
       {isIelts && ieltsMode === 'mock_exam' && (
-        <View style={styles.mockExamContainer}>
+        <>
           <LinearGradient
-            colors={['rgba(168,85,247,0.3)', 'rgba(67,56,202,0.1)']}
-            style={styles.mockExamCard}
+            colors={['rgba(168,85,247,0.22)', 'rgba(40,32,110,0.02)']}
+            style={styles.todayPlanCard}
           >
-            <View style={styles.mockExamHeader}>
-              <View style={styles.mockExamIconBox}>
-                <Feather name="mic" size={20} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.mockExamTitle}>IELTS Speaking Mock Test</Text>
-                <Text style={styles.mockExamSubtitle}>Parts 1, 2 & 3 • About 11-14 min</Text>
-              </View>
+            <View style={{ width: '100%', zIndex: 1 }}>
+              <Text style={styles.todayPlanTitle}>IELTS Speaking Mock Test</Text>
+              <Text style={styles.todayPlanDesc}>
+                Full 11–14 min test with AI examiner & band score.
+              </Text>
+              <FigmaPrimaryButton
+                onPress={() => openSpeaking('mock')}
+                style={styles.todayPlanButton}
+              >
+                <Text style={styles.todayPlanButtonText}>Take Speaking Mock</Text>
+                <Feather name="arrow-right" size={14} color="#fff" />
+              </FigmaPrimaryButton>
             </View>
-            <Text style={styles.mockExamDesc}>
-              A full practice interview with an AI examiner, ending in an estimated band report for Fluency, Vocabulary, Grammar, and Pronunciation.
-            </Text>
-            <TouchableOpacity
-              onPress={() => openSpeaking('mock')}
-              style={styles.mockExamButton}
-            >
-              <Text style={styles.mockExamButtonText}>Take Speaking Mock</Text>
-              <Feather name="arrow-right" size={16} color="#fff" />
-            </TouchableOpacity>
           </LinearGradient>
 
           <LinearGradient
-            colors={['rgba(59,130,246,0.3)', 'rgba(30,58,138,0.1)']}
-            style={[styles.mockExamCard, { marginTop: 16 }]}
+            colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
+            style={[styles.todayPlanCard, { marginTop: 16 }]}
           >
-            <View style={styles.mockExamHeader}>
-              <View style={[styles.mockExamIconBox, { backgroundColor: '#2563EB' }]}>
-                <Feather name="headphones" size={20} color="#FFFFFF" />
-              </View>
-              <View style={{ flex: 1, marginLeft: 12 }}>
-                <Text style={styles.mockExamTitle}>IELTS Listening Mock Test</Text>
-                <Text style={styles.mockExamSubtitle}>Parts 1-4 • 40 Questions</Text>
-              </View>
+            <View style={{ width: '100%', zIndex: 1 }}>
+              <Text style={styles.todayPlanTitle}>IELTS Listening Mock Test</Text>
+              <Text style={styles.todayPlanDesc}>
+                All 4 parts timed test with estimated band score.
+              </Text>
+              <FigmaPrimaryButton
+                onPress={() => openListening('mock')}
+                style={styles.todayPlanButton}
+              >
+                <Text style={styles.todayPlanButtonText}>Take Listening Mock</Text>
+                <Feather name="arrow-right" size={14} color="#fff" />
+              </FigmaPrimaryButton>
             </View>
-            <Text style={styles.mockExamDesc}>
-              A full four-part practice test with gap-fill and multiple-choice questions, ending in an estimated band.
-            </Text>
-            <TouchableOpacity
-              onPress={() => openListening('mock')}
-              style={styles.mockExamButton}
-            >
-              <Text style={styles.mockExamButtonText}>Take Listening Mock</Text>
-              <Feather name="arrow-right" size={16} color="#fff" />
-            </TouchableOpacity>
           </LinearGradient>
-        </View>
+        </>
       )}
 
     </ScrollView>

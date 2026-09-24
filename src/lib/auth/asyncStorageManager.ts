@@ -44,6 +44,13 @@ class AsyncStorageManager {
   }
 
   /**
+   * Replace only the stored user (tokens and expiry are left alone)
+   */
+  async storeUser(user: User): Promise<void> {
+    await AsyncStorage.setItem(this.USER_KEY, JSON.stringify(user));
+  }
+
+  /**
    * Clear all authentication data
    */
   async clearAuthData(): Promise<void> {

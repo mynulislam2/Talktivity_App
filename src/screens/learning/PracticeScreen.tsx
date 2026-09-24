@@ -34,14 +34,18 @@ export default function PracticeScreen() {
     prompt,
     firstPrompt,
   } = route?.params || {};
+  // IELTS Part 1/3 calls draw on the IELTS allowance, which the server
+  // enforces; the Daily Plan practice budget must not block them.
+  const isIeltsPart = Boolean(ieltsMasterSessionId && ieltsPart);
 
   const {
-    canStartSession,
+    canStartSession: canStartPractice,
     remainingTime,
     remainingTimeSeconds,
     isLoading: statusLoading,
     refreshStatus,
   } = usePracticeStatus('practice');
+  const canStartSession = canStartPractice || isIeltsPart;
 
   const {
     sessionState,
@@ -78,37 +82,14 @@ export default function PracticeScreen() {
     },
     onSaved: () => {
       setSaved();
-      if (ieltsMasterSessionId) {
-        if (ieltsPart === 1) {
-          Alert.alert(
-            'Part 1 Complete',
-            'Well done! Proceed to Part 2 (Cue Card monologue).',
-            [
-              {
-                text: 'Continue to Part 2',
-                onPress: () =>
-                  (navigation as any).navigate('IeltsSpeakingScreen', {
-                    initialPart: 2,
-                  }),
-              },
-            ]
-          );
-        } else if (ieltsPart === 3) {
-          Alert.alert(
-            'IELTS Speaking Complete',
-            'Your full test has been submitted for official Band score grading.',
-            [
-              {
-                text: 'View Completed Test',
-                onPress: () =>
-                  (navigation as any).navigate('IeltsSpeakingScreen', {
-                    initialPart: 3,
-                    completed: true,
-                  }),
-              },
-            ]
-          );
-        }
+      if (isIeltsPart) {
+        // Back to the IELTS screen, which re-reads the session on focus and
+        // moves on to the next part or the band report.
+        Alert.alert(
+          `Part ${ieltsPart} saved`,
+          'Your answers are saved. Continue on the IELTS Speaking screen.',
+          [{ text: 'Continue', onPress: () => navigation.goBack() }]
+        );
       } else {
         Alert.alert('Success', 'Session saved successfully!');
       }
@@ -161,7 +142,10 @@ export default function PracticeScreen() {
             canStartSession={canStartSession}
             timeLoading={statusLoading}
             remainingTime={remainingTime}
-            remainingTimeSeconds={remainingTimeSeconds}
+            // IELTS parts: no Daily Plan auto-disconnect; the server's IELTS
+            // allowance bounds the call through the token TTL.
+            remainingTimeSeconds={isIeltsPart ? null : remainingTimeSeconds}
+            hideRemainingTime={isIeltsPart}
             stateColor={stateColor}
             onDeviceFailure={handleDeviceFailure}
             onBack={() => navigation.goBack()}

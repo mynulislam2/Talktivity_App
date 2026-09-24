@@ -371,13 +371,10 @@ class AuthService {
       const userData = response.data as { success: boolean; data: User };
 
       if (userData.success && userData.data) {
-        // Update stored user data
-        await asyncStorageManager.storeAuthData({
-          user: userData.data,
-          accessToken: (await this.getStoredToken()) || '',
-          refreshToken: (await this.getRefreshToken()) || undefined,
-        });
-        return userData.data;
+        // Merge over the stored user so fields /me doesn't return survive.
+        // Not written here: the caller persists it only if the session is
+        // still this user's (a logout may have happened mid-request).
+        return { ...((await this.getStoredUser()) || {}), ...userData.data } as User;
       }
 
       throw new Error('Failed to get current user');

@@ -1,4 +1,4 @@
-import React, { useMemo, useCallback, useState } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -55,20 +55,17 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const authUser = useAppSelector((state) => state.auth?.user);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
 
-  const goalStr = Array.isArray((authUser as any)?.main_goal)
-    ? (authUser as any).main_goal.join(' ')
-    : typeof (authUser as any)?.main_goal === 'string'
-    ? (authUser as any).main_goal
-    : '';
+  const isIelts = authUser?.learning_track === 'ielts';
 
-  const isIelts =
-    authUser?.learning_track === 'ielts' ||
-    goalStr.toLowerCase().includes('ielts') ||
-    false;
-
-  const [ieltsMode, setIeltsMode] = useState<IeltsHomeMode>(
-    (authUser as any)?.ielts_default_focus === 'foundation' ? 'daily' : 'drills'
-  );
+  // Land on the tab for the user's saved focus (foundation/missing → Daily
+  // Plan), and follow it when the refreshed /auth/me user arrives.
+  const defaultFocus = authUser?.ielts_default_focus;
+  const focusMode: IeltsHomeMode =
+    defaultFocus === 'drills' || defaultFocus === 'mock_exam' ? defaultFocus : 'daily';
+  const [ieltsMode, setIeltsMode] = useState<IeltsHomeMode>(focusMode);
+  useEffect(() => {
+    setIeltsMode(focusMode);
+  }, [focusMode]);
 
   const navigation = useNavigation<any>();
   const todayListeningTopic = courseStatus?.course?.todayListeningTopic;
@@ -83,13 +80,10 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
     navigation.navigate('ListeningScreen');
   }, [navigation, todayListeningTopic]);
 
-  const handleOpenIeltsListening = useCallback(() => {
-    navigation.navigate('IeltsListeningScreen');
-  }, [navigation]);
-
-  const handleOpenIeltsSpeaking = useCallback(() => {
-    navigation.navigate('IeltsSpeakingScreen');
-  }, [navigation]);
+  const openSpeaking = (mode: 'drill' | 'mock', part?: 1 | 2 | 3) =>
+    navigation.navigate('IeltsSpeakingScreen', { mode, part });
+  const openListening = (mode: 'drill' | 'mock') =>
+    navigation.navigate('IeltsListeningScreen', { mode });
 
   return (
     <ScrollView
@@ -234,12 +228,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               Practice instant answers to everyday examiner questions without hesitation.
             </Text>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('PracticeScreen', {
-                  topicId: 'IELTS-DRILL-P1',
-                  topicName: 'IELTS Part 1 Fluency Drill',
-                })
-              }
+              onPress={() => openSpeaking('drill', 1)}
               style={styles.drillStartButton}
             >
               <Text style={styles.drillStartText}>Start Drill</Text>
@@ -260,7 +249,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               Master 1-min quick note-taking and continuous structured speech.
             </Text>
             <TouchableOpacity
-              onPress={handleOpenIeltsSpeaking}
+              onPress={() => openSpeaking('drill', 2)}
               style={styles.drillStartButton}
             >
               <Text style={styles.drillStartText}>Start Monologue</Text>
@@ -281,12 +270,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               Defend arguments with reasons, counterpoints, and Band 7.0+ vocabulary.
             </Text>
             <TouchableOpacity
-              onPress={() =>
-                navigation.navigate('PracticeScreen', {
-                  topicId: 'IELTS-DRILL-P3',
-                  topicName: 'IELTS Part 3 Abstract Reasoning',
-                })
-              }
+              onPress={() => openSpeaking('drill', 3)}
               style={styles.drillStartButton}
             >
               <Text style={styles.drillStartText}>Start Discussion</Text>
@@ -302,12 +286,12 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               <Text style={[styles.drillBadge, { backgroundColor: '#2563EB' }]}>Listening Drill</Text>
               <Text style={styles.drillTime}>5-7 Mins</Text>
             </View>
-            <Text style={styles.drillTitle}>Cambridge Audio Comprehension</Text>
+            <Text style={styles.drillTitle}>Listening Comprehension</Text>
             <Text style={styles.drillDesc}>
-              Practice authentic dialogues, sentence completion, and multiple choice questions.
+              Pick one part, answer its gap-fill and multiple-choice questions, then review your answers.
             </Text>
             <TouchableOpacity
-              onPress={handleOpenIeltsListening}
+              onPress={() => openListening('drill')}
               style={styles.drillStartButton}
             >
               <Text style={styles.drillStartText}>Start Listening</Text>
@@ -330,14 +314,14 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={styles.mockExamTitle}>IELTS Speaking Mock Test</Text>
-                <Text style={styles.mockExamSubtitle}>Parts 1, 2 & 3 • Official 11-14 min test</Text>
+                <Text style={styles.mockExamSubtitle}>Parts 1, 2 & 3 • About 11-14 min</Text>
               </View>
             </View>
             <Text style={styles.mockExamDesc}>
-              Complete authentic examiner interview with instant Band score evaluation across Fluency, Lexicon, Grammar, and Pronunciation.
+              A full practice interview with an AI examiner, ending in an estimated band report for Fluency, Vocabulary, Grammar, and Pronunciation.
             </Text>
             <TouchableOpacity
-              onPress={handleOpenIeltsSpeaking}
+              onPress={() => openSpeaking('mock')}
               style={styles.mockExamButton}
             >
               <Text style={styles.mockExamButtonText}>Take Speaking Mock</Text>
@@ -355,14 +339,14 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
               </View>
               <View style={{ flex: 1, marginLeft: 12 }}>
                 <Text style={styles.mockExamTitle}>IELTS Listening Mock Test</Text>
-                <Text style={styles.mockExamSubtitle}>Sections 1-4 • 40 Questions</Text>
+                <Text style={styles.mockExamSubtitle}>Parts 1-4 • 40 Questions</Text>
               </View>
             </View>
             <Text style={styles.mockExamDesc}>
-              Authentic Cambridge audio recordings with multiple-choice and sentence completion questions.
+              A full four-part practice test with gap-fill and multiple-choice questions, ending in an estimated band.
             </Text>
             <TouchableOpacity
-              onPress={handleOpenIeltsListening}
+              onPress={() => openListening('mock')}
               style={styles.mockExamButton}
             >
               <Text style={styles.mockExamButtonText}>Take Listening Mock</Text>

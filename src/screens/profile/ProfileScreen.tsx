@@ -153,6 +153,10 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
           isUploadingProfileImage={isUploadingProfileImage}
         />
 
+        <Text style={styles.billingNote}>
+          Plans and billing are managed on talktivity.app
+        </Text>
+
         {/* International Subscription Section — matches frontend exactly */}
         {isInternationalSubscription ? (
           <View style={styles.subscriptionCard}>
@@ -250,6 +254,14 @@ const styles = StyleSheet.create({
   mb4: {
     marginBottom: 16,
     marginTop: 16,
+  },
+  billingNote: {
+    fontSize: 13,
+    fontFamily: 'Poppins',
+    lineHeight: 18,
+    color: '#c6c6c6',
+    textAlign: 'center',
+    marginTop: 12,
   },
   mb8: {
     marginBottom: 32,

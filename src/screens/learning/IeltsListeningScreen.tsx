@@ -7,7 +7,6 @@ import {
   TouchableOpacity,
   TextInput,
   ActivityIndicator,
-  Alert,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Audio } from 'expo-av';
@@ -15,23 +14,38 @@ import Feather from '@expo/vector-icons/Feather';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import ScreenBackground from '@/components/common/ScreenBackground';
 import { useResponsive } from '@/theme/responsive';
+import { extractErrorMessage } from '@/lib/auth/errorHandler';
 import {
   ieltsService,
   IeltsListeningTest,
-  IeltsListeningPart,
   IeltsListeningQuestion,
+  IeltsListeningResult,
 } from '@/services/ielts';
+
+// Real IELTS Listening gives 40 minutes for all four parts.
+const MOCK_SECONDS = 40 * 60;
 
 export const IeltsListeningScreen: React.FC = () => {
   const { s } = useResponsive();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const isDrill = route.params?.mode === 'drill';
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [test, setTest] = useState<IeltsListeningTest | null>(null);
   const [activePartIndex, setActivePartIndex] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, string>>({});
-  const [showAnswers, setShowAnswers] = useState(false);
+  // Review comes only from the submit response, keyed by question number.
+  const [results, setResults] = useState<Record<number, IeltsListeningResult> | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  // Shown inline: Alert is a no-op on web.
+  const [summary, setSummary] = useState<{ score: number; total: number; band: number | null } | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
+  // Mock only: 40-minute countdown, auto-submitted once at 0.
+  const [secondsLeft, setSecondsLeft] = useState<number | null>(null);
+  const autoSubmittedRef = useRef(false);
 
   // Audio State
   const soundRef = useRef<Audio.Sound | null>(null);
@@ -39,43 +53,56 @@ export const IeltsListeningScreen: React.FC = () => {
   const [positionMillis, setPositionMillis] = useState(0);
   const [durationMillis, setDurationMillis] = useState(1);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
+  const [audioError, setAudioError] = useState(false);
+  const [audioReloadKey, setAudioReloadKey] = useState(0);
 
   // Load Test Data
-  useEffect(() => {
-    let isMounted = true;
-    async function loadTest() {
-      try {
-        setLoading(true);
-        const tests = await ieltsService.getListeningTests();
-        if (tests.length > 0 && isMounted) {
-          const selectedTest = tests[0];
-          setTest(selectedTest);
-        }
-      } catch (err) {
-        Alert.alert('Error', 'Failed to load IELTS Listening test.');
-      } finally {
-        if (isMounted) setLoading(false);
+  const loadTest = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const tests = await ieltsService.getListeningTests();
+      const selected = tests.find((t) => t.parts.some((p) => p.questions.length > 0));
+      if (selected) {
+        setTest(selected);
+      } else {
+        setLoadError('No IELTS Listening test is available yet.');
       }
+    } catch (err) {
+      setLoadError(extractErrorMessage(err) || 'Failed to load the IELTS Listening test.');
+    } finally {
+      setLoading(false);
     }
-    loadTest();
-    return () => {
-      isMounted = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadTest();
+  }, [loadTest]);
 
   const parts = test?.parts || [];
   const activePart = parts[activePartIndex] || parts[0];
-  const activeAudioUrl = activePart?.audio_url || test?.audio_url;
+  const activeAudioUrl = activePart?.audio_url;
+  const hasTest = !!test;
+  const submitted = !!results;
+
+  useEffect(() => {
+    if (isDrill || !hasTest || submitted) return;
+    setSecondsLeft(MOCK_SECONDS);
+    const id = setInterval(() => {
+      setSecondsLeft((prev) => (prev == null || prev <= 0 ? 0 : prev - 1));
+    }, 1000);
+    return () => clearInterval(id);
+  }, [isDrill, hasTest, submitted]);
 
   // Audio Setup & Cleanup synced per part
   useEffect(() => {
-    let sound: Audio.Sound | null = null;
     let isCancelled = false;
 
     async function initAudio() {
       if (!activeAudioUrl) return;
       try {
         setIsAudioLoading(true);
+        setAudioError(false);
         if (soundRef.current) {
           await soundRef.current.unloadAsync();
           soundRef.current = null;
@@ -96,13 +123,13 @@ export const IeltsListeningScreen: React.FC = () => {
           }
         );
         if (!isCancelled) {
-          sound = newSound;
           soundRef.current = newSound;
         } else {
           newSound.unloadAsync();
         }
       } catch (e) {
         console.warn('Audio load error:', e);
+        if (!isCancelled) setAudioError(true);
       } finally {
         if (!isCancelled) setIsAudioLoading(false);
       }
@@ -117,9 +144,39 @@ export const IeltsListeningScreen: React.FC = () => {
         soundRef.current = null;
       }
     };
-  }, [activeAudioUrl]);
+  }, [activeAudioUrl, audioReloadKey]);
+
+  // Signed audio URLs expire; re-fetch the test for fresh ones, then reload the part.
+  const reloadAudio = async () => {
+    setAudioError(false);
+    setIsAudioLoading(true);
+    try {
+      const tests = await ieltsService.getListeningTests();
+      const fresh = tests.find((t) => t.id === test?.id);
+      if (fresh) setTest(fresh);
+    } catch (e) {
+      console.warn('Listening test re-fetch failed:', e);
+    }
+    setAudioReloadKey((k) => k + 1);
+  };
+
+  // Drill: once this part has an answer, switching would silently drop it,
+  // so the other tabs stay locked until the part is checked or reset.
+  const partHasAnswers =
+    !!activePart &&
+    activePart.questions.some((q) => (userAnswers[q.question_number] ?? '') !== '');
+  const tabsLocked = isDrill && (!!results || partHasAnswers);
+
+  const resetDrill = () => {
+    setUserAnswers({});
+    setResults(null);
+    setSummary(null);
+    setSubmitError(null);
+  };
 
   const switchPart = async (index: number) => {
+    // A drill stays on its part once answered or graded.
+    if (tabsLocked && index !== activePartIndex) return;
     setActivePartIndex(index);
     if (soundRef.current) {
       try {
@@ -154,108 +211,61 @@ export const IeltsListeningScreen: React.FC = () => {
     }
   };
 
-  const seekToQuestion = async (timestampSecs?: number) => {
-    if (typeof timestampSecs !== 'number' || !soundRef.current) return;
-    try {
-      await soundRef.current.setPositionAsync(timestampSecs * 1000);
-      if (!isPlaying) {
-        await soundRef.current.playAsync();
-        setIsPlaying(true);
-      }
-    } catch (e) {
-      console.warn('Seek to question error:', e);
-    }
-  };
-
-  // Real-time synchronization: identify question currently discussed in audio
-  const currentActiveQuestionNumber = React.useMemo(() => {
-    if (!activePart?.questions) return null;
-    const currentSecs = positionMillis / 1000;
-    const qsWithTime = activePart.questions
-      .filter((q) => typeof q.timestamp_seconds === 'number' && (q.timestamp_seconds as number) <= currentSecs)
-      .sort((a, b) => ((b.timestamp_seconds || 0) as number) - ((a.timestamp_seconds || 0) as number));
-    return qsWithTime.length > 0 ? qsWithTime[0].question_number : null;
-  }, [activePart, positionMillis]);
-
   const handleAnswerChange = (questionNumber: number, answer: string) => {
+    if (results) return;
     setUserAnswers((prev) => ({
       ...prev,
       [questionNumber]: answer,
     }));
   };
 
-  const calculateScore = () => {
-    if (!test?.parts) return { score: 0, total: 0, band: 0 };
-    let correct = 0;
-    let total = 0;
-
-    test.parts.forEach((part) => {
-      part.questions.forEach((q) => {
-        total += 1;
-        const userAns = (userAnswers[q.question_number] || '').trim().toLowerCase();
-        const correctAns = (q.correct_answer || '').trim().toLowerCase();
-        if (userAns && userAns === correctAns) {
-          correct += 1;
-        }
-      });
+  const handleSubmit = async () => {
+    if (!test || !activePart || isSubmitting || results) return;
+    // A drill grades only the chosen part; a mock grades all four.
+    const gradedQuestions = isDrill
+      ? activePart.questions
+      : parts.flatMap((p) => p.questions);
+    const answers: Record<string, string> = {};
+    gradedQuestions.forEach((q) => {
+      answers[String(q.question_number)] = userAnswers[q.question_number] || '';
     });
 
-    // Approximate IELTS Listening Band conversion for 40 questions
-    let band = 4.0;
-    if (correct >= 39) band = 9.0;
-    else if (correct >= 37) band = 8.5;
-    else if (correct >= 35) band = 8.0;
-    else if (correct >= 32) band = 7.5;
-    else if (correct >= 30) band = 7.0;
-    else if (correct >= 26) band = 6.5;
-    else if (correct >= 23) band = 6.0;
-    else if (correct >= 18) band = 5.5;
-    else if (correct >= 16) band = 5.0;
-    else if (correct >= 13) band = 4.5;
-
-    return { score: correct, total, band };
-  };
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleSubmit = async () => {
     try {
       setIsSubmitting(true);
-      const stringAnswers: Record<string, string> = {};
-      Object.entries(userAnswers).forEach(([k, v]) => {
-        stringAnswers[String(k)] = v;
-      });
-
+      setSubmitError(null);
       const result = await ieltsService.submitListeningTest({
-        testSetId: test?.test_code || 'IELTS-L-01',
-        answers: stringAnswers,
+        testSetId: test.test_set_id,
+        answers,
+        part: isDrill ? activePart.part_number : undefined,
       });
-
-      setShowAnswers(true);
-      Alert.alert(
-        'Test Completed & Saved!',
-        `Official Score: ${result.score} / ${result.totalQuestions}\nOfficial IELTS Listening Band: ${result.band.toFixed(1)}\n\nYour profile and daily progress have been updated!`,
-        [
-          { text: 'Review Answers', style: 'default' },
-          { text: 'Back to Home', onPress: () => navigation.goBack() },
-        ]
-      );
-    } catch (e: any) {
-      // Fallback to local calculation if offline or network error
-      const { score, total, band } = calculateScore();
-      setShowAnswers(true);
-      Alert.alert(
-        'Test Completed!',
-        `You scored ${score} out of ${total}.\nEstimated IELTS Band: ${band.toFixed(1)}`,
-        [
-          { text: 'Review Answers', style: 'default' },
-          { text: 'Done', onPress: () => navigation.goBack() },
-        ]
+      const byNumber: Record<number, IeltsListeningResult> = {};
+      (result?.detailedResults || []).forEach((r) => {
+        byNumber[Number(r.question_number)] = r;
+      });
+      setResults(byNumber);
+      setSummary({
+        score: result?.score ?? 0,
+        total: result?.total ?? gradedQuestions.length,
+        band: result?.band ?? null,
+      });
+    } catch (e) {
+      setSubmitError(
+        `${extractErrorMessage(e) || 'Your answers could not be checked.'} Your answers are still here.`
       );
     } finally {
       setIsSubmitting(false);
+      scrollRef.current?.scrollTo({ y: 0, animated: true });
     }
   };
+
+  // Time is up: submit everything once, whatever has been answered.
+  useEffect(() => {
+    if (secondsLeft === 0 && !results && !autoSubmittedRef.current) {
+      autoSubmittedRef.current = true;
+      handleSubmit();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [secondsLeft, results]);
 
   const formatTime = (millis: number) => {
     const totalSeconds = Math.floor(millis / 1000);
@@ -264,7 +274,38 @@ export const IeltsListeningScreen: React.FC = () => {
     return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
-  if (loading || !test) {
+  const renderHeader = (title: string, subtitle?: string, showSubmit = false) => (
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Feather name="arrow-left" size={s(20)} color="#FFFFFF" />
+      </TouchableOpacity>
+      <View style={styles.headerTitleContainer}>
+        <Text style={styles.headerTitle}>{title}</Text>
+        {!!subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+      </View>
+      {showSubmit && secondsLeft != null && !results && (
+        <View style={styles.timerPill}>
+          <Feather name="clock" size={s(12)} color={secondsLeft <= 300 ? '#F87171' : '#FFFFFF'} />
+          <Text style={[styles.timerText, secondsLeft <= 300 && { color: '#F87171' }]}>
+            {formatTime(secondsLeft * 1000)}
+          </Text>
+        </View>
+      )}
+      {showSubmit && (
+        <TouchableOpacity
+          onPress={handleSubmit}
+          disabled={isSubmitting || !!results}
+          style={[styles.submitHeaderButton, (isSubmitting || !!results) && { opacity: 0.5 }]}
+        >
+          <Text style={styles.submitHeaderText}>
+            {isSubmitting ? 'Submitting…' : results ? 'Submitted' : isDrill ? 'Check part' : 'Submit'}
+          </Text>
+        </TouchableOpacity>
+      )}
+    </View>
+  );
+
+  if (loading) {
     return (
       <ScreenBackground>
         <SafeAreaView style={styles.centerContainer}>
@@ -275,22 +316,33 @@ export const IeltsListeningScreen: React.FC = () => {
     );
   }
 
+  if (loadError || !test || !activePart) {
+    return (
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+          {renderHeader('IELTS Listening')}
+          <View style={styles.centerContainer}>
+            <Text style={styles.errorText}>
+              {loadError || 'Failed to load the IELTS Listening test.'}
+            </Text>
+            <TouchableOpacity onPress={loadTest} style={styles.retryButton}>
+              <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.submitHeaderText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </ScreenBackground>
+    );
+  }
+
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Feather name="arrow-left" size={s(20)} color="#FFFFFF" />
-          </TouchableOpacity>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>{test.title || 'IELTS Listening Test'}</Text>
-            <Text style={styles.headerSubtitle}>{test.test_code} • Cambridge Format</Text>
-          </View>
-          <TouchableOpacity onPress={handleSubmit} style={styles.submitHeaderButton}>
-            <Text style={styles.submitHeaderText}>Submit</Text>
-          </TouchableOpacity>
-        </View>
+        {renderHeader(
+          test.title || 'IELTS Listening Test',
+          isDrill ? 'Listening drill: choose one part' : 'Listening mock test: Parts 1-4',
+          true
+        )}
 
         {/* Part Switcher Tabs */}
         <View style={styles.partTabsContainer}>
@@ -298,9 +350,11 @@ export const IeltsListeningScreen: React.FC = () => {
             <TouchableOpacity
               key={p.part_number || index}
               onPress={() => switchPart(index)}
+              disabled={tabsLocked && activePartIndex !== index}
               style={[
                 styles.partTab,
                 activePartIndex === index && styles.partTabActive,
+                tabsLocked && activePartIndex !== index && { opacity: 0.4 },
               ]}
             >
               <Text
@@ -315,112 +369,151 @@ export const IeltsListeningScreen: React.FC = () => {
           ))}
         </View>
 
+        {isDrill && partHasAnswers && !results && (
+          <View style={styles.lockHintRow}>
+            <Text style={styles.lockHintText}>Check this part or reset it to switch parts.</Text>
+            <TouchableOpacity onPress={resetDrill}>
+              <Text style={styles.lockHintAction}>Reset</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+
         {/* Part Questions Content */}
-        <ScrollView style={styles.contentScroll} contentContainerStyle={styles.contentBody}>
-          {activePart && (
-            <>
-              <View style={styles.instructionsCard}>
-                <Text style={styles.partTitle}>{activePart.title}</Text>
-                <Text style={styles.partInstructions}>{activePart.instructions}</Text>
-              </View>
+        <ScrollView
+          ref={scrollRef}
+          style={styles.contentScroll}
+          contentContainerStyle={styles.contentBody}
+        >
+          {!!submitError && (
+            <View style={[styles.resultBanner, styles.resultBannerError]}>
+              <Text style={styles.resultErrorText}>{submitError}</Text>
+              <TouchableOpacity
+                onPress={handleSubmit}
+                disabled={isSubmitting}
+                style={[styles.retryButton, styles.bannerButton]}
+              >
+                <Feather name="refresh-cw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                <Text style={styles.submitHeaderText}>{isSubmitting ? 'Submitting…' : 'Retry'}</Text>
+              </TouchableOpacity>
+            </View>
+          )}
 
-              {activePart.questions?.map((q: IeltsListeningQuestion) => {
-                const isCorrect = (userAnswers[q.question_number] || '').trim().toLowerCase() === (q.correct_answer || '').trim().toLowerCase();
-                const isQuestionActive = currentActiveQuestionNumber === q.question_number;
-                return (
-                  <View
-                    key={q.question_number}
-                    style={[
-                      styles.questionCard,
-                      isQuestionActive && styles.questionCardActive,
-                    ]}
+          {summary && (
+            <View style={styles.resultBanner}>
+              <Text style={styles.resultTitle}>
+                {isDrill ? `Part ${activePart.part_number} checked` : 'Test submitted'}
+              </Text>
+              <Text style={styles.resultScore}>
+                Score: {summary.score} / {summary.total}
+              </Text>
+              {summary.band != null && (
+                <Text style={styles.resultBand}>
+                  Estimated band: {Number(summary.band).toFixed(1)}
+                </Text>
+              )}
+              <Text style={styles.resultHint}>Review your answers below.</Text>
+              <View style={styles.bannerActions}>
+                {isDrill && (
+                  <TouchableOpacity
+                    onPress={resetDrill}
+                    style={[styles.retryButton, styles.bannerButton, styles.bannerButtonSecondary]}
                   >
-                    <View style={styles.questionHeader}>
-                      <View style={styles.qNumRow}>
-                        <View style={[styles.qNumBadge, isQuestionActive && styles.qNumBadgeActive]}>
-                          <Text style={styles.qNumText}>{q.question_number}</Text>
-                        </View>
-                        <Text style={styles.questionText}>{q.question_text}</Text>
-                      </View>
+                    <Text style={styles.submitHeaderText}>Try another part</Text>
+                  </TouchableOpacity>
+                )}
+                <TouchableOpacity
+                  onPress={() => navigation.goBack()}
+                  style={[styles.retryButton, styles.bannerButton]}
+                >
+                  <Text style={styles.submitHeaderText}>Back to Home</Text>
+                </TouchableOpacity>
+              </View>
+            </View>
+          )}
 
-                      <View style={styles.qMetaRow}>
-                        {q.timestamp_seconds !== undefined && (
-                          <TouchableOpacity
-                            onPress={() => seekToQuestion(q.timestamp_seconds)}
-                            style={styles.timestampButton}
-                          >
-                            <Feather name="volume-2" size={s(12)} color="#A78BFA" />
-                            <Text style={styles.timestampText}>{formatTime(q.timestamp_seconds * 1000)}</Text>
-                          </TouchableOpacity>
-                        )}
-                        {isQuestionActive && (
-                          <View style={styles.nowPlayingBadge}>
-                            <Text style={styles.nowPlayingText}>Now in Audio</Text>
-                          </View>
-                        )}
-                      </View>
+          <View style={styles.instructionsCard}>
+            <Text style={styles.partTitle}>{activePart.title}</Text>
+            <Text style={styles.partInstructions}>
+              {isDrill
+                ? 'Play the recording and answer this part, then tap "Check part".'
+                : 'Answer all four parts, then tap "Submit" for your score and band.'}
+            </Text>
+          </View>
+
+          {activePart.questions.map((q: IeltsListeningQuestion) => {
+            const result = results?.[q.question_number];
+            return (
+              <View key={q.question_number} style={styles.questionCard}>
+                <View style={styles.questionHeader}>
+                  <View style={styles.qNumRow}>
+                    <View style={styles.qNumBadge}>
+                      <Text style={styles.qNumText}>{q.question_number}</Text>
                     </View>
+                    <Text style={styles.questionText}>{q.question_text}</Text>
+                  </View>
+                </View>
 
-                    {/* Multiple Choice Render */}
-                    {q.type === 'multiple_choice' && q.options && (
-                      <View style={styles.optionsList}>
-                        {q.options.map((option, oIdx) => {
-                          const isSelected = userAnswers[q.question_number] === option;
-                          const isThisCorrect = (q.correct_answer || '').trim() === option;
-                          let optionStyle: any = styles.optionItem;
-                          if (isSelected) optionStyle = [styles.optionItem, styles.optionItemSelected];
-                          if (showAnswers) {
-                            if (isThisCorrect) optionStyle = [styles.optionItem, styles.optionItemCorrect];
-                            else if (isSelected && !isThisCorrect) optionStyle = [styles.optionItem, styles.optionItemWrong];
-                          }
+                {/* Multiple Choice Render */}
+                {q.type === 'multiple_choice' && q.options && (
+                  <View style={styles.optionsList}>
+                    {q.options.map((option, oIdx) => {
+                      const isSelected = userAnswers[q.question_number] === option;
+                      const isThisCorrect =
+                        !!result && String(result.correct_answer ?? '').trim() === option.trim();
+                      let optionStyle: any = styles.optionItem;
+                      if (isSelected) optionStyle = [styles.optionItem, styles.optionItemSelected];
+                      if (result) {
+                        if (isThisCorrect) optionStyle = [styles.optionItem, styles.optionItemCorrect];
+                        else if (isSelected) optionStyle = [styles.optionItem, styles.optionItemWrong];
+                      }
 
-                          return (
-                            <TouchableOpacity
-                              key={oIdx}
-                              onPress={() => handleAnswerChange(q.question_number, option)}
-                              style={optionStyle}
-                            >
-                              <Text
-                                style={[
-                                  styles.optionText,
-                                  isSelected && styles.optionTextSelected,
-                                  showAnswers && isThisCorrect && styles.optionTextCorrect,
-                                ]}
-                              >
-                                {option}
-                              </Text>
-                            </TouchableOpacity>
-                          );
-                        })}
-                      </View>
-                    )}
-
-                    {/* Fill in the Blank Render */}
-                    {q.type === 'fill_in_the_blank' && (
-                      <View style={styles.fillBlankContainer}>
-                        <TextInput
-                          value={userAnswers[q.question_number] || ''}
-                          onChangeText={(text) => handleAnswerChange(q.question_number, text)}
-                          placeholder="Type your answer here..."
-                          placeholderTextColor="#777"
-                          style={[
-                            styles.fillBlankInput,
-                            showAnswers && (isCorrect ? styles.fillBlankCorrect : styles.fillBlankWrong),
-                          ]}
-                          autoCapitalize="none"
-                        />
-                        {showAnswers && (
-                          <Text style={styles.correctAnswerHint}>
-                            Correct: {q.correct_answer}
+                      return (
+                        <TouchableOpacity
+                          key={oIdx}
+                          onPress={() => handleAnswerChange(q.question_number, option)}
+                          disabled={!!results}
+                          style={optionStyle}
+                        >
+                          <Text
+                            style={[
+                              styles.optionText,
+                              isSelected && styles.optionTextSelected,
+                              isThisCorrect && styles.optionTextCorrect,
+                            ]}
+                          >
+                            {option}
                           </Text>
-                        )}
-                      </View>
+                        </TouchableOpacity>
+                      );
+                    })}
+                  </View>
+                )}
+
+                {/* Fill in the Blank Render */}
+                {q.type === 'fill_in_the_blank' && (
+                  <View style={styles.fillBlankContainer}>
+                    <TextInput
+                      value={userAnswers[q.question_number] || ''}
+                      onChangeText={(text) => handleAnswerChange(q.question_number, text)}
+                      editable={!results}
+                      placeholder="Type your answer here..."
+                      placeholderTextColor="#777"
+                      style={[
+                        styles.fillBlankInput,
+                        result && (result.is_correct ? styles.fillBlankCorrect : styles.fillBlankWrong),
+                      ]}
+                      autoCapitalize="none"
+                    />
+                    {result && !result.is_correct && (
+                      <Text style={styles.correctAnswerHint}>
+                        Correct: {result.correct_answer}
+                      </Text>
                     )}
                   </View>
-                );
-              })}
-            </>
-          )}
+                )}
+              </View>
+            );
+          })}
           <View style={{ height: 120 }} />
         </ScrollView>
 
@@ -428,11 +521,6 @@ export const IeltsListeningScreen: React.FC = () => {
         <View style={styles.bottomPlayer}>
           <View style={styles.playerInfoRow}>
             <Text style={styles.playerPartTitle}>Part {activePart.part_number} Audio</Text>
-            {currentActiveQuestionNumber && (
-              <View style={styles.playerActiveQBadge}>
-                <Text style={styles.playerActiveQText}>Playing Q#{currentActiveQuestionNumber}</Text>
-              </View>
-            )}
           </View>
 
           <View style={styles.playerProgressRow}>
@@ -447,6 +535,13 @@ export const IeltsListeningScreen: React.FC = () => {
             </View>
             <Text style={styles.playerTime}>{formatTime(durationMillis)}</Text>
           </View>
+
+          {audioError && (
+            <TouchableOpacity onPress={reloadAudio} style={styles.audioErrorRow}>
+              <Feather name="refresh-cw" size={s(14)} color="#F87171" style={{ marginRight: 6 }} />
+              <Text style={styles.audioErrorText}>Audio couldn't load — tap to reload</Text>
+            </TouchableOpacity>
+          )}
 
           <View style={styles.playerControlsRow}>
             <TouchableOpacity onPress={() => seekRelative(-10000)} style={styles.skipButton}>
@@ -486,6 +581,21 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+  },
+  errorText: {
+    color: '#F87171',
+    fontSize: 14,
+    textAlign: 'center',
+    marginHorizontal: 24,
+    marginBottom: 16,
+  },
+  retryButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#8B5CF6',
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    borderRadius: 8,
   },
   loadingText: {
     color: '#A0A0A0',
@@ -589,11 +699,6 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.08)',
   },
-  questionCardActive: {
-    borderColor: 'rgba(139, 92, 246, 0.8)',
-    backgroundColor: 'rgba(139, 92, 246, 0.08)',
-    borderWidth: 1.5,
-  },
   questionHeader: {
     flexDirection: 'row',
     alignItems: 'flex-start',
@@ -615,9 +720,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-  qNumBadgeActive: {
-    backgroundColor: '#A78BFA',
-  },
   qNumText: {
     color: '#FFFFFF',
     fontSize: 11,
@@ -630,37 +732,6 @@ const styles = StyleSheet.create({
     lineHeight: 20,
     fontWeight: '500',
   },
-  qMetaRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  timestampButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 4,
-    backgroundColor: 'rgba(139, 92, 246, 0.2)',
-    paddingHorizontal: 8,
-    paddingVertical: 4,
-    borderRadius: 6,
-  },
-  timestampText: {
-    color: '#C4B5FD',
-    fontSize: 10,
-    fontFamily: 'monospace',
-    fontWeight: '600',
-  },
-  nowPlayingBadge: {
-    backgroundColor: 'rgba(139, 92, 246, 0.3)',
-    paddingHorizontal: 6,
-    paddingVertical: 3,
-    borderRadius: 10,
-  },
-  nowPlayingText: {
-    color: '#DDD6FE',
-    fontSize: 9,
-    fontWeight: '700',
-  },
   playerInfoRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -670,17 +741,6 @@ const styles = StyleSheet.create({
   playerPartTitle: {
     color: '#C4B5FD',
     fontSize: 11,
-    fontWeight: '600',
-  },
-  playerActiveQBadge: {
-    backgroundColor: 'rgba(139, 92, 246, 0.3)',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  playerActiveQText: {
-    color: '#EDE9FE',
-    fontSize: 10,
     fontWeight: '600',
   },
   optionsList: {
@@ -801,6 +861,104 @@ const styles = StyleSheet.create({
     color: '#9CA3AF',
     fontSize: 10,
     marginTop: 2,
+  },
+  timerPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 4,
+    marginRight: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 5,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  timerText: {
+    color: '#FFFFFF',
+    fontSize: 13,
+    fontWeight: '700',
+    fontFamily: 'monospace',
+  },
+  lockHintRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 19,
+    paddingVertical: 6,
+    backgroundColor: 'rgba(0, 0, 0, 0.2)',
+  },
+  lockHintText: {
+    flex: 1,
+    color: '#9CA3AF',
+    fontSize: 11,
+  },
+  lockHintAction: {
+    color: '#C4B5FD',
+    fontSize: 12,
+    fontWeight: '700',
+    marginLeft: 12,
+  },
+  resultBanner: {
+    backgroundColor: 'rgba(139, 92, 246, 0.12)',
+    borderWidth: 1,
+    borderColor: '#8B5CF6',
+    borderRadius: 12,
+    padding: 14,
+    marginBottom: 16,
+  },
+  resultBannerError: {
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+    borderColor: '#EF4444',
+  },
+  resultTitle: {
+    color: '#C4B5FD',
+    fontSize: 12,
+    fontWeight: '700',
+    textTransform: 'uppercase',
+  },
+  resultScore: {
+    color: '#FFFFFF',
+    fontSize: 20,
+    fontWeight: '700',
+    marginTop: 6,
+  },
+  resultBand: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '600',
+    marginTop: 2,
+  },
+  resultHint: {
+    color: '#9CA3AF',
+    fontSize: 11,
+    marginTop: 6,
+  },
+  resultErrorText: {
+    color: '#F87171',
+    fontSize: 13,
+    lineHeight: 18,
+  },
+  bannerActions: {
+    flexDirection: 'row',
+    flexWrap: 'wrap',
+    gap: 8,
+  },
+  bannerButton: {
+    alignSelf: 'flex-start',
+    marginTop: 10,
+  },
+  bannerButtonSecondary: {
+    backgroundColor: 'rgba(255, 255, 255, 0.12)',
+  },
+  audioErrorRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 6,
+  },
+  audioErrorText: {
+    color: '#F87171',
+    fontSize: 12,
+    fontWeight: '600',
   },
 });
 export default IeltsListeningScreen;

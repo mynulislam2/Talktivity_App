@@ -28,7 +28,7 @@ export interface UsePracticeSessionReturn {
 }
 
 export interface UsePracticeSessionOptions {
-  masterSessionId?: number | null;
+  masterSessionId?: string | null;
   ieltsPart?: number | null;
   targetDurationSeconds?: number | null;
   topicOverride?: any;

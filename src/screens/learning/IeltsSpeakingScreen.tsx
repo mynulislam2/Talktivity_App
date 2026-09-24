@@ -10,20 +10,68 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import Feather from '@expo/vector-icons/Feather';
-import { useNavigation, useRoute } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import { Audio } from 'expo-av';
 import ScreenBackground from '@/components/common/ScreenBackground';
 import { useResponsive } from '@/theme/responsive';
-import { ieltsService, IeltsSpeakingTest } from '@/services/ielts';
+import { extractErrorMessage } from '@/lib/auth/errorHandler';
+import {
+  ieltsService,
+  IeltsSpeakingTest,
+  IeltsTestSession,
+  IeltsCompleteResponse,
+} from '@/services/ielts';
+
+type SpeakingPart = 1 | 2 | 3;
+
+const CRITERIA = [
+  { key: 'fluency_band', label: 'Fluency & Coherence' },
+  { key: 'lexical_band', label: 'Lexical Resource' },
+  { key: 'grammar_band', label: 'Grammatical Range & Accuracy' },
+  { key: 'pronunciation_band', label: 'Pronunciation' },
+] as const;
+
+function formatBand(value: unknown): string {
+  const n = Number(value);
+  return value != null && value !== '' && Number.isFinite(n) ? n.toFixed(1) : '—';
+}
+
+// The agent saves a Part 1/3 call only after hang-up, so poll for it.
+const POLL_INTERVAL_MS = 3000;
+const POLL_ATTEMPTS = 30; // ~90s
+
+function apiErrorCode(e: unknown): string | undefined {
+  return (e as any)?.response?.data?.code;
+}
 
 export const IeltsSpeakingScreen: React.FC = () => {
   const { s } = useResponsive();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
+  const mode: 'drill' | 'mock' = route.params?.mode === 'drill' ? 'drill' : 'mock';
+  const drillPart: SpeakingPart = [1, 2, 3].includes(route.params?.part)
+    ? route.params.part
+    : 1;
+  const plan: SpeakingPart[] = mode === 'drill' ? [drillPart] : [1, 2, 3];
 
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [test, setTest] = useState<IeltsSpeakingTest | null>(null);
-  const [currentPart, setCurrentPart] = useState<1 | 2 | 3>(1);
+  const [session, setSession] = useState<IeltsTestSession | null>(null);
+
+  // Band report (POST /sessions/:id/complete)
+  const [report, setReport] = useState<IeltsCompleteResponse | null>(null);
+  const [isCompleting, setIsCompleting] = useState(false);
+  const [completeError, setCompleteError] = useState<string | null>(null);
+  const completeRequestedRef = useRef(false);
+
+  // Waiting for the server to record a Part 1/3 call.
+  const [waitingPart, setWaitingPart] = useState<SpeakingPart | null>(null);
+  const [waitExpired, setWaitExpired] = useState(false);
+  const awaitingPartRef = useRef<SpeakingPart | null>(null);
+  const afterSavedRef = useRef<(() => void) | null>(null);
+  const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const pollTokenRef = useRef(0);
 
   // Part 2 Prep & Recording States
   const [prepSecondsLeft, setPrepSecondsLeft] = useState(60);
@@ -32,59 +80,166 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const [isRecording, setIsRecording] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  const [part2Completed, setPart2Completed] = useState(false);
+  const [part2Saved, setPart2Saved] = useState(false);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
   const prepTimerRef = useRef<any>(null);
   const recordingTimerRef = useRef<any>(null);
+  const mountedRef = useRef(true);
 
-  const [masterSessionId, setMasterSessionId] = useState<number | null>(null);
+  const masterSessionId = session?.id ?? null;
 
-  // Handle route params when returning from Part 1/Part 3
-  useEffect(() => {
-    if (route.params?.initialPart) {
-      setCurrentPart(route.params.initialPart as 1 | 2 | 3);
-    }
-  }, [route.params?.initialPart]);
+  const isPartDone = (part: SpeakingPart) =>
+    session?.[`part${part}_status` as const] === 'completed' || (part === 2 && part2Saved);
+  const currentPart = plan.find((p) => !isPartDone(p)) ?? null;
+  const allPartsDone = !!session && currentPart === null;
 
-  // Load Test Data & Initialize Master Session
-  useEffect(() => {
-    let isMounted = true;
-    async function loadTest() {
-      try {
-        setLoading(true);
-        const tests = await ieltsService.getSpeakingTests();
-        if (tests.length > 0 && isMounted) {
-          const selected = tests[0];
-          setTest(selected);
-          setPrepSecondsLeft(selected.part2_prep_seconds || 60);
-          setSpeakingSecondsLeft(selected.part2_speaking_seconds || 120);
-
-          // Start or resume master test session
-          try {
-            const sess = await ieltsService.startTestSession({
-              testSetId: selected.test_set_id || selected.test_code || 'IELTS-S-01',
-              speaking_test_id: selected.id,
-              session_type: 'speaking',
-            });
-            if (sess && sess.id && isMounted) {
-              setMasterSessionId(sess.id);
-            }
-          } catch (sessErr) {
-            console.log('Session init fallback:', sessErr);
-          }
-        }
-      } catch (e) {
-        Alert.alert('Error', 'Failed to load IELTS Speaking test set.');
-      } finally {
-        if (isMounted) setLoading(false);
+  // Load test data and start (or resume) the session for this mode.
+  const loadTest = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    try {
+      const tests = await ieltsService.getSpeakingTests();
+      const selected = tests[0];
+      if (!selected) {
+        setLoadError('No IELTS Speaking test is available yet.');
+        return;
       }
+      setTest(selected);
+      setPrepSecondsLeft(selected.part2_prep_seconds || 60);
+      setSpeakingSecondsLeft(selected.part2_speaking_seconds || 120);
+
+      const sess = await ieltsService.startTestSession({
+        testSetId: selected.test_set_id,
+        sessionMode: mode,
+        testType: 'speaking',
+        part: mode === 'drill' ? drillPart : undefined,
+      });
+      if (!sess?.id) {
+        setLoadError('Could not start the speaking session.');
+        return;
+      }
+      setSession(sess);
+    } catch (e) {
+      setLoadError(extractErrorMessage(e) || 'Failed to load the IELTS Speaking test.');
+    } finally {
+      setLoading(false);
     }
+  }, [mode, drillPart]);
+
+  useEffect(() => {
     loadTest();
+  }, [loadTest]);
+
+  const stopPolling = useCallback(() => {
+    pollTokenRef.current += 1; // drops any in-flight check
+    if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
+    pollTimerRef.current = null;
+  }, []);
+
+  // Re-read the session every 3s (up to ~90s) until part N is saved.
+  const pollUntilSaved = useCallback(
+    (part: SpeakingPart, afterSaved?: () => void) => {
+      if (!masterSessionId) return;
+      stopPolling();
+      const token = pollTokenRef.current;
+      awaitingPartRef.current = part;
+      if (afterSaved) afterSavedRef.current = afterSaved;
+      setWaitingPart(part);
+      setWaitExpired(false);
+      let attempts = 0;
+      const check = async () => {
+        attempts += 1;
+        let fresh: IeltsTestSession | null = null;
+        try {
+          fresh = await ieltsService.getSession(masterSessionId);
+        } catch {
+          // Network blip: keep polling.
+        }
+        if (token !== pollTokenRef.current) return;
+        if (fresh?.id) setSession(fresh);
+        if (fresh?.[`part${part}_status` as const] === 'completed') {
+          awaitingPartRef.current = null;
+          setWaitingPart(null);
+          const next = afterSavedRef.current;
+          afterSavedRef.current = null;
+          next?.();
+          return;
+        }
+        if (attempts >= POLL_ATTEMPTS) {
+          setWaitExpired(true);
+          return;
+        }
+        pollTimerRef.current = setTimeout(check, POLL_INTERVAL_MS);
+      };
+      check();
+    },
+    [masterSessionId, stopPolling]
+  );
+
+  // Parts 1 and 3 are saved server-side after the call; on coming back from
+  // the call screen, wait for that part. Polling stops on blur and unmount.
+  useFocusEffect(
+    useCallback(() => {
+      if (!masterSessionId) return;
+      if (awaitingPartRef.current) {
+        pollUntilSaved(awaitingPartRef.current);
+      } else {
+        ieltsService
+          .getSession(masterSessionId)
+          .then((fresh) => {
+            if (fresh?.id) setSession(fresh);
+          })
+          .catch(() => {});
+      }
+      return stopPolling;
+    }, [masterSessionId, pollUntilSaved, stopPolling])
+  );
+
+  const requestReport: (isRetry?: boolean) => Promise<void> = useCallback(async (isRetry = false) => {
+    if (!masterSessionId) return;
+    completeRequestedRef.current = true;
+    setIsCompleting(true);
+    setCompleteError(null);
+    try {
+      const result = await ieltsService.completeTestSession(masterSessionId);
+      setReport(result);
+    } catch (e) {
+      if (apiErrorCode(e) === 'PART_PENDING' && !isRetry) {
+        // A call is still being saved: wait for it, then retry once.
+        const pending =
+          plan.find((p) => p !== 2 && session?.[`part${p}_status` as const] !== 'completed') ??
+          plan[plan.length - 1];
+        pollUntilSaved(pending, () => requestReport(true));
+      } else {
+        setCompleteError(extractErrorMessage(e) || 'Could not score this test.');
+      }
+    } finally {
+      setIsCompleting(false);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterSessionId, session, pollUntilSaved]);
+
+  // Every part in the plan is done: ask the server for the band report once.
+  useEffect(() => {
+    if (allPartsDone && !completeRequestedRef.current) {
+      requestReport();
+    }
+  }, [allPartsDone, requestReport]);
+
+  // Release the recorder and its audio mode if we leave mid-recording.
+  useEffect(() => {
+    mountedRef.current = true;
     return () => {
-      isMounted = false;
-      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
-      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      mountedRef.current = false;
+      if (prepTimerRef.current) clearTimeout(prepTimerRef.current);
+      if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+      const recording = recordingRef.current;
+      recordingRef.current = null;
+      if (recording) {
+        recording.stopAndUnloadAsync().catch(() => {});
+        Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
+      }
     };
   }, []);
 
@@ -96,7 +251,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
       }, 1000);
     } else if (isPrepping && prepSecondsLeft === 0) {
       setIsPrepping(false);
-      Alert.alert('Preparation Time Up!', 'Please start your 2-minute monologue now.');
+      Alert.alert('Preparation time is up', 'Start speaking now. You have up to 2 minutes.');
       startRecording();
     }
     return () => {
@@ -112,8 +267,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
       }, 1000);
     } else if (isRecording && speakingSecondsLeft === 0) {
       stopRecording();
-      Alert.alert('Time Up!', 'Part 2 monologue completed. Proceeding to Part 3.');
-      setCurrentPart(3);
     }
     return () => {
       if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
@@ -121,13 +274,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
   }, [isRecording, speakingSecondsLeft]);
 
   const startPart1LiveCall = () => {
+    awaitingPartRef.current = 1;
     navigation.navigate('PracticeScreen', {
-      topicId: test?.test_code || 'IELTS-P1',
+      topicId: test?.test_set_id || 'IELTS-P1',
       topicName: `IELTS Speaking Part 1: ${test?.title || 'Everyday Topics'}`,
       ieltsMasterSessionId: masterSessionId,
       ieltsPart: 1,
       targetDurationSeconds: test?.part1_duration_seconds || 240,
-      prompt: test?.part1_context_prompt || 'You are an official IELTS Speaking Examiner conducting Part 1.',
+      prompt: test?.part1_context_prompt || 'You are an IELTS Speaking examiner conducting Part 1.',
       firstPrompt: test?.part1_example_questions?.[0] || 'Welcome to Part 1. Can you tell me a little about yourself?',
     });
   };
@@ -145,13 +299,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
       }
     }
 
+    awaitingPartRef.current = 3;
     navigation.navigate('PracticeScreen', {
-      topicId: test?.test_code || 'IELTS-P3',
+      topicId: test?.test_set_id || 'IELTS-P3',
       topicName: `IELTS Speaking Part 3: ${test?.part3_theme || 'Two-Way Discussion'}`,
       ieltsMasterSessionId: masterSessionId,
       ieltsPart: 3,
       targetDurationSeconds: test?.part3_duration_seconds || 240,
-      prompt: `${test?.part3_context_prompt || 'You are an official IELTS Speaking Examiner conducting Part 3.'}${contextBridging ? `\n\n${contextBridging}` : ''}`,
+      prompt: `${test?.part3_context_prompt || 'You are an IELTS Speaking examiner conducting Part 3.'}${contextBridging ? `\n\n${contextBridging}` : ''}`,
       firstPrompt: test?.part3_example_questions?.[0] || 'Welcome to Part 3. Let us discuss broader themes connected with your talk.',
     });
   };
@@ -174,50 +329,89 @@ export const IeltsSpeakingScreen: React.FC = () => {
       const { recording } = await Audio.Recording.createAsync(
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
+      if (!mountedRef.current) {
+        // Left the screen while the recorder was starting: release it.
+        recording.stopAndUnloadAsync().catch(() => {});
+        Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
+        return;
+      }
       recordingRef.current = recording;
+      setIsPrepping(false);
       setIsRecording(true);
     } catch (err) {
       console.warn('Failed to start recording', err);
+      Alert.alert('Recording failed', 'Could not start the microphone. Please try again.');
     }
   };
 
   const uploadPart2Audio = async (uri: string) => {
-    if (!uri) return;
+    if (!uri || !masterSessionId) return;
     setIsUploading(true);
     setUploadError(null);
     try {
-      const { publicUrl } = await ieltsService.uploadAudioToR2(uri, 'audio/m4a', 'ielts-part2-audio');
-      if (masterSessionId) {
-        await ieltsService.savePart2Submission(masterSessionId, {
-          audioUrl: publicUrl,
-          summary: `Candidate Part 2 monologue on ${test?.part2_title || test?.part2_cue_card?.topic || 'cue card'}`,
-        });
-      }
-      setPart2Completed(true);
+      const audioKey = await ieltsService.uploadPart2Audio(uri);
+      const updated = await ieltsService.savePart2Submission(masterSessionId, {
+        audioKey,
+        topic: test?.part2_title,
+      });
+      if (updated?.id) setSession(updated);
+      setPart2Saved(true);
     } catch (uploadErr) {
-      console.warn('Direct Cloudflare R2 upload error:', uploadErr);
-      setUploadError('Failed to upload recording to cloud storage.');
+      console.warn('Part 2 upload error:', uploadErr);
+      if (apiErrorCode(uploadErr) === 'TRANSCRIPTION_FAILED') {
+        // Re-sending the same audio won't help: only offer "Record again".
+        setRecordingUri(null);
+        setUploadError(
+          extractErrorMessage(uploadErr) ||
+            'We could not hear your answer in that recording. Please record again.'
+        );
+      } else {
+        setUploadError('Your recording could not be saved. Please try again.');
+      }
     } finally {
       setIsUploading(false);
     }
   };
 
   const stopRecording = async () => {
-    if (!recordingRef.current) return;
+    const recording = recordingRef.current;
+    if (!recording) return;
+    recordingRef.current = null;
+    setIsRecording(false);
     try {
-      setIsRecording(false);
-      await recordingRef.current.stopAndUnloadAsync();
-      const uri = recordingRef.current.getURI();
+      await recording.stopAndUnloadAsync();
+      await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
+      const uri = recording.getURI();
       setRecordingUri(uri);
       if (uri) {
         await uploadPart2Audio(uri);
       }
     } catch (err) {
       console.warn('Failed to stop recording', err);
+      setUploadError('The recording could not be finished. Please record again.');
     }
   };
 
-  if (loading || !test) {
+  const resetPart2 = () => {
+    setUploadError(null);
+    setRecordingUri(null);
+    setSpeakingSecondsLeft(test?.part2_speaking_seconds || 120);
+    setPrepSecondsLeft(test?.part2_prep_seconds || 60);
+  };
+
+  const renderHeader = (title: string, subtitle?: string) => (
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+        <Feather name="arrow-left" size={s(20)} color="#FFFFFF" />
+      </TouchableOpacity>
+      <View style={styles.headerTitleContainer}>
+        <Text style={styles.headerTitle}>{title}</Text>
+        {!!subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
+      </View>
+    </View>
+  );
+
+  if (loading) {
     return (
       <ScreenBackground>
         <SafeAreaView style={styles.centerContainer}>
@@ -228,54 +422,143 @@ export const IeltsSpeakingScreen: React.FC = () => {
     );
   }
 
+  if (loadError || !test || !session) {
+    return (
+      <ScreenBackground>
+        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
+          {renderHeader('IELTS Speaking')}
+          <View style={styles.centerContainer}>
+            <Text style={styles.errorText}>
+              {loadError || 'Failed to load the IELTS Speaking test.'}
+            </Text>
+            <TouchableOpacity onPress={loadTest} style={[styles.actionButton, styles.retryButton]}>
+              <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
+              <Text style={styles.actionButtonText}>Retry</Text>
+            </TouchableOpacity>
+          </View>
+        </SafeAreaView>
+      </ScreenBackground>
+    );
+  }
+
+  const subtitle =
+    mode === 'drill' ? `Part ${drillPart} drill` : 'Speaking mock test: Parts 1, 2 and 3';
+  const reportBands = { ...session, ...(report ?? {}), ...(report?.report ?? {}) } as Record<string, unknown>;
+  const feedback = report?.report?.feedback;
+  const feedbackItems = Array.isArray(feedback) ? feedback : feedback ? [feedback] : [];
+  // While a call is being saved, hide its "start call" card (back after "Check again" expires).
+  const waiting = waitingPart !== null && !waitExpired;
+
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        {/* Header */}
-        <View style={styles.header}>
-          <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-            <Feather name="arrow-left" size={s(20)} color="#FFFFFF" />
-          </TouchableOpacity>
-          <View style={styles.headerTitleContainer}>
-            <Text style={styles.headerTitle}>{test.title}</Text>
-            <Text style={styles.headerSubtitle}>{test.test_set_id || test.test_code} • Full Speaking Test</Text>
+        {renderHeader(test.title, subtitle)}
+
+        {/* Step Indicator (mock runs Parts 1 → 2 → 3) */}
+        {mode === 'mock' && (
+          <View style={styles.stepperContainer}>
+            {([1, 2, 3] as const).map((p, idx) => (
+              <React.Fragment key={p}>
+                {idx > 0 && <View style={styles.stepDivider} />}
+                <View style={styles.stepItem}>
+                  <Text
+                    style={[
+                      styles.stepNum,
+                      (currentPart === p || isPartDone(p)) && styles.stepNumActive,
+                    ]}
+                  >
+                    {isPartDone(p) ? '✓' : p}
+                  </Text>
+                  <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
+                    {p === 1 ? 'Part 1' : p === 2 ? 'Cue Card' : 'Discussion'}
+                  </Text>
+                </View>
+              </React.Fragment>
+            ))}
           </View>
-        </View>
-
-        {/* Step Indicator */}
-        <View style={styles.stepperContainer}>
-          <TouchableOpacity
-            onPress={() => setCurrentPart(1)}
-            style={[styles.stepItem, currentPart === 1 && styles.stepItemActive]}
-          >
-            <Text style={[styles.stepNum, currentPart === 1 && styles.stepNumActive]}>1</Text>
-            <Text style={[styles.stepLabel, currentPart === 1 && styles.stepLabelActive]}>Part 1</Text>
-          </TouchableOpacity>
-
-          <View style={styles.stepDivider} />
-
-          <TouchableOpacity
-            onPress={() => setCurrentPart(2)}
-            style={[styles.stepItem, currentPart === 2 && styles.stepItemActive]}
-          >
-            <Text style={[styles.stepNum, currentPart === 2 && styles.stepNumActive]}>2</Text>
-            <Text style={[styles.stepLabel, currentPart === 2 && styles.stepLabelActive]}>Cue Card</Text>
-          </TouchableOpacity>
-
-          <View style={styles.stepDivider} />
-
-          <TouchableOpacity
-            onPress={() => setCurrentPart(3)}
-            style={[styles.stepItem, currentPart === 3 && styles.stepItemActive]}
-          >
-            <Text style={[styles.stepNum, currentPart === 3 && styles.stepNumActive]}>3</Text>
-            <Text style={[styles.stepLabel, currentPart === 3 && styles.stepLabelActive]}>Discussion</Text>
-          </TouchableOpacity>
-        </View>
+        )}
 
         <ScrollView style={styles.contentScroll} contentContainerStyle={styles.contentBody}>
+          {/* Waiting for a Part 1/3 call to be saved */}
+          {waitingPart !== null && (
+            <View style={[styles.timerDisplayBox, { marginBottom: 16 }]}>
+              {waitExpired ? (
+                <>
+                  <Text style={styles.timerLabel}>
+                    Your Part {waitingPart} answers haven't arrived yet.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => pollUntilSaved(waitingPart)}
+                    style={[styles.prepButton, { marginTop: 8, flex: 0, paddingHorizontal: 20 }]}
+                  >
+                    <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.actionButtonText}>Check again</Text>
+                  </TouchableOpacity>
+                </>
+              ) : (
+                <>
+                  <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 8 }} />
+                  <Text style={styles.timerLabel}>Saving your Part {waitingPart} answers…</Text>
+                </>
+              )}
+            </View>
+          )}
+
+          {/* Band report */}
+          {allPartsDone && (
+            <View style={styles.partCard}>
+              <View style={styles.badgeRow}>
+                <Feather name="award" size={s(16)} color="#8B5CF6" />
+                <Text style={styles.partBadgeText}>Estimated band report</Text>
+              </View>
+              {isCompleting ? (
+                <View style={styles.timerDisplayBox}>
+                  <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 8 }} />
+                  <Text style={styles.timerLabel}>Scoring your answers…</Text>
+                </View>
+              ) : completeError ? (
+                <View style={styles.timerDisplayBox}>
+                  <Text style={[styles.timerLabel, { color: '#F87171' }]}>{completeError}</Text>
+                  <TouchableOpacity onPress={() => requestReport()} style={[styles.prepButton, { marginTop: 8 }]}>
+                    <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.actionButtonText}>Retry</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : report ? (
+                <>
+                  <Text style={styles.partHeading}>
+                    Overall band {formatBand(reportBands.overall_band)}
+                  </Text>
+                  {CRITERIA.map((c) => (
+                    <View key={c.key} style={styles.criterionRow}>
+                      <Text style={styles.bulletText}>{c.label}</Text>
+                      <Text style={styles.criterionBand}>{formatBand(reportBands[c.key])}</Text>
+                    </View>
+                  ))}
+                  {feedbackItems.length > 0 && (
+                    <View style={[styles.topicsPreviewCard, { marginTop: 12 }]}>
+                      <Text style={styles.previewTitle}>Feedback</Text>
+                      {feedbackItems.map((f, idx) => (
+                        <Text key={idx} style={[styles.bulletText, { marginTop: 3 }]}>{f}</Text>
+                      ))}
+                    </View>
+                  )}
+                  <Text style={[styles.timerHint, { marginTop: 8 }]}>
+                    Estimated by AI from this practice session. It is not an official IELTS score.
+                  </Text>
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={[styles.actionButton, { marginTop: 16 }]}
+                  >
+                    <Text style={styles.actionButtonText}>Back to Home</Text>
+                  </TouchableOpacity>
+                </>
+              ) : null}
+            </View>
+          )}
+
           {/* Part 1 Screen */}
-          {currentPart === 1 && (
+          {currentPart === 1 && !waiting && (
             <View style={styles.partCard}>
               <View style={styles.badgeRow}>
                 <Feather name="mic" size={s(16)} color="#8B5CF6" />
@@ -288,15 +571,12 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
               <View style={styles.topicsPreviewCard}>
                 <Text style={styles.previewTitle}>Example Questions:</Text>
-                {(test.part1_example_questions ?? test.part1_topics?.map((t) => t.theme) ?? []).map(
-                  (q: string, idx: number) => (
-                    <View key={idx} style={styles.bulletRow}>
-                      <Text style={styles.bulletDot}>•</Text>
-                      <Text style={styles.bulletText}>{q}</Text>
-                    </View>
-                  )
-                )}
-                {/* Theme label */}
+                {(test.part1_example_questions ?? []).map((q: string, idx: number) => (
+                  <View key={idx} style={styles.bulletRow}>
+                    <Text style={styles.bulletDot}>•</Text>
+                    <Text style={styles.bulletText}>{q}</Text>
+                  </View>
+                ))}
                 {!!test.part1_theme && (
                   <Text style={[styles.previewTitle, { marginTop: 8 }]}>Theme: {test.part1_theme}</Text>
                 )}
@@ -319,18 +599,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
               {/* Cue Card Frame */}
               <View style={styles.cueCardBox}>
-                <Text style={styles.cueCardTopic}>
-                  {test.part2_title || test.part2_cue_card?.topic || 'Cue Card Topic'}
-                </Text>
+                <Text style={styles.cueCardTopic}>{test.part2_title || 'Cue Card Topic'}</Text>
                 <Text style={styles.cueCardSubtitle}>You should say:</Text>
-                {(test.part2_bullet_points ?? test.part2_cue_card?.bullets ?? []).map(
-                  (b: string, idx: number) => (
-                    <View key={idx} style={styles.cueBulletRow}>
-                      <Text style={styles.cueBulletDot}>-</Text>
-                      <Text style={styles.cueBulletText}>{b}</Text>
-                    </View>
-                  )
-                )}
+                {(test.part2_bullet_points ?? []).map((b: string, idx: number) => (
+                  <View key={idx} style={styles.cueBulletRow}>
+                    <Text style={styles.cueBulletDot}>-</Text>
+                    <Text style={styles.cueBulletText}>{b}</Text>
+                  </View>
+                ))}
                 {!!test.part2_preparation_hint && (
                   <Text style={[styles.timerHint, { marginTop: 10 }]}>
                     💡 {test.part2_preparation_hint}
@@ -358,43 +634,22 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 ) : isUploading ? (
                   <View style={styles.timerDisplayBox}>
                     <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 8 }} />
-                    <Text style={styles.timerLabel}>Uploading to Cloudflare R2...</Text>
+                    <Text style={styles.timerLabel}>Saving your recording...</Text>
                   </View>
                 ) : uploadError ? (
                   <View style={styles.timerDisplayBox}>
                     <Text style={[styles.timerLabel, { color: '#F87171' }]}>{uploadError}</Text>
-                    <TouchableOpacity
-                      onPress={() => recordingUri && uploadPart2Audio(recordingUri)}
-                      style={[styles.prepButton, { marginTop: 8 }]}
-                    >
-                      <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                      <Text style={styles.actionButtonText}>Retry Cloud Upload</Text>
-                    </TouchableOpacity>
-                  </View>
-                ) : part2Completed ? (
-                  <View style={styles.timerDisplayBox}>
-                    <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 8 }}>
-                      <Feather name="check-circle" size={s(16)} color="#10B981" style={{ marginRight: 6 }} />
-                      <Text style={[styles.timerLabel, { color: '#10B981', fontWeight: 'bold' }]}>
-                        Monologue Recorded & Uploaded
-                      </Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => setCurrentPart(3)}
-                      style={[styles.actionButton, { marginTop: 6 }]}
-                    >
-                      <Text style={styles.actionButtonText}>Proceed to Part 3 Discussion →</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                      onPress={() => {
-                        setPart2Completed(false);
-                        setRecordingUri(null);
-                        setSpeakingSecondsLeft(test?.part2_speaking_seconds || 120);
-                        setPrepSecondsLeft(test?.part2_prep_seconds || 60);
-                      }}
-                      style={{ marginTop: 10 }}
-                    >
-                      <Text style={styles.skipPrepText}>Re-record Part 2</Text>
+                    {recordingUri ? (
+                      <TouchableOpacity
+                        onPress={() => uploadPart2Audio(recordingUri)}
+                        style={[styles.prepButton, { marginTop: 8 }]}
+                      >
+                        <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                        <Text style={styles.actionButtonText}>Retry upload</Text>
+                      </TouchableOpacity>
+                    ) : null}
+                    <TouchableOpacity onPress={resetPart2} style={{ marginTop: 10 }}>
+                      <Text style={styles.skipPrepText}>Record again</Text>
                     </TouchableOpacity>
                   </View>
                 ) : (
@@ -413,7 +668,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
           )}
 
           {/* Part 3 Screen */}
-          {currentPart === 3 && (
+          {currentPart === 3 && !waiting && (
             <View style={styles.partCard}>
               <View style={styles.badgeRow}>
                 <Feather name="message-circle" size={s(16)} color="#8B5CF6" />
@@ -485,7 +740,6 @@ const styles = StyleSheet.create({
   stepItem: {
     alignItems: 'center',
   },
-  stepItemActive: {},
   stepNum: {
     width: 28,
     height: 28,
@@ -709,6 +963,29 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontWeight: '700',
     fontSize: 14,
+  },
+  errorText: {
+    color: '#F87171',
+    fontSize: 14,
+    textAlign: 'center',
+    marginHorizontal: 24,
+    marginBottom: 16,
+  },
+  retryButton: {
+    paddingHorizontal: 24,
+  },
+  criterionRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingVertical: 6,
+    borderBottomWidth: 1,
+    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
+  },
+  criterionBand: {
+    color: '#FFFFFF',
+    fontSize: 15,
+    fontWeight: '700',
   },
 });
 export default IeltsSpeakingScreen;

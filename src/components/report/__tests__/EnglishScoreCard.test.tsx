@@ -25,10 +25,12 @@ describe('scoreToIeltsBand — the band derivation used by EnglishScoreCard', ()
 });
 
 describe('EnglishScoreCard band rendering (ielts mode)', () => {
-  it('renders Band 9.0 — not Band 10.0 — for a perfect score', () => {
+  // The hero band comes only from a measured overall_band; it is never
+  // derived from the 0-100 overall score (spec 2026-09-24, "App only").
+  it('renders the measured overall_band in the hero', () => {
     const { getByText, queryByText } = render(
       <EnglishScoreCard
-        overallScores={scores({ overall: 100 })}
+        overallScores={scores({ overall: 100, overall_band: 9 })}
         onContinue={() => {}}
         mode="ielts"
       />
@@ -37,7 +39,7 @@ describe('EnglishScoreCard band rendering (ielts mode)', () => {
     expect(queryByText('Band 10.0')).toBeNull();
   });
 
-  it('renders Band 9.0 — not Band 9.5 — for a score of 95', () => {
+  it('does not derive a hero band from a score of 95 when no band was measured', () => {
     const { getByText, queryByText } = render(
       <EnglishScoreCard
         overallScores={scores({ overall: 95 })}
@@ -45,11 +47,12 @@ describe('EnglishScoreCard band rendering (ielts mode)', () => {
         mode="ielts"
       />
     );
-    expect(getByText('Band 9.0')).toBeTruthy();
+    expect(getByText('Band not available')).toBeTruthy();
+    expect(queryByText('Band 9.0')).toBeNull();
     expect(queryByText('Band 9.5')).toBeNull();
   });
 
-  it('renders a score of 0 as Band 1.0 instead of falling back to a fabricated 6.5', () => {
+  it('shows no hero band for a score of 0 instead of falling back to a fabricated 6.5', () => {
     const { getByText, queryByText } = render(
       <EnglishScoreCard
         overallScores={scores({ overall: 0 })}
@@ -57,7 +60,7 @@ describe('EnglishScoreCard band rendering (ielts mode)', () => {
         mode="ielts"
       />
     );
-    expect(getByText('Band 1.0')).toBeTruthy();
+    expect(getByText('Band not available')).toBeTruthy();
     expect(queryByText('Band 6.5')).toBeNull();
   });
 
@@ -81,9 +84,10 @@ describe('EnglishScoreCard band rendering (ielts mode)', () => {
         mode="ielts"
       />
     );
-    // Both the hero and the Fluency skill bar derive Band 1.0 from a 0 score;
-    // a falsy-but-present band must not fall through to the percentage branch.
-    expect(getAllByText('Band 1.0')).toHaveLength(2);
+    // The Fluency skill bar derives Band 1.0 from a 0 score (the hero has no
+    // measured band); a falsy-but-present band must not fall through to the
+    // percentage branch.
+    expect(getAllByText('Band 1.0')).toHaveLength(1);
     expect(queryByText('0%')).toBeNull();
   });
 });

@@ -48,6 +48,8 @@ export interface PracticeContentProps {
   timeLoading: boolean;
   remainingTime: string;
   remainingTimeSeconds?: number | null;
+  /** Hide the Daily Plan "Time remaining today" line (IELTS part calls). */
+  hideRemainingTime?: boolean;
   stateColor?: string;
   onDeviceFailure?: (error?: any) => void;
   onBack?: () => void;
@@ -66,6 +68,7 @@ export function PracticeContent({
   timeLoading,
   remainingTime,
   remainingTimeSeconds,
+  hideRemainingTime = false,
   stateColor,
   onDeviceFailure,
   onBack,
@@ -228,7 +231,7 @@ export function PracticeContent({
               <Text style={styles.gradientText}>{s.headlineGradient}</Text>
             </Text>
             <Text style={styles.introDescription}>{s.description}</Text>
-            {!timeLoading && (
+            {!timeLoading && !hideRemainingTime && (
               <Text style={styles.introMeta}>
                 {remainingTime === 'Unlimited' || remainingTimeSeconds === null
                   ? 'Unlimited time today'

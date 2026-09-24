@@ -66,6 +66,14 @@ describe('auth session consistency', () => {
   beforeEach(() => {
     mockMemory.clear();
     store.dispatch(clearAuth());
+    // Boot refreshes the user from /auth/me; keep these tests off the network.
+    jest
+      .spyOn(authService, 'getCurrentUser')
+      .mockRejectedValue(new Error('offline'));
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
   });
 
   it('clears the persisted redux flag when a forced logout drops the token', async () => {
@@ -121,5 +129,103 @@ describe('auth session consistency', () => {
       expect(store.getState().auth.isAuthenticated).toBe(true)
     );
     expect(store.getState().auth.user).toEqual(USER);
+  });
+
+  it('refreshes the restored user from /auth/me so learning_track is current', async () => {
+    await asyncStorageManager.storeAuthData({
+      accessToken: 'jwt',
+      user: USER,
+      expiresIn: 3600,
+    });
+    const fresh = {
+      id: 7,
+      email: 'fardin@example.com',
+      fullName: 'Fardin',
+      learning_track: 'ielts',
+      ielts_default_focus: 'mock_exam',
+      ielts_target_band: 7,
+    };
+    (authService.getCurrentUser as jest.Mock).mockResolvedValue(fresh);
+    const expiryBefore = await asyncStorageManager.getTokenExpiry();
+
+    renderHook(() => useAutoLogin());
+
+    await waitFor(() =>
+      expect(store.getState().auth.user?.learning_track).toBe('ielts')
+    );
+    expect(store.getState().auth.user?.ielts_default_focus).toBe('mock_exam');
+    expect(store.getState().auth.isAuthenticated).toBe(true);
+    // useAutoLogin persists the fresh user; the token expiry is left alone.
+    expect((await asyncStorageManager.getUser())?.learning_track).toBe('ielts');
+    expect(await asyncStorageManager.getTokenExpiry()).toBe(expiryBefore);
+  });
+
+  it('a logout during the /auth/me refresh is not undone by it', async () => {
+    await asyncStorageManager.storeAuthData({
+      accessToken: 'jwt',
+      user: USER,
+      expiresIn: 3600,
+    });
+    let resolveMe: (u: unknown) => void = () => {};
+    (authService.getCurrentUser as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => (resolveMe = resolve))
+    );
+
+    renderHook(() => useAutoLogin());
+    await waitFor(() => expect(store.getState().auth.isAuthenticated).toBe(true));
+
+    await authService.logout();
+    resolveMe({ ...(USER as object), learning_track: 'ielts' });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect(await asyncStorageManager.getUser()).toBeNull();
+    expect(store.getState().auth.isAuthenticated).toBe(false);
+    expect(store.getState().auth.user).toBeNull();
+  });
+
+  it('a /auth/me refresh for a previous user does not overwrite a new login', async () => {
+    await asyncStorageManager.storeAuthData({
+      accessToken: 'jwt',
+      user: USER,
+      expiresIn: 3600,
+    });
+    let resolveMe: (u: unknown) => void = () => {};
+    (authService.getCurrentUser as jest.Mock).mockImplementation(
+      () => new Promise((resolve) => (resolveMe = resolve))
+    );
+
+    renderHook(() => useAutoLogin());
+    await waitFor(() => expect(store.getState().auth.isAuthenticated).toBe(true));
+
+    const OTHER = { id: 8, email: 'other@example.com', fullName: 'Other' } as never;
+    await asyncStorageManager.storeAuthData({ accessToken: 'jwt2', user: OTHER, expiresIn: 3600 });
+    store.dispatch(setUser(OTHER));
+    resolveMe({ ...(USER as object), learning_track: 'ielts' });
+    await new Promise((r) => setTimeout(r, 0));
+
+    expect((await asyncStorageManager.getUser())?.id).toBe(8);
+    expect(store.getState().auth.user?.id).toBe(8);
+  });
+
+  it('getCurrentUser returns the merged user without writing storage', async () => {
+    (authService.getCurrentUser as jest.Mock).mockRestore();
+    await asyncStorageManager.storeAuthData({
+      accessToken: 'jwt',
+      user: USER,
+      expiresIn: 3600,
+    });
+    const expiryBefore = await asyncStorageManager.getTokenExpiry();
+    const { httpService } = require('@/services/http/httpservice');
+    jest.spyOn(httpService, 'get').mockResolvedValue({
+      data: { success: true, data: { id: 7, email: 'fardin@example.com', learning_track: 'ielts' } },
+    });
+
+    const user = await authService.getCurrentUser();
+
+    expect(user.learning_track).toBe('ielts');
+    expect(user.fullName).toBe('Fardin');
+    // Storage is written by useAutoLogin, after its logout guard.
+    expect((await asyncStorageManager.getUser())?.learning_track).toBeUndefined();
+    expect(await asyncStorageManager.getTokenExpiry()).toBe(expiryBefore);
   });
 });

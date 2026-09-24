@@ -23,7 +23,7 @@ export type HomeStackParamList = {
   PracticeScreen: {
     topicId?: string;
     topicName?: string;
-    ieltsMasterSessionId?: number | null;
+    ieltsMasterSessionId?: string | null;
     ieltsPart?: number;
     targetDurationSeconds?: number;
     prompt?: string;
@@ -33,8 +33,8 @@ export type HomeStackParamList = {
   ReviewScreen: undefined;
   ListeningScreen: { roomName?: string } | undefined;
   ListeningQuizScreen: { topicId?: string; topicName?: string } | undefined;
-  IeltsListeningScreen: { testId?: number; testCode?: string } | undefined;
-  IeltsSpeakingScreen: { testId?: number; testCode?: string } | undefined;
+  IeltsListeningScreen: { mode?: 'drill' | 'mock' } | undefined;
+  IeltsSpeakingScreen: { mode?: 'drill' | 'mock'; part?: 1 | 2 | 3 } | undefined;
   ReportScreen: {
     sessionId: string;
     sessionType: 'practice' | 'call';
@@ -49,15 +49,15 @@ export type LearningStackParamList = {
   PracticeScreen: {
     topicId?: string;
     topicName?: string;
-    ieltsMasterSessionId?: number | null;
+    ieltsMasterSessionId?: string | null;
     ieltsPart?: number;
     targetDurationSeconds?: number;
     prompt?: string;
     firstPrompt?: string;
   } | undefined;
   ProgressScreen: undefined;
-  IeltsListeningScreen: { testId?: number; testCode?: string } | undefined;
-  IeltsSpeakingScreen: { testId?: number; testCode?: string } | undefined;
+  IeltsListeningScreen: { mode?: 'drill' | 'mock' } | undefined;
+  IeltsSpeakingScreen: { mode?: 'drill' | 'mock'; part?: 1 | 2 | 3 } | undefined;
   ReportScreen: {
     sessionId: string;
     sessionType: 'practice' | 'call';

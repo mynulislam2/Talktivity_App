@@ -266,6 +266,7 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ navigation }) => {
 
           {/* Help & Support Section */}
           <SettingsSection title="Help & Support">
+            <SettingsRow label="Plans and billing are managed on talktivity.app" />
             <SettingsRow
               label="Permissions & Audio Check"
               onPress={() => setIsPermissionsModalVisible(true)}

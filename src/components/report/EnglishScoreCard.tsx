@@ -87,12 +87,9 @@ export function EnglishScoreCard({
   const overallScore = overallScores?.overall;
   const hasOverallScore =
     typeof overallScore === 'number' && Number.isFinite(overallScore);
-  const overallBand =
-    overallScores?.overall_band != null
-      ? Number(overallScores.overall_band).toFixed(1)
-      : hasOverallScore
-      ? scoreToIeltsBand(overallScore)
-      : null;
+  const overallBand = overallScores?.overall_band != null
+    ? Number(overallScores.overall_band).toFixed(1)
+    : null;
 
   const pentagonValues: [number, number, number, number, number] | null =
     overallScores

@@ -23,7 +23,7 @@ export interface ConnectionDetailsParams {
   userId: number;
   sessionType: WebSessionType;
   topic?: WebTopicData | null;
-  masterSessionId?: number | null;
+  masterSessionId?: string | null;
   ieltsPart?: number | null;
   targetDurationSeconds?: number | null;
 }

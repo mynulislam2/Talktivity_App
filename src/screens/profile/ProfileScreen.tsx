@@ -19,6 +19,7 @@ import {
   selectCurrentSubscription,
 } from '@/store/slices/subscriptionSlice';
 import { profileService } from '@/services/profile';
+import { getSubscriptionDisplayName } from '@/utils/subscriptionStatus';
 import {
   ProfileCard,
   ProfileHeroStats,
@@ -61,7 +62,7 @@ const ProfileScreen: React.FC<ProfileScreenProps> = () => {
 
   const currentSubscription = useAppSelector(selectCurrentSubscription);
   const subscriptionDetails = (currentSubscription as any)?.subscription;
-  const planType = (currentSubscription as any)?.planType || 'Free';
+  const planType = getSubscriptionDisplayName(currentSubscription);
   const isProActive = Boolean((currentSubscription as any)?.active);
   const isInternationalSubscription =
     isProActive && subscriptionDetails?.provider === 'lemonsqueezy';

@@ -26,6 +26,14 @@ export function getSubscriptionPlanLabel(planType?: string | null): string {
     .join(' ');
 }
 
+/** The plan's display name (admins set it), else its readable plan_type, else "Free". */
+export function getSubscriptionDisplayName(
+  subscription: SubscriptionStatus | null | undefined
+): string {
+  const name = (subscription?.subscription as { plan_name?: string } | undefined)?.plan_name;
+  return name || getSubscriptionPlanLabel(getSubscriptionPlanType(subscription));
+}
+
 export function hasActiveProSubscription(
   subscription: SubscriptionStatus | null | undefined
 ): boolean {

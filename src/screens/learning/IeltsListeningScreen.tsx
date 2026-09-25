@@ -21,6 +21,7 @@ import {
   IeltsListeningQuestion,
   IeltsListeningResult,
 } from '@/services/ielts';
+import { hasAnswer, optionReviewState, questionTimestamp } from '@/lib/ielts/listeningReview';
 
 // Real IELTS Listening gives 40 minutes for all four parts.
 const MOCK_SECONDS = 40 * 60;
@@ -164,24 +165,23 @@ export const IeltsListeningScreen: React.FC = () => {
   // so the other tabs stay locked until the part is checked or reset.
   const partHasAnswers =
     !!activePart &&
-    activePart.questions.some((q) => (userAnswers[q.question_number] ?? '') !== '');
+    activePart.questions.some((q) => hasAnswer(userAnswers[q.question_number]));
   const tabsLocked = isDrill && (!!results || partHasAnswers);
 
+  // Drill only: a mock keeps its review once submitted.
   const resetDrill = () => {
     setUserAnswers({});
     setResults(null);
     setSummary(null);
     setSubmitError(null);
+    autoSubmittedRef.current = false;
   };
 
   const hasNextPart = activePartIndex < parts.length - 1;
 
   const handleNextPart = () => {
     if (hasNextPart) {
-      setUserAnswers({});
-      setResults(null);
-      setSummary(null);
-      setSubmitError(null);
+      resetDrill();
       switchPart(activePartIndex + 1, true);
     } else {
       navigation.goBack();
@@ -440,17 +440,47 @@ export const IeltsListeningScreen: React.FC = () => {
             </View>
           )}
 
+          {summary && (
+            <View style={styles.resultBanner}>
+              <View style={styles.resultHeaderRow}>
+                <View style={styles.resultBadge}>
+                  <Feather name="check-circle" size={s(12)} color="#34D399" />
+                  <Text style={styles.resultTitle}>
+                    {isDrill ? `Part ${activePart.part_number} checked` : 'Test submitted'}
+                  </Text>
+                </View>
+                {summary.band != null && (
+                  <View style={styles.resultBandBadge}>
+                    <Text style={styles.resultBandText}>
+                      Estimated band {Number(summary.band).toFixed(1)}
+                    </Text>
+                  </View>
+                )}
+              </View>
+              <View style={styles.resultScoreRow}>
+                <Text style={styles.resultScoreNumber}>{summary.score}</Text>
+                <Text style={styles.resultScoreTotal}>/ {summary.total} correct</Text>
+              </View>
+              <Text style={styles.resultHint}>Review your answers below.</Text>
+              {!isDrill && (
+                <View style={styles.bannerActions}>
+                  <TouchableOpacity
+                    onPress={() => navigation.goBack()}
+                    style={[styles.retryButton, styles.bannerButton]}
+                  >
+                    <Text style={styles.submitHeaderText}>Back to Home</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+            </View>
+          )}
+
           <View style={styles.instructionsCard}>
             <View style={styles.instructionsHeaderRow}>
               <View style={{ flex: 1, marginRight: 8 }}>
                 <Text style={styles.partCategoryTag}>PART {activePart.part_number} • LISTENING</Text>
                 <Text style={styles.partTitle}>{activePart.title}</Text>
               </View>
-              {summary && (
-                <Text style={styles.plainScoreText}>
-                  Score: {summary.score}/{summary.total}
-                </Text>
-              )}
             </View>
             <Text style={styles.partInstructions}>
               {isDrill
@@ -461,6 +491,7 @@ export const IeltsListeningScreen: React.FC = () => {
 
           {activePart.questions.map((q: IeltsListeningQuestion) => {
             const result = results?.[q.question_number];
+            const timestamp = questionTimestamp(q.timestamp_seconds);
             return (
               <View key={q.question_number} style={styles.questionCard}>
                 <View style={styles.questionHeader}>
@@ -469,16 +500,19 @@ export const IeltsListeningScreen: React.FC = () => {
                       <Text style={styles.qNumText}>{q.question_number}</Text>
                     </View>
                     <View style={{ flex: 1 }}>
+                      {!!q.matching_title && (
+                        <Text style={styles.questionEyebrow}>{q.matching_title}</Text>
+                      )}
                       <Text style={styles.questionText}>{q.question_text}</Text>
                     </View>
                   </View>
-                  {q.timestamp_seconds !== undefined && (
+                  {timestamp !== null && (
                     <TouchableOpacity
-                      onPress={() => seekToQuestion(q.timestamp_seconds!)}
+                      onPress={() => seekToQuestion(timestamp)}
                       style={styles.timestampBtn}
                     >
                       <Feather name="volume-2" size={s(11)} color="#C55DFE" style={{ marginRight: 4 }} />
-                      <Text style={styles.timestampBtnText}>{formatTime(q.timestamp_seconds * 1000)}</Text>
+                      <Text style={styles.timestampBtnText}>{formatTime(timestamp * 1000)}</Text>
                     </TouchableOpacity>
                   )}
                 </View>
@@ -486,25 +520,23 @@ export const IeltsListeningScreen: React.FC = () => {
                 {/* 1. Multiple Choice Render */}
                 {q.type === 'multiple_choice' && q.options && (
                   <View style={styles.optionsList}>
-                    {q.options.map((option, oIdx) => {
+                    {q.options.map((option, oIdx, options) => {
                       const isSelected = userAnswers[q.question_number] === option;
-                      const isThisCorrect =
-                        !!result && String(result.correct_answer ?? '').trim().toLowerCase() === option.trim().toLowerCase();
+                      const state = optionReviewState({ option, options, selected: isSelected, result });
+                      // The right option is shown green, whether picked or missed.
+                      const isThisCorrect = state === 'correct' || state === 'missed';
                       let optionStyle: any = styles.optionItem;
                       let radioStyle: any = styles.radioIndicator;
 
-                      if (isSelected) {
+                      if (state === 'selected') {
                         optionStyle = [styles.optionItem, styles.optionItemSelected];
                         radioStyle = [styles.radioIndicator, styles.radioIndicatorSelected];
-                      }
-                      if (result) {
-                        if (isThisCorrect) {
-                          optionStyle = [styles.optionItem, styles.optionItemCorrect];
-                          radioStyle = [styles.radioIndicator, styles.radioIndicatorCorrect];
-                        } else if (isSelected) {
-                          optionStyle = [styles.optionItem, styles.optionItemWrong];
-                          radioStyle = [styles.radioIndicator, styles.radioIndicatorWrong];
-                        }
+                      } else if (isThisCorrect) {
+                        optionStyle = [styles.optionItem, styles.optionItemCorrect];
+                        radioStyle = [styles.radioIndicator, styles.radioIndicatorCorrect];
+                      } else if (state === 'wrong') {
+                        optionStyle = [styles.optionItem, styles.optionItemWrong];
+                        radioStyle = [styles.radioIndicator, styles.radioIndicatorWrong];
                       }
 
                       return (
@@ -544,26 +576,27 @@ export const IeltsListeningScreen: React.FC = () => {
                         ? (userAnswers[q.question_number] as string[]).length
                         : userAnswers[q.question_number] ? 1 : 0)}/{q.max_selections || 2}
                     </Text>
-                    {q.options.map((option, oIdx) => {
+                    {q.options.map((option, oIdx, options) => {
                       const selectedList = Array.isArray(userAnswers[q.question_number])
                         ? (userAnswers[q.question_number] as string[])
                         : userAnswers[q.question_number]
                         ? [userAnswers[q.question_number] as string]
                         : [];
                       const isSelected = selectedList.includes(option);
-                      const correctVariants = String(result?.correct_answer ?? '')
-                        .split(/[,;\/|]+/)
-                        .map((s) => s.trim().toLowerCase());
-                      const isThisCorrect =
-                        !!result && correctVariants.includes(option.trim().toLowerCase());
+                      const state = optionReviewState({
+                        option,
+                        options,
+                        selected: isSelected,
+                        result,
+                        multi: true,
+                      });
+                      const isThisCorrect = state === 'correct' || state === 'missed';
 
                       let rowStyle: any = styles.multiOptionRow;
-                      if (isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemSelected];
-                      if (result) {
-                        if (isThisCorrect && isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemCorrect];
-                        else if (!isThisCorrect && isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemWrong];
-                        else if (isThisCorrect && !isSelected) rowStyle = [styles.multiOptionRow, styles.optionItemMissed];
-                      }
+                      if (state === 'selected') rowStyle = [styles.multiOptionRow, styles.optionItemSelected];
+                      else if (state === 'correct') rowStyle = [styles.multiOptionRow, styles.optionItemCorrect];
+                      else if (state === 'wrong') rowStyle = [styles.multiOptionRow, styles.optionItemWrong];
+                      else if (state === 'missed') rowStyle = [styles.multiOptionRow, styles.optionItemMissed];
 
                       return (
                         <TouchableOpacity
@@ -606,24 +639,19 @@ export const IeltsListeningScreen: React.FC = () => {
                 {/* 3. Matching Render */}
                 {q.type === 'matching' && q.options && (
                   <View style={styles.optionsList}>
-                    {q.options.map((option, oIdx) => {
+                    {q.options.map((option, oIdx, options) => {
                       const currentAns = String(userAnswers[q.question_number] || '');
                       const isSelected =
                         currentAns === option ||
                         (currentAns.length === 1 && option.toUpperCase().startsWith(currentAns.toUpperCase()));
 
-                      const expected = String(result?.correct_answer ?? '');
-                      const isThisCorrect =
-                        !!result &&
-                        (expected === option ||
-                          (expected.length === 1 && option.toUpperCase().startsWith(expected.toUpperCase())));
+                      const state = optionReviewState({ option, options, selected: isSelected, result });
+                      const isThisCorrect = state === 'correct' || state === 'missed';
 
                       let optionStyle: any = styles.matchingRow;
-                      if (isSelected) optionStyle = [styles.matchingRow, styles.optionItemSelected];
-                      if (result) {
-                        if (isThisCorrect) optionStyle = [styles.matchingRow, styles.optionItemCorrect];
-                        else if (isSelected) optionStyle = [styles.matchingRow, styles.optionItemWrong];
-                      }
+                      if (state === 'selected') optionStyle = [styles.matchingRow, styles.optionItemSelected];
+                      else if (isThisCorrect) optionStyle = [styles.matchingRow, styles.optionItemCorrect];
+                      else if (state === 'wrong') optionStyle = [styles.matchingRow, styles.optionItemWrong];
 
                       return (
                         <TouchableOpacity
@@ -720,6 +748,11 @@ export const IeltsListeningScreen: React.FC = () => {
                 <Text style={styles.bottomPrimaryBtnText}>
                   {isSubmitting ? 'Submitting…' : isDrill ? 'Submit Part' : 'Submit Test'}
                 </Text>
+              </TouchableOpacity>
+            ) : !isDrill ? (
+              // Mock: the review stays; no restart.
+              <TouchableOpacity onPress={() => navigation.goBack()} style={styles.bottomPrimaryBtn}>
+                <Text style={styles.bottomPrimaryBtnText}>Back to Home</Text>
               </TouchableOpacity>
             ) : (
               <View style={styles.bottomButtonsRow}>
@@ -936,11 +969,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginBottom: 4,
-  },
-  plainScoreText: {
-    color: '#34D399',
-    fontSize: 14,
-    fontWeight: '700',
   },
   instructionsScoreRow: {
     flexDirection: 'row',

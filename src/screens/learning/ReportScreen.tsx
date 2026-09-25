@@ -104,15 +104,15 @@ function ReportScreenContent() {
           onContinue={handleContinue}
           mode={mode}
         />,
-        <GrammarCard
-          key="grammar"
-          grammar={reportData.grammar}
-          onContinue={handleContinue}
-          mode={mode}
-        />,
         <VocabularyCard
           key="vocabulary"
           vocabulary={reportData.vocabulary}
+          onContinue={handleContinue}
+          mode={mode}
+        />,
+        <GrammarCard
+          key="grammar"
+          grammar={reportData.grammar}
           onContinue={handleContinue}
           mode={mode}
         />,

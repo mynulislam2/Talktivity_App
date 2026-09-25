@@ -4,7 +4,6 @@ import {
   Text,
   StyleSheet,
   ScrollView,
-  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
@@ -26,6 +25,24 @@ interface HomeDashboardScreenProps {
   courseStatus?: CourseStatus | null;
   booleans?: DailyProgressBooleans;
 }
+
+const SPEAKING_DRILLS: { part: 1 | 2 | 3; title: string; description: string }[] = [
+  {
+    part: 1,
+    title: 'Speaking Part 1 Drill',
+    description: 'Interview call: short questions about familiar topics.',
+  },
+  {
+    part: 2,
+    title: 'Speaking Part 2 Drill',
+    description: 'Cue card: prepare for 1 minute, then speak for up to 2.',
+  },
+  {
+    part: 3,
+    title: 'Speaking Part 3 Drill',
+    description: 'Discussion call: deeper questions on abstract ideas.',
+  },
+];
 
 function getWeekdayItems() {
   const [y, m, d] = getUtcToday().split('-').map(Number);
@@ -215,24 +232,25 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
       {/* Mode 2: IELTS Targeted Drills */}
       {isIelts && ieltsMode === 'drills' && (
         <>
-          <LinearGradient
-            colors={['rgba(168,85,247,0.22)', 'rgba(40,32,110,0.02)']}
-            style={styles.todayPlanCard}
-          >
-            <View style={{ width: '100%', zIndex: 1 }}>
-              <Text style={styles.todayPlanTitle}>IELTS Speaking Drill</Text>
-              <Text style={styles.todayPlanDesc}>
-                Parts 1, 2 & 3 targeted practice with instant feedback.
-              </Text>
-              <FigmaPrimaryButton
-                onPress={() => openSpeaking('drill')}
-                style={styles.todayPlanButton}
-              >
-                <Text style={styles.todayPlanButtonText}>Start Speaking Drill</Text>
-                <Feather name="arrow-right" size={14} color="#fff" />
-              </FigmaPrimaryButton>
-            </View>
-          </LinearGradient>
+          {SPEAKING_DRILLS.map(({ part, title, description }, index) => (
+            <LinearGradient
+              key={part}
+              colors={['rgba(168,85,247,0.22)', 'rgba(40,32,110,0.02)']}
+              style={[styles.todayPlanCard, index > 0 && { marginTop: 16 }]}
+            >
+              <View style={{ width: '100%', zIndex: 1 }}>
+                <Text style={styles.todayPlanTitle}>{title}</Text>
+                <Text style={styles.todayPlanDesc}>{description}</Text>
+                <FigmaPrimaryButton
+                  onPress={() => openSpeaking('drill', part)}
+                  style={styles.todayPlanButton}
+                >
+                  <Text style={styles.todayPlanButtonText}>Start Part {part} Drill</Text>
+                  <Feather name="arrow-right" size={14} color="#fff" />
+                </FigmaPrimaryButton>
+              </View>
+            </LinearGradient>
+          ))}
 
           <LinearGradient
             colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
@@ -241,7 +259,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
             <View style={{ width: '100%', zIndex: 1 }}>
               <Text style={styles.todayPlanTitle}>IELTS Listening Drill</Text>
               <Text style={styles.todayPlanDesc}>
-                5–7 min Cambridge-style practice questions.
+                5–7 min practice questions with instant feedback.
               </Text>
               <FigmaPrimaryButton
                 onPress={() => openListening('drill')}
@@ -591,114 +609,5 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -15,
     right: -10,
-  },
-  ieltsDrillsContainer: {
-    marginTop: 12,
-  },
-  drillCard: {
-    borderRadius: 14,
-    padding: 16,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  drillBadgeRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 8,
-  },
-  drillBadge: {
-    backgroundColor: '#8B5CF6',
-    color: '#FFFFFF',
-    fontSize: 11,
-    fontWeight: '700',
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 6,
-    textTransform: 'uppercase',
-  },
-  drillTime: {
-    color: '#9CA3AF',
-    fontSize: 12,
-    fontWeight: '500',
-  },
-  drillTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 4,
-  },
-  drillDesc: {
-    fontSize: 13,
-    color: '#D1D5DB',
-    lineHeight: 18,
-    marginBottom: 14,
-  },
-  drillStartButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    alignSelf: 'flex-start',
-    backgroundColor: 'rgba(255, 255, 255, 0.12)',
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 8,
-    gap: 6,
-  },
-  drillStartText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  mockExamContainer: {
-    marginTop: 12,
-  },
-  mockExamCard: {
-    borderRadius: 16,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  mockExamHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginBottom: 10,
-  },
-  mockExamIconBox: {
-    width: 42,
-    height: 42,
-    borderRadius: 12,
-    backgroundColor: '#8B5CF6',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  mockExamTitle: {
-    fontSize: 17,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  mockExamSubtitle: {
-    fontSize: 12,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
-  mockExamDesc: {
-    fontSize: 13,
-    color: '#E5E7EB',
-    lineHeight: 19,
-    marginBottom: 16,
-  },
-  mockExamButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#8B5CF6',
-    paddingVertical: 12,
-    borderRadius: 10,
-    gap: 6,
-  },
-  mockExamButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
-    fontSize: 14,
   },
 });

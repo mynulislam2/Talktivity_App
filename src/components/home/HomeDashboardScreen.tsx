@@ -26,23 +26,6 @@ interface HomeDashboardScreenProps {
   booleans?: DailyProgressBooleans;
 }
 
-const SPEAKING_DRILLS: { part: 1 | 2 | 3; title: string; description: string }[] = [
-  {
-    part: 1,
-    title: 'Speaking Part 1 Drill',
-    description: 'Interview call: short questions about familiar topics.',
-  },
-  {
-    part: 2,
-    title: 'Speaking Part 2 Drill',
-    description: 'Cue card: prepare for 1 minute, then speak for up to 2.',
-  },
-  {
-    part: 3,
-    title: 'Speaking Part 3 Drill',
-    description: 'Discussion call: deeper questions on abstract ideas.',
-  },
-];
 
 function getWeekdayItems() {
   const [y, m, d] = getUtcToday().split('-').map(Number);
@@ -72,18 +55,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const authUser = useAppSelector((state) => state.auth?.user);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
 
-  const isIelts = authUser?.learning_track === 'ielts';
-
-  // Land on the tab for the user's saved focus (foundation/missing → Daily
-  // Plan), and follow it when the refreshed /auth/me user arrives.
-  const defaultFocus = authUser?.ielts_default_focus;
-  const focusMode: IeltsHomeMode =
-    defaultFocus === 'drills' || defaultFocus === 'mock_exam' ? defaultFocus : 'daily';
-  const [ieltsMode, setIeltsMode] = useState<IeltsHomeMode>(focusMode);
-  useEffect(() => {
-    setIeltsMode(focusMode);
-  }, [focusMode]);
-
   const navigation = useNavigation<any>();
   const todayListeningTopic = courseStatus?.course?.todayListeningTopic;
   const isListeningCompleted = Boolean(booleans?.listeningCompleted);
@@ -96,11 +67,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
     }
     navigation.navigate('ListeningScreen');
   }, [navigation, todayListeningTopic]);
-
-  const openSpeaking = (mode: 'drill' | 'mock', part?: 1 | 2 | 3) =>
-    navigation.navigate('IeltsSpeakingScreen', { mode, part });
-  const openListening = (mode: 'drill' | 'mock') =>
-    navigation.navigate('IeltsListeningScreen', { mode });
 
   return (
     <ScrollView
@@ -154,167 +120,69 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         </View>
       </View>
 
-      {/* IELTS Track Selector */}
-      {isIelts && (
-        <HomeTrackSelector
-          currentMode={ieltsMode}
-          onSelectMode={setIeltsMode}
+      {/* Your Today's Plan Card */}
+      <LinearGradient
+        colors={['rgba(210,131,255,0.23)', 'rgba(40,32,110,0.01)']}
+        style={styles.todayPlanCard}
+      >
+        <View style={styles.todayPlanContent}>
+          <Text style={styles.todayPlanTitle}>Your Today's Plan</Text>
+          <Text style={styles.todayPlanDesc}>
+            {practiceMinutes}-minute speaking practice on your daily topic.
+          </Text>
+          <FigmaPrimaryButton
+            onPress={onOpenTodayPlan}
+            style={styles.todayPlanButton}
+            disabled={isExpired}
+          >
+            <Text style={styles.todayPlanButtonText}>Continue</Text>
+            <Feather name="arrow-right" size={14} color="#fff" />
+          </FigmaPrimaryButton>
+        </View>
+        <ExpoImage
+          source={require('../../../assets/avatar_intro.svg')}
+          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
+          contentFit="contain"
+          pointerEvents="none"
         />
-      )}
+      </LinearGradient>
 
-      {/* Mode 1: Daily Plan (Standard) */}
-      {(!isIelts || ieltsMode === 'daily') && (
-        <>
-          <LinearGradient
-            colors={['rgba(210,131,255,0.23)', 'rgba(40,32,110,0.01)']}
-            style={styles.todayPlanCard}
+      {/* Listening Practice Card */}
+      <LinearGradient
+        colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
+        style={[styles.todayPlanCard, { marginTop: 16 }]}
+      >
+        <View style={styles.todayPlanContent}>
+          <Text style={styles.todayPlanTitle}>Listening Practice</Text>
+          <Text style={styles.todayPlanDesc}>
+            5-minute listening practice on your daily topic.
+          </Text>
+          <FigmaPrimaryButton
+            onPress={handleOpenListening}
+            style={styles.todayPlanButton}
+            disabled={isExpired || isAllListeningDone}
           >
-            <View style={styles.todayPlanContent}>
-              <Text style={styles.todayPlanTitle}>Your Today's Plan</Text>
-              <Text style={styles.todayPlanDesc}>
-                {practiceMinutes}-minute speaking practice on your daily topic.
-              </Text>
-              <FigmaPrimaryButton
-                onPress={onOpenTodayPlan}
-                style={styles.todayPlanButton}
-                disabled={isExpired}
-              >
-                <Text style={styles.todayPlanButtonText}>Continue</Text>
-                <Feather name="arrow-right" size={14} color="#fff" />
-              </FigmaPrimaryButton>
-            </View>
-            <ExpoImage
-              source={require('../../../assets/avatar_intro.svg')}
-              style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-              contentFit="contain"
-              pointerEvents="none"
-            />
-          </LinearGradient>
-
-          <LinearGradient
-            colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
-            style={[styles.todayPlanCard, { marginTop: 16 }]}
-          >
-            <View style={styles.todayPlanContent}>
-              <Text style={styles.todayPlanTitle}>Listening Practice</Text>
-              <Text style={styles.todayPlanDesc}>
-                5-minute listening practice on your daily topic.
-              </Text>
-              <FigmaPrimaryButton
-                onPress={handleOpenListening}
-                style={styles.todayPlanButton}
-                disabled={isExpired || isAllListeningDone}
-              >
-                <Text style={styles.todayPlanButtonText}>
-                  {isAllListeningDone
-                    ? 'Completed'
-                    : isListeningCompleted
-                    ? 'Continue'
-                    : 'Start Listening'}
-                </Text>
-                {isAllListeningDone ? (
-                  <Feather name="check" size={14} color="#fff" />
-                ) : (
-                  <Feather name="arrow-right" size={14} color="#fff" />
-                )}
-              </FigmaPrimaryButton>
-            </View>
-            <ExpoImage
-              source={require('../../../assets/listening_hero.png')}
-              style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-              contentFit="contain"
-              pointerEvents="none"
-            />
-          </LinearGradient>
-        </>
-      )}
-
-      {/* Mode 2: IELTS Targeted Drills */}
-      {isIelts && ieltsMode === 'drills' && (
-        <>
-          {SPEAKING_DRILLS.map(({ part, title, description }, index) => (
-            <LinearGradient
-              key={part}
-              colors={['rgba(168,85,247,0.22)', 'rgba(40,32,110,0.02)']}
-              style={[styles.todayPlanCard, index > 0 && { marginTop: 16 }]}
-            >
-              <View style={{ width: '100%', zIndex: 1 }}>
-                <Text style={styles.todayPlanTitle}>{title}</Text>
-                <Text style={styles.todayPlanDesc}>{description}</Text>
-                <FigmaPrimaryButton
-                  onPress={() => openSpeaking('drill', part)}
-                  style={styles.todayPlanButton}
-                >
-                  <Text style={styles.todayPlanButtonText}>Start Part {part} Drill</Text>
-                  <Feather name="arrow-right" size={14} color="#fff" />
-                </FigmaPrimaryButton>
-              </View>
-            </LinearGradient>
-          ))}
-
-          <LinearGradient
-            colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
-            style={[styles.todayPlanCard, { marginTop: 16 }]}
-          >
-            <View style={{ width: '100%', zIndex: 1 }}>
-              <Text style={styles.todayPlanTitle}>IELTS Listening Drill</Text>
-              <Text style={styles.todayPlanDesc}>
-                5–7 min practice questions with instant feedback.
-              </Text>
-              <FigmaPrimaryButton
-                onPress={() => openListening('drill')}
-                style={styles.todayPlanButton}
-              >
-                <Text style={styles.todayPlanButtonText}>Start Listening Drill</Text>
-                <Feather name="arrow-right" size={14} color="#fff" />
-              </FigmaPrimaryButton>
-            </View>
-          </LinearGradient>
-        </>
-      )}
-
-      {/* Mode 3: IELTS Full Mock Exam Hub */}
-      {isIelts && ieltsMode === 'mock_exam' && (
-        <>
-          <LinearGradient
-            colors={['rgba(168,85,247,0.22)', 'rgba(40,32,110,0.02)']}
-            style={styles.todayPlanCard}
-          >
-            <View style={{ width: '100%', zIndex: 1 }}>
-              <Text style={styles.todayPlanTitle}>IELTS Speaking Mock Test</Text>
-              <Text style={styles.todayPlanDesc}>
-                Full 11–14 min test with AI examiner & band score.
-              </Text>
-              <FigmaPrimaryButton
-                onPress={() => openSpeaking('mock')}
-                style={styles.todayPlanButton}
-              >
-                <Text style={styles.todayPlanButtonText}>Take Speaking Mock</Text>
-                <Feather name="arrow-right" size={14} color="#fff" />
-              </FigmaPrimaryButton>
-            </View>
-          </LinearGradient>
-
-          <LinearGradient
-            colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
-            style={[styles.todayPlanCard, { marginTop: 16 }]}
-          >
-            <View style={{ width: '100%', zIndex: 1 }}>
-              <Text style={styles.todayPlanTitle}>IELTS Listening Mock Test</Text>
-              <Text style={styles.todayPlanDesc}>
-                All 4 parts timed test with estimated band score.
-              </Text>
-              <FigmaPrimaryButton
-                onPress={() => openListening('mock')}
-                style={styles.todayPlanButton}
-              >
-                <Text style={styles.todayPlanButtonText}>Take Listening Mock</Text>
-                <Feather name="arrow-right" size={14} color="#fff" />
-              </FigmaPrimaryButton>
-            </View>
-          </LinearGradient>
-        </>
-      )}
+            <Text style={styles.todayPlanButtonText}>
+              {isAllListeningDone
+                ? 'Completed'
+                : isListeningCompleted
+                ? 'Continue'
+                : 'Start Listening'}
+            </Text>
+            {isAllListeningDone ? (
+              <Feather name="check" size={14} color="#fff" />
+            ) : (
+              <Feather name="arrow-right" size={14} color="#fff" />
+            )}
+          </FigmaPrimaryButton>
+        </View>
+        <ExpoImage
+          source={require('../../../assets/listening_hero.png')}
+          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
+          contentFit="contain"
+          pointerEvents="none"
+        />
+      </LinearGradient>
 
     </ScrollView>
   );

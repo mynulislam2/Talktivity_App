@@ -12,11 +12,15 @@ import { Ionicons } from '@expo/vector-icons';
 import Feather from '@expo/vector-icons/Feather';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import { HomeViewToggle } from './HomeViewToggle';
+import { HomeTrackSelector, IeltsHomeMode } from './HomeTrackSelector';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useAppSelector } from '@/store/hooks';
 import type { CourseStatus } from '@/services/course';
 import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { HomeStackParamList } from '@/navigation/types';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { persistListeningTopic } from '@/lib/listeningTopic';
 
 interface HomeTodayPlanScreenProps {
   courseStatus: CourseStatus;
@@ -124,8 +128,31 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
 }) => {
   const insets = useSafeAreaInsets();
   const navigation = useNavigation<HomeNav>();
+  const authUser = useAppSelector((state) => state.auth?.user);
+  const isIelts = authUser?.learning_track === 'ielts';
+  const defaultFocus = authUser?.ielts_default_focus;
+  const focusMode: IeltsHomeMode =
+    defaultFocus === 'drills' || defaultFocus === 'mock_exam' ? defaultFocus : 'daily';
+  const [ieltsMode, setIeltsMode] = React.useState<IeltsHomeMode>(focusMode);
+
+  const openSpeaking = (mode: 'drill' | 'mock', part?: 1 | 2 | 3) =>
+    (navigation as any).navigate('IeltsSpeakingScreen', { mode, part: part ?? 1 });
+  const openListening = (mode: 'drill' | 'mock') =>
+    (navigation as any).navigate('IeltsListeningScreen', { mode });
+
   const { course } = courseStatus;
-  const allActivitiesComplete = booleans.speakingCompleted && booleans.quizCompleted;
+  const isListeningCompleted = Boolean(booleans?.listeningCompleted);
+  const isQuizCompleted = Boolean(booleans?.listeningQuizCompleted);
+  const isAllListeningDone = isListeningCompleted && isQuizCompleted;
+  const allActivitiesComplete =
+    booleans.speakingCompleted && booleans.quizCompleted && isAllListeningDone;
+
+  const startListening = useCallback(() => {
+    if (course.todayListeningTopic) {
+      persistListeningTopic(course.todayListeningTopic as any);
+    }
+    navigation.navigate('ListeningScreen' as any);
+  }, [course.todayListeningTopic, navigation]);
 
   const startSpeaking = useCallback(async () => {
     // Clear roleplay flags so PracticeScreen treats this as a practice session
@@ -195,11 +222,36 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
                 : startReview,
           },
           {
+            id: 'listening',
+            title: 'Listening Practice',
+            description: '5-minute listening practice on your daily topic',
+            helper: isAllListeningDone
+              ? 'Listening completed'
+              : isListeningCompleted
+              ? 'Quiz ready to take'
+              : booleans.quizCompleted
+              ? 'Start 5-min listening practice'
+              : 'Complete Speaking Practice first',
+            status: isAllListeningDone
+              ? 'completed'
+              : booleans.quizCompleted
+              ? 'active'
+              : 'locked',
+            buttonLabel: isAllListeningDone
+              ? undefined
+              : !booleans.quizCompleted
+              ? undefined
+              : isListeningCompleted
+              ? 'Continue'
+              : 'Start Listening',
+            action: startListening,
+          },
+          {
             id: 'report',
             title: "Today's Report",
             description: allActivitiesComplete
               ? "Get your detailed performance report for today's activities"
-              : "Complete all today's activities to unlock your report",
+              : "Complete speaking, review, and listening to unlock your report",
             helper: allActivitiesComplete
               ? 'Report ready to open'
               : 'Complete all activities first',
@@ -258,14 +310,39 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
                 : startReview,
           },
           {
+            id: 'listening',
+            title: 'Listening Practice',
+            description: '5-minute listening practice on your daily topic',
+            helper: isAllListeningDone
+              ? 'Listening completed'
+              : isListeningCompleted
+              ? 'Quiz ready to take'
+              : booleans.quizCompleted
+              ? 'Start 5-min listening practice'
+              : 'Complete Speaking Practice first',
+            status: isAllListeningDone
+              ? 'completed'
+              : booleans.quizCompleted
+              ? 'active'
+              : 'locked',
+            buttonLabel: isAllListeningDone
+              ? undefined
+              : !booleans.quizCompleted
+              ? undefined
+              : isListeningCompleted
+              ? 'Continue'
+              : 'Start Listening',
+            action: startListening,
+          },
+          {
             id: 'report',
             title: "Today's Report",
             description: allActivitiesComplete
               ? "Get your detailed performance report for today's activities"
-              : "Complete speaking and review to unlock your report",
+              : "Complete speaking, review, and listening to unlock your report",
             helper: allActivitiesComplete
               ? 'Report ready to open'
-              : 'Complete speaking and review first',
+              : 'Complete all activities first',
             status: allActivitiesComplete ? 'active' : 'locked',
             buttonLabel: allActivitiesComplete ? 'View Report' : undefined,
             action: allActivitiesComplete
@@ -273,6 +350,48 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
               : undefined,
           },
         ];
+
+  const drillCards: TimelineActionCardData[] = [
+    {
+      id: 'ielts_speaking_drill',
+      title: 'IELTS Speaking Drill',
+      description: 'Targeted practice on Part 1, 2, or 3 with instant feedback.',
+      helper: 'Parts 1, 2, or 3 targeted practice',
+      status: 'active',
+      buttonLabel: 'Start Speaking Drill',
+      action: () => openSpeaking('drill', 1),
+    },
+    {
+      id: 'ielts_listening_drill',
+      title: 'IELTS Listening Drill',
+      description: '5–7 min practice questions with instant feedback.',
+      helper: '5–7 min practice questions',
+      status: 'active',
+      buttonLabel: 'Start Listening Drill',
+      action: () => openListening('drill'),
+    },
+  ];
+
+  const mockCards: TimelineActionCardData[] = [
+    {
+      id: 'ielts_speaking_mock',
+      title: 'IELTS Speaking Mock Test',
+      description: 'Full 11–14 min test with AI examiner & band score.',
+      helper: '11–14 min full AI examiner test',
+      status: 'active',
+      buttonLabel: 'Take Speaking Mock',
+      action: () => openSpeaking('mock'),
+    },
+    {
+      id: 'ielts_listening_mock',
+      title: 'IELTS Listening Mock Test',
+      description: 'All 4 parts timed test with estimated band score.',
+      helper: 'All 4 parts timed exam',
+      status: 'active',
+      buttonLabel: 'Take Listening Mock',
+      action: () => openListening('mock'),
+    },
+  ];
 
   return (
     <View style={styles.container}>
@@ -284,10 +403,17 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
       </View>
 
       <View style={styles.toggleContainer}>
-        <HomeViewToggle
-          viewMode="today"
-          onViewModeChange={onSwitchMode as any}
-        />
+        {isIelts ? (
+          <HomeTrackSelector
+            currentMode={ieltsMode}
+            onSelectMode={setIeltsMode}
+          />
+        ) : (
+          <HomeViewToggle
+            viewMode="today"
+            onViewModeChange={onSwitchMode as any}
+          />
+        )}
       </View>
 
       <ScrollView
@@ -295,40 +421,122 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
         contentContainerStyle={styles.scrollContent}
         showsVerticalScrollIndicator={false}
       >
-        <Text style={styles.sectionTitle}>Your Today's Plan</Text>
+        {(!isIelts || ieltsMode === 'daily') && (
+          <>
+            <Text style={styles.sectionTitle}>Your Today's Plan</Text>
 
-        <View style={styles.timelineRow}>
-          <View style={styles.dotColumn}>
-            {cards.map((card, index) => (
-              <View key={card.id} style={styles.dotColumnItem}>
-                <View
-                  style={[
-                    styles.dot,
-                    card.status === 'completed' && styles.dotCompleted,
-                    card.status === 'active' && styles.dotActive,
-                    card.status === 'locked' && styles.dotLocked,
-                  ]}
-                />
-                {index < cards.length - 1 ? (
-                  <View
-                    style={[
-                      styles.dotLine,
-                      card.status === 'locked'
-                        ? styles.dotLineLocked
-                        : styles.dotLineActive,
-                    ]}
-                  />
-                ) : null}
+            <View style={styles.timelineRow}>
+              <View style={styles.dotColumn}>
+                {cards.map((card, index) => (
+                  <View key={card.id} style={styles.dotColumnItem}>
+                    <View
+                      style={[
+                        styles.dot,
+                        card.status === 'completed' && styles.dotCompleted,
+                        card.status === 'active' && styles.dotActive,
+                        card.status === 'locked' && styles.dotLocked,
+                      ]}
+                    />
+                    {index < cards.length - 1 ? (
+                      <View
+                        style={[
+                          styles.dotLine,
+                          card.status === 'locked'
+                            ? styles.dotLineLocked
+                            : styles.dotLineActive,
+                        ]}
+                      />
+                    ) : null}
+                  </View>
+                ))}
               </View>
-            ))}
-          </View>
 
-          <View style={styles.cardsColumn}>
-            {cards.map((card) => (
-              <FigmaTimelineCard key={card.id} card={card} />
-            ))}
-          </View>
-        </View>
+              <View style={styles.cardsColumn}>
+                {cards.map((card) => (
+                  <FigmaTimelineCard key={card.id} card={card} />
+                ))}
+              </View>
+            </View>
+          </>
+        )}
+
+        {isIelts && ieltsMode === 'drills' && (
+          <>
+            <Text style={styles.sectionTitle}>IELTS Drills</Text>
+
+            <View style={styles.timelineRow}>
+              <View style={styles.dotColumn}>
+                {drillCards.map((card, index) => (
+                  <View key={card.id} style={styles.dotColumnItem}>
+                    <View
+                      style={[
+                        styles.dot,
+                        card.status === 'completed' && styles.dotCompleted,
+                        card.status === 'active' && styles.dotActive,
+                        card.status === 'locked' && styles.dotLocked,
+                      ]}
+                    />
+                    {index < drillCards.length - 1 ? (
+                      <View
+                        style={[
+                          styles.dotLine,
+                          card.status === 'locked'
+                            ? styles.dotLineLocked
+                            : styles.dotLineActive,
+                        ]}
+                      />
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.cardsColumn}>
+                {drillCards.map((card) => (
+                  <FigmaTimelineCard key={card.id} card={card} />
+                ))}
+              </View>
+            </View>
+          </>
+        )}
+
+        {isIelts && ieltsMode === 'mock_exam' && (
+          <>
+            <Text style={styles.sectionTitle}>Mock Exam</Text>
+
+            <View style={styles.timelineRow}>
+              <View style={styles.dotColumn}>
+                {mockCards.map((card, index) => (
+                  <View key={card.id} style={styles.dotColumnItem}>
+                    <View
+                      style={[
+                        styles.dot,
+                        card.status === 'completed' && styles.dotCompleted,
+                        card.status === 'active' && styles.dotActive,
+                        card.status === 'locked' && styles.dotLocked,
+                      ]}
+                    />
+                    {index < mockCards.length - 1 ? (
+                      <View
+                        style={[
+                          styles.dotLine,
+                          card.status === 'locked'
+                            ? styles.dotLineLocked
+                            : styles.dotLineActive,
+                        ]}
+                      />
+                    ) : null}
+                  </View>
+                ))}
+              </View>
+
+              <View style={styles.cardsColumn}>
+                {mockCards.map((card) => (
+                  <FigmaTimelineCard key={card.id} card={card} />
+                ))}
+              </View>
+            </View>
+          </>
+        )}
       </ScrollView>
     </View>
   );
@@ -417,6 +625,43 @@ const styles = StyleSheet.create({
   },
   dotLineLocked: {
     backgroundColor: 'rgba(255,255,255,0.35)',
+  },
+  drillCard: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.05)',
+    padding: 16,
+    minHeight: 148,
+    overflow: 'hidden',
+  },
+  drillTitle: {
+    fontSize: 22,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    lineHeight: 28,
+    color: '#fff',
+  },
+  drillDesc: {
+    fontSize: 15,
+    fontFamily: 'Poppins-Regular',
+    lineHeight: 22,
+    color: '#fff',
+    marginTop: 6,
+  },
+  drillButton: {
+    marginTop: 16,
+    height: 40,
+    paddingHorizontal: 16,
+    borderRadius: 8,
+    alignSelf: 'flex-start',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+  },
+  drillButtonText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#fff',
   },
   cardsColumn: {
     flex: 1,

@@ -1,5 +1,6 @@
 import { httpService } from '../http/httpservice';
 import { API_URLS } from '../urls';
+import { derivePronunciationStatus } from '@/lib/report/todayReportMapper';
 
 export interface FluencyReport {
   fluencyScore: number;
@@ -185,6 +186,10 @@ function normalizeCallReport(report: unknown): ReportData {
       ...asRecord(reportData?.discourse),
       ...discourse,
     } as DiscourseReport,
+    pronunciation_status: derivePronunciationStatus(
+      reportData?.pronunciation_status,
+      reportData?.source
+    ),
   } as unknown as ReportData;
 }
 
@@ -230,9 +235,15 @@ class ReportService {
       const response = await httpService.get(API_URLS.REPORT.DAILY);
       return response.data;
     } catch (error: unknown) {
-      throw new Error(
+      const apiError = (
+        typeof error === 'object' && error !== null ? error : {}
+      ) as ApiError;
+      const err = new Error(
         getFriendlyReportError(error, "Failed to load today's report")
-      );
+      ) as Error & { code?: string; status?: number };
+      err.code = getReportErrorCode(error);
+      err.status = apiError.response?.status;
+      throw err;
     }
   }
 

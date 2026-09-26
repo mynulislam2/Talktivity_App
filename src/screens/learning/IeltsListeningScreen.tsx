@@ -22,6 +22,7 @@ import {
   IeltsListeningResult,
 } from '@/services/ielts';
 import { hasAnswer, optionReviewState, questionTimestamp } from '@/lib/ielts/listeningReview';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 
 // Real IELTS Listening gives 40 minutes for all four parts.
 const MOCK_SECONDS = 40 * 60;
@@ -41,7 +42,12 @@ export const IeltsListeningScreen: React.FC = () => {
   const [results, setResults] = useState<Record<number, IeltsListeningResult> | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   // Shown inline: Alert is a no-op on web.
-  const [summary, setSummary] = useState<{ score: number; total: number; band: number | null } | null>(null);
+  const [summary, setSummary] = useState<{
+    score: number;
+    total: number;
+    band: number | null;
+    bandCefr: string | null;
+  } | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const scrollRef = useRef<ScrollView | null>(null);
   // Mock only: 40-minute countdown, auto-submitted once at 0.
@@ -300,6 +306,7 @@ export const IeltsListeningScreen: React.FC = () => {
         score: result?.score ?? 0,
         total: result?.total ?? gradedQuestions.length,
         band: result?.band ?? null,
+        bandCefr: result?.band_cefr ?? null,
       });
     } catch (e) {
       setSubmitError(
@@ -452,7 +459,8 @@ export const IeltsListeningScreen: React.FC = () => {
                 {summary.band != null && (
                   <View style={styles.resultBandBadge}>
                     <Text style={styles.resultBandText}>
-                      Estimated band {Number(summary.band).toFixed(1)}
+                      Estimated{' '}
+                      {formatBandLabel(summary.band, summary.bandCefr) ?? `band ${Number(summary.band).toFixed(1)}`}
                     </Text>
                   </View>
                 )}

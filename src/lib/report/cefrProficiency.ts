@@ -3,9 +3,9 @@ import type {
   IeltsBand,
   ProficiencyConfidence,
   ProficiencyResult,
-  ProficiencyTrend,
-  SessionScore,
-  VocabBreakdown,
+  ProficiencySkillResult,
+  ProfileProgress,
+  ProfileProgressCriterion,
 } from '@/types/proficiency';
 
 export const CEFR_LEVELS: CefrLevel[] = ['A1', 'A2', 'B1', 'B2', 'C1', 'C2'];
@@ -31,144 +31,6 @@ export const IELTS_DESCRIPTORS: Record<string, string> = {
   '1.5': 'Non User',
   '1.0': 'Non User',
 };
-
-export const CEFR_DESCRIPTORS: Record<CefrLevel, string> = {
-  A1: 'Beginner',
-  A2: 'Elementary',
-  B1: 'Intermediate',
-  B2: 'Upper Intermediate',
-  C1: 'Advanced',
-  C2: 'Proficiency',
-};
-
-const SCORE_RANGES: Record<CefrLevel, { min: number; max: number }> = {
-  A1: { min: 0, max: 19 },
-  A2: { min: 20, max: 39 },
-  B1: { min: 40, max: 59 },
-  B2: { min: 60, max: 74 },
-  C1: { min: 75, max: 89 },
-  C2: { min: 90, max: 100 },
-};
-
-const EMA_ALPHA = 0.3;
-
-const SKILL_WEIGHTS = {
-  fluency: 0.3,
-  grammar: 0.3,
-  vocabulary: 0.25,
-  discourse: 0.15,
-} as const;
-
-const EMPTY_BREAKDOWN: VocabBreakdown = {
-  A1: 0,
-  A2: 0,
-  B1: 0,
-  B2: 0,
-  C1: 0,
-  C2: 0,
-};
-
-function clampScore(value: number): number {
-  if (!Number.isFinite(value)) return 0;
-  return Math.max(0, Math.min(100, value));
-}
-
-function roundScore(value: number): number {
-  return Math.round(clampScore(value));
-}
-
-function average(values: number[]): number {
-  if (!values.length) return 0;
-  return values.reduce((sum, value) => sum + value, 0) / values.length;
-}
-
-function normalizeBreakdown(
-  breakdown?: Partial<VocabBreakdown> | null
-): VocabBreakdown {
-  return {
-    A1: roundScore(Number(breakdown?.A1 || 0)),
-    A2: roundScore(Number(breakdown?.A2 || 0)),
-    B1: roundScore(Number(breakdown?.B1 || 0)),
-    B2: roundScore(Number(breakdown?.B2 || 0)),
-    C1: roundScore(Number(breakdown?.C1 || 0)),
-    C2: roundScore(Number(breakdown?.C2 || 0)),
-  };
-}
-
-function getVocabularyDistributionBonus(
-  breakdown?: Partial<VocabBreakdown> | null
-): number {
-  const normalizedBreakdown = normalizeBreakdown(breakdown);
-  const totalWords = Object.values(normalizedBreakdown).reduce(
-    (sum, value) => sum + value,
-    0
-  );
-  if (!totalWords) return 0;
-  const advancedWords =
-    normalizedBreakdown.B2 + normalizedBreakdown.C1 + normalizedBreakdown.C2;
-  const advancedPercentage = (advancedWords / totalWords) * 100;
-  if (advancedPercentage >= 30) return 5;
-  if (advancedPercentage >= 20) return 3;
-  if (advancedPercentage >= 10) return 0;
-  if (advancedPercentage >= 5) return -3;
-  return -5;
-}
-
-function calculateEmaSeries(values: number[], alpha = EMA_ALPHA): number[] {
-  if (!values.length) return [];
-  const emaValues: number[] = [values[0]];
-  for (let index = 1; index < values.length; index += 1) {
-    const current = values[index];
-    const previous = emaValues[index - 1];
-    emaValues.push(alpha * current + (1 - alpha) * previous);
-  }
-  return emaValues;
-}
-
-function getRecentTrend(values: number[]): ProficiencyTrend {
-  if (!values.length) return 'stable';
-  const recentWindow = values.slice(-3);
-  const previousWindow = values.slice(-6, -3);
-  const delta = previousWindow.length
-    ? average(recentWindow) - average(previousWindow)
-    : values.length > 1
-    ? values[values.length - 1] - values[0]
-    : 0;
-  if (delta > 3) return 'improving';
-  if (delta < -3) return 'declining';
-  return 'stable';
-}
-
-export function getCefrLevelFromScore(score: number): CefrLevel {
-  const normalizedScore = clampScore(score);
-  if (normalizedScore >= SCORE_RANGES.C2.min) return 'C2';
-  if (normalizedScore >= SCORE_RANGES.C1.min) return 'C1';
-  if (normalizedScore >= SCORE_RANGES.B2.min) return 'B2';
-  if (normalizedScore >= SCORE_RANGES.B1.min) return 'B1';
-  if (normalizedScore >= SCORE_RANGES.A2.min) return 'A2';
-  return 'A1';
-}
-
-export function scoreToIeltsBand(score: number): IeltsBand {
-  const s = clampScore(score);
-  if (s >= 95) return '9.0';
-  if (s >= 90) return '8.5';
-  if (s >= 84) return '8.0';
-  if (s >= 78) return '7.5';
-  if (s >= 71) return '7.0';
-  if (s >= 65) return '6.5';
-  if (s >= 59) return '6.0';
-  if (s >= 53) return '5.5';
-  if (s >= 47) return '5.0';
-  if (s >= 41) return '4.5';
-  if (s >= 35) return '4.0';
-  if (s >= 29) return '3.5';
-  if (s >= 22) return '3.0';
-  if (s >= 16) return '2.5';
-  if (s >= 10) return '2.0';
-  if (s >= 5) return '1.5';
-  return '1.0';
-}
 
 export function formatIeltsBand(band: unknown): IeltsBand | undefined {
   if (band === null || band === undefined || band === '') return undefined;
@@ -201,6 +63,7 @@ export function getIeltsBarFillPercentage(band?: IeltsBand | string | null): num
   );
 }
 
+/** Self-rated onboarding level shown as "Self-rated start:" — not a proficiency band source. */
 export function startingLevelToIeltsBand(level?: string | null): IeltsBand | null {
   if (!level) return null;
   switch (level.toLowerCase()) {
@@ -229,44 +92,6 @@ export function startingLevelToIeltsBand(level?: string | null): IeltsBand | nul
   }
 }
 
-export function getCefrDescriptor(level: CefrLevel): string {
-  return CEFR_DESCRIPTORS[level];
-}
-
-export function getCefrLevelIndex(level: CefrLevel): number {
-  return CEFR_LEVELS.indexOf(level);
-}
-
-export function getNextCefrLevel(level: CefrLevel): CefrLevel {
-  const currentIndex = getCefrLevelIndex(level);
-  return CEFR_LEVELS[Math.min(currentIndex + 1, CEFR_LEVELS.length - 1)];
-}
-
-function getConfidence(sessionCount: number): ProficiencyConfidence {
-  if (sessionCount === 0) return 'none';
-  if (sessionCount <= 2) return 'preliminary';
-  if (sessionCount <= 4) return 'developing';
-  return 'established';
-}
-
-function getProgressToNextLevel(score: number, level: CefrLevel): number {
-  if (level === 'C2') return 100;
-  const currentRange = SCORE_RANGES[level];
-  const nextLevel = getNextCefrLevel(level);
-  const nextThreshold = SCORE_RANGES[nextLevel].min;
-  const distanceToNext = nextThreshold - currentRange.min;
-  if (distanceToNext <= 0) return 0;
-  return Math.max(
-    0,
-    Math.min(
-      100,
-      Math.round(
-        ((clampScore(score) - currentRange.min) / distanceToNext) * 100
-      )
-    )
-  );
-}
-
 function getEmptyResult(): ProficiencyResult {
   return {
     overallScore: 0,
@@ -275,168 +100,78 @@ function getEmptyResult(): ProficiencyResult {
     ieltsDescriptor: undefined,
     confidence: 'none',
     skills: {
-      fluency: { score: 0, level: 'A1', ieltsBand: '1.0', trend: 'stable' },
-      grammar: { score: 0, level: 'A1', ieltsBand: '1.0', trend: 'stable' },
-      vocabulary: { score: 0, level: 'A1', ieltsBand: '1.0', trend: 'stable' },
-      discourse: { score: 0, level: 'A1', ieltsBand: '1.0', trend: 'stable' },
+      fluency: { score: 0, level: 'A1', ieltsBand: undefined, trend: 'stable' },
+      grammar: { score: 0, level: 'A1', ieltsBand: undefined, trend: 'stable' },
+      vocabulary: { score: 0, level: 'A1', ieltsBand: undefined, trend: 'stable' },
     },
-    progressToNextLevel: 0,
-    nextLevel: 'A1',
     sessionCount: 0,
   };
 }
 
-function getWeightedSessionScore(
-  session: SessionScore,
-  adjustedVocabulary: number
-): number {
-  return (
-    clampScore(session.fluency) * SKILL_WEIGHTS.fluency +
-    clampScore(session.grammar) * SKILL_WEIGHTS.grammar +
-    clampScore(adjustedVocabulary) * SKILL_WEIGHTS.vocabulary +
-    clampScore(session.discourse) * SKILL_WEIGHTS.discourse
-  );
+/** Band (0-9) as a 0-100 chart-geometry value only — never shown as a number. */
+function bandChartScore(band: number | null | undefined): number {
+  return typeof band === 'number' && Number.isFinite(band)
+    ? Math.max(0, Math.min(100, (band / 9) * 100))
+    : 0;
 }
 
-export function calculateProficiency(
-  sessions: SessionScore[] | null | undefined
+function cefrToLevel(cefr: string | null | undefined): CefrLevel {
+  return cefr && (CEFR_LEVELS as string[]).includes(cefr) ? (cefr as CefrLevel) : 'A1';
+}
+
+function confidenceFromSources(sources: number): ProficiencyConfidence {
+  if (sources >= 5) return 'established';
+  if (sources >= 3) return 'developing';
+  if (sources >= 1) return 'preliminary';
+  return 'none';
+}
+
+function skillFromCriterion(
+  criterion: ProfileProgressCriterion | null | undefined
+): ProficiencySkillResult {
+  return {
+    score: bandChartScore(criterion?.band),
+    level: cefrToLevel(criterion?.cefr),
+    ieltsBand: formatIeltsBand(criterion?.band ?? null),
+    trend: 'stable',
+  };
+}
+
+/**
+ * Maps the server's `current` profile progress (GET /reports/proficiency) to
+ * the shape the Profile CEFRProgressCard already renders. This is the ONLY
+ * band source for the Profile card — no client EMA, weakest-skill cap, or
+ * discourse-as-pronunciation fallback.
+ */
+export function mapProfileProgressToProficiency(
+  current: ProfileProgress | null | undefined
 ): ProficiencyResult {
-  if (!sessions?.length) return getEmptyResult();
+  if (!current || current.overall_band == null) {
+    // A target band can be set before the first assessment; keep it visible.
+    return {
+      ...getEmptyResult(),
+      targetBand: current?.target_band ?? undefined,
+      bandGap: current?.band_gap ?? undefined,
+    };
+  }
 
-  const sortedSessions = [...sessions]
-    .map((session) => ({
-      ...session,
-      fluency: roundScore(Number(session.fluency || 0)),
-      grammar: roundScore(Number(session.grammar || 0)),
-      vocabulary: roundScore(Number(session.vocabulary || 0)),
-      discourse: roundScore(Number(session.discourse || 0)),
-      vocabBreakdown: normalizeBreakdown(
-        session.vocabBreakdown || EMPTY_BREAKDOWN
-      ),
-    }))
-    .sort(
-      (first, second) =>
-        new Date(first.date).getTime() - new Date(second.date).getTime()
-    );
-
-  const fluencySeries = sortedSessions.map((session) => session.fluency);
-  const grammarSeries = sortedSessions.map((session) => session.grammar);
-  const vocabularySeries = sortedSessions.map((session) =>
-    clampScore(
-      session.vocabulary +
-        getVocabularyDistributionBonus(session.vocabBreakdown)
-    )
-  );
-  const discourseSeries = sortedSessions.map((session) => session.discourse);
-  const overallSeries = sortedSessions.map((session, index) =>
-    getWeightedSessionScore(session, vocabularySeries[index])
-  );
-
-  const fluencyEmaSeries = calculateEmaSeries(fluencySeries);
-  const grammarEmaSeries = calculateEmaSeries(grammarSeries);
-  const vocabularyEmaSeries = calculateEmaSeries(vocabularySeries);
-  const discourseEmaSeries = calculateEmaSeries(discourseSeries);
-  const overallEmaSeries = calculateEmaSeries(overallSeries);
-
-  const finalFluencyScore = roundScore(
-    fluencyEmaSeries[fluencyEmaSeries.length - 1] || 0
-  );
-  const finalGrammarScore = roundScore(
-    grammarEmaSeries[grammarEmaSeries.length - 1] || 0
-  );
-  const finalVocabularyScore = roundScore(
-    vocabularyEmaSeries[vocabularyEmaSeries.length - 1] || 0
-  );
-  const finalDiscourseScore = roundScore(
-    discourseEmaSeries[discourseEmaSeries.length - 1] || 0
-  );
-
-  const fluencyLevel = getCefrLevelFromScore(finalFluencyScore);
-  const grammarLevel = getCefrLevelFromScore(finalGrammarScore);
-  const vocabularyLevel = getCefrLevelFromScore(finalVocabularyScore);
-  const discourseLevel = getCefrLevelFromScore(finalDiscourseScore);
-
-  const weakestSkillLevelIndex = Math.min(
-    getCefrLevelIndex(fluencyLevel),
-    getCefrLevelIndex(grammarLevel),
-    getCefrLevelIndex(vocabularyLevel),
-    getCefrLevelIndex(discourseLevel)
-  );
-
-  const rawOverallScore = clampScore(
-    overallEmaSeries[overallEmaSeries.length - 1] || 0
-  );
-  const rawOverallLevel = getCefrLevelFromScore(rawOverallScore);
-  const cappedOverallLevelIndex = Math.min(
-    getCefrLevelIndex(rawOverallLevel),
-    weakestSkillLevelIndex + 1
-  );
-  const overallLevel = CEFR_LEVELS[cappedOverallLevelIndex];
-  const overallScore = roundScore(
-    Math.min(rawOverallScore, SCORE_RANGES[overallLevel].max)
-  );
-
-  const latestSession = sortedSessions[sortedSessions.length - 1];
-
-  // Native server IELTS bands — directly consumed without converting from CEFR
-  const overallIeltsBand = formatIeltsBand(latestSession?.overall_band);
-  const fluencyBand = formatIeltsBand(latestSession?.fluencyBand);
-  const grammarBand = formatIeltsBand(latestSession?.grammarBand);
-  const vocabularyBand = formatIeltsBand(latestSession?.vocabularyBand);
-  const pronunciationBand = formatIeltsBand(latestSession?.pronunciationBand);
-  const targetBand = formatIeltsBand(latestSession?.target_band);
-  const bandGap = latestSession?.band_gap != null ? Number(latestSession.band_gap) : undefined;
+  const overallIeltsBand = formatIeltsBand(current.overall_band);
+  const pron = current.criteria?.pron ?? null;
 
   return {
-    overallScore,
-    overallLevel,
+    overallScore: bandChartScore(current.overall_band),
+    overallLevel: cefrToLevel(current.overall_cefr),
     ieltsBand: overallIeltsBand,
     ieltsDescriptor: getIeltsDescriptor(overallIeltsBand),
-    targetBand,
-    bandGap,
-    confidence: getConfidence(sortedSessions.length),
+    targetBand: current.target_band ?? undefined,
+    bandGap: current.band_gap ?? undefined,
+    confidence: confidenceFromSources(current.sources ?? 0),
     skills: {
-      fluency: {
-        score: finalFluencyScore,
-        level: fluencyLevel,
-        ieltsBand: fluencyBand,
-        trend: getRecentTrend(fluencyEmaSeries),
-      },
-      grammar: {
-        score: finalGrammarScore,
-        level: grammarLevel,
-        ieltsBand: grammarBand,
-        trend: getRecentTrend(grammarEmaSeries),
-      },
-      vocabulary: {
-        score: finalVocabularyScore,
-        level: vocabularyLevel,
-        ieltsBand: vocabularyBand,
-        trend: getRecentTrend(vocabularyEmaSeries),
-      },
-      discourse: {
-        score: finalDiscourseScore,
-        level: discourseLevel,
-        ieltsBand: overallIeltsBand,
-        trend: getRecentTrend(discourseEmaSeries),
-      },
-      ...(pronunciationBand
-        ? {
-            pronunciation: {
-              score: roundScore(
-                Number(latestSession?.pronunciation || latestSession?.fluency || finalFluencyScore)
-              ),
-              level: getCefrLevelFromScore(
-                Number(latestSession?.pronunciation || latestSession?.fluency || finalFluencyScore)
-              ),
-              ieltsBand: pronunciationBand,
-              trend: 'stable' as const,
-            },
-          }
-        : {}),
+      fluency: skillFromCriterion(current.criteria?.fc),
+      grammar: skillFromCriterion(current.criteria?.gra),
+      vocabulary: skillFromCriterion(current.criteria?.lr),
+      ...(pron?.band != null ? { pronunciation: skillFromCriterion(pron) } : {}),
     },
-    progressToNextLevel: getProgressToNextLevel(overallScore, overallLevel),
-    nextLevel: getNextCefrLevel(overallLevel),
-    sessionCount: sortedSessions.length,
+    sessionCount: current.sources ?? 0,
   };
 }

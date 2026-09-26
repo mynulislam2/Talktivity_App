@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 import type { VocabularyReport } from '@/types/report';
 import type { ReportMode } from '@/lib/report/reportMode';
 
@@ -32,8 +33,10 @@ export function VocabularyCard({
 }: VocabularyCardProps) {
   const isIelts = mode === 'ielts';
   const band = finite(vocabulary?.band) ?? finite(vocabulary?.vocabularyBand);
+  const bandLabel = band != null ? formatBandLabel(band, vocabulary?.cefr) : null;
   const targetBand =
     band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
+  const targetBandLabel = targetBand != null ? formatBandLabel(targetBand) : null;
   const strengths = vocabulary?.strengths ?? [];
   const areasForImprovement = vocabulary?.improvements ?? [];
   const score = finite(vocabulary?.vocabularyScore);
@@ -52,9 +55,7 @@ export function VocabularyCard({
               {isIelts ? 'Lexical Resource' : 'Vocabulary Analysis'}
             </Text>
             {isIelts ? (
-              <Text style={ss.subtitle}>
-                {band != null ? `Band ${band}` : 'Band not available'}
-              </Text>
+              <Text style={ss.subtitle}>{bandLabel ?? 'Band not available'}</Text>
             ) : vocabulary?.vocabularyLevel ? (
               <Text style={ss.subtitle}>Level {vocabulary.vocabularyLevel}</Text>
             ) : null}
@@ -66,20 +67,12 @@ export function VocabularyCard({
         {/* 1. Score / band headline and coaching notes */}
         <StatCard
           title={isIelts ? 'Lexical Resource' : 'Vocabulary Score'}
-          value={
-            isIelts
-              ? band != null
-                ? `Band ${band}`
-                : undefined
-              : score != null
-                ? `${score}%`
-                : undefined
-          }
+          value={isIelts ? bandLabel ?? undefined : score != null ? `${score}%` : undefined}
         >
           {isIelts ? (
-            targetBand != null ? (
+            targetBandLabel != null ? (
               <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-                Next Milestone: Band {targetBand} (0.5 band to go)
+                Next Milestone: {targetBandLabel} (0.5 band to go)
               </Text>
             ) : (
               <Text style={ss.desc}>Band not available</Text>

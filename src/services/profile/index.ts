@@ -16,6 +16,8 @@ export interface ProfileData {
   profile_picture?: string;
   startingLevel?: string;
   created_at?: string;
+  learning_track?: string;
+  ielts_target_band?: number | null;
   lifecycle?: {
     onboardingCompleted: boolean;
     callCompleted: boolean;
@@ -72,6 +74,9 @@ class ProfileService {
             profile_picture: userData.profile_picture || undefined,
             created_at: userData.created_at || undefined,
             startingLevel: startingLevel || undefined,
+            learning_track: userData.learning_track || undefined,
+            ielts_target_band:
+              typeof userData.ielts_target_band === 'number' ? userData.ielts_target_band : null,
             lifecycle: userData.lifecycle || undefined,
           },
         };
@@ -88,6 +93,11 @@ class ProfileService {
             profile_picture: response.data.profile_picture || undefined,
             created_at: response.data.created_at || undefined,
             startingLevel: startingLevel || undefined,
+            learning_track: response.data.learning_track || undefined,
+            ielts_target_band:
+              typeof response.data.ielts_target_band === 'number'
+                ? response.data.ielts_target_band
+                : null,
             lifecycle: response.data.lifecycle || undefined,
           },
         };

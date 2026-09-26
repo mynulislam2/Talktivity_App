@@ -21,6 +21,8 @@ import {
   IeltsTestSession,
   IeltsCompleteResponse,
 } from '@/services/ielts';
+import { formatBandLabel } from '@/lib/report/bandLabel';
+import { mergeSessionReport, readPronunciationState, toBandNumber } from '@/lib/ielts/speakingResult';
 
 type SpeakingPart = 1 | 2 | 3;
 
@@ -31,14 +33,14 @@ const CRITERIA = [
   { key: 'pronunciation_band', label: 'Pronunciation' },
 ] as const;
 
-function formatBand(value: unknown): string {
-  const n = Number(value);
-  return value != null && value !== '' && Number.isFinite(n) ? n.toFixed(1) : '—';
-}
-
 // The agent saves a Part 1/3 call only after hang-up, so poll for it.
 const POLL_INTERVAL_MS = 3000;
 const POLL_ATTEMPTS = 30; // ~90s
+
+// While pronunciation is pending (still measuring from the recording),
+// re-fetch the session every 5s for up to 3 minutes.
+const PRONUNCIATION_POLL_INTERVAL_MS = 5000;
+const PRONUNCIATION_POLL_ATTEMPTS = 36;
 
 function apiErrorCode(e: unknown): string | undefined {
   return (e as any)?.response?.data?.code;
@@ -226,6 +228,49 @@ export const IeltsSpeakingScreen: React.FC = () => {
       requestReport();
     }
   }, [allPartsDone, requestReport]);
+
+  // Pronunciation is measured from the Part 2 recording after the text bands
+  // are ready. While pending, re-fetch the session every 5s (up to 3 min) and
+  // update the report in place; stop on unmount or once it resolves.
+  useEffect(() => {
+    if (!masterSessionId || !report) return;
+    const merged = mergeSessionReport(session, report);
+    if (readPronunciationState(merged).status !== 'pending') return;
+
+    let cancelled = false;
+    let attempts = 0;
+    let timer: ReturnType<typeof setTimeout> | null = null;
+
+    const poll = () => {
+      timer = setTimeout(async () => {
+        attempts += 1;
+        try {
+          const fresh = await ieltsService.getSession(masterSessionId);
+          if (cancelled) return;
+          setSession(fresh);
+          setReport((prev) => (prev ? { ...prev, ...fresh } : prev));
+          const stillPending = readPronunciationState(fresh as unknown as Record<string, unknown>).status === 'pending';
+          if (stillPending && attempts < PRONUNCIATION_POLL_ATTEMPTS) {
+            poll();
+          }
+        } catch {
+          if (!cancelled && attempts < PRONUNCIATION_POLL_ATTEMPTS) {
+            poll();
+          }
+        }
+      }, PRONUNCIATION_POLL_INTERVAL_MS);
+    };
+    poll();
+
+    return () => {
+      cancelled = true;
+      if (timer) clearTimeout(timer);
+    };
+    // Deliberately keyed off report presence, not its contents, so this
+    // effect starts once when the report first arrives and does not restart
+    // on every poll's own setReport call.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [masterSessionId, report != null]);
 
   // Release the recorder and its audio mode if we leave mid-recording.
   useEffect(() => {
@@ -443,7 +488,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
   const subtitle =
     mode === 'drill' ? `Part ${drillPart} drill` : 'Speaking mock test: Parts 1, 2 and 3';
-  const reportBands = { ...session, ...(report ?? {}), ...(report?.report ?? {}) } as Record<string, unknown>;
+  const reportBands = mergeSessionReport(session, report);
   const feedback = report?.report?.feedback;
   const feedbackItems = Array.isArray(feedback) ? feedback : feedback ? [feedback] : [];
   // While a call is being saved, hide its "start call" card (back after "Check again" expires).
@@ -527,14 +572,37 @@ export const IeltsSpeakingScreen: React.FC = () => {
               ) : report ? (
                 <>
                   <Text style={styles.partHeading}>
-                    Overall band {formatBand(reportBands.overall_band)}
+                    Overall{' '}
+                    {formatBandLabel(
+                      toBandNumber(reportBands.overall_band),
+                      reportBands.overall_cefr as string | null | undefined
+                    ) ?? 'band not available'}
                   </Text>
-                  {CRITERIA.map((c) => (
-                    <View key={c.key} style={styles.criterionRow}>
-                      <Text style={styles.bulletText}>{c.label}</Text>
-                      <Text style={styles.criterionBand}>{formatBand(reportBands[c.key])}</Text>
-                    </View>
-                  ))}
+                  {CRITERIA.map((c) => {
+                    if (c.key === 'pronunciation_band') {
+                      const pronunciation = readPronunciationState(reportBands);
+                      const text =
+                        pronunciation.status === 'measured'
+                          ? formatBandLabel(pronunciation.band, pronunciation.cefr) ?? '—'
+                          : pronunciation.status === 'pending'
+                            ? 'Measuring from your recording…'
+                            : 'Not measured';
+                      return (
+                        <View key={c.key} style={styles.criterionRow}>
+                          <Text style={styles.bulletText}>{c.label}</Text>
+                          <Text style={styles.criterionBand}>{text}</Text>
+                        </View>
+                      );
+                    }
+                    return (
+                      <View key={c.key} style={styles.criterionRow}>
+                        <Text style={styles.bulletText}>{c.label}</Text>
+                        <Text style={styles.criterionBand}>
+                          {formatBandLabel(toBandNumber(reportBands[c.key])) ?? '—'}
+                        </Text>
+                      </View>
+                    );
+                  })}
                   {feedbackItems.length > 0 && (
                     <View style={[styles.topicsPreviewCard, { marginTop: 12 }]}>
                       <Text style={styles.previewTitle}>Feedback</Text>

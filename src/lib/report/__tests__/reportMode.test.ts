@@ -74,6 +74,16 @@ describe('getReportMode', () => {
   it('returns "general" for an empty payload', () => {
     expect(getReportMode({})).toBe('general');
   });
+
+  it('returns "ielts" for insufficient_speech even with every criterion band null', () => {
+    expect(
+      getReportMode({
+        insufficient_speech: true,
+        overall_band: null,
+        fluency: { band: null },
+      })
+    ).toBe('ielts');
+  });
 });
 
 
@@ -100,6 +110,7 @@ describe('shared getReportMode contract', () => {
     ['undefined', undefined, 'general'],
     ['a string', 'boom', 'general'],
     ['an array', [], 'general'],
+    ['insufficient_speech true, no bands', { insufficient_speech: true }, 'ielts'],
   ];
 
   it.each(CASES)('%s -> %s', (_label, payload, expected) => {

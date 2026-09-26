@@ -1,7 +1,6 @@
 import React from 'react';
 import { render } from '@testing-library/react-native';
 import { EnglishScoreCard } from '../EnglishScoreCard';
-import { scoreToIeltsBand } from '../../../lib/report/cefrProficiency';
 import type { OverallScores } from '../../../types/report';
 
 function scores(overrides: Partial<OverallScores> = {}): OverallScores {
@@ -16,26 +15,18 @@ function scores(overrides: Partial<OverallScores> = {}): OverallScores {
   };
 }
 
-describe('scoreToIeltsBand — the band derivation used by EnglishScoreCard', () => {
-  it('never leaves the 1.0-9.0 IELTS scale', () => {
-    expect(scoreToIeltsBand(100)).toBe('9.0');
-    expect(scoreToIeltsBand(95)).toBe('9.0');
-    expect(scoreToIeltsBand(0)).toBe('1.0');
-  });
-});
-
 describe('EnglishScoreCard band rendering (ielts mode)', () => {
   // The hero band comes only from a measured overall_band; it is never
   // derived from the 0-100 overall score (spec 2026-09-24, "App only").
-  it('renders the measured overall_band in the hero', () => {
+  it('renders the measured overall_band + cefr in the hero', () => {
     const { getByText, queryByText } = render(
       <EnglishScoreCard
-        overallScores={scores({ overall: 100, overall_band: 9 })}
+        overallScores={scores({ overall: 100, overall_band: 9, overall_cefr: 'C2' })}
         onContinue={() => {}}
         mode="ielts"
       />
     );
-    expect(getByText('Band 9.0')).toBeTruthy();
+    expect(getByText('Band 9.0 (C2)')).toBeTruthy();
     expect(queryByText('Band 10.0')).toBeNull();
   });
 
@@ -76,19 +67,112 @@ describe('EnglishScoreCard band rendering (ielts mode)', () => {
     expect(queryByText('Band 6.5')).toBeNull();
   });
 
-  it('renders a skill bar band of 0 as "Band 1.0", not as a percentage', () => {
-    const { getAllByText, queryByText } = render(
+  it('shows "Speak a bit more to get a band" when insufficient_speech is set, instead of a band', () => {
+    const { getByText, queryByText } = render(
       <EnglishScoreCard
-        overallScores={scores({ overall: 0, fluency: 0 })}
+        overallScores={scores({ overall_band: 5, overall_cefr: 'B1', insufficient_speech: true })}
         onContinue={() => {}}
         mode="ielts"
       />
     );
-    // The Fluency skill bar derives Band 1.0 from a 0 score (the hero has no
-    // measured band); a falsy-but-present band must not fall through to the
-    // percentage branch.
-    expect(getAllByText('Band 1.0')).toHaveLength(1);
-    expect(queryByText('0%')).toBeNull();
+    expect(getByText('Speak a bit more to get a band')).toBeTruthy();
+    expect(queryByText(/^Band /)).toBeNull();
+  });
+
+  it('shows a "short sample" note alongside the band when low_confidence is set', () => {
+    const { getByText } = render(
+      <EnglishScoreCard
+        overallScores={scores({ overall_band: 6.5, overall_cefr: 'B2', low_confidence: true })}
+        onContinue={() => {}}
+        mode="ielts"
+      />
+    );
+    expect(getByText('Band 6.5 (B2)')).toBeTruthy();
+    expect(getByText('Based on a short sample')).toBeTruthy();
+  });
+
+  it('shows a "short sample" note alongside the band when short_sample_capped is set', () => {
+    const { getByText } = render(
+      <EnglishScoreCard
+        overallScores={scores({ overall_band: 6.0, overall_cefr: 'B2', short_sample_capped: true })}
+        onContinue={() => {}}
+        mode="ielts"
+      />
+    );
+    expect(getByText('Band 6.0 (B2)')).toBeTruthy();
+    expect(getByText('Based on a short sample')).toBeTruthy();
+  });
+
+  it('renders a measured criterion band as "Band 0.0", not as a percentage', () => {
+    const { getByText, getAllByText } = render(
+      <EnglishScoreCard
+        overallScores={scores({
+          overall: 0,
+          fluency: 0,
+          criteria: {
+            fluency: { band: 0, cefr: null },
+            vocabulary: { band: null, cefr: null },
+            grammar: { band: null, cefr: null },
+            pronunciation: { band: null, cefr: null, status: 'not_measured' },
+          },
+        })}
+        onContinue={() => {}}
+        mode="ielts"
+      />
+    );
+    // The Fluency skill bar shows the real measured band (0.0); a
+    // falsy-but-present band must not fall through to the percentage branch.
+    expect(getByText('Band 0.0')).toBeTruthy();
+    expect(getAllByText('0%').length).toBeGreaterThan(0); // the other, unmeasured criteria still show 0%
+  });
+
+  it('shows "Not measured" for pronunciation when it was never measured', () => {
+    const { getByText } = render(
+      <EnglishScoreCard
+        overallScores={scores()}
+        onContinue={() => {}}
+        mode="ielts"
+      />
+    );
+    expect(getByText('Not measured')).toBeTruthy();
+  });
+
+  it('shows "Measuring from your recording…" for pronunciation while it is pending', () => {
+    const { getByText } = render(
+      <EnglishScoreCard
+        overallScores={scores({
+          criteria: {
+            fluency: { band: null, cefr: null },
+            vocabulary: { band: null, cefr: null },
+            grammar: { band: null, cefr: null },
+            pronunciation: { band: null, cefr: null, status: 'pending' },
+          },
+        })}
+        onContinue={() => {}}
+        mode="ielts"
+      />
+    );
+    expect(getByText('Measuring from your recording…')).toBeTruthy();
+  });
+
+  it('shows the measured pronunciation band + cefr, never the discourse score', () => {
+    const { getByText, queryByText } = render(
+      <EnglishScoreCard
+        overallScores={scores({
+          discourse: 80, // a general-mode value present on the same payload
+          criteria: {
+            fluency: { band: null, cefr: null },
+            vocabulary: { band: null, cefr: null },
+            grammar: { band: null, cefr: null },
+            pronunciation: { band: 6.5, cefr: 'B2', status: 'measured' },
+          },
+        })}
+        onContinue={() => {}}
+        mode="ielts"
+      />
+    );
+    expect(getByText('Band 6.5 (B2)')).toBeTruthy();
+    expect(queryByText('80%')).toBeNull();
   });
 });
 

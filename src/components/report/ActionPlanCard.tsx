@@ -12,6 +12,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { StatCard } from '@/components/report/StatCard';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { tokens } from '@/theme/tokens';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 import type { TodayReport } from '@/types/report';
 
 export interface ActionPlanCardProps {
@@ -32,17 +33,17 @@ export function ActionPlanCard({
   buttonLabel,
 }: ActionPlanCardProps) {
   const currentBand = finite(report?.overall_band);
-  const targetBand =
-    finite(report?.target_band) ??
-    (currentBand != null
-      ? Math.min(9.0, Number((currentBand + 0.5).toFixed(1)))
-      : null);
+  const currentBandLabel = currentBand != null ? formatBandLabel(currentBand, report?.overall_cefr) : null;
+  // Only the learner's real target is shown; no fabricated "+0.5" fallback
+  // when they have not set one.
+  const targetBand = finite(report?.target_band);
+  const targetBandLabel = targetBand != null ? formatBandLabel(targetBand) : null;
   const reportedGap = finite(report?.band_gap);
   const bandGap =
     reportedGap != null
       ? `${reportedGap} band to go`
       : targetBand != null && currentBand != null
-        ? `${(targetBand - currentBand).toFixed(1)} band to go`
+        ? `${Math.max(0, targetBand - currentBand).toFixed(1)} band to go`
         : null;
   const priorities = report?.action_plan_priorities ?? [];
 
@@ -62,13 +63,11 @@ export function ActionPlanCard({
 
       <View style={ss.statSpace}>
         {/* 1. Next Milestone Banner */}
-        <StatCard
-          title="Next Milestone"
-          value={targetBand != null ? `Band ${targetBand}` : undefined}
-        >
-          {currentBand != null && bandGap ? (
+        <StatCard title="Next Milestone" value={targetBandLabel ?? undefined}>
+          {currentBandLabel != null ? (
             <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-              Current: Band {currentBand} ({bandGap})
+              Current: {currentBandLabel}
+              {bandGap ? ` (${bandGap})` : ''}
             </Text>
           ) : (
             <Text style={ss.desc}>Band not available</Text>
@@ -82,8 +81,8 @@ export function ActionPlanCard({
         {priorities.length > 0 ? (
           <StatCard
             title={
-              targetBand != null
-                ? `Path to Next Milestone: Band ${targetBand} (Key Focus)`
+              targetBandLabel != null
+                ? `Path to Next Milestone: ${targetBandLabel} (Key Focus)`
                 : 'Key Focus for Next Practice'
             }
           >

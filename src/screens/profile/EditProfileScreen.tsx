@@ -24,10 +24,11 @@ import {
 } from 'react-native-safe-area-context';
 import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { authService } from '@/services/auth';
 import { profileService } from '@/services/profile';
 import { lifecycleService } from '@/services/lifecycle';
 import { onboardingService } from '@/services/onboarding';
+import { ieltsService } from '@/services/ielts';
+import { buildOnboardingSavePayload } from '@/lib/onboarding/editProfilePayload';
 import {
   DISPLAY_LANGUAGE_OPTIONS,
   DisplayLanguage,
@@ -43,7 +44,8 @@ type EditableFieldKey =
   | 'nativeLanguage'
   | 'displayLanguage'
   | 'currentLevel'
-  | 'tutorStyle';
+  | 'tutorStyle'
+  | 'targetBand';
 
 interface EditableFieldConfig {
   key: EditableFieldKey;
@@ -73,6 +75,17 @@ const CURRENT_LEVEL_OPTIONS = [
   { value: 'intermediate', label: 'Intermediate' },
   { value: 'upper', label: 'Upper-Intermediate' },
   { value: 'advanced', label: 'Advanced' },
+];
+
+// "Not sure yet" is represented as '' and saved as targetBand: null.
+const TARGET_BAND_OPTIONS = [
+  { value: '5.5', label: 'Band 5.5' },
+  { value: '6', label: 'Band 6.0' },
+  { value: '6.5', label: 'Band 6.5' },
+  { value: '7', label: 'Band 7.0' },
+  { value: '7.5', label: 'Band 7.5' },
+  { value: '8', label: 'Band 8.0+' },
+  { value: '', label: 'Not sure yet' },
 ];
 
 const TUTOR_STYLE_OPTIONS = [
@@ -123,6 +136,15 @@ const FIELD_CONFIGS: EditableFieldConfig[] = [
   },
 ];
 
+// Shown only for IELTS learners (user.learning_track === 'ielts'); appended
+// to FIELD_CONFIGS at render time rather than listed unconditionally.
+const TARGET_BAND_CONFIG: EditableFieldConfig = {
+  key: 'targetBand',
+  label: 'IELTS Target Band',
+  description: 'Sets the goal band used for your Action Plan and Personal Plan pacing.',
+  options: TARGET_BAND_OPTIONS,
+};
+
 function getOptionLabel(
   options: { value: string; label: string }[] | undefined,
   value: string | null | undefined
@@ -155,6 +177,9 @@ const EditProfileScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [selections, setSelections] = useState<UserSelections | null>(null);
+  // The full onboarding_data record, kept so a single-field edit can be
+  // merged onto it before saving (see buildOnboardingSavePayload).
+  const [onboardingRecord, setOnboardingRecord] = useState<Record<string, unknown> | null>(null);
   const insets = useSafeAreaInsets();
   const [displayLanguageState, setDisplayLanguageStateState] =
     useState<DisplayLanguage>('English');
@@ -200,6 +225,7 @@ const EditProfileScreen: React.FC = () => {
           string,
           unknown
         >;
+        setOnboardingRecord(onboardingData);
         setSelections({
           nativeLanguage:
             typeof onboardingData.native_language === 'string'
@@ -231,13 +257,21 @@ const EditProfileScreen: React.FC = () => {
     };
   }, []);
 
-  const activeConfig = useMemo(
-    () => FIELD_CONFIGS.find((f) => f.key === activeField) || null,
-    [activeField]
+  const isIeltsLearner = profile?.learning_track === 'ielts';
+  const visibleFieldConfigs = useMemo(
+    () => (isIeltsLearner ? [...FIELD_CONFIGS, TARGET_BAND_CONFIG] : FIELD_CONFIGS),
+    [isIeltsLearner]
   );
 
-  const fieldValues = useMemo(
-    () => ({
+  const activeConfig = useMemo(
+    () => visibleFieldConfigs.find((f) => f.key === activeField) || null,
+    [visibleFieldConfigs, activeField]
+  );
+
+  const fieldValues = useMemo(() => {
+    const targetBandStored =
+      profile?.ielts_target_band != null ? String(profile.ielts_target_band) : '';
+    return {
       fullName: profile?.full_name?.trim() || 'Not set',
       nativeLanguage: getOptionLabel(
         FIELD_CONFIGS.find((f) => f.key === 'nativeLanguage')?.options,
@@ -249,9 +283,10 @@ const EditProfileScreen: React.FC = () => {
         selections?.currentLevel
       ),
       tutorStyle: getTutorStyleLabel(selections?.tutorStyle || []),
-    }),
-    [displayLanguageState, profile, selections]
-  );
+      targetBand:
+        TARGET_BAND_OPTIONS.find((o) => o.value === targetBandStored)?.label || 'Not sure yet',
+    };
+  }, [displayLanguageState, profile, selections]);
 
   const openEditor = useCallback(
     (fieldKey: EditableFieldKey) => {
@@ -269,6 +304,11 @@ const EditProfileScreen: React.FC = () => {
         setDraftMultiValue([]);
       } else if (fieldKey === 'currentLevel') {
         setDraftValue(selections?.currentLevel || '');
+        setDraftMultiValue([]);
+      } else if (fieldKey === 'targetBand') {
+        setDraftValue(
+          profile?.ielts_target_band != null ? String(profile.ielts_target_band) : ''
+        );
         setDraftMultiValue([]);
       } else {
         setDraftValue('');
@@ -305,9 +345,23 @@ const EditProfileScreen: React.FC = () => {
         await setDisplayLanguage(draftValue as DisplayLanguage);
         setDisplayLanguageStateState(draftValue as DisplayLanguage);
         setFeedback('Display language updated.');
+      } else if (activeField === 'targetBand') {
+        const numericTargetBand = draftValue === '' ? null : Number(draftValue);
+        await ieltsService.updatePreferences({ targetBand: numericTargetBand });
+        setProfile((prev) =>
+          prev ? { ...prev, ielts_target_band: numericTargetBand } : prev
+        );
+        setFeedback('Target band updated.');
       } else {
         if (!selections) throw new Error('Profile details are still loading.');
-        const updatedSelections: UserSelections = {
+        const editedValue = activeField === 'tutorStyle' ? draftMultiValue : draftValue || null;
+        // Full-record merge: the backend upsert nulls/empties any onboarding
+        // column missing from the payload, so a single-field edit must be
+        // sent as the full current record with only this field changed.
+        const payload = buildOnboardingSavePayload(onboardingRecord, activeField, editedValue);
+        await onboardingService.saveOnboarding(payload);
+        setOnboardingRecord(payload);
+        setSelections({
           ...selections,
           nativeLanguage:
             activeField === 'nativeLanguage'
@@ -321,13 +375,7 @@ const EditProfileScreen: React.FC = () => {
             activeField === 'tutorStyle'
               ? draftMultiValue
               : selections.tutorStyle,
-        };
-        const authUser = authService.getUser();
-        const userId = (authUser as any)?.id
-          ? String((authUser as any).id)
-          : undefined;
-        await onboardingService.saveOnboarding(updatedSelections, userId);
-        setSelections(updatedSelections);
+        });
         setFeedback(`${activeConfig?.label || 'Profile'} updated.`);
       }
       setActiveField(null);
@@ -347,7 +395,16 @@ const EditProfileScreen: React.FC = () => {
     selections,
     activeConfig,
     profile,
+    onboardingRecord,
   ]);
+
+  // Target band's "Not sure yet" option is an empty string and is a valid,
+  // savable choice — it must not be treated as "nothing entered".
+  const isSaveDisabled =
+    isSaving ||
+    (activeConfig?.multi
+      ? draftMultiValue.length === 0
+      : activeField !== 'targetBand' && draftValue.trim().length === 0);
 
   return (
     <AppBackground>
@@ -392,7 +449,7 @@ const EditProfileScreen: React.FC = () => {
               ))
             ) : (
               <>
-                {FIELD_CONFIGS.map((config) => (
+                {visibleFieldConfigs.map((config) => (
                   <TouchableOpacity
                     key={config.key}
                     style={styles.fieldCard}
@@ -526,21 +583,9 @@ const EditProfileScreen: React.FC = () => {
                     <Text style={styles.cancelBtnText}>Cancel</Text>
                   </TouchableOpacity>
                   <TouchableOpacity
-                    style={[
-                      styles.saveBtn,
-                      (isSaving ||
-                        (activeConfig.multi
-                          ? draftMultiValue.length === 0
-                          : draftValue.trim().length === 0)) &&
-                      styles.saveBtnDisabled,
-                    ]}
+                    style={[styles.saveBtn, isSaveDisabled && styles.saveBtnDisabled]}
                     onPress={saveField}
-                    disabled={
-                      isSaving ||
-                      (activeConfig.multi
-                        ? draftMultiValue.length === 0
-                        : draftValue.trim().length === 0)
-                    }
+                    disabled={isSaveDisabled}
                     activeOpacity={0.85}
                   >
                     <LinearGradient

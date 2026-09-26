@@ -23,6 +23,7 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import type { ProfileData } from '@/types/profile';
 import type { ProficiencyResult } from '@/types/proficiency';
 import { startingLevelToIeltsBand } from '@/lib/report/cefrProficiency';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 import { tokens } from '@/theme/tokens';
 import { ProfileCameraBadgeIcon, UpgradeMagicIcon } from './ProfileVisualIcons';
 
@@ -81,17 +82,19 @@ export function ProfileCard({
   // and silently do nothing.
   const upgradeDisabled = isProActive || !onUpgradePress;
   const selfRatedBand = startingLevelToIeltsBand(profile?.startingLevel);
-  const assessedBand =
+  const assessedBandLabel =
     proficiency &&
     proficiency.confidence !== 'none' &&
-    proficiency.overallLevel !== 'Not yet assessed'
-      ? (proficiency.ieltsBand ? String(proficiency.ieltsBand) : null)
+    proficiency.overallLevel !== 'Not yet assessed' &&
+    proficiency.ieltsBand
+      ? formatBandLabel(Number(proficiency.ieltsBand), proficiency.overallLevel)
       : null;
+  const selfRatedBandLabel = selfRatedBand ? formatBandLabel(Number(selfRatedBand)) : null;
 
-  const ratingLine = assessedBand
-    ? `IELTS Band ${assessedBand} AI Rated`
-    : selfRatedBand
-    ? `IELTS Band ${selfRatedBand} Self Rated`
+  const ratingLine = assessedBandLabel
+    ? `IELTS ${assessedBandLabel} AI Rated`
+    : selfRatedBandLabel
+    ? `IELTS ${selfRatedBandLabel} Self Rated`
     : 'IELTS Not Yet Assessed';
 
   return (

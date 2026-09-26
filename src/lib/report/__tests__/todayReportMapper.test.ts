@@ -128,4 +128,70 @@ describe('normalizeTodayReport in Talktivity-App', () => {
       expect(report.grammar.sentenceComplexity?.complexSentenceRatio).toBe(40);
     });
   });
+
+  describe('CEFR and pronunciation_status pass-through', () => {
+    it('carries overall_cefr and per-criterion cefr through end to end', () => {
+      const report = normalizeTodayReport({
+        overall_cefr: 'B2',
+        fluency: { band: 6.5, cefr: 'B2' },
+        vocabulary: { band: 6.0, cefr: 'B1' },
+        grammar: { band: 6.5, cefr: 'B2' },
+        pronunciation: { band: 6.5, cefr: 'B2' },
+      });
+      expect(report.overall_cefr).toBe('B2');
+      expect(report.fluency.cefr).toBe('B2');
+      expect(report.vocabulary.cefr).toBe('B1');
+      expect(report.grammar.cefr).toBe('B2');
+      expect(report.pronunciation?.cefr).toBe('B2');
+    });
+
+    it('drops a non-string overall_cefr rather than rendering garbage', () => {
+      const report = normalizeTodayReport({ overall_cefr: 42 });
+      expect(report.overall_cefr).toBeNull();
+    });
+
+    it('carries insufficient_speech and low_confidence through as booleans', () => {
+      const report = normalizeTodayReport({ insufficient_speech: true, low_confidence: true });
+      expect(report.insufficient_speech).toBe(true);
+      expect(report.low_confidence).toBe(true);
+    });
+
+    it('defaults insufficient_speech/low_confidence to false when absent', () => {
+      const report = normalizeTodayReport({});
+      expect(report.insufficient_speech).toBe(false);
+      expect(report.low_confidence).toBe(false);
+    });
+
+    it('carries short_sample_capped through as a boolean, defaulting to false', () => {
+      expect(normalizeTodayReport({ short_sample_capped: true }).short_sample_capped).toBe(true);
+      expect(normalizeTodayReport({}).short_sample_capped).toBe(false);
+    });
+
+    it('trusts an explicit pronunciation_status from the backend', () => {
+      expect(normalizeTodayReport({ pronunciation_status: 'pending' }).pronunciation_status).toBe(
+        'pending'
+      );
+      expect(
+        normalizeTodayReport({ pronunciation_status: 'not_measured' }).pronunciation_status
+      ).toBe('not_measured');
+      expect(normalizeTodayReport({ pronunciation_status: 'measured' }).pronunciation_status).toBe(
+        'measured'
+      );
+    });
+
+    it('treats an old audio-sourced report (no pronunciation_status) as measured', () => {
+      const report = normalizeTodayReport({ source: 'audio', pronunciation: { band: 6.0 } });
+      expect(report.pronunciation_status).toBe('measured');
+    });
+
+    it('treats an old non-audio report (no pronunciation_status) as not_measured', () => {
+      const report = normalizeTodayReport({ pronunciation: { band: 6.0 } });
+      expect(report.pronunciation_status).toBe('not_measured');
+    });
+
+    it('ignores a garbage pronunciation_status and falls back to source derivation', () => {
+      const report = normalizeTodayReport({ pronunciation_status: 'yes-please', source: 'audio' });
+      expect(report.pronunciation_status).toBe('measured');
+    });
+  });
 });

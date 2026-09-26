@@ -12,10 +12,13 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
-import type { PronunciationReport } from '@/types/report';
+import { formatBandLabel } from '@/lib/report/bandLabel';
+import type { PronunciationReport, PronunciationStatus } from '@/types/report';
 
 export interface PronunciationCardProps {
   pronunciation?: PronunciationReport;
+  /** From the report's pronunciation_status; defaults to "not_measured". */
+  status?: PronunciationStatus;
   onContinue: () => void;
   hideSectionHeader?: boolean;
 }
@@ -26,16 +29,22 @@ function finite(value: unknown): number | null {
 
 export function PronunciationCard({
   pronunciation,
+  status = 'not_measured',
   onContinue,
   hideSectionHeader = false,
 }: PronunciationCardProps) {
-  const band =
-    finite(pronunciation?.band) ?? finite(pronunciation?.pronunciationBand);
+  const measured = status === 'measured';
+  const band = measured
+    ? finite(pronunciation?.band) ?? finite(pronunciation?.pronunciationBand)
+    : null;
+  const bandLabel = band != null ? formatBandLabel(band, pronunciation?.cefr) : null;
+  const statusText =
+    bandLabel ?? (status === 'pending' ? 'Measuring from your recording…' : 'Not measured');
   const targetBand =
     band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
-  const strengths = pronunciation?.strengths ?? [];
-  const areasForImprovement = pronunciation?.improvements ?? [];
-  const struggledWords = pronunciation?.struggledWords ?? [];
+  const strengths = measured ? pronunciation?.strengths ?? [] : [];
+  const areasForImprovement = measured ? pronunciation?.improvements ?? [] : [];
+  const struggledWords = measured ? pronunciation?.struggledWords ?? [] : [];
 
   return (
     <ScrollView style={ss.wrapper} contentContainerStyle={ss.container}>
@@ -46,26 +55,21 @@ export function PronunciationCard({
           </View>
           <View>
             <Text style={ss.title}>Pronunciation</Text>
-            <Text style={ss.subtitle}>
-              {band != null ? `Band ${band}` : 'Band not available'}
-            </Text>
+            <Text style={ss.subtitle}>{statusText}</Text>
           </View>
         </View>
       )}
 
       <View style={ss.statSpace}>
         {/* 1. Official IELTS Band & Goal */}
-        <StatCard
-          title="Pronunciation"
-          value={band != null ? `Band ${band}` : undefined}
-        >
-          {targetBand != null ? (
+        <StatCard title="Pronunciation" value={bandLabel ?? undefined}>
+          {bandLabel == null ? (
+            <Text style={ss.desc}>{statusText}</Text>
+          ) : targetBand != null ? (
             <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-              Next Milestone: Band {targetBand} (0.5 band to go)
+              Next Milestone: {formatBandLabel(targetBand) ?? `Band ${targetBand}`} (0.5 band to go)
             </Text>
-          ) : (
-            <Text style={ss.desc}>Band not available</Text>
-          )}
+          ) : null}
           {strengths.length > 0 || areasForImprovement.length > 0 ? (
             <View style={{ marginTop: 8, gap: 8 }}>
               {strengths.map((s, i) => (

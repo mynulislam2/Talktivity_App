@@ -6,7 +6,29 @@
  */
 
 import type { ReportData } from '@/services/report';
-import type { TodayReport, OverallScores } from '@/types/report';
+import type { TodayReport, OverallScores, CriterionBand } from '@/types/report';
+import { derivePronunciationStatus } from '@/lib/report/todayReportMapper';
+
+function toFiniteOrNull(value: unknown): number | null {
+  const num = Number(value);
+  return typeof value === 'number' || typeof value === 'string'
+    ? Number.isFinite(num)
+      ? num
+      : null
+    : null;
+}
+
+function toCefrOrNull(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value : null;
+}
+
+function criterionBand(section: unknown): CriterionBand {
+  const record = (section ?? {}) as Record<string, unknown>;
+  return {
+    band: toFiniteOrNull(record.band ?? record.fluencyBand ?? record.grammarBand ?? record.vocabularyBand),
+    cefr: toCefrOrNull(record.cefr),
+  };
+}
 
 /**
  * Calculate level from overall score (A1-C2)
@@ -65,13 +87,36 @@ export function calculateOverallScores(
 
   const level = calculateLevelFromScore(overall);
 
+  // Real per-criterion bands, sourced only from their own section — never
+  // from discourse, which is a different (general-mode-only) quantity.
+  const pronunciationStatus = derivePronunciationStatus(
+    (report as any).pronunciation_status,
+    (report as any).source
+  );
+  const measuredPronunciation =
+    pronunciationStatus === 'measured'
+      ? criterionBand((report as TodayReport).pronunciation)
+      : { band: null, cefr: null };
+
+  const criteria = {
+    fluency: criterionBand((report as TodayReport).fluency),
+    vocabulary: criterionBand((report as TodayReport).vocabulary),
+    grammar: criterionBand((report as TodayReport).grammar),
+    pronunciation: { ...measuredPronunciation, status: pronunciationStatus },
+  };
+
   return {
     ...scores,
     overall,
     level,
     overall_band: (report as any).overall_band ?? undefined,
+    overall_cefr: toCefrOrNull((report as any).overall_cefr),
     target_band: (report as any).target_band ?? undefined,
     band_gap: (report as any).band_gap ?? undefined,
+    insufficient_speech: (report as any).insufficient_speech === true,
+    low_confidence: (report as any).low_confidence === true,
+    short_sample_capped: (report as any).short_sample_capped === true,
+    criteria,
   };
 }
 

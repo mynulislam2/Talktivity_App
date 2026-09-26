@@ -45,6 +45,7 @@ export interface HesitationsAndCorrections {
 export interface FluencyReport {
   band?: number;
   fluencyBand?: number;
+  cefr?: string | null;
   fluencyScore: number;
   fluencyLevel: string;
   improvementTarget: ImprovementTarget | null;
@@ -79,6 +80,7 @@ export interface GrammarError {
 export interface GrammarReport {
   band?: number;
   grammarBand?: number;
+  cefr?: string | null;
   grammarScore: number;
   grammarLevel: string;
   improvementTarget: ImprovementTarget | null;
@@ -146,6 +148,7 @@ export interface PronunciationStruggledWord {
 export interface PronunciationReport {
   band?: number;
   pronunciationBand?: number;
+  cefr?: string | null;
   pronunciationScore?: number;
   pronunciationLevel?: string;
   feedback?: string;
@@ -160,6 +163,7 @@ export interface PronunciationReport {
 export interface VocabularyReport {
   band?: number;
   vocabularyBand?: number;
+  cefr?: string | null;
   vocabularyScore: number;
   vocabularyLevel: string;
   improvementTarget: ImprovementTarget | null;
@@ -197,6 +201,14 @@ export interface DiscourseReport {
   feedback?: string[];
 }
 
+/** A single IELTS criterion's measured band, as shown in "Band 5.5 (B2)". */
+export interface CriterionBand {
+  band: number | null;
+  cefr: string | null;
+}
+
+export type PronunciationStatus = 'pending' | 'measured' | 'not_measured';
+
 /**
  * Overall scores summary
  */
@@ -207,9 +219,21 @@ export interface OverallScores {
   discourse: number;
   overall: number;
   level: string;
-  overall_band?: number | string;
-  target_band?: number | string;
-  band_gap?: number | string;
+  overall_band?: number | string | null;
+  overall_cefr?: string | null;
+  target_band?: number | string | null;
+  band_gap?: number | string | null;
+  insufficient_speech?: boolean;
+  low_confidence?: boolean;
+  /** R11: FC/LR/GRA were capped at 6.0 because the scope had under 150 learner words. */
+  short_sample_capped?: boolean;
+  /** Real per-criterion bands (never the discourse score). */
+  criteria?: {
+    fluency: CriterionBand;
+    vocabulary: CriterionBand;
+    grammar: CriterionBand;
+    pronunciation: CriterionBand & { status: PronunciationStatus };
+  };
 }
 
 /**
@@ -217,8 +241,13 @@ export interface OverallScores {
  */
 export interface TodayReport {
   overall_band?: number;
+  overall_cefr?: string | null;
   target_band?: number;
   band_gap?: number;
+  insufficient_speech?: boolean;
+  low_confidence?: boolean;
+  short_sample_capped?: boolean;
+  pronunciation_status?: PronunciationStatus;
   action_plan_priorities?: string[];
   fluency: FluencyReport;
   grammar: GrammarReport;

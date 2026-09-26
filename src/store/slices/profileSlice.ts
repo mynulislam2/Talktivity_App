@@ -8,10 +8,10 @@ import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { profileService } from '@/services/profile';
 import { courseService } from '@/services/course';
 import { proficiencyService } from '@/services/report/ProficiencyService';
-import { calculateProficiency } from '@/lib/report/cefrProficiency';
+import { mapProfileProgressToProficiency } from '@/lib/report/cefrProficiency';
 import type { ProfileData } from '@/types/profile';
 import type { ProgressStats } from '@/types/profile';
-import type { ProficiencyResult, SessionScore } from '@/types/proficiency';
+import type { ProficiencyResult } from '@/types/proficiency';
 import type { RootState } from '@/store';
 import { selectCourseStatus, loadCourseStatus } from './courseSlice';
 
@@ -30,7 +30,6 @@ interface ProfileState {
   profile: ProfileData | null;
   progressStats: ProgressStats | null;
   proficiency: ProficiencyResult | null;
-  proficiencySessions: SessionScore[] | null;
   loading: boolean;
   error: string | null;
   profileLoading: boolean;
@@ -45,7 +44,6 @@ const initialState: ProfileState = {
   profile: null,
   progressStats: null,
   proficiency: null,
-  proficiencySessions: null,
   loading: false,
   error: null,
   profileLoading: false,
@@ -111,7 +109,8 @@ export const loadProgressStats = createAsyncThunk(
 );
 
 /**
- * Async thunk: Load CEFR proficiency inputs + calculated profile
+ * Async thunk: Load the Profile band — the server's `current` progress is the
+ * only source; the client no longer computes it from raw sessions.
  */
 export const loadProficiency = createAsyncThunk(
   'profile/loadProficiency',
@@ -123,10 +122,7 @@ export const loadProficiency = createAsyncThunk(
         return rejectWithValue(response.error || 'Failed to load proficiency');
       }
 
-      return {
-        sessions: response.data.sessions || [],
-        proficiency: calculateProficiency(response.data.sessions || []),
-      };
+      return mapProfileProgressToProficiency(response.data.current ?? null);
     } catch (error: unknown) {
       return rejectWithValue(
         getErrorMessage(error, 'Failed to load proficiency')
@@ -172,7 +168,6 @@ const profileSlice = createSlice({
       state.profile = null;
       state.progressStats = null;
       state.proficiency = null;
-      state.proficiencySessions = null;
       state.loading = false;
       state.error = null;
       state.profileLoading = false;
@@ -224,14 +219,12 @@ const profileSlice = createSlice({
         }
       })
       .addCase(loadProficiency.fulfilled, (state, action) => {
-        state.proficiency = action.payload.proficiency;
-        state.proficiencySessions = action.payload.sessions;
+        state.proficiency = action.payload;
         state.proficiencyLoading = false;
       })
       .addCase(loadProficiency.rejected, (state) => {
         state.proficiencyLoading = false;
         state.proficiency = null;
-        state.proficiencySessions = null;
       });
 
     // Refresh profile
@@ -260,8 +253,6 @@ export const selectProgressStats = (state: RootState) =>
   state.profile.progressStats;
 export const selectProficiency = (state: RootState) =>
   state.profile.proficiency;
-export const selectProficiencySessions = (state: RootState) =>
-  state.profile.proficiencySessions;
 export const selectProfileLoading = (state: RootState) =>
   state.profile.loading ||
   state.profile.profileLoading ||

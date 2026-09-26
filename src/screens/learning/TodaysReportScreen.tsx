@@ -19,6 +19,7 @@ import { DiscourseCard } from '@/components/report/DiscourseCard';
 import { PronunciationCard } from '@/components/report/PronunciationCard';
 import { ActionPlanCard } from '@/components/report/ActionPlanCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
+import { ReportErrorCard } from '@/components/report/ReportErrorCard';
 import { TodayReportStepHeader } from '@/components/report/TodayReportStepHeader';
 import { getReportMode } from '@/lib/report/reportMode';
 import { tokens } from '@/theme/tokens';
@@ -32,7 +33,7 @@ export default function TodaysReportScreen() {
   const fadeAnim = useRef(new Animated.Value(1)).current;
   const slideAnim = useRef(new Animated.Value(0)).current;
 
-  const { report, isLoading, isExamDay, complete } =
+  const { report, isLoading, error, errorCode, isExamDay, refresh, complete } =
     useTodayReportNative();
   const { overallScores } = useReportCalculations(report);
   const mode = getReportMode(report);
@@ -96,7 +97,7 @@ export default function TodaysReportScreen() {
     );
   };
 
-  if (isLoading) {
+  if (isLoading || (!report && !error)) {
     return (
       <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
@@ -109,6 +110,29 @@ export default function TodaysReportScreen() {
             <Ionicons name="chevron-back" size={24} color="#fff" />
           </TouchableOpacity>
           <ReportLoadingCard />
+        </SafeAreaView>
+      </AppBackground>
+    );
+  }
+
+  if (error || !report) {
+    return (
+      <AppBackground>
+        <SafeAreaView style={ss.safe} edges={['top']}>
+          <TouchableOpacity
+            onPress={goBack}
+            style={ss.loadingBackBtn}
+            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+            activeOpacity={0.7}
+          >
+            <Ionicons name="chevron-back" size={24} color="#fff" />
+          </TouchableOpacity>
+          <ReportErrorCard
+            error={error}
+            code={errorCode}
+            title="Daily Report Not Available"
+            onRetry={refresh}
+          />
         </SafeAreaView>
       </AppBackground>
     );
@@ -164,6 +188,7 @@ export default function TodaysReportScreen() {
         <PronunciationCard
           key="pronunciation"
           pronunciation={report?.pronunciation}
+          status={report?.pronunciation_status}
           onContinue={handleContinue}
           hideSectionHeader
         />,

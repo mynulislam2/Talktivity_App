@@ -67,11 +67,15 @@ export interface IeltsListeningSubmitResponse {
   total: number;
   /** Full test only; null for a single-part drill. */
   band: number | null;
+  /** CEFR for `band`, e.g. "B2"; null when there is no band. */
+  band_cefr?: string | null;
   session_id: string;
   detailedResults: IeltsListeningResult[];
 }
 
 export type IeltsPartStatus = 'not_started' | 'in_progress' | 'completed' | string;
+
+export type IeltsPronunciationStatus = 'pending' | 'measured' | 'not_measured';
 
 export interface IeltsTestSession {
   id: string;
@@ -84,19 +88,25 @@ export interface IeltsTestSession {
   part3_status: IeltsPartStatus;
   overall_status: 'in_progress' | 'completed' | string;
   overall_band?: number | string | null;
+  overall_cefr?: string | null;
   fluency_band?: number | string | null;
   lexical_band?: number | string | null;
   grammar_band?: number | string | null;
   pronunciation_band?: number | string | null;
+  pronunciation_status?: IeltsPronunciationStatus;
+  /** The attempt's master report JSON; carries per-criterion cefr + pronunciation detail. */
+  report_data?: Record<string, any> | null;
 }
 
 /** `report` on the /complete response: server-computed bands plus short feedback. */
 export interface IeltsSpeakingReport {
   overall_band?: number | string | null;
+  overall_cefr?: string | null;
   fluency_band?: number | string | null;
   lexical_band?: number | string | null;
   grammar_band?: number | string | null;
   pronunciation_band?: number | string | null;
+  pronunciation_status?: IeltsPronunciationStatus;
   feedback?: string | string[] | null;
 }
 
@@ -249,8 +259,11 @@ export class IeltsService {
     return (res.data as any)?.data;
   }
 
-  async updatePreferences(defaultFocus: IeltsDefaultFocus): Promise<{ ielts_default_focus: IeltsDefaultFocus }> {
-    const res = await this.http.put('ielts/preferences', { defaultFocus });
+  async updatePreferences(payload: {
+    defaultFocus?: IeltsDefaultFocus;
+    targetBand?: number | null;
+  }): Promise<{ ielts_default_focus?: IeltsDefaultFocus; ielts_target_band?: number | null }> {
+    const res = await this.http.put('ielts/preferences', payload);
     return (res.data as any)?.data;
   }
 }

@@ -119,6 +119,7 @@ function ReportScreenContent() {
         <PronunciationCard
           key="pronunciation"
           pronunciation={reportData.pronunciation}
+          status={reportData.pronunciation_status}
           onContinue={handleContinue}
         />,
         <ActionPlanCard

@@ -89,11 +89,10 @@ const TARGET_BAND_OPTIONS = [
 ];
 
 const TUTOR_STYLE_OPTIONS = [
-  { value: 'encouraging', label: 'Encouraging' },
-  { value: 'strict', label: 'Strict' },
-  { value: 'fun', label: 'Fun & Casual' },
-  { value: 'academic', label: 'Academic' },
-  { value: 'business', label: 'Business' },
+  { value: 'cheerful', label: 'Cheerful' },
+  { value: 'energetic', label: 'Energetic' },
+  { value: 'patient', label: 'Patient' },
+  { value: 'friendly', label: 'Friendly' },
 ];
 
 const DISPLAY_LANGUAGE_FIELD_OPTIONS = DISPLAY_LANGUAGE_OPTIONS.map((opt) => ({

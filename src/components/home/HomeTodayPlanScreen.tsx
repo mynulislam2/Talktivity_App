@@ -353,13 +353,31 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
 
   const drillCards: TimelineActionCardData[] = [
     {
-      id: 'ielts_speaking_drill',
-      title: 'IELTS Speaking Drill',
-      description: 'Targeted practice on Part 1, 2, or 3 with instant feedback.',
-      helper: 'Parts 1, 2, or 3 targeted practice',
+      id: 'ielts_speaking_drill_part1',
+      title: 'Speaking Drill — Part 1',
+      description: 'Introduction & interview: 4–5 min fast-paced warm-up questions.',
+      helper: 'Part 1: 4–5 min warm-up',
       status: 'active',
-      buttonLabel: 'Start Speaking Drill',
+      buttonLabel: 'Start Part 1 Drill',
       action: () => openSpeaking('drill', 1),
+    },
+    {
+      id: 'ielts_speaking_drill_part2',
+      title: 'Speaking Drill — Part 2',
+      description: 'Long turn cue card: 1 min preparation followed by 2 min speech.',
+      helper: 'Part 2: 1 min prep + 2 min talk',
+      status: 'active',
+      buttonLabel: 'Start Part 2 Drill',
+      action: () => openSpeaking('drill', 2),
+    },
+    {
+      id: 'ielts_speaking_drill_part3',
+      title: 'Speaking Drill — Part 3',
+      description: 'Two-way discussion: In-depth abstract questions with AI examiner.',
+      helper: 'Part 3: 4–5 min discussion',
+      status: 'active',
+      buttonLabel: 'Start Part 3 Drill',
+      action: () => openSpeaking('drill', 3),
     },
     {
       id: 'ielts_listening_drill',
@@ -369,6 +387,15 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
       status: 'active',
       buttonLabel: 'Start Listening Drill',
       action: () => openListening('drill'),
+    },
+    {
+      id: 'ielts_report_drill',
+      title: "Today's IELTS Report",
+      description: 'View your detailed band score breakdown, criteria radar, and action plan.',
+      helper: 'Detailed band score & breakdown',
+      status: 'active',
+      buttonLabel: 'View Report',
+      action: () => navigation.navigate('TodaysReportScreen' as any),
     },
   ];
 
@@ -390,6 +417,15 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
       status: 'active',
       buttonLabel: 'Take Listening Mock',
       action: () => openListening('mock'),
+    },
+    {
+      id: 'ielts_report_mock',
+      title: "Today's IELTS Report",
+      description: 'View your detailed band score breakdown, criteria radar, and action plan.',
+      helper: 'Detailed band score & breakdown',
+      status: 'active',
+      buttonLabel: 'View Report',
+      action: () => navigation.navigate('TodaysReportScreen' as any),
     },
   ];
 

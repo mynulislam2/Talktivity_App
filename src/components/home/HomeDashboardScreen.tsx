@@ -17,7 +17,6 @@ import { useAppSelector } from '@/store/hooks';
 import type { CourseStatus } from '@/services/course';
 import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
 import { persistListeningTopic } from '@/lib/listeningTopic';
-import { HomeTrackSelector, IeltsHomeMode } from './HomeTrackSelector';
 
 interface HomeDashboardScreenProps {
   practiceMinutes: string;
@@ -52,7 +51,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const { narrow, s } = useResponsive();
   const dayCircle = s(26);
   const subscriptionState = useAppSelector((state) => state.subscription);
-  const authUser = useAppSelector((state) => state.auth?.user);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
 
   const navigation = useNavigation<any>();
@@ -178,6 +176,32 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         </View>
         <ExpoImage
           source={require('../../../assets/listening_hero.png')}
+          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
+          contentFit="contain"
+          pointerEvents="none"
+        />
+      </LinearGradient>
+
+      {/* Today's Report Card (3rd Option) */}
+      <LinearGradient
+        colors={['rgba(16,185,129,0.20)', 'rgba(40,32,110,0.02)']}
+        style={[styles.todayPlanCard, { marginTop: 16 }]}
+      >
+        <View style={styles.todayPlanContent}>
+          <Text style={styles.todayPlanTitle}>Today's Report</Text>
+          <Text style={styles.todayPlanDesc}>
+            View your detailed score breakdown, band radar, and action plan.
+          </Text>
+          <FigmaPrimaryButton
+            onPress={() => navigation.navigate('TodaysReportScreen')}
+            style={[styles.todayPlanButton, { backgroundColor: '#059669' }]}
+          >
+            <Text style={styles.todayPlanButtonText}>View Report</Text>
+            <Feather name="arrow-right" size={14} color="#fff" />
+          </FigmaPrimaryButton>
+        </View>
+        <ExpoImage
+          source={require('../../../assets/avatar_intro.svg')}
           style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
           contentFit="contain"
           pointerEvents="none"

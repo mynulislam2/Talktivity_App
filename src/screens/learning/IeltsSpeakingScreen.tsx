@@ -51,10 +51,21 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const mode: 'drill' | 'mock' = route.params?.mode === 'drill' ? 'drill' : 'mock';
-  const drillPart: SpeakingPart = [1, 2, 3].includes(route.params?.part)
-    ? route.params.part
-    : 1;
+  const [drillPart, setDrillPart] = useState<SpeakingPart>(
+    [1, 2, 3].includes(route.params?.part) ? route.params.part : 1
+  );
   const plan: SpeakingPart[] = mode === 'drill' ? [drillPart] : [1, 2, 3];
+
+  const handleSwitchDrillPart = (part: SpeakingPart) => {
+    if (part === drillPart) return;
+    setReport(null);
+    setCompleteError(null);
+    setWaitingPart(null);
+    setWaitExpired(false);
+    setPart2Saved(false);
+    setRecordingUri(null);
+    setDrillPart(part);
+  };
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -520,6 +531,35 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 </View>
               </React.Fragment>
             ))}
+          </View>
+        )}
+
+        {/* Drill Part Selector */}
+        {mode === 'drill' && !report && (
+          <View style={styles.drillTabContainer}>
+            {([1, 2, 3] as const).map((p) => {
+              const isActive = drillPart === p;
+              return (
+                <TouchableOpacity
+                  key={p}
+                  onPress={() => handleSwitchDrillPart(p)}
+                  style={[
+                    styles.drillTabItem,
+                    isActive && styles.drillTabItemActive,
+                  ]}
+                  activeOpacity={0.7}
+                >
+                  <Text
+                    style={[
+                      styles.drillTabText,
+                      isActive && styles.drillTabTextActive,
+                    ]}
+                  >
+                    Part {p}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
           </View>
         )}
 
@@ -1046,6 +1086,42 @@ const styles = StyleSheet.create({
   },
   retryButton: {
     paddingHorizontal: 24,
+  },
+  drillTabContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginHorizontal: 16,
+    marginTop: 8,
+    marginBottom: 4,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 10,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  drillTabItem: {
+    flex: 1,
+    paddingVertical: 9,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  },
+  drillTabItemActive: {
+    backgroundColor: '#7c3aed',
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.6)',
+  },
+  drillTabText: {
+    fontSize: 13,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    color: '#9ca3af',
+  },
+  drillTabTextActive: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
   criterionRow: {
     flexDirection: 'row',

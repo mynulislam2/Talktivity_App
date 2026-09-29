@@ -42,6 +42,7 @@ interface TimelineActionCardData {
   status: TimelineStatus;
   buttonLabel?: string;
   action?: () => void;
+  customContent?: React.ReactNode;
 }
 
 type HomeNav = NativeStackNavigationProp<HomeStackParamList>;
@@ -74,6 +75,8 @@ function FigmaTimelineCard({ card }: { card: TimelineActionCardData }) {
         <Text style={styles.timelineCardTitle}>{card.title}</Text>
         <Text style={styles.timelineCardDesc}>{card.description}</Text>
       </View>
+
+      {card.customContent}
 
       <View style={styles.cardBottomRow}>
         {card.buttonLabel && card.action ? (
@@ -351,33 +354,56 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
           },
         ];
 
+  const [selectedDrillPart, setSelectedDrillPart] = React.useState<1 | 2 | 3>(1);
+
+  const drillPartInfo: Record<1 | 2 | 3, { desc: string; helper: string }> = {
+    1: {
+      desc: 'Introduction & interview: 4–5 min fast-paced warm-up questions.',
+      helper: 'Part 1: 4–5 min warm-up',
+    },
+    2: {
+      desc: 'Long turn cue card: 1 min preparation followed by 2 min speech.',
+      helper: 'Part 2: 1 min prep + 2 min talk',
+    },
+    3: {
+      desc: 'Two-way discussion: In-depth abstract questions with AI examiner.',
+      helper: 'Part 3: 4–5 min discussion',
+    },
+  };
+
   const drillCards: TimelineActionCardData[] = [
     {
-      id: 'ielts_speaking_drill_part1',
-      title: 'Speaking Drill — Part 1',
-      description: 'Introduction & interview: 4–5 min fast-paced warm-up questions.',
-      helper: 'Part 1: 4–5 min warm-up',
+      id: 'ielts_speaking_drill',
+      title: 'IELTS Speaking Drill',
+      description: drillPartInfo[selectedDrillPart].desc,
+      helper: drillPartInfo[selectedDrillPart].helper,
       status: 'active',
-      buttonLabel: 'Start Part 1 Drill',
-      action: () => openSpeaking('drill', 1),
-    },
-    {
-      id: 'ielts_speaking_drill_part2',
-      title: 'Speaking Drill — Part 2',
-      description: 'Long turn cue card: 1 min preparation followed by 2 min speech.',
-      helper: 'Part 2: 1 min prep + 2 min talk',
-      status: 'active',
-      buttonLabel: 'Start Part 2 Drill',
-      action: () => openSpeaking('drill', 2),
-    },
-    {
-      id: 'ielts_speaking_drill_part3',
-      title: 'Speaking Drill — Part 3',
-      description: 'Two-way discussion: In-depth abstract questions with AI examiner.',
-      helper: 'Part 3: 4–5 min discussion',
-      status: 'active',
-      buttonLabel: 'Start Part 3 Drill',
-      action: () => openSpeaking('drill', 3),
+      customContent: (
+        <View style={styles.drillPartPillsRow}>
+          {([1, 2, 3] as const).map((part) => (
+            <TouchableOpacity
+              key={part}
+              onPress={() => setSelectedDrillPart(part)}
+              style={[
+                styles.drillPartPill,
+                selectedDrillPart === part && styles.drillPartPillActive,
+              ]}
+              activeOpacity={0.7}
+            >
+              <Text
+                style={[
+                  styles.drillPartPillText,
+                  selectedDrillPart === part && styles.drillPartPillTextActive,
+                ]}
+              >
+                Part {part}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
+      ),
+      buttonLabel: `Start Part ${selectedDrillPart} Drill`,
+      action: () => openSpeaking('drill', selectedDrillPart),
     },
     {
       id: 'ielts_listening_drill',
@@ -793,5 +819,39 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     alignItems: 'center',
     justifyContent: 'center',
+  },
+  drillPartPillsRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginTop: 12,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    borderRadius: 8,
+    padding: 4,
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  drillPartPill: {
+    flex: 1,
+    paddingVertical: 7,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: 6,
+    backgroundColor: 'transparent',
+  },
+  drillPartPillActive: {
+    backgroundColor: '#7c3aed',
+    borderWidth: 1,
+    borderColor: 'rgba(167,139,250,0.6)',
+  },
+  drillPartPillText: {
+    fontSize: 13,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    color: '#9ca3af',
+  },
+  drillPartPillTextActive: {
+    color: '#ffffff',
+    fontWeight: '600',
   },
 });

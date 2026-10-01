@@ -354,56 +354,15 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
           },
         ];
 
-  const [selectedDrillPart, setSelectedDrillPart] = React.useState<1 | 2 | 3>(1);
-
-  const drillPartInfo: Record<1 | 2 | 3, { desc: string; helper: string }> = {
-    1: {
-      desc: 'Introduction & interview: 4–5 min fast-paced warm-up questions.',
-      helper: 'Part 1: 4–5 min warm-up',
-    },
-    2: {
-      desc: 'Long turn cue card: 1 min preparation followed by 2 min speech.',
-      helper: 'Part 2: 1 min prep + 2 min talk',
-    },
-    3: {
-      desc: 'Two-way discussion: In-depth abstract questions with AI examiner.',
-      helper: 'Part 3: 4–5 min discussion',
-    },
-  };
-
   const drillCards: TimelineActionCardData[] = [
     {
       id: 'ielts_speaking_drill',
       title: 'IELTS Speaking Drill',
-      description: drillPartInfo[selectedDrillPart].desc,
-      helper: drillPartInfo[selectedDrillPart].helper,
+      description: 'Practice Parts 1, 2, and 3 back-to-back with AI examiner.',
+      helper: 'Parts 1, 2 & 3 unified practice',
       status: 'active',
-      customContent: (
-        <View style={styles.drillPartPillsRow}>
-          {([1, 2, 3] as const).map((part) => (
-            <TouchableOpacity
-              key={part}
-              onPress={() => setSelectedDrillPart(part)}
-              style={[
-                styles.drillPartPill,
-                selectedDrillPart === part && styles.drillPartPillActive,
-              ]}
-              activeOpacity={0.7}
-            >
-              <Text
-                style={[
-                  styles.drillPartPillText,
-                  selectedDrillPart === part && styles.drillPartPillTextActive,
-                ]}
-              >
-                Part {part}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      ),
-      buttonLabel: `Start Part ${selectedDrillPart} Drill`,
-      action: () => openSpeaking('drill', selectedDrillPart),
+      buttonLabel: 'Start Speaking Drill',
+      action: () => openSpeaking('drill'),
     },
     {
       id: 'ielts_listening_drill',
@@ -421,7 +380,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
       helper: 'Detailed band score & breakdown',
       status: 'active',
       buttonLabel: 'View Report',
-      action: () => navigation.navigate('TodaysReportScreen' as any),
+      action: () => (navigation as any).navigate('TodaysReportScreen', { track: 'drill' }),
     },
   ];
 
@@ -451,7 +410,7 @@ export const HomeTodayPlanScreen: React.FC<HomeTodayPlanScreenProps> = ({
       helper: 'Detailed band score & breakdown',
       status: 'active',
       buttonLabel: 'View Report',
-      action: () => navigation.navigate('TodaysReportScreen' as any),
+      action: () => (navigation as any).navigate('TodaysReportScreen', { track: 'mock' }),
     },
   ];
 

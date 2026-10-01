@@ -56,6 +56,28 @@ describe('normalizeTodayReport in Talktivity-App', () => {
       expect(report.vocabulary.sentenceUpgrades).toHaveLength(1);
       expect(report.pronunciation?.struggledWords).toHaveLength(1);
     });
+
+    it('carries listening section through end to end', () => {
+      const report = normalizeTodayReport({
+        ...ieltsPayload,
+        listening: {
+          score: 8,
+          total: 10,
+          percentage: 80,
+          estimated_band: 7.5,
+          weaknesses: ['Multiple Choice Questions', 'Speed with complex accents'],
+        },
+      });
+      expect(report.listening).toBeDefined();
+      expect(report.listening?.score).toBe(8);
+      expect(report.listening?.total).toBe(10);
+      expect(report.listening?.percentage).toBe(80);
+      expect(report.listening?.estimated_band).toBe(7.5);
+      expect(report.listening?.weaknesses).toEqual([
+        'Multiple Choice Questions',
+        'Speed with complex accents',
+      ]);
+    });
   });
 
   describe('Band validation and coercion (toBand / pickBand)', () => {

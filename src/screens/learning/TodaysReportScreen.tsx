@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { View, StyleSheet, Animated, TouchableOpacity } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { CommonActions } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import { useAppDispatch, useAppSelector } from '@/store/hooks';
@@ -17,6 +17,7 @@ import { GrammarCard } from '@/components/report/GrammarCard';
 import { VocabularyCard } from '@/components/report/VocabularyCard';
 import { DiscourseCard } from '@/components/report/DiscourseCard';
 import { PronunciationCard } from '@/components/report/PronunciationCard';
+import { ListeningCard } from '@/components/report/ListeningCard';
 import { ActionPlanCard } from '@/components/report/ActionPlanCard';
 import { ReportLoadingCard } from '@/components/report/ReportLoadingCard';
 import { ReportErrorCard } from '@/components/report/ReportErrorCard';
@@ -27,6 +28,8 @@ import { AppBackground } from '../../components/common/AppBackground';
 
 export default function TodaysReportScreen() {
   const navigation = useNavigation();
+  const route = useRoute<any>();
+  const track = route.params?.track || null;
   const dispatch = useAppDispatch();
   const courseStatus = useAppSelector(selectCourseStatus);
   const [step, setStep] = useState(0);
@@ -34,11 +37,11 @@ export default function TodaysReportScreen() {
   const slideAnim = useRef(new Animated.Value(0)).current;
 
   const { report, isLoading, error, errorCode, isExamDay, refresh, complete } =
-    useTodayReportNative();
+    useTodayReportNative(track);
   const { overallScores } = useReportCalculations(report);
   const mode = getReportMode(report);
   const isIelts = mode === 'ielts';
-  const totalSteps = isIelts ? 6 : 5;
+  const totalSteps = isIelts ? 7 : 5;
 
   useEffect(() => {
     if (!courseStatus) {
@@ -145,6 +148,7 @@ export default function TodaysReportScreen() {
         'Lexical Resource',
         'Grammar & Accuracy',
         'Pronunciation',
+        'Listening Performance',
         'Action Plan',
       ]
     : [
@@ -189,6 +193,12 @@ export default function TodaysReportScreen() {
           key="pronunciation"
           pronunciation={report?.pronunciation}
           status={report?.pronunciation_status}
+          onContinue={handleContinue}
+          hideSectionHeader
+        />,
+        <ListeningCard
+          key="listening"
+          listening={report?.listening}
           onContinue={handleContinue}
           hideSectionHeader
         />,

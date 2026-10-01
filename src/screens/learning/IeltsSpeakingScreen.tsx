@@ -51,21 +51,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const mode: 'drill' | 'mock' = route.params?.mode === 'drill' ? 'drill' : 'mock';
-  const [drillPart, setDrillPart] = useState<SpeakingPart>(
-    [1, 2, 3].includes(route.params?.part) ? route.params.part : 1
-  );
-  const plan: SpeakingPart[] = mode === 'drill' ? [drillPart] : [1, 2, 3];
-
-  const handleSwitchDrillPart = (part: SpeakingPart) => {
-    if (part === drillPart) return;
-    setReport(null);
-    setCompleteError(null);
-    setWaitingPart(null);
-    setWaitExpired(false);
-    setPart2Saved(false);
-    setRecordingUri(null);
-    setDrillPart(part);
-  };
+  const plan: SpeakingPart[] = [1, 2, 3];
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -126,7 +112,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
         testSetId: selected.test_set_id,
         sessionMode: mode,
         testType: 'speaking',
-        part: mode === 'drill' ? drillPart : undefined,
       });
       if (!sess?.id) {
         setLoadError('Could not start the speaking session.');
@@ -138,7 +123,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [mode, drillPart]);
+  }, [mode]);
 
   useEffect(() => {
     loadTest();
@@ -498,7 +483,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
   }
 
   const subtitle =
-    mode === 'drill' ? `Part ${drillPart} drill` : 'Speaking mock test: Parts 1, 2 and 3';
+    mode === 'drill' ? 'Speaking drill: Parts 1, 2 and 3' : 'Speaking mock test: Parts 1, 2 and 3';
   const reportBands = mergeSessionReport(session, report);
   const feedback = report?.report?.feedback;
   const feedbackItems = Array.isArray(feedback) ? feedback : feedback ? [feedback] : [];
@@ -510,58 +495,27 @@ export const IeltsSpeakingScreen: React.FC = () => {
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         {renderHeader(test.title, subtitle)}
 
-        {/* Step Indicator (mock runs Parts 1 → 2 → 3) */}
-        {mode === 'mock' && (
-          <View style={styles.stepperContainer}>
-            {([1, 2, 3] as const).map((p, idx) => (
-              <React.Fragment key={p}>
-                {idx > 0 && <View style={styles.stepDivider} />}
-                <View style={styles.stepItem}>
-                  <Text
-                    style={[
-                      styles.stepNum,
-                      (currentPart === p || isPartDone(p)) && styles.stepNumActive,
-                    ]}
-                  >
-                    {isPartDone(p) ? '✓' : p}
-                  </Text>
-                  <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
-                    {p === 1 ? 'Part 1' : p === 2 ? 'Part 2' : 'Part 3'}
-                  </Text>
-                </View>
-              </React.Fragment>
-            ))}
-          </View>
-        )}
-
-        {/* Drill Part Selector */}
-        {mode === 'drill' && !report && (
-          <View style={styles.drillTabContainer}>
-            {([1, 2, 3] as const).map((p) => {
-              const isActive = drillPart === p;
-              return (
-                <TouchableOpacity
-                  key={p}
-                  onPress={() => handleSwitchDrillPart(p)}
+        {/* Step Indicator (runs Parts 1 → 2 → 3) */}
+        <View style={styles.stepperContainer}>
+          {([1, 2, 3] as const).map((p, idx) => (
+            <React.Fragment key={p}>
+              {idx > 0 && <View style={styles.stepDivider} />}
+              <View style={styles.stepItem}>
+                <Text
                   style={[
-                    styles.drillTabItem,
-                    isActive && styles.drillTabItemActive,
+                    styles.stepNum,
+                    (currentPart === p || isPartDone(p)) && styles.stepNumActive,
                   ]}
-                  activeOpacity={0.7}
                 >
-                  <Text
-                    style={[
-                      styles.drillTabText,
-                      isActive && styles.drillTabTextActive,
-                    ]}
-                  >
-                    Part {p}
-                  </Text>
-                </TouchableOpacity>
-              );
-            })}
-          </View>
-        )}
+                  {isPartDone(p) ? '✓' : p}
+                </Text>
+                <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
+                  {p === 1 ? 'Part 1' : p === 2 ? 'Part 2' : 'Part 3'}
+                </Text>
+              </View>
+            </React.Fragment>
+          ))}
+        </View>
 
         <ScrollView style={styles.contentScroll} contentContainerStyle={styles.contentBody}>
           {/* Waiting for a Part 1/3 call to be saved */}
@@ -594,7 +548,9 @@ export const IeltsSpeakingScreen: React.FC = () => {
             <View style={styles.partCard}>
               <View style={styles.badgeRow}>
                 <Feather name="award" size={s(16)} color="#8B5CF6" />
-                <Text style={styles.partBadgeText}>Estimated band report</Text>
+                <Text style={styles.partBadgeText}>
+                  {mode === 'drill' ? 'Speaking Drill Band Score' : 'Estimated band report'}
+                </Text>
               </View>
               {isCompleting ? (
                 <View style={styles.timerDisplayBox}>

@@ -237,6 +237,20 @@ export interface OverallScores {
 }
 
 /**
+ * Listening section of the report (IELTS)
+ */
+export interface ListeningReport {
+  band?: number | null;
+  estimated_band?: number | null;
+  band_cefr?: string | null;
+  score?: number;
+  total?: number;
+  percentage?: number;
+  weaknesses?: string[];
+  problems?: string[];
+}
+
+/**
  * Complete today's report structure
  */
 export interface TodayReport {
@@ -254,6 +268,7 @@ export interface TodayReport {
   vocabulary: VocabularyReport;
   discourse: DiscourseReport;
   pronunciation?: PronunciationReport;
+  listening?: ListeningReport;
   report_date?: string;
   created_at?: string;
   updated_at?: string;

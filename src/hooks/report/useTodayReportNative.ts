@@ -28,7 +28,7 @@ export interface UseTodayReportNativeResult {
 const MAX_AUTO_RETRIES = 6;
 const RETRY_BACKOFF_MS = 2000;
 
-export function useTodayReportNative(): UseTodayReportNativeResult {
+export function useTodayReportNative(track?: string | null): UseTodayReportNativeResult {
   const dispatch = useAppDispatch();
   const report = useAppSelector(selectTodayReport);
   const isLoading = useAppSelector(selectTodayReportLoading);
@@ -48,14 +48,14 @@ export function useTodayReportNative(): UseTodayReportNativeResult {
   const reload = useCallback(async () => {
     attemptsRef.current = 0;
     setAutoRetrying(false);
-    await dispatch(loadTodayReport());
-  }, [dispatch]);
+    await dispatch(loadTodayReport({ track }));
+  }, [dispatch, track]);
 
   const refresh = useCallback(async () => {
     attemptsRef.current = 0;
     setAutoRetrying(false);
-    await dispatch(refreshTodayReport());
-  }, [dispatch]);
+    await dispatch(refreshTodayReport({ track }));
+  }, [dispatch, track]);
 
   const complete = useCallback(async () => {
     await dispatch(completeTodayReport());
@@ -73,7 +73,7 @@ export function useTodayReportNative(): UseTodayReportNativeResult {
       attemptsRef.current += 1;
       setAutoRetrying(true);
       retryTimerRef.current = setTimeout(() => {
-        void dispatch(loadTodayReport());
+        void dispatch(loadTodayReport({ track }));
       }, RETRY_BACKOFF_MS);
     } else {
       setAutoRetrying(false);
@@ -85,7 +85,7 @@ export function useTodayReportNative(): UseTodayReportNativeResult {
         retryTimerRef.current = null;
       }
     };
-  }, [isLoading, report, error, errorCode, errorStatus, dispatch]);
+  }, [isLoading, report, error, errorCode, errorStatus, dispatch, track]);
 
   const effectiveLoading = isLoading || autoRetrying;
   const effectiveError = autoRetrying ? null : error;

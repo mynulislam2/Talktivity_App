@@ -23,9 +23,13 @@ const initialState: TodayReportState = {
 
 export const loadTodayReport = createAsyncThunk(
   'todayReport/loadTodayReport',
-  async (_, { rejectWithValue }) => {
+  async (
+    arg: { force?: boolean; track?: string | null } | string | null | undefined,
+    { rejectWithValue }
+  ) => {
+    const track = typeof arg === 'string' ? arg : arg?.track ?? null;
     try {
-      const response: any = await reportService.getDailyReport();
+      const response: any = await reportService.getDailyReport(track);
       const report =
         response?.data?.report ?? response?.data ?? response?.report ?? null;
 
@@ -47,8 +51,10 @@ export const loadTodayReport = createAsyncThunk(
     }
   },
   {
-    condition: (_, { getState }) => {
+    condition: (arg, { getState }) => {
       const state = getState() as RootState;
+      const force = typeof arg === 'object' && arg !== null ? Boolean(arg.force) : false;
+      if (force) return true;
       return !state.todayReport.loading;
     },
   }
@@ -57,10 +63,14 @@ export const loadTodayReport = createAsyncThunk(
 // Refresh today's report (backend handles regeneration automatically)
 export const refreshTodayReport = createAsyncThunk(
   'todayReport/refreshTodayReport',
-  async (_, { rejectWithValue }) => {
+  async (
+    arg: { force?: boolean; track?: string | null } | string | null | undefined,
+    { rejectWithValue }
+  ) => {
+    const track = typeof arg === 'string' ? arg : arg?.track ?? null;
     try {
       // Backend will regenerate if needed
-      const response: any = await reportService.getDailyReport();
+      const response: any = await reportService.getDailyReport(track);
       const report =
         response?.data?.report ?? response?.data ?? response?.report ?? null;
 

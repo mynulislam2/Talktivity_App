@@ -12,6 +12,7 @@ import type {
   VocabularyReport,
   DiscourseReport,
   PronunciationReport,
+  ListeningReport,
 } from '@/types/report';
 
 /**
@@ -228,6 +229,26 @@ export function normalizeTodayReport(backendData: any): TodayReport {
       }
     : undefined;
 
+  const rawListening = reportData?.listening;
+  const listening: ListeningReport | undefined = rawListening
+    ? {
+        band: pickBand(rawListening.band, rawListening.estimated_band),
+        estimated_band: pickBand(rawListening.estimated_band, rawListening.band),
+        band_cefr: toCefr(rawListening.band_cefr),
+        score: typeof rawListening.score === 'number' ? rawListening.score : 0,
+        total:
+          typeof rawListening.total === 'number'
+            ? rawListening.total
+            : rawListening.score > 10
+            ? 40
+            : 10,
+        percentage:
+          typeof rawListening.percentage === 'number' ? rawListening.percentage : 0,
+        weaknesses: toArray<string>(rawListening.weaknesses ?? rawListening.problems),
+        problems: toArray<string>(rawListening.problems ?? rawListening.weaknesses),
+      }
+    : undefined;
+
   return {
     overall_band: toBand(reportData?.overall_band),
     overall_cefr: toCefr(reportData?.overall_cefr),
@@ -246,6 +267,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
     vocabulary,
     discourse,
     pronunciation,
+    listening,
     report_date: backendData?.report_date,
     created_at: backendData?.created_at,
     updated_at: backendData?.updated_at,

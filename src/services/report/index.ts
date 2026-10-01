@@ -230,9 +230,11 @@ function getFriendlyReportError(error: unknown, fallback: string) {
 }
 
 class ReportService {
-  async getDailyReport(): Promise<any> {
+  async getDailyReport(track?: string | null): Promise<any> {
     try {
-      const response = await httpService.get(API_URLS.REPORT.DAILY);
+      const response = await httpService.get(API_URLS.REPORT.DAILY, {
+        params: track ? { track } : undefined,
+      });
       return response.data;
     } catch (error: unknown) {
       const apiError = (

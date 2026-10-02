@@ -454,24 +454,27 @@ export const IeltsSpeakingScreen: React.FC = () => {
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         {renderHeader(test.title, subtitle)}
 
-        {/* Step Indicator Tabs (runs Parts 1 → 2 → 3) */}
+        {/* Step Indicator (runs Parts 1 → 2 → 3) */}
         {!isFinalizing && (
-          <View style={styles.drillTabContainer}>
-            {([1, 2, 3] as const).map((p) => {
-              const isActive = currentPart === p;
-              return (
-                <TouchableOpacity
-                  key={p}
-                  onPress={() => setCurrentPart(p)}
-                  style={[styles.drillTabItem, isActive && styles.drillTabItemActive]}
-                  activeOpacity={0.7}
-                >
-                  <Text style={[styles.drillTabText, isActive && styles.drillTabTextActive]}>
-                    Part {p} {isPartDone(p) ? '✓' : ''}
+          <View style={styles.stepperContainer}>
+            {([1, 2, 3] as const).map((p, idx) => (
+              <React.Fragment key={p}>
+                {idx > 0 && <View style={styles.stepDivider} />}
+                <View style={styles.stepItem}>
+                  <Text
+                    style={[
+                      styles.stepNum,
+                      (currentPart === p || isPartDone(p)) && styles.stepNumActive,
+                    ]}
+                  >
+                    {isPartDone(p) ? '✓' : p}
                   </Text>
-                </TouchableOpacity>
-              );
-            })}
+                  <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
+                    {p === 1 ? 'Part 1' : p === 2 ? 'Part 2' : 'Part 3'}
+                  </Text>
+                </View>
+              </React.Fragment>
+            ))}
           </View>
         )}
 
@@ -555,17 +558,9 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 )}
               </View>
 
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <TouchableOpacity onPress={startPart1LiveCall} style={[styles.actionButton, { flex: 1 }]}>
-                  <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setCurrentPart(2)}
-                  style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: 'rgba(255,255,255,0.08)' }]}
-                >
-                  <Text style={styles.actionButtonText}>Go to Part 2 →</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
+                <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
+              </TouchableOpacity>
             </View>
           )}
 
@@ -665,25 +660,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 )}
               </View>
 
-              {/* Bottom Navigation & Retake */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
-                <TouchableOpacity
-                  onPress={() => {
-                    setCurrentPart(1);
-                    startPart1LiveCall();
-                  }}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                >
-                  <Feather name="rotate-ccw" size={s(14)} color="#A78BFA" />
-                  <Text style={{ color: '#A78BFA', fontSize: 12, fontWeight: '600' }}>Retake Part 1</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => setCurrentPart(3)}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-                >
-                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontWeight: '500' }}>Go to Part 3 →</Text>
-                </TouchableOpacity>
-              </View>
             </View>
           )}
 
@@ -699,39 +675,9 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 The AI examiner will ask deeper, analytical questions connected to your Part 2 topic. Provide reasons, examples, and consider multiple perspectives.
               </Text>
 
-              <View style={{ flexDirection: 'row', gap: 10 }}>
-                <TouchableOpacity onPress={startPart3LiveCall} style={[styles.actionButton, { flex: 1 }]}>
-                  <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
-                </TouchableOpacity>
-                {masterSessionId && (
-                  <TouchableOpacity
-                    onPress={() => void requestReport()}
-                    style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: '#8B5CF6' }]}
-                  >
-                    <Text style={styles.actionButtonText}>Submit &amp; View Report →</Text>
-                  </TouchableOpacity>
-                )}
-              </View>
-
-              {/* Bottom Navigation & Retake */}
-              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
-                <TouchableOpacity
-                  onPress={() => setCurrentPart(2)}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
-                >
-                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontWeight: '500' }}>← Back to Part 2</Text>
-                </TouchableOpacity>
-                <TouchableOpacity
-                  onPress={() => {
-                    resetPart2();
-                    setCurrentPart(2);
-                  }}
-                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
-                >
-                  <Feather name="rotate-ccw" size={s(14)} color="#A78BFA" />
-                  <Text style={{ color: '#A78BFA', fontSize: 12, fontWeight: '600' }}>Retake Part 2</Text>
-                </TouchableOpacity>
-              </View>
+              <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
+                <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
+              </TouchableOpacity>
             </View>
           )}
         </ScrollView>

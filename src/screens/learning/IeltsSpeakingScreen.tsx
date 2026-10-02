@@ -19,28 +19,13 @@ import {
   ieltsService,
   IeltsSpeakingTest,
   IeltsTestSession,
-  IeltsCompleteResponse,
 } from '@/services/ielts';
-import { formatBandLabel } from '@/lib/report/bandLabel';
-import { mergeSessionReport, readPronunciationState, toBandNumber } from '@/lib/ielts/speakingResult';
 
 type SpeakingPart = 1 | 2 | 3;
-
-const CRITERIA = [
-  { key: 'fluency_band', label: 'Fluency & Coherence' },
-  { key: 'lexical_band', label: 'Lexical Resource' },
-  { key: 'grammar_band', label: 'Grammatical Range & Accuracy' },
-  { key: 'pronunciation_band', label: 'Pronunciation' },
-] as const;
 
 // The agent saves a Part 1/3 call only after hang-up, so poll for it.
 const POLL_INTERVAL_MS = 3000;
 const POLL_ATTEMPTS = 30; // ~90s
-
-// While pronunciation is pending (still measuring from the recording),
-// re-fetch the session every 5s for up to 3 minutes.
-const PRONUNCIATION_POLL_INTERVAL_MS = 5000;
-const PRONUNCIATION_POLL_ATTEMPTS = 36;
 
 function apiErrorCode(e: unknown): string | undefined {
   return (e as any)?.response?.data?.code;
@@ -59,10 +44,8 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const [session, setSession] = useState<IeltsTestSession | null>(null);
 
   // Band report (POST /sessions/:id/complete)
-  const [report, setReport] = useState<IeltsCompleteResponse | null>(null);
   const [isCompleting, setIsCompleting] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
-  const completeRequestedRef = useRef(false);
 
   // Waiting for the server to record a Part 1/3 call.
   const [waitingPart, setWaitingPart] = useState<SpeakingPart | null>(null);
@@ -88,10 +71,11 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
   const masterSessionId = session?.id ?? null;
 
+  const requestedPart = route.params?.part ? (route.params.part as SpeakingPart) : 1;
+  const [currentPart, setCurrentPart] = useState<SpeakingPart>(requestedPart);
+
   const isPartDone = (part: SpeakingPart) =>
     session?.[`part${part}_status` as const] === 'completed' || (part === 2 && part2Saved);
-  const currentPart = plan.find((p) => !isPartDone(p)) ?? null;
-  const allPartsDone = !!session && currentPart === null;
 
   // Load test data and start (or resume) the session for this mode.
   const loadTest = useCallback(async () => {
@@ -118,12 +102,18 @@ export const IeltsSpeakingScreen: React.FC = () => {
         return;
       }
       setSession(sess);
+      if (sess.part2_status === 'completed') setPart2Saved(true);
+      if (!route.params?.part) {
+        if (sess.part1_status !== 'completed') setCurrentPart(1);
+        else if (sess.part2_status !== 'completed') setCurrentPart(2);
+        else setCurrentPart(3);
+      }
     } catch (e) {
       setLoadError(extractErrorMessage(e) || 'Failed to load the IELTS Speaking test.');
     } finally {
       setLoading(false);
     }
-  }, [mode]);
+  }, [mode, route.params?.part]);
 
   useEffect(() => {
     loadTest();
@@ -175,98 +165,70 @@ export const IeltsSpeakingScreen: React.FC = () => {
     [masterSessionId, stopPolling]
   );
 
+  const requestReport = useCallback(
+    async (isRetry = false) => {
+      if (!masterSessionId) return;
+      setIsCompleting(true);
+      setCompleteError(null);
+      try {
+        const existing = await ieltsService.getSession(masterSessionId);
+        if (existing?.overall_status === 'completed') {
+          navigation.replace('TodaysReportScreen', { track: mode });
+          return;
+        }
+        await ieltsService.completeTestSession(masterSessionId);
+        navigation.replace('TodaysReportScreen', { track: mode });
+      } catch (e) {
+        if (apiErrorCode(e) === 'PART_PENDING' && !isRetry) {
+          // A call is still being saved: wait for it, then retry once.
+          pollUntilSaved(3, () => void requestReport(true));
+        } else {
+          setCompleteError(extractErrorMessage(e) || 'Could not score this test.');
+        }
+      } finally {
+        setIsCompleting(false);
+      }
+    },
+    [masterSessionId, mode, navigation, pollUntilSaved]
+  );
+
   // Parts 1 and 3 are saved server-side after the call; on coming back from
-  // the call screen, wait for that part. Polling stops on blur and unmount.
+  // the call screen, handle transition smoothly. Polling stops on blur and unmount.
   useFocusEffect(
     useCallback(() => {
       if (!masterSessionId) return;
-      if (awaitingPartRef.current) {
-        pollUntilSaved(awaitingPartRef.current);
+      if (awaitingPartRef.current === 1) {
+        // Return from Part 1: seamless transition to Part 2 without blocker spinner!
+        awaitingPartRef.current = null;
+        setCurrentPart(2);
+        ieltsService
+          .getSession(masterSessionId)
+          .then((fresh) => {
+            if (fresh?.id) {
+              setSession(fresh);
+              if (fresh.part2_status === 'completed') setPart2Saved(true);
+            }
+          })
+          .catch(() => {});
+      } else if (awaitingPartRef.current === 3) {
+        // Return from Part 3: wait for Part 3 save and score
+        pollUntilSaved(3, () => {
+          void requestReport();
+        });
       } else {
         ieltsService
           .getSession(masterSessionId)
           .then((fresh) => {
-            if (fresh?.id) setSession(fresh);
+            if (fresh?.id) {
+              setSession(fresh);
+              if (fresh.part2_status === 'completed') setPart2Saved(true);
+            }
           })
           .catch(() => {});
       }
       return stopPolling;
-    }, [masterSessionId, pollUntilSaved, stopPolling])
+    }, [masterSessionId, pollUntilSaved, stopPolling, requestReport])
   );
-
-  const requestReport: (isRetry?: boolean) => Promise<void> = useCallback(async (isRetry = false) => {
-    if (!masterSessionId) return;
-    completeRequestedRef.current = true;
-    setIsCompleting(true);
-    setCompleteError(null);
-    try {
-      const result = await ieltsService.completeTestSession(masterSessionId);
-      setReport(result);
-    } catch (e) {
-      if (apiErrorCode(e) === 'PART_PENDING' && !isRetry) {
-        // A call is still being saved: wait for it, then retry once.
-        const pending =
-          plan.find((p) => p !== 2 && session?.[`part${p}_status` as const] !== 'completed') ??
-          plan[plan.length - 1];
-        pollUntilSaved(pending, () => requestReport(true));
-      } else {
-        setCompleteError(extractErrorMessage(e) || 'Could not score this test.');
-      }
-    } finally {
-      setIsCompleting(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [masterSessionId, session, pollUntilSaved]);
-
-  // Every part in the plan is done: ask the server for the band report once.
-  useEffect(() => {
-    if (allPartsDone && !completeRequestedRef.current) {
-      requestReport();
-    }
-  }, [allPartsDone, requestReport]);
-
-  // Pronunciation is measured from the Part 2 recording after the text bands
-  // are ready. While pending, re-fetch the session every 5s (up to 3 min) and
-  // update the report in place; stop on unmount or once it resolves.
-  useEffect(() => {
-    if (!masterSessionId || !report) return;
-    const merged = mergeSessionReport(session, report);
-    if (readPronunciationState(merged).status !== 'pending') return;
-
-    let cancelled = false;
-    let attempts = 0;
-    let timer: ReturnType<typeof setTimeout> | null = null;
-
-    const poll = () => {
-      timer = setTimeout(async () => {
-        attempts += 1;
-        try {
-          const fresh = await ieltsService.getSession(masterSessionId);
-          if (cancelled) return;
-          setSession(fresh);
-          setReport((prev) => (prev ? { ...prev, ...fresh } : prev));
-          const stillPending = readPronunciationState(fresh as unknown as Record<string, unknown>).status === 'pending';
-          if (stillPending && attempts < PRONUNCIATION_POLL_ATTEMPTS) {
-            poll();
-          }
-        } catch {
-          if (!cancelled && attempts < PRONUNCIATION_POLL_ATTEMPTS) {
-            poll();
-          }
-        }
-      }, PRONUNCIATION_POLL_INTERVAL_MS);
-    };
-    poll();
-
-    return () => {
-      cancelled = true;
-      if (timer) clearTimeout(timer);
-    };
-    // Deliberately keyed off report presence, not its contents, so this
-    // effect starts once when the report first arrives and does not restart
-    // on every poll's own setReport call.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [masterSessionId, report != null]);
 
   // Release the recorder and its audio mode if we leave mid-recording.
   useEffect(() => {
@@ -434,6 +396,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
   };
 
   const resetPart2 = () => {
+    setPart2Saved(false);
     setUploadError(null);
     setRecordingUri(null);
     setSpeakingSecondsLeft(test?.part2_speaking_seconds || 120);
@@ -484,149 +447,95 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
   const subtitle =
     mode === 'drill' ? 'Speaking drill: Parts 1, 2 and 3' : 'Speaking mock test: Parts 1, 2 and 3';
-  const reportBands = mergeSessionReport(session, report);
-  const feedback = report?.report?.feedback;
-  const feedbackItems = Array.isArray(feedback) ? feedback : feedback ? [feedback] : [];
-  // While a call is being saved, hide its "start call" card (back after "Check again" expires).
-  const waiting = waitingPart !== null && !waitExpired;
+  const isFinalizing = isCompleting || waitingPart === 3 || !!completeError;
 
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
         {renderHeader(test.title, subtitle)}
 
-        {/* Step Indicator (runs Parts 1 → 2 → 3) */}
-        <View style={styles.stepperContainer}>
-          {([1, 2, 3] as const).map((p, idx) => (
-            <React.Fragment key={p}>
-              {idx > 0 && <View style={styles.stepDivider} />}
-              <View style={styles.stepItem}>
-                <Text
-                  style={[
-                    styles.stepNum,
-                    (currentPart === p || isPartDone(p)) && styles.stepNumActive,
-                  ]}
+        {/* Step Indicator Tabs (runs Parts 1 → 2 → 3) */}
+        {!isFinalizing && (
+          <View style={styles.drillTabContainer}>
+            {([1, 2, 3] as const).map((p) => {
+              const isActive = currentPart === p;
+              return (
+                <TouchableOpacity
+                  key={p}
+                  onPress={() => setCurrentPart(p)}
+                  style={[styles.drillTabItem, isActive && styles.drillTabItemActive]}
+                  activeOpacity={0.7}
                 >
-                  {isPartDone(p) ? '✓' : p}
-                </Text>
-                <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
-                  {p === 1 ? 'Part 1' : p === 2 ? 'Part 2' : 'Part 3'}
-                </Text>
-              </View>
-            </React.Fragment>
-          ))}
-        </View>
+                  <Text style={[styles.drillTabText, isActive && styles.drillTabTextActive]}>
+                    Part {p} {isPartDone(p) ? '✓' : ''}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        )}
 
         <ScrollView style={styles.contentScroll} contentContainerStyle={styles.contentBody}>
-          {/* Waiting for a Part 1/3 call to be saved */}
-          {waitingPart !== null && (
-            <View style={[styles.timerDisplayBox, { marginBottom: 16 }]}>
-              {waitExpired ? (
-                <>
-                  <Text style={styles.timerLabel}>
-                    Your Part {waitingPart} answers haven't arrived yet.
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => pollUntilSaved(waitingPart)}
-                    style={[styles.prepButton, { marginTop: 8, flex: 0, paddingHorizontal: 20 }]}
-                  >
-                    <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.actionButtonText}>Check again</Text>
-                  </TouchableOpacity>
-                </>
-              ) : (
-                <>
-                  <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 8 }} />
-                  <Text style={styles.timerLabel}>Saving your Part {waitingPart} answers…</Text>
-                </>
-              )}
-            </View>
-          )}
-
-          {/* Band report */}
-          {allPartsDone && (
+          {/* Finalizing / Scoring / Saving Part 3 */}
+          {isFinalizing && (
             <View style={styles.partCard}>
-              <View style={styles.badgeRow}>
-                <Feather name="award" size={s(16)} color="#8B5CF6" />
-                <Text style={styles.partBadgeText}>
-                  {mode === 'drill' ? 'Speaking Drill Band Score' : 'Estimated band report'}
-                </Text>
-              </View>
-              {isCompleting ? (
+              {isCompleting || waitingPart === 3 ? (
                 <View style={styles.timerDisplayBox}>
-                  <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 8 }} />
-                  <Text style={styles.timerLabel}>Scoring your answers…</Text>
+                  <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 12 }} />
+                  <Text style={[styles.partHeading, { fontSize: 16, textAlign: 'center' }]}>
+                    Finalizing Speaking Test
+                  </Text>
+                  <Text style={[styles.timerHint, { textAlign: 'center', marginTop: 4 }]}>
+                    {waitingPart === 3
+                      ? 'Uploading conversation audio and saving transcripts…'
+                      : 'Scoring your test across Fluency, Vocabulary, Grammar & Pronunciation…'}
+                  </Text>
+                  <Text style={[styles.timerHint, { textAlign: 'center', marginTop: 8, opacity: 0.6 }]}>
+                    You will be automatically redirected to Today's Report momentarily.
+                  </Text>
                 </View>
               ) : completeError ? (
                 <View style={styles.timerDisplayBox}>
-                  <Text style={[styles.timerLabel, { color: '#F87171' }]}>{completeError}</Text>
-                  <TouchableOpacity onPress={() => requestReport()} style={[styles.prepButton, { marginTop: 8 }]}>
-                    <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.actionButtonText}>Retry</Text>
-                  </TouchableOpacity>
+                  <Text style={[styles.timerLabel, { color: '#F87171', textAlign: 'center' }]}>
+                    {completeError}
+                  </Text>
+                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
+                    <TouchableOpacity
+                      onPress={() => navigation.goBack()}
+                      style={[styles.prepButton, { flex: 1, backgroundColor: 'rgba(255,255,255,0.1)' }]}
+                    >
+                      <Text style={styles.actionButtonText}>Back to Home</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setCompleteError(null);
+                        setCurrentPart(3);
+                        void startPart3LiveCall();
+                      }}
+                      style={[styles.prepButton, { flex: 1 }]}
+                    >
+                      <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.actionButtonText}>Retake Part 3</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={() => requestReport(true)}
+                      style={[styles.prepButton, { flex: 1, backgroundColor: '#8B5CF6' }]}
+                    >
+                      <Feather name="refresh-cw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                      <Text style={styles.actionButtonText}>Retry</Text>
+                    </TouchableOpacity>
+                  </View>
                 </View>
-              ) : report ? (
-                <>
-                  <Text style={styles.partHeading}>
-                    Overall{' '}
-                    {formatBandLabel(
-                      toBandNumber(reportBands.overall_band),
-                      reportBands.overall_cefr as string | null | undefined
-                    ) ?? 'band not available'}
-                  </Text>
-                  {CRITERIA.map((c) => {
-                    if (c.key === 'pronunciation_band') {
-                      const pronunciation = readPronunciationState(reportBands);
-                      const text =
-                        pronunciation.status === 'measured'
-                          ? formatBandLabel(pronunciation.band, pronunciation.cefr) ?? '—'
-                          : pronunciation.status === 'pending'
-                            ? 'Measuring from your recording…'
-                            : 'Not measured';
-                      return (
-                        <View key={c.key} style={styles.criterionRow}>
-                          <Text style={styles.bulletText}>{c.label}</Text>
-                          <Text style={styles.criterionBand}>{text}</Text>
-                        </View>
-                      );
-                    }
-                    return (
-                      <View key={c.key} style={styles.criterionRow}>
-                        <Text style={styles.bulletText}>{c.label}</Text>
-                        <Text style={styles.criterionBand}>
-                          {formatBandLabel(toBandNumber(reportBands[c.key])) ?? '—'}
-                        </Text>
-                      </View>
-                    );
-                  })}
-                  {feedbackItems.length > 0 && (
-                    <View style={[styles.topicsPreviewCard, { marginTop: 12 }]}>
-                      <Text style={styles.previewTitle}>Feedback</Text>
-                      {feedbackItems.map((f, idx) => (
-                        <Text key={idx} style={[styles.bulletText, { marginTop: 3 }]}>{f}</Text>
-                      ))}
-                    </View>
-                  )}
-                  <Text style={[styles.timerHint, { marginTop: 8 }]}>
-                    Estimated by AI from this practice session. It is not an official IELTS score.
-                  </Text>
-                  <TouchableOpacity
-                    onPress={() => navigation.goBack()}
-                    style={[styles.actionButton, { marginTop: 16 }]}
-                  >
-                    <Text style={styles.actionButtonText}>Back to Home</Text>
-                  </TouchableOpacity>
-                </>
               ) : null}
             </View>
           )}
 
           {/* Part 1 Screen */}
-          {currentPart === 1 && !waiting && (
+          {currentPart === 1 && !isFinalizing && (
             <View style={styles.partCard}>
               <View style={styles.badgeRow}>
                 <Feather name="mic" size={s(16)} color="#8B5CF6" />
-                <Text style={styles.partBadgeText}>Part 1: Introduction & Interview</Text>
+                <Text style={styles.partBadgeText}>Part 1: Introduction &amp; Interview</Text>
               </View>
               <Text style={styles.partHeading}>Familiar Everyday Topics</Text>
               <Text style={styles.partDescription}>
@@ -646,14 +555,22 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 )}
               </View>
 
-              <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>Start Live Part 1 Call (~4 mins)</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity onPress={startPart1LiveCall} style={[styles.actionButton, { flex: 1 }]}>
+                  <Text style={styles.actionButtonText}>Start Part 1 Call (~4 mins)</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setCurrentPart(2)}
+                  style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: 'rgba(255,255,255,0.08)' }]}
+                >
+                  <Text style={styles.actionButtonText}>Proceed to Part 2 →</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
 
           {/* Part 2 Cue Card Screen */}
-          {currentPart === 2 && (
+          {currentPart === 2 && !isFinalizing && (
             <View style={styles.partCard}>
               <View style={styles.badgeRow}>
                 <Feather name="file-text" size={s(16)} color="#8B5CF6" />
@@ -712,8 +629,29 @@ export const IeltsSpeakingScreen: React.FC = () => {
                       </TouchableOpacity>
                     ) : null}
                     <TouchableOpacity onPress={resetPart2} style={{ marginTop: 10 }}>
-                      <Text style={styles.skipPrepText}>Record again</Text>
+                      <Text style={styles.skipPrepText}>Retake Part 2</Text>
                     </TouchableOpacity>
+                  </View>
+                ) : isPartDone(2) ? (
+                  <View style={styles.timerDisplayBox}>
+                    <Text style={[styles.timerLabel, { color: '#34D399', fontWeight: '700' }]}>
+                      ✓ Part 2 Monologue Recorded &amp; Uploaded
+                    </Text>
+                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 12, width: '100%' }}>
+                      <TouchableOpacity
+                        onPress={() => setCurrentPart(3)}
+                        style={[styles.prepButton, { flex: 1.2, backgroundColor: '#8B5CF6' }]}
+                      >
+                        <Text style={styles.actionButtonText}>Proceed to Part 3 →</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={resetPart2}
+                        style={[styles.prepButton, { flex: 0.8, backgroundColor: 'rgba(255,255,255,0.08)' }]}
+                      >
+                        <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 4 }} />
+                        <Text style={styles.actionButtonText}>Retake Part 2</Text>
+                      </TouchableOpacity>
+                    </View>
                   </View>
                 ) : (
                   <View style={styles.prepActionRow}>
@@ -721,29 +659,79 @@ export const IeltsSpeakingScreen: React.FC = () => {
                       <Text style={styles.prepButtonText}>Start 1-Min Prep</Text>
                     </TouchableOpacity>
                     <TouchableOpacity onPress={startRecording} style={styles.skipPrepButton}>
-                      <Text style={styles.skipPrepText}>Skip Prep & Record</Text>
+                      <Text style={styles.skipPrepText}>Skip Prep &amp; Record</Text>
                     </TouchableOpacity>
                   </View>
                 )}
+              </View>
+
+              {/* Bottom Navigation & Retake */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                <TouchableOpacity
+                  onPress={() => {
+                    setCurrentPart(1);
+                    startPart1LiveCall();
+                  }}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                >
+                  <Feather name="rotate-ccw" size={s(14)} color="#A78BFA" />
+                  <Text style={{ color: '#A78BFA', fontSize: 12, fontWeight: '600' }}>Retake Part 1</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => setCurrentPart(3)}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                >
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontWeight: '500' }}>Proceed to Part 3 →</Text>
+                </TouchableOpacity>
               </View>
             </View>
           )}
 
           {/* Part 3 Screen */}
-          {currentPart === 3 && !waiting && (
+          {currentPart === 3 && !isFinalizing && (
             <View style={styles.partCard}>
               <View style={styles.badgeRow}>
                 <Feather name="message-circle" size={s(16)} color="#8B5CF6" />
                 <Text style={styles.partBadgeText}>Part 3: Two-Way Discussion</Text>
               </View>
-              <Text style={styles.partHeading}>Abstract & Societal Topics</Text>
+              <Text style={styles.partHeading}>Abstract &amp; Societal Topics</Text>
               <Text style={styles.partDescription}>
                 The AI examiner will ask deeper, analytical questions connected to your Part 2 topic. Provide reasons, examples, and consider multiple perspectives.
               </Text>
 
-              <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>Start Live Part 3 Discussion (~4 mins)</Text>
-              </TouchableOpacity>
+              <View style={{ flexDirection: 'row', gap: 10 }}>
+                <TouchableOpacity onPress={startPart3LiveCall} style={[styles.actionButton, { flex: 1 }]}>
+                  <Text style={styles.actionButtonText}>Start Part 3 Call (~4 mins)</Text>
+                </TouchableOpacity>
+                {masterSessionId && (
+                  <TouchableOpacity
+                    onPress={() => void requestReport()}
+                    style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: '#8B5CF6' }]}
+                  >
+                    <Text style={styles.actionButtonText}>Submit &amp; View Report →</Text>
+                  </TouchableOpacity>
+                )}
+              </View>
+
+              {/* Bottom Navigation & Retake */}
+              <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, paddingTop: 12, borderTopWidth: 1, borderTopColor: 'rgba(255,255,255,0.06)' }}>
+                <TouchableOpacity
+                  onPress={() => setCurrentPart(2)}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
+                >
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontWeight: '500' }}>← Back to Part 2</Text>
+                </TouchableOpacity>
+                <TouchableOpacity
+                  onPress={() => {
+                    resetPart2();
+                    setCurrentPart(2);
+                  }}
+                  style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}
+                >
+                  <Feather name="rotate-ccw" size={s(14)} color="#A78BFA" />
+                  <Text style={{ color: '#A78BFA', fontSize: 12, fontWeight: '600' }}>Retake Part 2</Text>
+                </TouchableOpacity>
+              </View>
             </View>
           )}
         </ScrollView>

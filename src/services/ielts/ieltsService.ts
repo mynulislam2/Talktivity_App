@@ -94,6 +94,8 @@ export interface IeltsTestSession {
   grammar_band?: number | string | null;
   pronunciation_band?: number | string | null;
   pronunciation_status?: IeltsPronunciationStatus;
+  part1_elapsed_seconds?: number | null;
+  part3_elapsed_seconds?: number | null;
   /** The attempt's master report JSON; carries per-criterion cefr + pronunciation detail. */
   report_data?: Record<string, any> | null;
 }

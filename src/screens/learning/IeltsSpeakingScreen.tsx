@@ -54,6 +54,9 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const afterSavedRef = useRef<(() => void) | null>(null);
   const pollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const pollTokenRef = useRef(0);
+  const callStartTimeRef = useRef<number | null>(null);
+  const [part1Attempted, setPart1Attempted] = useState(false);
+  const [part3Attempted, setPart3Attempted] = useState(false);
 
   // Part 2 Prep & Recording States
   const [prepSecondsLeft, setPrepSecondsLeft] = useState(60);
@@ -197,24 +200,55 @@ export const IeltsSpeakingScreen: React.FC = () => {
   useFocusEffect(
     useCallback(() => {
       if (!masterSessionId) return;
+
       if (awaitingPartRef.current === 1) {
-        // Return from Part 1: seamless transition to Part 2 without blocker spinner!
         awaitingPartRef.current = null;
-        setCurrentPart(2);
+        setPart1Attempted(true);
+
+        const startTime = callStartTimeRef.current;
+        callStartTimeRef.current = null;
+        const callElapsed = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+        const targetDuration = test?.part1_duration_seconds || 240;
+        const isTimeFinished = callElapsed >= Math.max(30, targetDuration - 20);
+
+        if (isTimeFinished) {
+          setCurrentPart(2);
+        } else {
+          // Call was cut early (time not finished): stay on Part 1 so learner can Retake
+          setCurrentPart(1);
+        }
+
         ieltsService
           .getSession(masterSessionId)
           .then((fresh) => {
             if (fresh?.id) {
               setSession(fresh);
               if (fresh.part2_status === 'completed') setPart2Saved(true);
+              const totalElapsed = (fresh as any).part1_elapsed_seconds || 0;
+              if (totalElapsed >= Math.max(30, targetDuration - 20)) {
+                setCurrentPart(2);
+              }
             }
           })
           .catch(() => {});
       } else if (awaitingPartRef.current === 3) {
-        // Return from Part 3: wait for Part 3 save and score
-        pollUntilSaved(3, () => {
-          void requestReport();
-        });
+        awaitingPartRef.current = null;
+        setPart3Attempted(true);
+
+        const startTime = callStartTimeRef.current;
+        callStartTimeRef.current = null;
+        const callElapsed = startTime ? Math.round((Date.now() - startTime) / 1000) : 0;
+        const targetDuration = test?.part3_duration_seconds || 240;
+        const isTimeFinished = callElapsed >= Math.max(30, targetDuration - 20);
+
+        if (isTimeFinished) {
+          pollUntilSaved(3, () => {
+            void requestReport();
+          });
+        } else {
+          // Part 3 cut early: stay on Part 3 with Retake Part 3 option
+          setCurrentPart(3);
+        }
       } else {
         ieltsService
           .getSession(masterSessionId)
@@ -222,12 +256,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
             if (fresh?.id) {
               setSession(fresh);
               if (fresh.part2_status === 'completed') setPart2Saved(true);
+              if (((fresh as any).part1_elapsed_seconds || 0) > 0) setPart1Attempted(true);
+              if (((fresh as any).part3_elapsed_seconds || 0) > 0) setPart3Attempted(true);
             }
           })
           .catch(() => {});
       }
       return stopPolling;
-    }, [masterSessionId, pollUntilSaved, stopPolling, requestReport])
+    }, [masterSessionId, test, pollUntilSaved, stopPolling, requestReport])
   );
 
   // Release the recorder and its audio mode if we leave mid-recording.
@@ -277,6 +313,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
   }, [isRecording, speakingSecondsLeft]);
 
   const startPart1LiveCall = () => {
+    callStartTimeRef.current = Date.now();
     awaitingPartRef.current = 1;
     navigation.navigate('PracticeScreen', {
       topicId: test?.test_set_id || 'IELTS-P1',
@@ -302,6 +339,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
       }
     }
 
+    callStartTimeRef.current = Date.now();
     awaitingPartRef.current = 3;
     navigation.navigate('PracticeScreen', {
       topicId: test?.test_set_id || 'IELTS-P3',
@@ -558,9 +596,24 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 )}
               </View>
 
-              <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
-              </TouchableOpacity>
+              {part1Attempted || ((session as any)?.part1_elapsed_seconds || 0) > 0 ? (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <TouchableOpacity onPress={startPart1LiveCall} style={[styles.actionButton, { flex: 1 }]}>
+                    <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.actionButtonText}>Retake Part 1</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setCurrentPart(2)}
+                    style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: 'rgba(255,255,255,0.08)' }]}
+                  >
+                    <Text style={styles.actionButtonText}>Go to Part 2 →</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
+                  <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
 
@@ -676,7 +729,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
               </Text>
 
               <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
-                <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
+                {part3Attempted || ((session as any)?.part3_elapsed_seconds || 0) > 0 ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+                    <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.actionButtonText}>Retake Part 3</Text>
+                  </View>
+                ) : (
+                  <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
+                )}
               </TouchableOpacity>
             </View>
           )}

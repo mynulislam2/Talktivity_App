@@ -557,13 +557,13 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <TouchableOpacity onPress={startPart1LiveCall} style={[styles.actionButton, { flex: 1 }]}>
-                  <Text style={styles.actionButtonText}>Start Part 1 Call (~4 mins)</Text>
+                  <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
                   onPress={() => setCurrentPart(2)}
                   style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: 'rgba(255,255,255,0.08)' }]}
                 >
-                  <Text style={styles.actionButtonText}>Proceed to Part 2 →</Text>
+                  <Text style={styles.actionButtonText}>Go to Part 2 →</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -642,7 +642,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
                         onPress={() => setCurrentPart(3)}
                         style={[styles.prepButton, { flex: 1.2, backgroundColor: '#8B5CF6' }]}
                       >
-                        <Text style={styles.actionButtonText}>Proceed to Part 3 →</Text>
+                        <Text style={styles.actionButtonText}>Go to Part 3 →</Text>
                       </TouchableOpacity>
                       <TouchableOpacity
                         onPress={resetPart2}
@@ -681,7 +681,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
                   onPress={() => setCurrentPart(3)}
                   style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
                 >
-                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontWeight: '500' }}>Proceed to Part 3 →</Text>
+                  <Text style={{ color: '#9CA3AF', fontSize: 12, fontWeight: '500' }}>Go to Part 3 →</Text>
                 </TouchableOpacity>
               </View>
             </View>
@@ -701,7 +701,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
 
               <View style={{ flexDirection: 'row', gap: 10 }}>
                 <TouchableOpacity onPress={startPart3LiveCall} style={[styles.actionButton, { flex: 1 }]}>
-                  <Text style={styles.actionButtonText}>Start Part 3 Call (~4 mins)</Text>
+                  <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
                 </TouchableOpacity>
                 {masterSessionId && (
                   <TouchableOpacity

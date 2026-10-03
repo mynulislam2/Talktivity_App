@@ -605,18 +605,10 @@ export const IeltsSpeakingScreen: React.FC = () => {
               </View>
 
               {part1Attempted || ((session as any)?.part1_elapsed_seconds || 0) > 0 ? (
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <TouchableOpacity onPress={startPart1LiveCall} style={[styles.actionButton, { flex: 1 }]}>
-                    <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.actionButtonText}>Retake Part 1</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => setCurrentPart(2)}
-                    style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: 'rgba(255,255,255,0.08)' }]}
-                  >
-                    <Text style={styles.actionButtonText}>Go to Part 2 →</Text>
-                  </TouchableOpacity>
-                </View>
+                <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
+                  <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                  <Text style={styles.actionButtonText}>Retake Part 1</Text>
+                </TouchableOpacity>
               ) : (
                 <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
                   <Text style={styles.actionButtonText}>Start Part 1 Call</Text>

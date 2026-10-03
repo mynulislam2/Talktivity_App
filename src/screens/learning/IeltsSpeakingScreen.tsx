@@ -106,8 +106,10 @@ export const IeltsSpeakingScreen: React.FC = () => {
       }
       setSession(sess);
       if (sess.part2_status === 'completed') setPart2Saved(true);
+      const p1Duration = selected.part1_duration_seconds || 240;
+      const part1Done = ((sess as any)?.part1_elapsed_seconds || 0) >= Math.max(30, p1Duration - 20);
       if (!route.params?.part) {
-        if (sess.part1_status !== 'completed') setCurrentPart(1);
+        if (!part1Done) setCurrentPart(1);
         else if (sess.part2_status !== 'completed') setCurrentPart(2);
         else setCurrentPart(3);
       }
@@ -248,6 +250,12 @@ export const IeltsSpeakingScreen: React.FC = () => {
         } else {
           // Part 3 cut early: stay on Part 3 with Retake Part 3 option
           setCurrentPart(3);
+          ieltsService
+            .getSession(masterSessionId)
+            .then((fresh) => {
+              if (fresh?.id) setSession(fresh);
+            })
+            .catch(() => {});
         }
       } else {
         ieltsService

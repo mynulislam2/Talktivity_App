@@ -17,6 +17,7 @@ import type {
   VocabularyCategoryGroup,
   VocabularyTopic,
 } from '@/types/vocabulary';
+import { getTopicIcon } from '@/utils/vocabularyIcons';
 
 export default function VocabularyAllTopicsScreen() {
   const navigation = useNavigation<any>();
@@ -136,7 +137,7 @@ export default function VocabularyAllTopicsScreen() {
                       onPress={() => handleOpenTopic(topic)}
                     >
                       <View style={styles.topicCardHeader}>
-                        <Text style={styles.topicIcon}>{topic.icon || '💬'}</Text>
+                        <Text style={styles.topicIcon}>{getTopicIcon(topic.icon)}</Text>
                         {topic.practiced_words > 0 && (
                           <View style={styles.practicedBadge}>
                             <Feather name="check" size={11} color="#23ff7a" />

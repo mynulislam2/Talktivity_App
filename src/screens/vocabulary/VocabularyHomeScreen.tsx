@@ -22,6 +22,7 @@ import type {
   VocabularyTopic,
   VocabularyWordItem,
 } from '@/types/vocabulary';
+import { getTopicIcon } from '@/utils/vocabularyIcons';
 
 export default function VocabularyHomeScreen() {
   const navigation = useNavigation<any>();
@@ -174,7 +175,7 @@ export default function VocabularyHomeScreen() {
                             activeOpacity={0.75}
                             onPress={() => handleOpenTopic(t)}
                           >
-                            <Text style={styles.searchResultIcon}>{t.icon || '📚'}</Text>
+                            <Text style={styles.searchResultIcon}>{getTopicIcon(t.icon)}</Text>
                             <View style={styles.searchResultInfo}>
                               <Text style={styles.searchResultTitle}>{t.title}</Text>
                               <Text style={styles.searchResultMeta}>
@@ -312,7 +313,7 @@ export default function VocabularyHomeScreen() {
                             onPress={() => handleOpenTopic(topic)}
                           >
                             <View style={styles.topicCardTop}>
-                              <Text style={styles.topicIcon}>{topic.icon || '💬'}</Text>
+                              <Text style={styles.topicIcon}>{getTopicIcon(topic.icon)}</Text>
                               <View style={styles.topicCategoryBadge}>
                                 <Text
                                   style={styles.topicCategoryBadgeText}

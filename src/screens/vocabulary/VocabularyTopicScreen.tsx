@@ -20,6 +20,7 @@ import type {
   VocabularyTopicDetailData,
   VocabularyWordItem,
 } from '@/types/vocabulary';
+import { getTopicIcon } from '@/utils/vocabularyIcons';
 
 export default function VocabularyTopicScreen() {
   const navigation = useNavigation<any>();
@@ -129,7 +130,7 @@ export default function VocabularyTopicScreen() {
               style={styles.heroCard}
             >
               <View style={styles.heroTopRow}>
-                <Text style={styles.heroIcon}>{topic?.icon || '📖'}</Text>
+                <Text style={styles.heroIcon}>{getTopicIcon(topic?.icon)}</Text>
                 <View style={styles.heroBadge}>
                   <Text style={styles.heroBadgeText}>
                     {practicedWords}/{totalWords} PRACTICED

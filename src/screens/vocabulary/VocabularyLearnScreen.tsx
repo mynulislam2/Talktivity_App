@@ -426,33 +426,9 @@ export default function VocabularyLearnScreen() {
 
         {/* Bottom Navigation Buttons */}
         <View style={styles.bottomBar}>
-          <TouchableOpacity
-            style={[
-              styles.navPrevButton,
-              currentIndex === 0 && styles.navPrevButtonDisabled,
-            ]}
-            onPress={handlePrevWord}
-            disabled={currentIndex === 0}
-            activeOpacity={0.7}
-          >
-            <Feather
-              name="chevron-left"
-              size={18}
-              color={currentIndex === 0 ? 'rgba(255,255,255,0.2)' : '#fff'}
-            />
-            <Text
-              style={[
-                styles.navPrevText,
-                currentIndex === 0 && styles.navPrevTextDisabled,
-              ]}
-            >
-              Previous
-            </Text>
-          </TouchableOpacity>
-
           <FigmaPrimaryButton
             onPress={handleNextWord}
-            style={styles.navNextButton}
+            style={styles.navNextButtonFull}
           >
             <Text style={styles.navNextText}>
               {currentIndex + 1 === totalWords ? 'Finish Topic' : 'Next Word'}
@@ -770,34 +746,9 @@ const styles = StyleSheet.create({
     borderTopColor: 'rgba(255,255,255,0.06)',
     backgroundColor: '#09090f',
   },
-  navPrevButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    height: 44,
-    paddingHorizontal: 14,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    gap: 4,
-  },
-  navPrevButtonDisabled: {
-    borderColor: 'rgba(255,255,255,0.06)',
-    backgroundColor: 'transparent',
-  },
-  navPrevText: {
-    fontSize: 13,
-    fontWeight: '600',
-    fontFamily: 'Poppins-Medium',
-    color: '#fff',
-  },
-  navPrevTextDisabled: {
-    color: 'rgba(255,255,255,0.2)',
-  },
-  navNextButton: {
-    flex: 1,
-    height: 44,
+  navNextButtonFull: {
+    width: '100%',
+    height: 48,
     borderRadius: 8,
     flexDirection: 'row',
     alignItems: 'center',
@@ -805,7 +756,7 @@ const styles = StyleSheet.create({
     gap: 6,
   },
   navNextText: {
-    fontSize: 14,
+    fontSize: 14.5,
     fontWeight: '600',
     fontFamily: 'Poppins-SemiBold',
     color: '#fff',

@@ -23,6 +23,11 @@ import TodaysReportScreen from '../screens/learning/TodaysReportScreen';
 import GrammarHubScreen from '../screens/grammar/GrammarHubScreen';
 import GrammarLessonScreen from '../screens/grammar/GrammarLessonScreen';
 import GrammarQuizScreen from '../screens/grammar/GrammarQuizScreen';
+import VocabularyHomeScreen from '../screens/vocabulary/VocabularyHomeScreen';
+import VocabularyAllTopicsScreen from '../screens/vocabulary/VocabularyAllTopicsScreen';
+import VocabularyTopicScreen from '../screens/vocabulary/VocabularyTopicScreen';
+import VocabularyLearnScreen from '../screens/vocabulary/VocabularyLearnScreen';
+import VocabularySavedScreen from '../screens/vocabulary/VocabularySavedScreen';
 
 import { HomeStackParamList } from './types';
 
@@ -111,6 +116,41 @@ const HomeNavigator: React.FC = () => {
       <Stack.Screen
         name="GrammarQuizScreen"
         component={GrammarQuizScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="VocabularyHomeScreen"
+        component={VocabularyHomeScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="VocabularyAllTopicsScreen"
+        component={VocabularyAllTopicsScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="VocabularyTopicScreen"
+        component={VocabularyTopicScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="VocabularyLearnScreen"
+        component={VocabularyLearnScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="VocabularySavedScreen"
+        component={VocabularySavedScreen}
         options={{
           animation: 'slide_from_right',
         }}

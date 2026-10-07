@@ -239,23 +239,23 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
           <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
         </TouchableOpacity>
 
-        {/* Vocabulary Coach Card (Coming Soon) */}
-        <View style={[styles.coachCard, styles.coachCardDisabled]}>
+        {/* Vocabulary Coach Card */}
+        <TouchableOpacity
+          style={styles.coachCard}
+          activeOpacity={0.75}
+          onPress={() => navigation.navigate('VocabularyHomeScreen')}
+        >
           <View style={styles.coachIconBoxVocab}>
             <MaterialCommunityIcons name="translate" size={22} color="#60a5fa" />
           </View>
           <View style={styles.coachInfo}>
-            <View style={styles.coachTitleRow}>
-              <Text style={styles.coachTitle}>Vocabulary Coach</Text>
-              <View style={styles.comingSoonBadge}>
-                <Text style={styles.comingSoonText}>Coming Soon</Text>
-              </View>
-            </View>
+            <Text style={styles.coachTitle}>Vocabulary Coach</Text>
             <Text style={styles.coachSubtitle} numberOfLines={1}>
               Expand your lexical resource with smart drills
             </Text>
           </View>
-        </View>
+          <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
 
         {/* Shadowing Card (Coming Soon) */}
         <View style={[styles.coachCard, styles.coachCardDisabled]}>

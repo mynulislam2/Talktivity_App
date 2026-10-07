@@ -44,6 +44,11 @@ export type HomeStackParamList = {
   GrammarHubScreen: undefined;
   GrammarLessonScreen: { slug: string; topicTitle?: string };
   GrammarQuizScreen: { slug: string; topicTitle?: string };
+  VocabularyHomeScreen: undefined;
+  VocabularyAllTopicsScreen: undefined;
+  VocabularyTopicScreen: { slug: string; topicTitle?: string };
+  VocabularyLearnScreen: { slug: string; topicTitle?: string; initialIndex?: number };
+  VocabularySavedScreen: undefined;
 };
 
 // Learning Stack (Topics, Practice, Call, Progress, Report, Quiz)
@@ -73,6 +78,11 @@ export type LearningStackParamList = {
   GrammarHubScreen: undefined;
   GrammarLessonScreen: { slug: string; topicTitle?: string };
   GrammarQuizScreen: { slug: string; topicTitle?: string };
+  VocabularyHomeScreen: undefined;
+  VocabularyAllTopicsScreen: undefined;
+  VocabularyTopicScreen: { slug: string; topicTitle?: string };
+  VocabularyLearnScreen: { slug: string; topicTitle?: string; initialIndex?: number };
+  VocabularySavedScreen: undefined;
 };
 
 // Roleplay Stack (Topics, Session, Practice)
@@ -254,6 +264,26 @@ export type GrammarLessonScreenProps = NativeStackScreenProps<
 export type GrammarQuizScreenProps = NativeStackScreenProps<
   HomeStackParamList,
   'GrammarQuizScreen'
+>;
+export type VocabularyHomeScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyHomeScreen'
+>;
+export type VocabularyAllTopicsScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyAllTopicsScreen'
+>;
+export type VocabularyTopicScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyTopicScreen'
+>;
+export type VocabularyLearnScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyLearnScreen'
+>;
+export type VocabularySavedScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularySavedScreen'
 >;
 export type ProfileStackProps = CompositeScreenProps<
   BottomTabScreenProps<MainStackParamList, 'ProfileStack'>,

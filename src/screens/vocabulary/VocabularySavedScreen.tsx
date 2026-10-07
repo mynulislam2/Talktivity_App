@@ -261,7 +261,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: '#3d3e50',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 14,
   },
   wordMain: {

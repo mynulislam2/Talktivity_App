@@ -297,7 +297,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   heroCard: {
-    borderRadius: 14,
+    borderRadius: 8,
     padding: 18,
     borderWidth: 1,
     borderColor: 'rgba(106,75,255,0.3)',
@@ -391,7 +391,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.06)',
     borderWidth: 1,
     borderColor: '#3d3e50',
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 14,
   },
   wordLeft: {

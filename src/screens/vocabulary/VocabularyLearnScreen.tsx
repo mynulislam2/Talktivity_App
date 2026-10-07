@@ -490,7 +490,7 @@ const styles = StyleSheet.create({
     gap: 16,
   },
   wordCard: {
-    borderRadius: 14,
+    borderRadius: 8,
     padding: 18,
     borderWidth: 1,
     borderColor: '#3d3e50',
@@ -581,7 +581,7 @@ const styles = StyleSheet.create({
     color: '#fff',
   },
   practiceCard: {
-    borderRadius: 14,
+    borderRadius: 8,
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(106,75,255,0.3)',
@@ -744,7 +744,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
   },
   completedCard: {
-    borderRadius: 16,
+    borderRadius: 8,
     padding: 24,
     alignItems: 'center',
     borderWidth: 1,

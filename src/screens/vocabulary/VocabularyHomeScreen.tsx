@@ -449,7 +449,7 @@ const styles = StyleSheet.create({
     gap: 20,
   },
   goalCard: {
-    borderRadius: 12,
+    borderRadius: 8,
     padding: 16,
     borderWidth: 1,
     borderColor: 'rgba(210,131,255,0.25)',
@@ -506,7 +506,7 @@ const styles = StyleSheet.create({
     borderRadius: 4,
   },
   allTopicsBannerWrapper: {
-    borderRadius: 12,
+    borderRadius: 8,
     overflow: 'hidden',
   },
   allTopicsBanner: {
@@ -514,7 +514,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     padding: 16,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: 'rgba(106,75,255,0.3)',
   },
@@ -586,7 +586,7 @@ const styles = StyleSheet.create({
   topicCard: {
     width: '48.5%',
     minHeight: 112,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.06)',

@@ -282,7 +282,7 @@ const styles = StyleSheet.create({
   topicCard: {
     width: '48.5%',
     minHeight: 108,
-    borderRadius: 12,
+    borderRadius: 8,
     borderWidth: 1,
     borderColor: '#3d3e50',
     backgroundColor: 'rgba(255,255,255,0.06)',

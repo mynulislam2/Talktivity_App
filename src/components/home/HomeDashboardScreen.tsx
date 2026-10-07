@@ -13,6 +13,7 @@ import { Image as ExpoImage } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import { CompleteProfileCard } from './CompleteProfileCard';
 import { getUtcToday } from '@/utils/timezoneUtils';
 import { useResponsive } from '@/theme/responsive';
 import { useAppSelector } from '@/store/hooks';
@@ -119,6 +120,8 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
           ))}
         </View>
       </View>
+
+      <CompleteProfileCard />
 
       {/* Your Today's Plan Card */}
       <LinearGradient

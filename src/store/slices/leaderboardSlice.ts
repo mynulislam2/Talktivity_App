@@ -12,6 +12,24 @@ import type {
   LeaderboardType,
 } from '@/types/leaderboard';
 
+function normalizeUserPosition(userRank: any, type: LeaderboardType): UserPositionData {
+  const user = userRank.user || {
+    id: userRank.id ?? 0,
+    name: userRank.name || userRank.full_name || 'You',
+    profile_picture: userRank.profile_picture,
+    level: userRank.level || 1,
+    xp: userRank.xp || 0,
+    xpForNextLevel: 100,
+    xpProgress: (userRank.xp || 0) % 100,
+  };
+
+  return {
+    ...userRank,
+    user,
+    type,
+  };
+}
+
 /**
  * Leaderboard state interface
  */
@@ -195,10 +213,7 @@ const leaderboardSlice = createSlice({
         state.weeklyLeaderboard = action.payload.leaderboard;
         // Update user position if included in response
         if (action.payload.userRank) {
-          state.userPosition.weekly = {
-            ...action.payload.userRank,
-            type: 'weekly',
-          };
+          state.userPosition.weekly = normalizeUserPosition(action.payload.userRank, 'weekly');
         }
         state.weeklyLoading = false;
       })
@@ -217,10 +232,7 @@ const leaderboardSlice = createSlice({
         state.overallLeaderboard = action.payload.leaderboard;
         // Update user position if included in response
         if (action.payload.userRank) {
-          state.userPosition.overall = {
-            ...action.payload.userRank,
-            type: 'overall',
-          };
+          state.userPosition.overall = normalizeUserPosition(action.payload.userRank, 'overall');
         }
         state.overallLoading = false;
       })
@@ -235,7 +247,9 @@ const leaderboardSlice = createSlice({
         state.positionLoading[action.meta.arg] = true;
       })
       .addCase(loadUserPosition.fulfilled, (state, action) => {
-        state.userPosition[action.payload.type] = action.payload.position;
+        state.userPosition[action.payload.type] = action.payload.position
+          ? normalizeUserPosition(action.payload.position, action.payload.type)
+          : null;
         state.positionLoading[action.payload.type] = false;
       })
       .addCase(loadUserPosition.rejected, (state, action) => {

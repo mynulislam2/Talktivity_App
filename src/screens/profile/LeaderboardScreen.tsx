@@ -55,6 +55,15 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
   );
   const currentXpLabel = currentType === 'weekly' ? 'Weekly XP' : 'Global XP';
 
+  const currentUserName =
+    currentUserPosition?.user?.name ||
+    (currentUserPosition as any)?.name ||
+    'You';
+  const currentUserXp =
+    currentUserPosition?.user?.xp ??
+    (currentUserPosition as any)?.xp ??
+    0;
+
   const handleScopeChange = (scope: LeaderboardType) => {
     dispatch(setLeaderboardType(scope));
   };
@@ -118,7 +127,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
                 <>
                   <View style={styles.avatarSm}>
                     <Text style={styles.avatarSmText}>
-                      {(currentUserPosition.user.name || 'U')
+                      {(currentUserName || 'U')
                         .charAt(0)
                         .toUpperCase()}
                     </Text>
@@ -127,7 +136,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
                     <Text style={styles.youLabel}>You</Text>
                     <Text style={styles.xpSubtext}>
                       {currentUserPosition
-                        ? formatCompactNumber(currentUserPosition.user.xp)
+                        ? formatCompactNumber(currentUserXp)
                         : 'Start earning XP'}
                     </Text>
                   </View>
@@ -149,7 +158,7 @@ const LeaderboardScreen: React.FC<LeaderboardScreenProps> = () => {
               <View style={styles.xpRow}>
                 <Text style={styles.xpValue}>
                   {currentUserPosition
-                    ? `${formatCompactNumber(currentUserPosition.user.xp)}XP`
+                    ? `${formatCompactNumber(currentUserXp)}XP`
                     : '0XP'}
                 </Text>
                 <Ionicons

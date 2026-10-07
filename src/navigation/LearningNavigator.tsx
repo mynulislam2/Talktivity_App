@@ -22,6 +22,9 @@ import ListeningScreen from '../screens/learning/ListeningScreen';
 import ListeningQuizScreen from '../screens/learning/ListeningQuizScreen';
 import IeltsListeningScreen from '../screens/learning/IeltsListeningScreen';
 import IeltsSpeakingScreen from '../screens/learning/IeltsSpeakingScreen';
+import GrammarHubScreen from '../screens/grammar/GrammarHubScreen';
+import GrammarLessonScreen from '../screens/grammar/GrammarLessonScreen';
+import GrammarQuizScreen from '../screens/grammar/GrammarQuizScreen';
 
 import { LearningStackParamList } from './types';
 
@@ -64,6 +67,21 @@ const LearningNavigator: React.FC = () => {
       <Stack.Screen
         name="IeltsSpeakingScreen"
         component={IeltsSpeakingScreen}
+        options={{}}
+      />
+      <Stack.Screen
+        name="GrammarHubScreen"
+        component={GrammarHubScreen}
+        options={{}}
+      />
+      <Stack.Screen
+        name="GrammarLessonScreen"
+        component={GrammarLessonScreen}
+        options={{}}
+      />
+      <Stack.Screen
+        name="GrammarQuizScreen"
+        component={GrammarQuizScreen}
         options={{}}
       />
     </Stack.Navigator>

@@ -118,4 +118,12 @@ export const API_URLS = {
     WORDS: '/vocabulary/words',
     COMPLETE: '/vocabulary/complete',
   },
+  GRAMMAR: {
+    HUB: '/grammar/hub',
+    TOPIC: (slug: string) => `/grammar/topics/${slug}`,
+    LESSONS: (slug: string) => `/grammar/topics/${slug}/lessons`,
+    COMPLETE_LESSONS: (slug: string) => `/grammar/topics/${slug}/lessons/complete`,
+    QUIZ: (slug: string) => `/grammar/topics/${slug}/quiz`,
+    SUBMIT_QUIZ: (slug: string) => `/grammar/topics/${slug}/quiz/submit`,
+  },
 };

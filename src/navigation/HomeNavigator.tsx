@@ -20,6 +20,9 @@ import IeltsListeningScreen from '../screens/learning/IeltsListeningScreen';
 import IeltsSpeakingScreen from '../screens/learning/IeltsSpeakingScreen';
 import ReportScreen from '../screens/learning/ReportScreen';
 import TodaysReportScreen from '../screens/learning/TodaysReportScreen';
+import GrammarHubScreen from '../screens/grammar/GrammarHubScreen';
+import GrammarLessonScreen from '../screens/grammar/GrammarLessonScreen';
+import GrammarQuizScreen from '../screens/grammar/GrammarQuizScreen';
 
 import { HomeStackParamList } from './types';
 
@@ -87,6 +90,27 @@ const HomeNavigator: React.FC = () => {
       <Stack.Screen
         name="TodaysReportScreen"
         component={TodaysReportScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="GrammarHubScreen"
+        component={GrammarHubScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="GrammarLessonScreen"
+        component={GrammarLessonScreen}
+        options={{
+          animation: 'slide_from_right',
+        }}
+      />
+      <Stack.Screen
+        name="GrammarQuizScreen"
+        component={GrammarQuizScreen}
         options={{
           animation: 'slide_from_right',
         }}

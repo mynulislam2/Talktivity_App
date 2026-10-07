@@ -41,6 +41,9 @@ export type HomeStackParamList = {
     reportData: any;
   };
   TodaysReportScreen: undefined;
+  GrammarHubScreen: undefined;
+  GrammarLessonScreen: { slug: string; topicTitle?: string };
+  GrammarQuizScreen: { slug: string; topicTitle?: string };
 };
 
 // Learning Stack (Topics, Practice, Call, Progress, Report, Quiz)
@@ -67,6 +70,9 @@ export type LearningStackParamList = {
   QuizScreen: { topicId?: string; topicName?: string };
   ListeningScreen: undefined;
   ListeningQuizScreen: { topicId?: string; topicName?: string };
+  GrammarHubScreen: undefined;
+  GrammarLessonScreen: { slug: string; topicTitle?: string };
+  GrammarQuizScreen: { slug: string; topicTitle?: string };
 };
 
 // Roleplay Stack (Topics, Session, Practice)
@@ -236,6 +242,18 @@ export type AboutScreenProps = NativeStackScreenProps<
 export type LeaderboardScreenProps = NativeStackScreenProps<
   ProfileStackParamList,
   'LeaderboardScreen'
+>;
+export type GrammarHubScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'GrammarHubScreen'
+>;
+export type GrammarLessonScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'GrammarLessonScreen'
+>;
+export type GrammarQuizScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'GrammarQuizScreen'
 >;
 export type ProfileStackProps = CompositeScreenProps<
   BottomTabScreenProps<MainStackParamList, 'ProfileStack'>,

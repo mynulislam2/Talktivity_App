@@ -4,9 +4,11 @@ import {
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image as ExpoImage } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 
@@ -208,6 +210,69 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         />
       </LinearGradient>
 
+      {/* Pick your coach Section */}
+      <View style={styles.coachSection}>
+        <Text style={styles.coachSectionTitle}>Pick your coach</Text>
+
+        {/* Grammar Coach Card */}
+        <TouchableOpacity
+          style={styles.coachCard}
+          activeOpacity={0.75}
+          onPress={() => navigation.navigate('GrammarHubScreen')}
+        >
+          <View style={styles.coachIconBoxGrammar}>
+            <MaterialCommunityIcons
+              name="book-open-page-variant"
+              size={22}
+              color="#a78bfa"
+            />
+          </View>
+          <View style={styles.coachInfo}>
+            <Text style={styles.coachTitle}>Grammar Coach</Text>
+            <Text style={styles.coachSubtitle} numberOfLines={1}>
+              Your personalised journey to master grammar
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        {/* Vocabulary Coach Card (Coming Soon) */}
+        <View style={[styles.coachCard, styles.coachCardDisabled]}>
+          <View style={styles.coachIconBoxVocab}>
+            <MaterialCommunityIcons name="translate" size={22} color="#60a5fa" />
+          </View>
+          <View style={styles.coachInfo}>
+            <View style={styles.coachTitleRow}>
+              <Text style={styles.coachTitle}>Vocabulary Coach</Text>
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>Coming Soon</Text>
+              </View>
+            </View>
+            <Text style={styles.coachSubtitle} numberOfLines={1}>
+              Expand your lexical resource with smart drills
+            </Text>
+          </View>
+        </View>
+
+        {/* Shadowing Card (Coming Soon) */}
+        <View style={[styles.coachCard, styles.coachCardDisabled]}>
+          <View style={styles.coachIconBoxShadowing}>
+            <MaterialCommunityIcons name="waveform" size={22} color="#34d399" />
+          </View>
+          <View style={styles.coachInfo}>
+            <View style={styles.coachTitleRow}>
+              <Text style={styles.coachTitle}>Shadowing</Text>
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>Coming Soon</Text>
+              </View>
+            </View>
+            <Text style={styles.coachSubtitle} numberOfLines={1}>
+              Mimic native speech to master rhythm, pace, and accent
+            </Text>
+          </View>
+        </View>
+      </View>
+
     </ScrollView>
   );
 };
@@ -312,101 +377,6 @@ const styles = StyleSheet.create({
     bottom: -20,
     right: -18,
   },
-  coachSection: {
-    marginTop: 28,
-  },
-  coachSectionTitle: {
-    fontSize: 24,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    lineHeight: 28.8,
-    letterSpacing: 0.12,
-    color: '#fff',
-  },
-  coachSectionDesc: {
-    marginTop: 6,
-    fontSize: 16,
-    fontFamily: 'Poppins',
-    lineHeight: 22.4,
-    color: '#c6c6c6',
-  },
-  coachCard: {
-    marginTop: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    padding: 20,
-    overflow: 'hidden',
-    minHeight: 128,
-  },
-  coachCardContent: {
-    justifyContent: 'space-between',
-    zIndex: 1,
-  },
-  coachCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    maxWidth: '72%',
-  },
-  coachCardTitle: {
-    flexShrink: 1,
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    lineHeight: 24,
-    letterSpacing: 0.12,
-    color: '#fff',
-  },
-  lockChip: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    padding: 4,
-  },
-  coachCardDesc: {
-    marginTop: 8,
-    fontSize: 15,
-    fontFamily: 'Poppins',
-    lineHeight: 21,
-    color: '#c6c6c6',
-    maxWidth: '66%',
-  },
-  coachCardButton: {
-    marginTop: 16,
-    height: 38,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  coachCardButtonLocked: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  coachCardButtonText: {
-    fontSize: 14,
-    lineHeight: 16.8,
-    color: '#fff',
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-  },
-  coachCardButtonTextLocked: {
-    color: 'rgba(255,255,255,0.8)',
-  },
-  coachImage: {
-    position: 'absolute',
-    bottom: 16,
-    right: 6,
-  },
   listeningCard: {
     marginTop: 16,
     borderRadius: 12,
@@ -501,5 +471,90 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -15,
     right: -10,
+  },
+  coachSection: {
+    marginTop: 20,
+    gap: 12,
+  },
+  coachSectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  coachCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    gap: 14,
+  },
+  coachCardDisabled: {
+    opacity: 0.75,
+  },
+  coachIconBoxGrammar: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachIconBoxVocab: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachIconBoxShadowing: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  coachTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  coachTitle: {
+    fontSize: 15.5,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#fff',
+    lineHeight: 20,
+  },
+  coachSubtitle: {
+    fontSize: 12.5,
+    color: 'rgba(255,255,255,0.6)',
+    fontFamily: 'Poppins',
+    lineHeight: 17,
+    marginTop: 2,
+  },
+  comingSoonBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  comingSoonText: {
+    fontSize: 10,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    color: 'rgba(255,255,255,0.7)',
   },
 });

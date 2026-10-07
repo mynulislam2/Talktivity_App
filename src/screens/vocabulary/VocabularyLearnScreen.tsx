@@ -342,14 +342,23 @@ export default function VocabularyLearnScreen() {
                 <MaterialCommunityIcons name="microphone" size={14} color="#6a4bff" />
                 <Text style={styles.practiceBadgeText}>SPEAKING PRACTICE</Text>
               </View>
-              <TouchableOpacity
-                style={styles.listenSentenceButton}
-                activeOpacity={0.75}
-                onPress={() => speak(targetSentence)}
-              >
-                <Feather name="volume-2" size={15} color="#b0c7ff" />
-                <Text style={styles.listenSentenceText}>Listen sentence</Text>
-              </TouchableOpacity>
+              {(currentWord?.is_practiced || practiceRecorded) ? (
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}>
+                  <Feather name="check-circle" size={13} color="#4ade80" />
+                  <Text style={{ color: '#4ade80', fontSize: 12, fontFamily: 'Poppins-Medium' }}>
+                    Pronounced
+                  </Text>
+                </View>
+              ) : (
+                <TouchableOpacity
+                  style={styles.listenSentenceButton}
+                  activeOpacity={0.75}
+                  onPress={() => speak(targetSentence)}
+                >
+                  <Feather name="volume-2" size={15} color="#b0c7ff" />
+                  <Text style={styles.listenSentenceText}>Listen sentence</Text>
+                </TouchableOpacity>
+              )}
             </View>
 
             <Text style={styles.practiceInstruction}>
@@ -375,50 +384,18 @@ export default function VocabularyLearnScreen() {
               </TouchableOpacity>
               <Text style={styles.micCaption}>
                 {isListening
-                  ? 'Listening... tap to evaluate'
-                  : 'Tap mic and read sentence'}
+                  ? 'Listening... Tap to stop'
+                  : 'Tap to speak'}
               </Text>
             </View>
 
-            {/* Transcript & Feedback */}
+            {/* Transcript */}
             {(spokenText.length > 0 || isListening) && (
               <View style={styles.feedbackSection}>
                 <Text style={styles.transcriptLabel}>You said:</Text>
                 <Text style={styles.transcriptText}>
                   {spokenText || '...'}
                 </Text>
-
-                {accuracyScore !== null && (
-                  <View
-                    style={[
-                      styles.scoreBanner,
-                      accuracyScore >= 70
-                        ? styles.scoreBannerGood
-                        : accuracyScore >= 40
-                        ? styles.scoreBannerMid
-                        : styles.scoreBannerLow,
-                    ]}
-                  >
-                    <Feather
-                      name={
-                        accuracyScore >= 70
-                          ? 'check-circle'
-                          : accuracyScore >= 40
-                          ? 'info'
-                          : 'alert-circle'
-                      }
-                      size={17}
-                      color="#fff"
-                    />
-                    <Text style={styles.scoreBannerText}>
-                      {accuracyScore >= 70
-                        ? `Great pronunciation! (${accuracyScore}% match)`
-                        : accuracyScore >= 40
-                        ? `Good attempt! (${accuracyScore}% match)`
-                        : `Keep practicing! Try reading clearly`}
-                    </Text>
-                  </View>
-                )}
               </View>
             )}
           </LinearGradient>

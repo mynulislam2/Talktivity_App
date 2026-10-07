@@ -100,7 +100,7 @@ export function useVocabularySpeech(options: UseVocabularySpeechOptions = {}) {
       ExpoSpeechRecognitionModule.start({
         lang: 'en-US',
         interimResults: true,
-        continuous: false,
+        continuous: true,
       });
       return true;
     } catch (err) {

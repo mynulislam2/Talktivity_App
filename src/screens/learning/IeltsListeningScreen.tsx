@@ -305,7 +305,7 @@ export const IeltsListeningScreen: React.FC = () => {
       setSummary({
         score: result?.score ?? 0,
         total: result?.total ?? gradedQuestions.length,
-        band: result?.band ?? null,
+        band: result?.band ?? result?.estimated_band ?? null,
         bandCefr: result?.band_cefr ?? null,
       });
     } catch (e) {

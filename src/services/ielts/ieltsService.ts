@@ -69,6 +69,8 @@ export interface IeltsListeningSubmitResponse {
   band: number | null;
   /** CEFR for `band`, e.g. "B2"; null when there is no band. */
   band_cefr?: string | null;
+  /** Scaled estimated band for single-part drill submissions. */
+  estimated_band?: number | null;
   session_id: string;
   detailedResults: IeltsListeningResult[];
 }
@@ -256,6 +258,7 @@ export class IeltsService {
     testSetId: string;
     answers: Record<string, string | string[]>;
     part?: 1 | 2 | 3 | 4;
+    partAnswers?: Record<string, Record<string, string | string[]>>;
   }): Promise<IeltsListeningSubmitResponse> {
     const res = await this.http.post('ielts/listening/submit', data);
     return (res.data as any)?.data;

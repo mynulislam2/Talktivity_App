@@ -177,12 +177,19 @@ export const IeltsSpeakingScreen: React.FC = () => {
       setCompleteError(null);
       try {
         const existing = await ieltsService.getSession(masterSessionId);
+        const navigateBack = () => {
+          if (navigation.canGoBack()) {
+            navigation.goBack();
+          } else {
+            (navigation as any).navigate('PracticeScreen');
+          }
+        };
         if (existing?.overall_status === 'completed') {
-          navigation.replace('TodaysReportScreen', { track: mode });
+          navigateBack();
           return;
         }
         await ieltsService.completeTestSession(masterSessionId);
-        navigation.replace('TodaysReportScreen', { track: mode });
+        navigateBack();
       } catch (e) {
         if (apiErrorCode(e) === 'PART_PENDING' && !isRetry) {
           // A call is still being saved: wait for it, then retry once.
@@ -605,10 +612,18 @@ export const IeltsSpeakingScreen: React.FC = () => {
               </View>
 
               {part1Attempted || ((session as any)?.part1_elapsed_seconds || 0) > 0 ? (
-                <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
-                  <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                  <Text style={styles.actionButtonText}>Retake Part 1</Text>
-                </TouchableOpacity>
+                <>
+                  <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
+                    <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
+                    <Text style={styles.actionButtonText}>Retake Part 1</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setCurrentPart(2)}
+                    style={[styles.actionButton, { marginTop: 10, backgroundColor: 'transparent', borderWidth: 1, borderColor: '#8B5CF6' }]}
+                  >
+                    <Text style={[styles.actionButtonText, { color: '#C4B5FD' }]}>Continue to Part 2</Text>
+                  </TouchableOpacity>
+                </>
               ) : (
                 <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
                   <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
@@ -738,6 +753,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
                   <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
                 )}
               </TouchableOpacity>
+              {masterSessionId && (part3Attempted || ((session as any)?.part3_elapsed_seconds || 0) > 0) && (
+                <TouchableOpacity
+                  onPress={() => void requestReport()}
+                  style={[styles.actionButton, { marginTop: 10, backgroundColor: 'transparent', borderWidth: 1, borderColor: '#8B5CF6' }]}
+                >
+                  <Text style={[styles.actionButtonText, { color: '#C4B5FD' }]}>Finish and get my score</Text>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </ScrollView>

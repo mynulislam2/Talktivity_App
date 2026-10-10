@@ -19,7 +19,6 @@ import { useResponsive } from '@/theme/responsive';
 import { useAppSelector } from '@/store/hooks';
 import type { CourseStatus } from '@/services/course';
 import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
-import { persistListeningTopic } from '@/lib/listeningTopic';
 
 interface HomeDashboardScreenProps {
   practiceMinutes: string;
@@ -57,17 +56,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
   const isExpired = subscriptionState?.currentSubscription?.active === false;
 
   const navigation = useNavigation<any>();
-  const todayListeningTopic = courseStatus?.course?.todayListeningTopic;
-  const isListeningCompleted = Boolean(booleans?.listeningCompleted);
-  const isQuizCompleted = Boolean(booleans?.listeningQuizCompleted);
-  const isAllListeningDone = isListeningCompleted && isQuizCompleted;
-
-  const handleOpenListening = useCallback(() => {
-    if (todayListeningTopic) {
-      persistListeningTopic(todayListeningTopic as any);
-    }
-    navigation.navigate('ListeningScreen');
-  }, [navigation, todayListeningTopic]);
 
   return (
     <ScrollView
@@ -150,68 +138,6 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         />
       </LinearGradient>
 
-      {/* Listening Practice Card */}
-      <LinearGradient
-        colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
-        style={[styles.todayPlanCard, { marginTop: 16 }]}
-      >
-        <View style={styles.todayPlanContent}>
-          <Text style={styles.todayPlanTitle}>Listening Practice</Text>
-          <Text style={styles.todayPlanDesc}>
-            5-minute listening practice on your daily topic.
-          </Text>
-          <FigmaPrimaryButton
-            onPress={handleOpenListening}
-            style={styles.todayPlanButton}
-            disabled={isExpired || isAllListeningDone}
-          >
-            <Text style={styles.todayPlanButtonText}>
-              {isAllListeningDone
-                ? 'Completed'
-                : isListeningCompleted
-                ? 'Continue'
-                : 'Start Listening'}
-            </Text>
-            {isAllListeningDone ? (
-              <Feather name="check" size={14} color="#fff" />
-            ) : (
-              <Feather name="arrow-right" size={14} color="#fff" />
-            )}
-          </FigmaPrimaryButton>
-        </View>
-        <ExpoImage
-          source={require('../../../assets/listening_hero.png')}
-          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-          contentFit="contain"
-          pointerEvents="none"
-        />
-      </LinearGradient>
-
-      {/* Today's Report Card (3rd Option) */}
-      <LinearGradient
-        colors={['rgba(16,185,129,0.20)', 'rgba(40,32,110,0.02)']}
-        style={[styles.todayPlanCard, { marginTop: 16 }]}
-      >
-        <View style={styles.todayPlanContent}>
-          <Text style={styles.todayPlanTitle}>Today's Report</Text>
-          <Text style={styles.todayPlanDesc}>
-            View your detailed score breakdown, band radar, and action plan.
-          </Text>
-          <FigmaPrimaryButton
-            onPress={() => navigation.navigate('TodaysReportScreen')}
-            style={[styles.todayPlanButton, { backgroundColor: '#059669' }]}
-          >
-            <Text style={styles.todayPlanButtonText}>View Report</Text>
-            <Feather name="arrow-right" size={14} color="#fff" />
-          </FigmaPrimaryButton>
-        </View>
-        <ExpoImage
-          source={require('../../../assets/avatar_intro.svg')}
-          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-          contentFit="contain"
-          pointerEvents="none"
-        />
-      </LinearGradient>
 
       {/* Pick your coach Section */}
       <View style={styles.coachSection}>

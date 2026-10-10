@@ -31,7 +31,8 @@ export const IeltsListeningScreen: React.FC = () => {
   const { s } = useResponsive();
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
-  const isDrill = route.params?.mode === 'drill';
+  const mode: 'drill' | 'mock' | undefined = route.params?.mode;
+  const isDrill = mode === 'drill';
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -68,8 +69,13 @@ export const IeltsListeningScreen: React.FC = () => {
     setLoading(true);
     setLoadError(null);
     try {
-      const tests = await ieltsService.getListeningTests();
-      const selected = tests.find((t) => t.parts.some((p) => p.questions.length > 0));
+      const tests = await ieltsService.getListeningTests(mode);
+      const selected =
+        (route.params?.testSetId
+          ? tests.find((t) => t.test_set_id === route.params.testSetId)
+          : null) ||
+        tests.find((t) => t.parts.some((p) => p.questions.length > 0)) ||
+        tests[0];
       if (selected) {
         setTest(selected);
       } else {
@@ -80,7 +86,7 @@ export const IeltsListeningScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [mode, route.params?.testSetId]);
 
   useEffect(() => {
     loadTest();

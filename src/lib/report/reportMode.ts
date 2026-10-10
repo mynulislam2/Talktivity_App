@@ -65,6 +65,11 @@ export function getReportMode(report: unknown): ReportMode {
 
   const record = report as Record<string, unknown>;
 
+  // A too-short scope has no bands at all (every criterion is null) but is
+  // still an IELTS-track report — 'ielts' is what renders the "Speak a bit
+  // more to get a band" state instead of a fabricated A1 / 0.
+  if (record.insufficient_speech === true) return 'ielts';
+
   if (isFiniteNumber(record.overall_band)) return 'ielts';
   if (hasCriterionBand(record)) return 'ielts';
 

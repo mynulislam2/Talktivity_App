@@ -54,12 +54,10 @@ export const SPEAKING_FREQUENCY_OPTIONS: StepOption[] = [
 // Step 5: Main goal
 export const MAIN_GOAL_OPTIONS: StepOption[] = [
   { id: 'ielts', text: 'Prepare for IELTS exam', icon: '🎓' },
-  { id: 'work', text: 'Speak confidently at work', icon: '💼' },
-  { id: 'job', text: 'Find a new job', icon: '🔍' },
-  { id: 'abroad', text: 'Live comfortably abroad', icon: '🏙️' },
+  { id: 'govt_job', text: 'Prepare for govt job', icon: '🏛️' },
+  { id: 'private_job', text: 'Find a private job', icon: '💼' },
+  { id: 'skills', text: 'Upgrade skill and promotion', icon: '🚀' },
   { id: 'travel', text: 'Travel with ease', icon: '✈️' },
-  { id: 'skills', text: 'Expand my skills', icon: '🧠' },
-  { id: 'connect', text: 'Connect with family & friends', icon: '👨‍👩‍👧‍👦' },
 ];
 
 // Step 6: Gender
@@ -200,10 +198,5 @@ export const TUTOR_STYLE_OPTIONS: StepOption[] = [
   { id: 'cheerful', text: 'cheerful' },
   { id: 'energetic', text: 'energetic' },
   { id: 'patient', text: 'patient' },
-  { id: 'strict', text: 'strict' },
-  { id: 'academic', text: 'academic' },
-  { id: 'demanding', text: 'demanding' },
   { id: 'friendly', text: 'friendly' },
-  { id: 'relaxed', text: 'relaxed' },
-  { id: 'encouraging', text: 'encouraging' },
 ];

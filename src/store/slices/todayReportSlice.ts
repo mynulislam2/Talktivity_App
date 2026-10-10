@@ -9,19 +9,27 @@ export interface TodayReportState {
   report: TodayReport | null;
   loading: boolean;
   error: string | null;
+  errorCode: string | null;
+  errorStatus: number | null;
 }
 
 const initialState: TodayReportState = {
   report: null,
   loading: false,
   error: null,
+  errorCode: null,
+  errorStatus: null,
 };
 
 export const loadTodayReport = createAsyncThunk(
   'todayReport/loadTodayReport',
-  async (_, { rejectWithValue }) => {
+  async (
+    arg: { force?: boolean; track?: string | null } | string | null | undefined,
+    { rejectWithValue }
+  ) => {
+    const track = typeof arg === 'string' ? arg : arg?.track ?? null;
     try {
-      const response: any = await reportService.getDailyReport();
+      const response: any = await reportService.getDailyReport(track);
       const report =
         response?.data?.report ?? response?.data ?? response?.report ?? null;
 
@@ -29,16 +37,24 @@ export const loadTodayReport = createAsyncThunk(
         return normalizeTodayReport(report);
       }
 
-      return rejectWithValue(
-        response?.error || "Failed to load today's report"
-      );
+      return rejectWithValue({
+        message: response?.error || "Failed to load today's report",
+        code: response?.code ?? null,
+        status: response?.status ?? null,
+      });
     } catch (error: any) {
-      return rejectWithValue(error.message || "Failed to load today's report");
+      return rejectWithValue({
+        message: error.message || "Failed to load today's report",
+        code: error.code || null,
+        status: error.status || null,
+      });
     }
   },
   {
-    condition: (_, { getState }) => {
+    condition: (arg, { getState }) => {
       const state = getState() as RootState;
+      const force = typeof arg === 'object' && arg !== null ? Boolean(arg.force) : false;
+      if (force) return true;
       return !state.todayReport.loading;
     },
   }
@@ -47,10 +63,14 @@ export const loadTodayReport = createAsyncThunk(
 // Refresh today's report (backend handles regeneration automatically)
 export const refreshTodayReport = createAsyncThunk(
   'todayReport/refreshTodayReport',
-  async (_, { rejectWithValue }) => {
+  async (
+    arg: { force?: boolean; track?: string | null } | string | null | undefined,
+    { rejectWithValue }
+  ) => {
+    const track = typeof arg === 'string' ? arg : arg?.track ?? null;
     try {
       // Backend will regenerate if needed
-      const response: any = await reportService.getDailyReport();
+      const response: any = await reportService.getDailyReport(track);
       const report =
         response?.data?.report ?? response?.data ?? response?.report ?? null;
 
@@ -58,13 +78,17 @@ export const refreshTodayReport = createAsyncThunk(
         return normalizeTodayReport(report);
       }
 
-      return rejectWithValue(
-        response?.error || "Failed to regenerate today's report"
-      );
+      return rejectWithValue({
+        message: response?.error || "Failed to regenerate today's report",
+        code: response?.code ?? null,
+        status: response?.status ?? null,
+      });
     } catch (error: any) {
-      return rejectWithValue(
-        error.message || "Failed to regenerate today's report"
-      );
+      return rejectWithValue({
+        message: error.message || "Failed to regenerate today's report",
+        code: error.code || null,
+        status: error.status || null,
+      });
     }
   }
 );
@@ -106,11 +130,15 @@ const todayReportSlice = createSlice({
   reducers: {
     clearTodayReportError: (state) => {
       state.error = null;
+      state.errorCode = null;
+      state.errorStatus = null;
     },
     resetTodayReport: (state) => {
       state.report = null;
       state.loading = false;
       state.error = null;
+      state.errorCode = null;
+      state.errorStatus = null;
     },
   },
   extraReducers: (builder) => {
@@ -118,33 +146,59 @@ const todayReportSlice = createSlice({
       .addCase(loadTodayReport.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.errorCode = null;
+        state.errorStatus = null;
       })
       .addCase(
         loadTodayReport.fulfilled,
         (state, action: PayloadAction<TodayReport>) => {
           state.loading = false;
           state.report = action.payload;
+          state.error = null;
+          state.errorCode = null;
+          state.errorStatus = null;
         }
       )
       .addCase(loadTodayReport.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        const payload = action.payload as any;
+        state.error =
+          typeof payload === 'string'
+            ? payload
+            : payload?.message || "Failed to load today's report";
+        state.errorCode =
+          typeof payload === 'object' ? payload?.code ?? null : null;
+        state.errorStatus =
+          typeof payload === 'object' ? payload?.status ?? null : null;
         state.report = null;
       })
       .addCase(refreshTodayReport.pending, (state) => {
         state.loading = true;
         state.error = null;
+        state.errorCode = null;
+        state.errorStatus = null;
       })
       .addCase(
         refreshTodayReport.fulfilled,
         (state, action: PayloadAction<TodayReport>) => {
           state.loading = false;
           state.report = action.payload;
+          state.error = null;
+          state.errorCode = null;
+          state.errorStatus = null;
         }
       )
       .addCase(refreshTodayReport.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload as string;
+        const payload = action.payload as any;
+        state.error =
+          typeof payload === 'string'
+            ? payload
+            : payload?.message || "Failed to regenerate today's report";
+        state.errorCode =
+          typeof payload === 'object' ? payload?.code ?? null : null;
+        state.errorStatus =
+          typeof payload === 'object' ? payload?.status ?? null : null;
       })
       .addCase(completeTodayReport.pending, (state) => {
         // Don't set loading to true for completion, as it's a background action
@@ -170,5 +224,9 @@ export const selectTodayReportLoading = (state: RootState) =>
   state.todayReport.loading;
 export const selectTodayReportError = (state: RootState) =>
   state.todayReport.error;
+export const selectTodayReportErrorCode = (state: RootState) =>
+  state.todayReport.errorCode;
+export const selectTodayReportErrorStatus = (state: RootState) =>
+  state.todayReport.errorStatus;
 
 export default todayReportSlice.reducer;

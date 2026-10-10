@@ -342,7 +342,7 @@ const slides: SlideData[] = [
     id: '3',
     headline: 'Track Your Progress',
     description:
-      'Monitor your improvement across official IELTS Band scores and key speaking criteria over time.',
+      'Monitor your improvement across estimated IELTS Band scores and key speaking criteria over time.',
     visual: <RadarVisual />,
   },
 ];

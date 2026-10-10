@@ -20,24 +20,52 @@ export type AuthStackParamList = {
 // Home Stack
 export type HomeStackParamList = {
   HomeScreen: undefined;
-  PracticeScreen: { topicId?: string; topicName?: string } | undefined;
+  PracticeScreen: {
+    topicId?: string;
+    topicName?: string;
+    ieltsMasterSessionId?: string | null;
+    ieltsPart?: number;
+    targetDurationSeconds?: number;
+    prompt?: string;
+    firstPrompt?: string;
+  } | undefined;
   QuizScreen: { topicId?: string; topicName?: string } | undefined;
   ReviewScreen: undefined;
   ListeningScreen: { roomName?: string } | undefined;
   ListeningQuizScreen: { topicId?: string; topicName?: string } | undefined;
+  IeltsListeningScreen: { mode?: 'drill' | 'mock' } | undefined;
+  IeltsSpeakingScreen: { mode?: 'drill' | 'mock'; part?: 1 | 2 | 3 } | undefined;
   ReportScreen: {
     sessionId: string;
     sessionType: 'practice' | 'call';
     reportData: any;
   };
   TodaysReportScreen: undefined;
+  GrammarHubScreen: undefined;
+  GrammarLessonScreen: { slug: string; topicTitle?: string };
+  GrammarQuizScreen: { slug: string; topicTitle?: string };
+  VocabularyHomeScreen: undefined;
+  VocabularyAllTopicsScreen: undefined;
+  VocabularyTopicScreen: { slug: string; topicTitle?: string };
+  VocabularyLearnScreen: { slug: string; topicTitle?: string; initialIndex?: number };
+  VocabularySavedScreen: undefined;
 };
 
 // Learning Stack (Topics, Practice, Call, Progress, Report, Quiz)
 export type LearningStackParamList = {
   TopicsScreen: undefined;
-  PracticeScreen: { topicId?: string; topicName?: string };
+  PracticeScreen: {
+    topicId?: string;
+    topicName?: string;
+    ieltsMasterSessionId?: string | null;
+    ieltsPart?: number;
+    targetDurationSeconds?: number;
+    prompt?: string;
+    firstPrompt?: string;
+  } | undefined;
   ProgressScreen: undefined;
+  IeltsListeningScreen: { mode?: 'drill' | 'mock' } | undefined;
+  IeltsSpeakingScreen: { mode?: 'drill' | 'mock'; part?: 1 | 2 | 3 } | undefined;
   ReportScreen: {
     sessionId: string;
     sessionType: 'practice' | 'call';
@@ -47,6 +75,14 @@ export type LearningStackParamList = {
   QuizScreen: { topicId?: string; topicName?: string };
   ListeningScreen: undefined;
   ListeningQuizScreen: { topicId?: string; topicName?: string };
+  GrammarHubScreen: undefined;
+  GrammarLessonScreen: { slug: string; topicTitle?: string };
+  GrammarQuizScreen: { slug: string; topicTitle?: string };
+  VocabularyHomeScreen: undefined;
+  VocabularyAllTopicsScreen: undefined;
+  VocabularyTopicScreen: { slug: string; topicTitle?: string };
+  VocabularyLearnScreen: { slug: string; topicTitle?: string; initialIndex?: number };
+  VocabularySavedScreen: undefined;
 };
 
 // Roleplay Stack (Topics, Session, Practice)
@@ -216,6 +252,38 @@ export type AboutScreenProps = NativeStackScreenProps<
 export type LeaderboardScreenProps = NativeStackScreenProps<
   ProfileStackParamList,
   'LeaderboardScreen'
+>;
+export type GrammarHubScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'GrammarHubScreen'
+>;
+export type GrammarLessonScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'GrammarLessonScreen'
+>;
+export type GrammarQuizScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'GrammarQuizScreen'
+>;
+export type VocabularyHomeScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyHomeScreen'
+>;
+export type VocabularyAllTopicsScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyAllTopicsScreen'
+>;
+export type VocabularyTopicScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyTopicScreen'
+>;
+export type VocabularyLearnScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularyLearnScreen'
+>;
+export type VocabularySavedScreenProps = NativeStackScreenProps<
+  HomeStackParamList,
+  'VocabularySavedScreen'
 >;
 export type ProfileStackProps = CompositeScreenProps<
   BottomTabScreenProps<MainStackParamList, 'ProfileStack'>,

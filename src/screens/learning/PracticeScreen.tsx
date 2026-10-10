@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 import { Alert } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
 
 import {
   usePracticeStatus,
@@ -24,13 +24,28 @@ import { AppBackground } from '../../components/common/AppBackground';
 
 export default function PracticeScreen() {
   const navigation = useNavigation();
+  const route = useRoute<any>();
   const {
-    canStartSession,
+    topicId,
+    topicName,
+    ieltsMasterSessionId,
+    ieltsPart,
+    targetDurationSeconds,
+    prompt,
+    firstPrompt,
+  } = route?.params || {};
+  // IELTS Part 1/3 calls draw on the IELTS allowance, which the server
+  // enforces; the Daily Plan practice budget must not block them.
+  const isIeltsPart = Boolean(ieltsMasterSessionId && ieltsPart);
+
+  const {
+    canStartSession: canStartPractice,
     remainingTime,
     remainingTimeSeconds,
     isLoading: statusLoading,
     refreshStatus,
   } = usePracticeStatus('practice');
+  const canStartSession = canStartPractice || isIeltsPart;
 
   const {
     sessionState,
@@ -39,7 +54,18 @@ export default function PracticeScreen() {
     startSession,
     endSession,
     updateAgentState,
-  } = usePracticeSession('practice');
+  } = usePracticeSession('practice', {
+    masterSessionId: ieltsMasterSessionId,
+    ieltsPart,
+    targetDurationSeconds,
+    topicOverride: (topicName && prompt)
+      ? {
+          title: topicName,
+          prompt,
+          firstPrompt,
+        }
+      : undefined,
+  });
 
   const { setSaving, setSaved, setFailed } = usePracticeSaving();
 
@@ -56,7 +82,17 @@ export default function PracticeScreen() {
     },
     onSaved: () => {
       setSaved();
-      Alert.alert('Success', 'Session saved successfully!');
+      if (isIeltsPart) {
+        // Back to the IELTS screen, which re-reads the session on focus and
+        // moves on to the next part or the band report.
+        Alert.alert(
+          `Part ${ieltsPart} saved`,
+          'Your answers are saved. Continue on the IELTS Speaking screen.',
+          [{ text: 'Continue', onPress: () => navigation.goBack() }]
+        );
+      } else {
+        Alert.alert('Success', 'Session saved successfully!');
+      }
     },
     onFailed: (message: any) => {
       setFailed(message || 'Failed to save conversation.');
@@ -87,7 +123,7 @@ export default function PracticeScreen() {
     }
   }, [endSession, refreshStatus]);
 
-  const topicTitle = topic?.title || 'General Conversation';
+  const topicTitle = topicName || topic?.title || 'General Conversation';
 
   return (
     <AppBackground>
@@ -106,7 +142,10 @@ export default function PracticeScreen() {
             canStartSession={canStartSession}
             timeLoading={statusLoading}
             remainingTime={remainingTime}
-            remainingTimeSeconds={remainingTimeSeconds}
+            // IELTS parts: no Daily Plan auto-disconnect; the server's IELTS
+            // allowance bounds the call through the token TTL.
+            remainingTimeSeconds={isIeltsPart ? null : remainingTimeSeconds}
+            hideRemainingTime={isIeltsPart}
             stateColor={stateColor}
             onDeviceFailure={handleDeviceFailure}
             onBack={() => navigation.goBack()}

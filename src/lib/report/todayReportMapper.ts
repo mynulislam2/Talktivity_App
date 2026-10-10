@@ -12,6 +12,7 @@ import type {
   VocabularyReport,
   DiscourseReport,
   PronunciationReport,
+  ListeningReport,
 } from '@/types/report';
 
 /**
@@ -40,6 +41,28 @@ function toArray<T>(value: unknown): T[] {
   return Array.isArray(value) ? (value as T[]) : [];
 }
 
+/** A CEFR level is only ever a short server-supplied string; anything else is garbage. */
+function toCefr(value: unknown): string | null {
+  return typeof value === 'string' && value.trim() !== '' ? value.trim() : null;
+}
+
+const PRONUNCIATION_STATUSES = ['pending', 'measured', 'not_measured'] as const;
+
+/**
+ * `pronunciation_status` is new; a report saved before it existed has no such
+ * field. The only reports that ever measured real pronunciation were sourced
+ * from audio, so that's the sole fallback signal — never "measured" by default.
+ */
+export function derivePronunciationStatus(
+  status: unknown,
+  source: unknown
+): 'pending' | 'measured' | 'not_measured' {
+  if ((PRONUNCIATION_STATUSES as readonly unknown[]).includes(status)) {
+    return status as 'pending' | 'measured' | 'not_measured';
+  }
+  return source === 'audio' ? 'measured' : 'not_measured';
+}
+
 /**
  * The backend contract does not pin this scale: some payloads carry a percentage
  * (40), others a fraction (0.4). A fraction fed straight into a width renders
@@ -64,6 +87,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
   const fluency: FluencyReport = {
     band: pickBand(reportData?.fluency?.band, reportData?.fluency?.fluencyBand),
     fluencyBand: pickBand(reportData?.fluency?.fluencyBand, reportData?.fluency?.band),
+    cefr: toCefr(reportData?.fluency?.cefr),
     fluencyScore: reportData?.fluency?.fluencyScore || reportData?.fluency?.score || 0,
     fluencyLevel: reportData?.fluency?.fluencyLevel || reportData?.fluency?.level || 'A1',
     improvementTarget: reportData?.fluency?.improvementTarget
@@ -103,6 +127,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
   const grammar: GrammarReport = {
     band: pickBand(reportData?.grammar?.band, reportData?.grammar?.grammarBand),
     grammarBand: pickBand(reportData?.grammar?.grammarBand, reportData?.grammar?.band),
+    cefr: toCefr(reportData?.grammar?.cefr),
     grammarScore: reportData?.grammar?.grammarScore || reportData?.grammar?.score || 0,
     grammarLevel: reportData?.grammar?.grammarLevel || reportData?.grammar?.level || 'A1',
     improvementTarget: reportData?.grammar?.improvementTarget
@@ -126,6 +151,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
   const vocabulary: VocabularyReport = {
     band: pickBand(reportData?.vocabulary?.band, reportData?.vocabulary?.vocabularyBand),
     vocabularyBand: pickBand(reportData?.vocabulary?.vocabularyBand, reportData?.vocabulary?.band),
+    cefr: toCefr(reportData?.vocabulary?.cefr),
     vocabularyScore: reportData?.vocabulary?.vocabularyScore || reportData?.vocabulary?.score || 0,
     vocabularyLevel: reportData?.vocabulary?.vocabularyLevel || reportData?.vocabulary?.level || 'A1',
     improvementTarget: reportData?.vocabulary?.improvementTarget
@@ -192,6 +218,7 @@ export function normalizeTodayReport(backendData: any): TodayReport {
         band: pickBand(reportData.pronunciation.band, reportData.pronunciation.pronunciationBand),
         pronunciationBand:
           pickBand(reportData.pronunciation.pronunciationBand, reportData.pronunciation.band),
+        cefr: toCefr(reportData.pronunciation.cefr),
         pronunciationScore:
           reportData.pronunciation.pronunciationScore || reportData.pronunciation.score || 0,
         pronunciationLevel: reportData.pronunciation.pronunciationLevel,
@@ -202,16 +229,45 @@ export function normalizeTodayReport(backendData: any): TodayReport {
       }
     : undefined;
 
+  const rawListening = reportData?.listening;
+  const listening: ListeningReport | undefined = rawListening
+    ? {
+        band: pickBand(rawListening.band, rawListening.estimated_band),
+        estimated_band: pickBand(rawListening.estimated_band, rawListening.band),
+        band_cefr: toCefr(rawListening.band_cefr),
+        score: typeof rawListening.score === 'number' ? rawListening.score : 0,
+        total:
+          typeof rawListening.total === 'number'
+            ? rawListening.total
+            : rawListening.score > 10
+            ? 40
+            : 10,
+        percentage:
+          typeof rawListening.percentage === 'number' ? rawListening.percentage : 0,
+        weaknesses: toArray<string>(rawListening.weaknesses ?? rawListening.problems),
+        problems: toArray<string>(rawListening.problems ?? rawListening.weaknesses),
+      }
+    : undefined;
+
   return {
     overall_band: toBand(reportData?.overall_band),
+    overall_cefr: toCefr(reportData?.overall_cefr),
     target_band: toBand(reportData?.target_band),
     band_gap: reportData?.band_gap,
+    insufficient_speech: reportData?.insufficient_speech === true,
+    low_confidence: reportData?.low_confidence === true,
+    short_sample_capped: reportData?.short_sample_capped === true,
+    pronunciation_status: derivePronunciationStatus(
+      reportData?.pronunciation_status,
+      reportData?.source ?? backendData?.source
+    ),
     action_plan_priorities: reportData?.action_plan_priorities,
     fluency,
     grammar,
     vocabulary,
     discourse,
     pronunciation,
+    listening,
     report_date: backendData?.report_date,
     created_at: backendData?.created_at,
     updated_at: backendData?.updated_at,

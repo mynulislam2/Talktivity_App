@@ -10,6 +10,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { ReportCTAButton } from '@/components/report/ReportCTAButton';
 import { StatCard } from '@/components/report/StatCard';
 import { tokens } from '@/theme/tokens';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 import type { FluencyReport } from '@/types/report';
 import type { ReportMode } from '@/lib/report/reportMode';
 
@@ -32,8 +33,10 @@ export function FluencyCard({
 }: FluencyCardProps) {
   const isIelts = mode === 'ielts';
   const band = finite(fluency?.band) ?? finite(fluency?.fluencyBand);
+  const bandLabel = band != null ? formatBandLabel(band, fluency?.cefr) : null;
   const targetBand =
     band != null ? Math.min(9.0, Number((band + 0.5).toFixed(1))) : null;
+  const targetBandLabel = targetBand != null ? formatBandLabel(targetBand) : null;
   const strengths = fluency?.strengths ?? [];
   const areasForImprovement = fluency?.improvements ?? [];
   const score = finite(fluency?.fluencyScore);
@@ -62,9 +65,7 @@ export function FluencyCard({
               {isIelts ? 'Fluency & Coherence' : 'Fluency Analysis'}
             </Text>
             {isIelts ? (
-              <Text style={ss.subtitle}>
-                {band != null ? `Band ${band}` : 'Band not available'}
-              </Text>
+              <Text style={ss.subtitle}>{bandLabel ?? 'Band not available'}</Text>
             ) : fluency?.fluencyLevel ? (
               <Text style={ss.subtitle}>Level {fluency.fluencyLevel}</Text>
             ) : null}
@@ -76,20 +77,12 @@ export function FluencyCard({
         {/* 1. Score / band headline and coaching notes */}
         <StatCard
           title={isIelts ? 'Fluency & Coherence' : 'Fluency Score'}
-          value={
-            isIelts
-              ? band != null
-                ? `Band ${band}`
-                : undefined
-              : score != null
-                ? `${score}%`
-                : undefined
-          }
+          value={isIelts ? bandLabel ?? undefined : score != null ? `${score}%` : undefined}
         >
           {isIelts ? (
-            targetBand != null ? (
+            targetBandLabel != null ? (
               <Text style={[ss.desc, { color: tokens.color.accent.rim, fontWeight: '500' }]}>
-                Next Milestone: Band {targetBand} (0.5 band to go)
+                Next Milestone: {targetBandLabel} (0.5 band to go)
               </Text>
             ) : (
               <Text style={ss.desc}>Band not available</Text>

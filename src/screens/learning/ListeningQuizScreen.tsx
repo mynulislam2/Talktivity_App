@@ -549,12 +549,13 @@ export default function ListeningQuizScreen() {
             completedAt: new Date().toISOString(),
           })
         );
-        if (!cancelled) setCompletedUI(true);
       } catch (e: any) {
         if (!cancelled)
           setCompletionError(
             e?.message || 'Failed to save listening quiz completion.'
           );
+      } finally {
+        if (!cancelled) setCompletedUI(true);
       }
     };
     run();

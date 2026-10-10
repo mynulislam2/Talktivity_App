@@ -16,6 +16,7 @@ import {
   getIeltsBarFillPercentage,
   startingLevelToIeltsBand,
 } from '@/lib/report/cefrProficiency';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 import type { ProficiencyResult } from '@/types/proficiency';
 
 interface CEFRProgressCardProps {
@@ -74,16 +75,21 @@ const CONFIDENCE_NOTES: Record<string, string> = {
   established: 'Keep speaking daily to reach your target band.',
 };
 
+/** "6.5 (B2)" — the radar labels are too narrow for the full "Band X (CEFR)"
+ * text, but must still show the CEFR (I6), so this reuses formatBandLabel and
+ * drops just the "Band " prefix. */
+function compactBandLabel(bandStr?: string | null): string {
+  const num = Number(bandStr);
+  const label = bandStr && Number.isFinite(num) ? formatBandLabel(num) : null;
+  return label ? label.replace(/^Band /, '') : '—';
+}
+
 function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
-  const overallBand = String(proficiency.ieltsBand || '—');
-  const vocabBand = String(proficiency.skills.vocabulary.ieltsBand || '—');
-  const grammarBand = String(proficiency.skills.grammar.ieltsBand || '—');
-  const fluencyBand = String(proficiency.skills.fluency.ieltsBand || '—');
-  const pronunciationBand = String(
-    proficiency.skills.pronunciation?.ieltsBand ||
-    (proficiency.skills as any).discourse?.ieltsBand ||
-    '—'
-  );
+  const overallBand = compactBandLabel(proficiency.ieltsBand);
+  const vocabBand = compactBandLabel(proficiency.skills.vocabulary.ieltsBand);
+  const grammarBand = compactBandLabel(proficiency.skills.grammar.ieltsBand);
+  const fluencyBand = compactBandLabel(proficiency.skills.fluency.ieltsBand);
+  const pronunciationBand = compactBandLabel(proficiency.skills.pronunciation?.ieltsBand);
 
   const radarAxes = [
     {
@@ -133,7 +139,9 @@ function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
     },
     {
       key: 'pronunciation',
-      score: (proficiency.skills as any).pronunciation?.score ?? proficiency.skills.discourse.score,
+      // Never falls back to another skill's score — a not-yet-measured
+      // pronunciation renders as an empty (0) axis, not someone else's value.
+      score: proficiency.skills.pronunciation?.score ?? 0,
       band: pronunciationBand,
       label: 'Pronunciation',
       left: 12,
@@ -240,33 +248,13 @@ function SkillRadarChart({ proficiency }: { proficiency: ProficiencyResult }) {
   );
 }
 
+/** "Band 2.0 (A1, approx.)" — the same "Band X (CEFR)" format used everywhere
+ * else (owner rule), derived from the self-rated band itself rather than the
+ * onboarding descriptor. */
 function formatStartingLevel(level?: string | null) {
   const band = startingLevelToIeltsBand(level);
   if (band) {
-    switch (level?.toLowerCase()) {
-      case 'beginner':
-      case 'a1':
-        return `Band ${band} (Beginner)`;
-      case 'elementary':
-      case 'a2':
-        return `Band ${band} (Elementary)`;
-      case 'intermediate':
-      case 'b1':
-        return `Band ${band} (Intermediate)`;
-      case 'upper':
-      case 'upper-intermediate':
-      case 'upper_intermediate':
-      case 'b2':
-        return `Band ${band} (Upper-Intermediate)`;
-      case 'advanced':
-      case 'c1':
-        return `Band ${band} (Advanced)`;
-      case 'proficiency':
-      case 'c2':
-        return `Band ${band} (Proficient)`;
-      default:
-        return `Band ${band}`;
-    }
+    return formatBandLabel(Number(band));
   }
   return level || null;
 }
@@ -277,6 +265,25 @@ export function CEFRProgressCard({
 }: CEFRProgressCardProps) {
   const navigation = useNavigation<any>();
   const formattedStartingLevel = formatStartingLevel(startingLevel);
+
+  // A target band can be set before any assessment exists, so this is
+  // computed once and shown in both the empty and the assessed states.
+  const targetBandNumeric =
+    proficiency?.targetBand != null ? Number(proficiency.targetBand) : null;
+  const targetBandLabel =
+    targetBandNumeric != null && Number.isFinite(targetBandNumeric)
+      ? formatBandLabel(targetBandNumeric)
+      : null;
+  const bandGapNumeric = proficiency?.bandGap != null ? Number(proficiency.bandGap) : null;
+  const targetLine =
+    targetBandLabel != null ? (
+      <Text style={styles.startedAt}>
+        Target: <Text style={styles.startedAtValue}>{targetBandLabel}</Text>
+        {bandGapNumeric != null && Number.isFinite(bandGapNumeric) && bandGapNumeric > 0
+          ? ` (${bandGapNumeric.toFixed(1)} band to go)`
+          : ''}
+      </Text>
+    ) : null;
 
   if (
     !proficiency ||
@@ -292,6 +299,7 @@ export function CEFRProgressCard({
             Self-rated start: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
           </Text>
         )}
+        {targetLine}
         <FigmaPrimaryButton
           onPress={() =>
             navigation.navigate('LearningStack', { screen: 'TopicsScreen' })
@@ -318,6 +326,8 @@ export function CEFRProgressCard({
   const descriptor =
     proficiency.ieltsDescriptor || getIeltsDescriptor(currentBand);
   const currentBandNumeric = parseFloat(currentBand);
+  const currentBandLabel =
+    formatBandLabel(currentBandNumeric, proficiency.overallLevel) ?? `Band ${currentBand}`;
 
   return (
     <View style={styles.card}>
@@ -331,6 +341,7 @@ export function CEFRProgressCard({
             Self-rated start: <Text style={styles.startedAtValue}>{formattedStartingLevel}</Text>
           </Text>
         )}
+        {targetLine}
       </View>
 
       {/* IELTS Milestone Level Bar */}
@@ -365,7 +376,7 @@ export function CEFRProgressCard({
         </View>
         <Text style={styles.levelDescriptor}>
           {descriptor}{' '}
-          <Text style={styles.levelHighlight}>Band {currentBand}</Text>
+          <Text style={styles.levelHighlight}>{currentBandLabel}</Text>
         </Text>
       </View>
 

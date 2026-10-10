@@ -115,7 +115,23 @@ export const API_URLS = {
     RECORD_ROLEPLAY_SESSION: '/usage/record-roleplay-session',
   },
   VOCABULARY: {
+    HOME: '/vocabulary/home',
+    TOPICS: '/vocabulary/topics',
+    TOPIC: (slug: string) => `/vocabulary/topics/${slug}`,
+    WORD: (id: string | number) => `/vocabulary/words/${id}`,
+    SAVE: (id: string | number) => `/vocabulary/words/${id}/save`,
+    PRACTICE: (id: string | number) => `/vocabulary/words/${id}/practice`,
+    SAVED: '/vocabulary/saved',
+    SEARCH: '/vocabulary/search',
     WORDS: '/vocabulary/words',
     COMPLETE: '/vocabulary/complete',
+  },
+  GRAMMAR: {
+    HUB: '/grammar/hub',
+    TOPIC: (slug: string) => `/grammar/topics/${slug}`,
+    LESSONS: (slug: string) => `/grammar/topics/${slug}/lessons`,
+    COMPLETE_LESSONS: (slug: string) => `/grammar/topics/${slug}/lessons/complete`,
+    QUIZ: (slug: string) => `/grammar/topics/${slug}/quiz`,
+    SUBMIT_QUIZ: (slug: string) => `/grammar/topics/${slug}/quiz/submit`,
   },
 };

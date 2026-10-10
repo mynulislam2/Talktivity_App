@@ -1,22 +1,24 @@
-import React, { useMemo, useCallback } from 'react';
+import React, { useMemo, useCallback, useEffect, useState } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   ScrollView,
+  TouchableOpacity,
 } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import Feather from '@expo/vector-icons/Feather';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Image as ExpoImage } from 'expo-image';
 import { useNavigation } from '@react-navigation/native';
 
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
+import { CompleteProfileCard } from './CompleteProfileCard';
 import { getUtcToday } from '@/utils/timezoneUtils';
 import { useResponsive } from '@/theme/responsive';
 import { useAppSelector } from '@/store/hooks';
 import type { CourseStatus } from '@/services/course';
 import type { DailyProgressBooleans } from '@/hooks/progress/useDailyProgress';
-import { persistListeningTopic } from '@/lib/listeningTopic';
 
 interface HomeDashboardScreenProps {
   practiceMinutes: string;
@@ -24,6 +26,7 @@ interface HomeDashboardScreenProps {
   courseStatus?: CourseStatus | null;
   booleans?: DailyProgressBooleans;
 }
+
 
 function getWeekdayItems() {
   const [y, m, d] = getUtcToday().split('-').map(Number);
@@ -48,25 +51,11 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
 }) => {
   const weekdayItems = useMemo(() => getWeekdayItems(), []);
   const { narrow, s } = useResponsive();
-  // Seven day chips have to share the row whatever the screen is. The chips
-  // used to be a fixed 38pt wide with a 14pt gap (350pt of content inside a
-  // 328pt row on a 360pt phone), so "Wed" wrapped to "We / d".
   const dayCircle = s(26);
   const subscriptionState = useAppSelector((state) => state.subscription);
   const isExpired = subscriptionState?.currentSubscription?.active === false;
 
   const navigation = useNavigation<any>();
-  const todayListeningTopic = courseStatus?.course?.todayListeningTopic;
-  const isListeningCompleted = Boolean(booleans?.listeningCompleted);
-  const isQuizCompleted = Boolean(booleans?.listeningQuizCompleted);
-  const isAllListeningDone = isListeningCompleted && isQuizCompleted;
-
-  const handleOpenListening = useCallback(() => {
-    if (todayListeningTopic) {
-      persistListeningTopic(todayListeningTopic as any);
-    }
-    navigation.navigate('ListeningScreen');
-  }, [navigation, todayListeningTopic]);
 
   return (
     <ScrollView
@@ -74,6 +63,7 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
       contentContainerStyle={styles.contentContainer}
       showsVerticalScrollIndicator={false}
     >
+      {/* 7-Day Tracker */}
       <View style={styles.weekdaysRowContainer}>
         <View style={styles.weekdaysRow}>
           {weekdayItems.map((item) => (
@@ -119,6 +109,9 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         </View>
       </View>
 
+      <CompleteProfileCard />
+
+      {/* Your Today's Plan Card */}
       <LinearGradient
         colors={['rgba(210,131,255,0.23)', 'rgba(40,32,110,0.01)']}
         style={styles.todayPlanCard}
@@ -145,41 +138,70 @@ export const HomeDashboardScreen: React.FC<HomeDashboardScreenProps> = ({
         />
       </LinearGradient>
 
-      <LinearGradient
-        colors={['rgba(93,76,255,0.22)', 'rgba(40,32,110,0.02)']}
-        style={[styles.todayPlanCard, { marginTop: 16 }]}
-      >
-        <View style={styles.todayPlanContent}>
-          <Text style={styles.todayPlanTitle}>Listening Practice</Text>
-          <Text style={styles.todayPlanDesc}>
-            5-minute listening practice on your daily topic.
-          </Text>
-          <FigmaPrimaryButton
-            onPress={handleOpenListening}
-            style={styles.todayPlanButton}
-            disabled={isExpired || isAllListeningDone}
-          >
-            <Text style={styles.todayPlanButtonText}>
-              {isAllListeningDone
-                ? 'Completed'
-                : isListeningCompleted
-                ? 'Continue'
-                : 'Start Listening'}
+
+      {/* Pick your coach Section */}
+      <View style={styles.coachSection}>
+        <Text style={styles.coachSectionTitle}>Pick your coach</Text>
+
+        {/* Grammar Coach Card */}
+        <TouchableOpacity
+          style={styles.coachCard}
+          activeOpacity={0.75}
+          onPress={() => navigation.navigate('GrammarHubScreen')}
+        >
+          <View style={styles.coachIconBoxGrammar}>
+            <MaterialCommunityIcons
+              name="book-open-page-variant"
+              size={22}
+              color="#a78bfa"
+            />
+          </View>
+          <View style={styles.coachInfo}>
+            <Text style={styles.coachTitle}>Grammar Coach</Text>
+            <Text style={styles.coachSubtitle} numberOfLines={1}>
+              Your personalised journey to master grammar
             </Text>
-            {isAllListeningDone ? (
-              <Feather name="check" size={14} color="#fff" />
-            ) : (
-              <Feather name="arrow-right" size={14} color="#fff" />
-            )}
-          </FigmaPrimaryButton>
+          </View>
+          <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        {/* Vocabulary Coach Card */}
+        <TouchableOpacity
+          style={styles.coachCard}
+          activeOpacity={0.75}
+          onPress={() => navigation.navigate('VocabularyHomeScreen')}
+        >
+          <View style={styles.coachIconBoxVocab}>
+            <MaterialCommunityIcons name="translate" size={22} color="#60a5fa" />
+          </View>
+          <View style={styles.coachInfo}>
+            <Text style={styles.coachTitle}>Vocabulary Coach</Text>
+            <Text style={styles.coachSubtitle} numberOfLines={1}>
+              Expand your lexical resource with smart drills
+            </Text>
+          </View>
+          <Feather name="chevron-right" size={20} color="rgba(255,255,255,0.4)" />
+        </TouchableOpacity>
+
+        {/* Shadowing Card (Coming Soon) */}
+        <View style={[styles.coachCard, styles.coachCardDisabled]}>
+          <View style={styles.coachIconBoxShadowing}>
+            <MaterialCommunityIcons name="waveform" size={22} color="#34d399" />
+          </View>
+          <View style={styles.coachInfo}>
+            <View style={styles.coachTitleRow}>
+              <Text style={styles.coachTitle}>Shadowing</Text>
+              <View style={styles.comingSoonBadge}>
+                <Text style={styles.comingSoonText}>Coming Soon</Text>
+              </View>
+            </View>
+            <Text style={styles.coachSubtitle} numberOfLines={1}>
+              Mimic native speech to master rhythm, pace, and accent
+            </Text>
+          </View>
         </View>
-        <ExpoImage
-          source={require('../../../assets/listening_hero.png')}
-          style={[styles.todayPlanHero, { width: s(170), height: s(170) }]}
-          contentFit="contain"
-          pointerEvents="none"
-        />
-      </LinearGradient>
+      </View>
+
     </ScrollView>
   );
 };
@@ -284,101 +306,6 @@ const styles = StyleSheet.create({
     bottom: -20,
     right: -18,
   },
-  coachSection: {
-    marginTop: 28,
-  },
-  coachSectionTitle: {
-    fontSize: 24,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    lineHeight: 28.8,
-    letterSpacing: 0.12,
-    color: '#fff',
-  },
-  coachSectionDesc: {
-    marginTop: 6,
-    fontSize: 16,
-    fontFamily: 'Poppins',
-    lineHeight: 22.4,
-    color: '#c6c6c6',
-  },
-  coachCard: {
-    marginTop: 24,
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.04)',
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    padding: 20,
-    overflow: 'hidden',
-    minHeight: 128,
-  },
-  coachCardContent: {
-    justifyContent: 'space-between',
-    zIndex: 1,
-  },
-  coachCardHeader: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-    maxWidth: '72%',
-  },
-  coachCardTitle: {
-    flexShrink: 1,
-    fontSize: 20,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    lineHeight: 24,
-    letterSpacing: 0.12,
-    color: '#fff',
-  },
-  lockChip: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 20,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    padding: 4,
-  },
-  coachCardDesc: {
-    marginTop: 8,
-    fontSize: 15,
-    fontFamily: 'Poppins',
-    lineHeight: 21,
-    color: '#c6c6c6',
-    maxWidth: '66%',
-  },
-  coachCardButton: {
-    marginTop: 16,
-    height: 38,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingHorizontal: 18,
-    borderRadius: 8,
-    alignSelf: 'flex-start',
-    gap: 6,
-    backgroundColor: 'rgba(255,255,255,0.06)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.35)',
-  },
-  coachCardButtonLocked: {
-    backgroundColor: 'rgba(255,255,255,0.04)',
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  coachCardButtonText: {
-    fontSize: 14,
-    lineHeight: 16.8,
-    color: '#fff',
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-  },
-  coachCardButtonTextLocked: {
-    color: 'rgba(255,255,255,0.8)',
-  },
-  coachImage: {
-    position: 'absolute',
-    bottom: 16,
-    right: 6,
-  },
   listeningCard: {
     marginTop: 16,
     borderRadius: 12,
@@ -473,5 +400,90 @@ const styles = StyleSheet.create({
     position: 'absolute',
     bottom: -15,
     right: -10,
+  },
+  coachSection: {
+    marginTop: 20,
+    gap: 12,
+  },
+  coachSectionTitle: {
+    fontSize: 18,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#fff',
+    marginBottom: 2,
+  },
+  coachCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 14,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: '#3d3e50',
+    backgroundColor: 'rgba(255,255,255,0.06)',
+    gap: 14,
+  },
+  coachCardDisabled: {
+    opacity: 0.75,
+  },
+  coachIconBoxGrammar: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachIconBoxVocab: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachIconBoxShadowing: {
+    width: 44,
+    height: 44,
+    borderRadius: 10,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  coachInfo: {
+    flex: 1,
+    minWidth: 0,
+  },
+  coachTitleRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  coachTitle: {
+    fontSize: 15.5,
+    fontWeight: '600',
+    fontFamily: 'Poppins-SemiBold',
+    color: '#fff',
+    lineHeight: 20,
+  },
+  coachSubtitle: {
+    fontSize: 12.5,
+    color: 'rgba(255,255,255,0.6)',
+    fontFamily: 'Poppins',
+    lineHeight: 17,
+    marginTop: 2,
+  },
+  comingSoonBadge: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderWidth: 1,
+    borderColor: 'rgba(255,255,255,0.08)',
+  },
+  comingSoonText: {
+    fontSize: 10,
+    fontWeight: '500',
+    fontFamily: 'Poppins-Medium',
+    color: 'rgba(255,255,255,0.7)',
   },
 });

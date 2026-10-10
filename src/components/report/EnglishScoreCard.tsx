@@ -7,13 +7,13 @@ import { tokens } from '@/theme/tokens';
 import type { OverallScores } from '@/types/report';
 import type { RadarDataPoint } from '@/lib/report/calculations';
 import type { ReportMode } from '@/lib/report/reportMode';
-import { scoreToIeltsBand } from '@/lib/report/cefrProficiency';
+import { formatBandLabel } from '@/lib/report/bandLabel';
 
 const SCORE_BREAKDOWN_ORDER = [
   { key: 'fluency' as const, label: 'Fluency & Coherence' },
   { key: 'vocabulary' as const, label: 'Lexical Resource' },
   { key: 'grammar' as const, label: 'Grammar & Accuracy' },
-  { key: 'discourse' as const, label: 'Pronunciation' },
+  { key: 'pronunciation' as const, label: 'Pronunciation' },
 ];
 
 const GENERAL_SCORE_BREAKDOWN_ORDER = [
@@ -35,11 +35,12 @@ export interface EnglishScoreCardProps {
 function SkillBar({
   label,
   value,
-  band,
+  displayLabel,
 }: {
   label: string;
   value: number;
-  band?: string | null;
+  /** Already-formatted text (e.g. "Band 5.5 (B2)", "Measuring…"); falls back to a percentage. */
+  displayLabel?: string | null;
 }) {
   const clamped = Math.max(0, Math.min(100, Math.round(value)));
   return (
@@ -47,7 +48,7 @@ function SkillBar({
       <Text style={sb.label}>{label}</Text>
       <View style={sb.row}>
         <Text style={sb.bandText}>
-          {band != null ? `Band ${band}` : `${clamped}%`}
+          {displayLabel != null ? displayLabel : `${clamped}%`}
         </Text>
         <View style={sb.track}>
           <LinearGradient
@@ -77,6 +78,58 @@ const sb = StyleSheet.create({
   fill: { height: '100%', borderRadius: 9999 },
 });
 
+function toBandNumber(value: unknown): number | null {
+  if (typeof value !== 'number' && typeof value !== 'string') return null;
+  const num = Number(value);
+  return Number.isFinite(num) ? num : null;
+}
+
+function clampToPercent(band: number): number {
+  return Math.max(0, Math.min(100, (band / 9) * 100));
+}
+
+type BreakdownKey = 'fluency' | 'vocabulary' | 'grammar' | 'discourse' | 'pronunciation';
+
+/** General mode keeps the legacy 0-100 score bars; IELTS mode shows real bands only. */
+function criterionDisplay(
+  key: BreakdownKey,
+  overallScores: OverallScores | null | undefined,
+  isIelts: boolean
+): { value: number; displayLabel: string | null } {
+  if (!isIelts) {
+    const value =
+      key === 'fluency'
+        ? overallScores?.fluency
+        : key === 'vocabulary'
+          ? overallScores?.vocabulary
+          : key === 'grammar'
+            ? overallScores?.grammar
+            : overallScores?.discourse;
+    return { value: value ?? 0, displayLabel: null };
+  }
+  if (key === 'pronunciation') {
+    const pronunciation = overallScores?.criteria?.pronunciation;
+    const measured = pronunciation?.status === 'measured';
+    const displayLabel = measured
+      ? formatBandLabel(pronunciation?.band ?? null, pronunciation?.cefr) ?? 'Band not available'
+      : pronunciation?.status === 'pending'
+        ? 'Measuring from your recording…'
+        : 'Not measured';
+    const value = measured && pronunciation?.band != null ? clampToPercent(pronunciation.band) : 0;
+    return { value, displayLabel };
+  }
+  const criterion =
+    key === 'fluency'
+      ? overallScores?.criteria?.fluency
+      : key === 'vocabulary'
+        ? overallScores?.criteria?.vocabulary
+        : key === 'grammar'
+          ? overallScores?.criteria?.grammar
+          : undefined;
+  const value = criterion?.band != null ? clampToPercent(criterion.band) : 0;
+  return { value, displayLabel: formatBandLabel(criterion?.band ?? null, criterion?.cefr) };
+}
+
 export function EnglishScoreCard({
   overallScores,
   onContinue,
@@ -87,9 +140,16 @@ export function EnglishScoreCard({
   const overallScore = overallScores?.overall;
   const hasOverallScore =
     typeof overallScore === 'number' && Number.isFinite(overallScore);
-  const overallBand = overallScores?.overall_band != null
-    ? Number(overallScores.overall_band).toFixed(1)
-    : null;
+  const overallBandLabel = formatBandLabel(
+    toBandNumber(overallScores?.overall_band),
+    overallScores?.overall_cefr
+  );
+
+  const pronunciationForChart = overallScores?.criteria?.pronunciation;
+  const pronunciationChartValue =
+    pronunciationForChart?.status === 'measured' && pronunciationForChart.band != null
+      ? clampToPercent(pronunciationForChart.band)
+      : 50; // not measured: keep the pentagon shape sane instead of a fabricated value
 
   const pentagonValues: [number, number, number, number, number] | null =
     overallScores
@@ -98,7 +158,7 @@ export function EnglishScoreCard({
           overallScores.fluency,
           overallScores.vocabulary,
           overallScores.grammar,
-          overallScores.discourse,
+          isIelts ? pronunciationChartValue : overallScores.discourse,
         ]
       : null;
 
@@ -114,8 +174,15 @@ export function EnglishScoreCard({
             {isIelts ? 'Your Overall Band Score' : 'Your English Score'}
           </Text>
           {isIelts ? (
-            overallBand != null ? (
-              <Text style={s.heroLevel}>Band {overallBand}</Text>
+            overallScores?.insufficient_speech ? (
+              <Text style={s.heroUnavailable}>Speak a bit more to get a band</Text>
+            ) : overallBandLabel != null ? (
+              <>
+                <Text style={s.heroLevel}>{overallBandLabel}</Text>
+                {overallScores?.low_confidence || overallScores?.short_sample_capped ? (
+                  <Text style={s.heroNote}>Based on a short sample</Text>
+                ) : null}
+              </>
             ) : (
               <Text style={s.heroUnavailable}>Band not available</Text>
             )
@@ -154,14 +221,10 @@ export function EnglishScoreCard({
         {overallScores ? (
           <View style={s.grid}>
             {breakdownOrder.map(({ key, label }) => {
-              const val = overallScores[key];
+              const { value, displayLabel } = criterionDisplay(key, overallScores, isIelts);
               return (
                 <View key={key} style={s.skillBarWrap}>
-                  <SkillBar
-                    label={label}
-                    value={val}
-                    band={isIelts ? scoreToIeltsBand(val) : null}
-                  />
+                  <SkillBar label={label} value={value} displayLabel={displayLabel} />
                 </View>
               );
             })}
@@ -212,6 +275,12 @@ const s = StyleSheet.create({
     fontSize: 16,
     fontFamily: 'Poppins',
     lineHeight: 24,
+    color: tokens.color.text.secondary,
+  },
+  heroNote: {
+    marginTop: 4,
+    fontSize: 12,
+    fontFamily: 'Poppins',
     color: tokens.color.text.secondary,
   },
   unavailable: {

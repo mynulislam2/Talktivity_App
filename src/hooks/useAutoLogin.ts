@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import { AppDispatch } from '@/store';
 import { asyncStorageManager } from '@/lib/auth/asyncStorageManager';
+import { authService } from '@/services/auth';
 import {
   clearAuth,
   setUser,
@@ -51,6 +52,21 @@ export const useAutoLogin = (): UseAutoLoginReturn => {
           const user = await asyncStorageManager.getUser();
           if (user) {
             dispatch(setUser(user));
+            // The cached user can predate fields like learning_track, so
+            // refresh it from /auth/me in the background. Offline or failed:
+            // keep the cached user (the http interceptor handles a 401).
+            authService
+              .getCurrentUser()
+              .then(async (fresh) => {
+                // A logout (or another login) during the request must not be
+                // undone by it.
+                if (!(await asyncStorageManager.isAuthenticated())) return;
+                const stored = await asyncStorageManager.getUser();
+                if (!stored || stored.id !== fresh.id) return;
+                await asyncStorageManager.storeUser(fresh);
+                dispatch(setUser(fresh));
+              })
+              .catch(() => {});
           } else {
             await asyncStorageManager.clearAuthData();
             dispatch(clearAuth());

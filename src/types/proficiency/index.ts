@@ -70,12 +70,32 @@ export interface ProficiencyResult {
     fluency: ProficiencySkillResult;
     grammar: ProficiencySkillResult;
     vocabulary: ProficiencySkillResult;
-    discourse: ProficiencySkillResult;
     pronunciation?: ProficiencySkillResult;
   };
-  progressToNextLevel: number;
-  nextLevel: CefrLevel;
   sessionCount: number;
+}
+
+/** GET /reports/proficiency `current`: the server-computed profile progress (single source of truth). */
+export interface ProfileProgressCriterion {
+  band: number | null;
+  cefr: string | null;
+}
+
+export interface ProfileProgress {
+  overall_band: number | null;
+  overall_cefr: string | null;
+  approximate: boolean;
+  criteria: {
+    fc: ProfileProgressCriterion;
+    lr: ProfileProgressCriterion;
+    gra: ProfileProgressCriterion;
+    pron: ProfileProgressCriterion | null;
+  };
+  target_band: number | null;
+  band_gap: number | null;
+  trend_7d: string | null;
+  last_assessed_at: string | null;
+  sources: number;
 }
 
 export interface ProficiencyResponse {
@@ -83,6 +103,7 @@ export interface ProficiencyResponse {
   data?: {
     sessionCount: number;
     sessions: SessionScore[];
+    current?: ProfileProgress | null;
   };
   error?: string;
 }

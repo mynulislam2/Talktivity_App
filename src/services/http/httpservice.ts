@@ -78,7 +78,10 @@ export class HttpService {
       // a TTS synthesis before responding — comfortably past the 15s default.
       api.includes('/review/evaluate-audio') ||
       api.includes('/reports/call') ||
-      api.includes('/reports/daily')
+      api.includes('/reports/daily') ||
+      // IELTS speaking: /part2 transcribes the recording and /complete runs
+      // the band-report LLM before responding.
+      /ielts\/sessions\/[^/]+\/(part2|complete)$/.test(api)
     ) {
       return 120000;
     } else {

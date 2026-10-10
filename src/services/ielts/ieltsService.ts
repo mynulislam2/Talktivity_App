@@ -67,6 +67,8 @@ export interface IeltsListeningSubmitResponse {
   total: number;
   /** Full test only; null for a single-part drill. */
   band: number | null;
+  /** Single-part drill estimated band; null for full mock. */
+  estimated_band?: number | null;
   /** CEFR for `band`, e.g. "B2"; null when there is no band. */
   band_cefr?: string | null;
   session_id: string;
@@ -172,13 +174,15 @@ export class IeltsService {
     };
   }
 
-  async getSpeakingTests(): Promise<IeltsSpeakingTest[]> {
-    const res = await this.http.get('ielts/speaking/tests');
+  async getSpeakingTests(mode?: 'drill' | 'mock'): Promise<IeltsSpeakingTest[]> {
+    const url = mode ? `ielts/speaking/tests?mode=${mode}` : 'ielts/speaking/tests';
+    const res = await this.http.get(url);
     return (res.data as any)?.data || [];
   }
 
-  async getListeningTests(): Promise<IeltsListeningTest[]> {
-    const res = await this.http.get('ielts/listening/tests');
+  async getListeningTests(mode?: 'drill' | 'mock'): Promise<IeltsListeningTest[]> {
+    const url = mode ? `ielts/listening/tests?mode=${mode}` : 'ielts/listening/tests';
+    const res = await this.http.get(url);
     const list = (res.data as any)?.data || [];
     return list.map((item: any) => this.normalizeListeningTest(item));
   }

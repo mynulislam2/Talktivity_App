@@ -85,8 +85,11 @@ export const IeltsSpeakingScreen: React.FC = () => {
     setLoading(true);
     setLoadError(null);
     try {
-      const tests = await ieltsService.getSpeakingTests();
-      const selected = tests[0];
+      const tests = await ieltsService.getSpeakingTests(mode);
+      const selected =
+        (route.params?.testSetId
+          ? tests.find((t) => t.test_set_id === route.params.testSetId)
+          : null) || tests[0];
       if (!selected) {
         setLoadError('No IELTS Speaking test is available yet.');
         return;
@@ -118,7 +121,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  }, [mode, route.params?.part]);
+  }, [mode, route.params?.part, route.params?.testSetId]);
 
   useEffect(() => {
     loadTest();
@@ -728,16 +731,24 @@ export const IeltsSpeakingScreen: React.FC = () => {
                 The AI examiner will ask deeper, analytical questions connected to your Part 2 topic. Provide reasons, examples, and consider multiple perspectives.
               </Text>
 
-              <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
-                {part3Attempted || ((session as any)?.part3_elapsed_seconds || 0) > 0 ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+              {part3Attempted || ((session as any)?.part3_elapsed_seconds || 0) > 0 ? (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <TouchableOpacity onPress={startPart3LiveCall} style={[styles.actionButton, { flex: 1 }]}>
                     <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
                     <Text style={styles.actionButtonText}>Retake Part 3</Text>
-                  </View>
-                ) : (
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => requestReport(false)}
+                    style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: '#059669' }]}
+                  >
+                    <Text style={styles.actionButtonText}>Finish & Score →</Text>
+                  </TouchableOpacity>
+                </View>
+              ) : (
+                <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
                   <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
-                )}
-              </TouchableOpacity>
+                </TouchableOpacity>
+              )}
             </View>
           )}
         </ScrollView>

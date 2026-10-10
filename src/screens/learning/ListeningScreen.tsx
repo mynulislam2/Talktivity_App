@@ -32,6 +32,13 @@ import { AppBackground } from '../../components/common/AppBackground';
 import { tokens } from '../../theme/tokens';
 import { FigmaPrimaryButton } from '@/components/ui/FigmaPrimaryButton';
 import type { QuizOption, QuizQuestion } from '@/types/quiz';
+import {
+  resolveStoredListeningTopic,
+  hydrateListeningTopic,
+  getFallbackListeningTopic,
+  persistListeningTopic,
+  hasListeningTopicEssentials,
+} from '@/lib/listeningTopic';
 
 const PARTY_POPPER = require('../../../assets/figma/listening/party-popper.png');
 const LISTENING_TOPIC_KEY = 'listeningTopic';
@@ -788,20 +795,35 @@ export default function ListeningScreen() {
     const init = async () => {
       try {
         let topic: any = null;
-        const stored = await AsyncStorage.getItem(LISTENING_TOPIC_KEY);
-        if (stored) {
-          try {
+        try {
+          const stored = await AsyncStorage.getItem(LISTENING_TOPIC_KEY);
+          if (stored) {
             topic = JSON.parse(stored);
-          } catch {}
+          }
+        } catch {}
+
+        if (!topic || !hasListeningTopicEssentials(topic)) {
+          const resolved = await resolveStoredListeningTopic();
+          if (hasListeningTopicEssentials(resolved)) {
+            topic = resolved;
+          }
         }
-        if (!topic?.conversation) {
+
+        if (!topic || !hasListeningTopicEssentials(topic)) {
           try {
             const courseStatus = await courseService.getCourseStatus();
-            topic = courseStatus?.course?.todayListeningTopic || topic;
+            if (courseStatus?.course?.todayListeningTopic) {
+              topic = hydrateListeningTopic(courseStatus.course.todayListeningTopic as any);
+            }
           } catch {}
         }
 
+        if (!topic || !hasListeningTopicEssentials(topic)) {
+          topic = getFallbackListeningTopic();
+        }
+
         if (topic && !cancelled) {
+          await persistListeningTopic(topic);
           await AsyncStorage.setItem(LISTENING_TOPIC_KEY, JSON.stringify(topic));
           setCurrentTopic(topic);
 

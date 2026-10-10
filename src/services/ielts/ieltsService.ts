@@ -16,6 +16,7 @@ export interface IeltsSpeakingTest {
   part2_title?: string;
   part2_bullet_points?: string[];
   part2_preparation_hint?: string;
+  part2_cue_card?: { topic?: string; bullets?: string[] };
   part3_duration_seconds: number;
   part3_theme?: string;
   part3_context_prompt?: string;
@@ -44,6 +45,7 @@ export interface IeltsListeningPart {
   part_number: 1 | 2 | 3 | 4;
   title: string;
   audio_url: string;
+  instructions?: string;
   questions: IeltsListeningQuestion[];
 }
 

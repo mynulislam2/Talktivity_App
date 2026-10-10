@@ -19,6 +19,7 @@ import Feather from '@expo/vector-icons/Feather';
 import { courseService } from '@/services/course';
 import { formatLocalDate } from '@/utils/timezoneUtils';
 import { HomeViewToggle } from './HomeViewToggle';
+import { AppBackButton } from '@/components/common/AppBackButton';
 
 interface HomeFullTimelineScreenProps {
   currentWeek: number;
@@ -27,16 +28,7 @@ interface HomeFullTimelineScreenProps {
 }
 
 function ScreenBackButton({ onClick }: { onClick: () => void }) {
-  return (
-    <TouchableOpacity
-      onPress={onClick}
-      style={styles.backButton}
-      activeOpacity={0.7}
-      aria-label="Go back"
-    >
-      <Ionicons name="chevron-back" size={20} color="rgba(255,255,255,0.8)" />
-    </TouchableOpacity>
-  );
+  return <AppBackButton onPress={onClick} />;
 }
 
 function TimelineWeekCard({
@@ -162,6 +154,7 @@ export const HomeFullTimelineScreen: React.FC<HomeFullTimelineScreenProps> = ({
         <View style={styles.headerSpacer} />
         <Text style={styles.headerTitle}>Full Timeline</Text>
         <View style={styles.headerSpacer} />
+        <View style={styles.headerRightPlaceholder} />
       </View>
 
       <View style={styles.toggleContainer}>
@@ -308,33 +301,41 @@ const styles = StyleSheet.create({
     paddingBottom: 40,
   },
   header: {
+    minHeight: 44,
     flexDirection: 'row',
     alignItems: 'center',
     paddingHorizontal: 14,
-    paddingBottom: 8,
+    paddingBottom: 6,
   },
   headerSpacer: {
     flex: 1,
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '500',
+    fontSize: 18,
+    fontWeight: '600',
     fontFamily: 'Poppins-Medium',
-    lineHeight: 33.6,
+    lineHeight: 25.2,
     color: '#fff',
+    textAlign: 'center',
+  },
+  headerRightPlaceholder: {
+    width: 42,
+    height: 42,
   },
   backButton: {
     width: 42,
     height: 42,
-    borderRadius: 6,
+    borderRadius: 8,
     borderWidth: 1,
-    borderColor: '#3d3e50',
-    backgroundColor: 'rgba(255,255,255,0.08)',
+    borderColor: '#3D3E50',
+    backgroundColor: 'rgba(255, 255, 255, 0.08)',
     alignItems: 'center',
     justifyContent: 'center',
   },
   toggleContainer: {
     paddingHorizontal: 14,
+    marginTop: 18,
+    marginBottom: 4,
   },
   journeyBadge: {
     flexDirection: 'row',

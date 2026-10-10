@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { tokens } from '@/theme/tokens';
+import { AppBackButton } from '@/components/common/AppBackButton';
 
 export interface TodayReportStepHeaderProps {
   title: string;
@@ -18,16 +19,7 @@ export function TodayReportStepHeader({
     <View style={s.header}>
       <View style={s.inner}>
         {onBack ? (
-          <TouchableOpacity
-            onPress={onBack}
-            style={s.backBtn}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            activeOpacity={0.7}
-            accessibilityRole="button"
-            accessibilityLabel="Go back"
-          >
-            <Ionicons name="chevron-back" size={24} color="#fff" />
-          </TouchableOpacity>
+          <AppBackButton onPress={onBack} />
         ) : (
           <View style={s.spacer} />
         )}
@@ -52,16 +44,9 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
-  backBtn: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginLeft: -4,
-  },
   spacer: {
-    width: 36,
-    marginRight: -4,
+    width: 42,
+    height: 42,
   },
   title: {
     fontSize: 18,

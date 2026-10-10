@@ -25,6 +25,7 @@ import { TodayReportStepHeader } from '@/components/report/TodayReportStepHeader
 import { getReportMode } from '@/lib/report/reportMode';
 import { tokens } from '@/theme/tokens';
 import { AppBackground } from '../../components/common/AppBackground';
+import { AppBackButton } from '@/components/common/AppBackButton';
 
 export default function TodaysReportScreen() {
   const navigation = useNavigation();
@@ -104,14 +105,9 @@ export default function TodaysReportScreen() {
     return (
       <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
-          <TouchableOpacity
-            onPress={goBack}
-            style={ss.loadingBackBtn}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="chevron-back" size={24} color="#fff" />
-          </TouchableOpacity>
+          <View style={ss.loadingBackBtn}>
+            <AppBackButton onPress={goBack} />
+          </View>
           <ReportLoadingCard />
         </SafeAreaView>
       </AppBackground>
@@ -122,14 +118,9 @@ export default function TodaysReportScreen() {
     return (
       <AppBackground>
         <SafeAreaView style={ss.safe} edges={['top']}>
-          <TouchableOpacity
-            onPress={goBack}
-            style={ss.loadingBackBtn}
-            hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
-            activeOpacity={0.7}
-          >
-            <Ionicons name="chevron-back" size={24} color="#fff" />
-          </TouchableOpacity>
+          <View style={ss.loadingBackBtn}>
+            <AppBackButton onPress={goBack} />
+          </View>
           <ReportErrorCard
             error={error}
             code={errorCode}

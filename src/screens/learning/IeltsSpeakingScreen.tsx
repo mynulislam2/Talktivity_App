@@ -20,6 +20,12 @@ import {
   IeltsSpeakingTest,
   IeltsTestSession,
 } from '@/services/ielts';
+import {
+  IeltsHeader,
+  IeltsPillTabs,
+  IeltsButton,
+  IeltsTabItem,
+} from '@/components/ielts';
 
 type SpeakingPart = 1 | 2 | 3;
 
@@ -36,7 +42,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const navigation = useNavigation<any>();
   const route = useRoute<any>();
   const mode: 'drill' | 'mock' = route.params?.mode === 'drill' ? 'drill' : 'mock';
-  const plan: SpeakingPart[] = [1, 2, 3];
 
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -47,7 +52,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const [isCompleting, setIsCompleting] = useState(false);
   const [completeError, setCompleteError] = useState<string | null>(null);
 
-  // Waiting for the server to record a Part 1/3 call.
+  // Waiting for server to record Part 1/3 call
   const [waitingPart, setWaitingPart] = useState<SpeakingPart | null>(null);
   const [waitExpired, setWaitExpired] = useState(false);
   const awaitingPartRef = useRef<SpeakingPart | null>(null);
@@ -68,6 +73,8 @@ export const IeltsSpeakingScreen: React.FC = () => {
   const [part2Saved, setPart2Saved] = useState(false);
   const [recordingUri, setRecordingUri] = useState<string | null>(null);
   const recordingRef = useRef<Audio.Recording | null>(null);
+  const playbackSoundRef = useRef<Audio.Sound | null>(null);
+  const [isPlayingPreview, setIsPlayingPreview] = useState(false);
   const prepTimerRef = useRef<any>(null);
   const recordingTimerRef = useRef<any>(null);
   const mountedRef = useRef(true);
@@ -110,7 +117,8 @@ export const IeltsSpeakingScreen: React.FC = () => {
       setSession(sess);
       if (sess.part2_status === 'completed') setPart2Saved(true);
       const p1Duration = selected.part1_duration_seconds || 240;
-      const part1Done = ((sess as any)?.part1_elapsed_seconds || 0) >= Math.max(30, p1Duration - 20);
+      const part1Done =
+        ((sess as any)?.part1_elapsed_seconds || 0) >= Math.max(30, p1Duration - 20);
       if (!route.params?.part) {
         if (!part1Done) setCurrentPart(1);
         else if (sess.part2_status !== 'completed') setCurrentPart(2);
@@ -128,12 +136,11 @@ export const IeltsSpeakingScreen: React.FC = () => {
   }, [loadTest]);
 
   const stopPolling = useCallback(() => {
-    pollTokenRef.current += 1; // drops any in-flight check
+    pollTokenRef.current += 1;
     if (pollTimerRef.current) clearTimeout(pollTimerRef.current);
     pollTimerRef.current = null;
   }, []);
 
-  // Re-read the session every 3s (up to ~90s) until part N is saved.
   const pollUntilSaved = useCallback(
     (part: SpeakingPart, afterSaved?: () => void) => {
       if (!masterSessionId) return;
@@ -149,9 +156,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
         let fresh: IeltsTestSession | null = null;
         try {
           fresh = await ieltsService.getSession(masterSessionId);
-        } catch {
-          // Network blip: keep polling.
-        }
+        } catch {}
         if (token !== pollTokenRef.current) return;
         if (fresh?.id) setSession(fresh);
         if (fresh?.[`part${part}_status` as const] === 'completed') {
@@ -180,22 +185,14 @@ export const IeltsSpeakingScreen: React.FC = () => {
       setCompleteError(null);
       try {
         const existing = await ieltsService.getSession(masterSessionId);
-        const navigateBack = () => {
-          if (navigation.canGoBack()) {
-            navigation.goBack();
-          } else {
-            (navigation as any).navigate('PracticeScreen');
-          }
-        };
         if (existing?.overall_status === 'completed') {
-          navigateBack();
+          navigation.replace('TodaysReportScreen', { track: mode });
           return;
         }
         await ieltsService.completeTestSession(masterSessionId);
-        navigateBack();
+        navigation.replace('TodaysReportScreen', { track: mode });
       } catch (e) {
         if (apiErrorCode(e) === 'PART_PENDING' && !isRetry) {
-          // A call is still being saved: wait for it, then retry once.
           pollUntilSaved(3, () => void requestReport(true));
         } else {
           setCompleteError(extractErrorMessage(e) || 'Could not score this test.');
@@ -207,8 +204,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
     [masterSessionId, mode, navigation, pollUntilSaved]
   );
 
-  // Parts 1 and 3 are saved server-side after the call; on coming back from
-  // the call screen, handle transition smoothly. Polling stops on blur and unmount.
   useFocusEffect(
     useCallback(() => {
       if (!masterSessionId) return;
@@ -226,7 +221,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
         if (isTimeFinished) {
           setCurrentPart(2);
         } else {
-          // Call was cut early (time not finished): stay on Part 1 so learner can Retake
           setCurrentPart(1);
         }
 
@@ -254,83 +248,83 @@ export const IeltsSpeakingScreen: React.FC = () => {
         const isTimeFinished = callElapsed >= Math.max(30, targetDuration - 20);
 
         if (isTimeFinished) {
-          pollUntilSaved(3, () => {
-            void requestReport();
-          });
+          void requestReport(false);
         } else {
-          // Part 3 cut early: stay on Part 3 with Retake Part 3 option
           setCurrentPart(3);
-          ieltsService
-            .getSession(masterSessionId)
-            .then((fresh) => {
-              if (fresh?.id) setSession(fresh);
-            })
-            .catch(() => {});
         }
-      } else {
+
         ieltsService
           .getSession(masterSessionId)
           .then((fresh) => {
             if (fresh?.id) {
               setSession(fresh);
-              if (fresh.part2_status === 'completed') setPart2Saved(true);
-              if (((fresh as any).part1_elapsed_seconds || 0) > 0) setPart1Attempted(true);
-              if (((fresh as any).part3_elapsed_seconds || 0) > 0) setPart3Attempted(true);
             }
           })
           .catch(() => {});
       }
-      return stopPolling;
-    }, [masterSessionId, test, pollUntilSaved, stopPolling, requestReport])
+
+      return () => {
+        stopPolling();
+      };
+    }, [masterSessionId, requestReport, stopPolling, test])
   );
 
-  // Release the recorder and its audio mode if we leave mid-recording.
   useEffect(() => {
     mountedRef.current = true;
     return () => {
       mountedRef.current = false;
-      if (prepTimerRef.current) clearTimeout(prepTimerRef.current);
-      if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
-      const recording = recordingRef.current;
-      recordingRef.current = null;
-      if (recording) {
-        recording.stopAndUnloadAsync().catch(() => {});
-        Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
+      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
+      if (playbackSoundRef.current) {
+        playbackSoundRef.current.unloadAsync().catch(() => {});
       }
     };
   }, []);
 
-  // Prep Countdown Timer
+  // Prep timer countdown
   useEffect(() => {
-    if (isPrepping && prepSecondsLeft > 0) {
-      prepTimerRef.current = setTimeout(() => {
-        setPrepSecondsLeft((prev) => prev - 1);
+    if (isPrepping) {
+      prepTimerRef.current = setInterval(() => {
+        setPrepSecondsLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(prepTimerRef.current);
+            void startRecording();
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-    } else if (isPrepping && prepSecondsLeft === 0) {
-      setIsPrepping(false);
-      Alert.alert('Preparation time is up', 'Start speaking now. You have up to 2 minutes.');
-      startRecording();
+    } else {
+      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
     }
     return () => {
-      if (prepTimerRef.current) clearTimeout(prepTimerRef.current);
+      if (prepTimerRef.current) clearInterval(prepTimerRef.current);
     };
-  }, [isPrepping, prepSecondsLeft]);
+  }, [isPrepping]);
 
-  // Speaking Recording Countdown
+  // Speaking timer countdown
   useEffect(() => {
-    if (isRecording && speakingSecondsLeft > 0) {
-      recordingTimerRef.current = setTimeout(() => {
-        setSpeakingSecondsLeft((prev) => prev - 1);
+    if (isRecording) {
+      recordingTimerRef.current = setInterval(() => {
+        setSpeakingSecondsLeft((prev) => {
+          if (prev <= 1) {
+            clearInterval(recordingTimerRef.current);
+            void stopRecording();
+            return 0;
+          }
+          return prev - 1;
+        });
       }, 1000);
-    } else if (isRecording && speakingSecondsLeft === 0) {
-      stopRecording();
+    } else {
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     }
     return () => {
-      if (recordingTimerRef.current) clearTimeout(recordingTimerRef.current);
+      if (recordingTimerRef.current) clearInterval(recordingTimerRef.current);
     };
-  }, [isRecording, speakingSecondsLeft]);
+  }, [isRecording]);
 
   const startPart1LiveCall = () => {
+    if (!masterSessionId) return;
     callStartTimeRef.current = Date.now();
     awaitingPartRef.current = 1;
     navigation.navigate('PracticeScreen', {
@@ -340,11 +334,13 @@ export const IeltsSpeakingScreen: React.FC = () => {
       ieltsPart: 1,
       targetDurationSeconds: test?.part1_duration_seconds || 240,
       prompt: test?.part1_context_prompt || 'You are an IELTS Speaking examiner conducting Part 1.',
-      firstPrompt: test?.part1_example_questions?.[0] || 'Welcome to Part 1. Can you tell me a little about yourself?',
+      firstPrompt:
+        test?.part1_example_questions?.[0] || 'Hello! Welcome to your IELTS Speaking test.',
     });
   };
 
   const startPart3LiveCall = async () => {
+    if (!masterSessionId) return;
     let contextBridging = '';
     if (masterSessionId) {
       try {
@@ -352,9 +348,7 @@ export const IeltsSpeakingScreen: React.FC = () => {
         if (ctx?.part2_summary || ctx?.part2_topic) {
           contextBridging = ` Candidate Part 2 context: "${ctx.part2_summary || ctx.part2_topic}". Bridging guideline: Reference their cue card topic in your initial transition into Part 3.`;
         }
-      } catch (e) {
-        // Non-blocking fallback
-      }
+      } catch (e) {}
     }
 
     callStartTimeRef.current = Date.now();
@@ -366,7 +360,9 @@ export const IeltsSpeakingScreen: React.FC = () => {
       ieltsPart: 3,
       targetDurationSeconds: test?.part3_duration_seconds || 240,
       prompt: `${test?.part3_context_prompt || 'You are an IELTS Speaking examiner conducting Part 3.'}${contextBridging ? `\n\n${contextBridging}` : ''}`,
-      firstPrompt: test?.part3_example_questions?.[0] || 'Welcome to Part 3. Let us discuss broader themes connected with your talk.',
+      firstPrompt:
+        test?.part3_example_questions?.[0] ||
+        'Welcome to Part 3. Let us discuss broader themes connected with your talk.',
     });
   };
 
@@ -389,7 +385,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       if (!mountedRef.current) {
-        // Left the screen while the recorder was starting: release it.
         recording.stopAndUnloadAsync().catch(() => {});
         Audio.setAudioModeAsync({ allowsRecordingIOS: false }).catch(() => {});
         return;
@@ -418,7 +413,6 @@ export const IeltsSpeakingScreen: React.FC = () => {
     } catch (uploadErr) {
       console.warn('Part 2 upload error:', uploadErr);
       if (apiErrorCode(uploadErr) === 'TRANSCRIPTION_FAILED') {
-        // Re-sending the same audio won't help: only offer "Record again".
         setRecordingUri(null);
         setUploadError(
           extractErrorMessage(uploadErr) ||
@@ -433,336 +427,454 @@ export const IeltsSpeakingScreen: React.FC = () => {
   };
 
   const stopRecording = async () => {
-    const recording = recordingRef.current;
-    if (!recording) return;
-    recordingRef.current = null;
+    if (!recordingRef.current) return;
     setIsRecording(false);
     try {
-      await recording.stopAndUnloadAsync();
+      await recordingRef.current.stopAndUnloadAsync();
+      const uri = recordingRef.current.getURI();
+      recordingRef.current = null;
       await Audio.setAudioModeAsync({ allowsRecordingIOS: false });
-      const uri = recording.getURI();
-      setRecordingUri(uri);
       if (uri) {
+        setRecordingUri(uri);
         await uploadPart2Audio(uri);
       }
     } catch (err) {
       console.warn('Failed to stop recording', err);
-      setUploadError('The recording could not be finished. Please record again.');
+      setUploadError('Failed to save audio recording.');
     }
   };
 
-  const resetPart2 = () => {
-    setPart2Saved(false);
-    setUploadError(null);
-    setRecordingUri(null);
-    setSpeakingSecondsLeft(test?.part2_speaking_seconds || 120);
-    setPrepSecondsLeft(test?.part2_prep_seconds || 60);
+  const togglePreviewAudio = async () => {
+    if (!recordingUri) return;
+    try {
+      if (playbackSoundRef.current) {
+        if (isPlayingPreview) {
+          await playbackSoundRef.current.pauseAsync();
+          setIsPlayingPreview(false);
+        } else {
+          await playbackSoundRef.current.playAsync();
+          setIsPlayingPreview(true);
+        }
+      } else {
+        const { sound } = await Audio.Sound.createAsync(
+          { uri: recordingUri },
+          { shouldPlay: true },
+          (status) => {
+            if (status.isLoaded) {
+              if (status.didJustFinish) {
+                setIsPlayingPreview(false);
+              }
+            }
+          }
+        );
+        playbackSoundRef.current = sound;
+        setIsPlayingPreview(true);
+      }
+    } catch {}
   };
 
-  const renderHeader = (title: string, subtitle?: string) => (
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-        <Feather name="arrow-left" size={s(20)} color="#FFFFFF" />
-      </TouchableOpacity>
-      <View style={styles.headerTitleContainer}>
-        <Text style={styles.headerTitle}>{title}</Text>
-        {!!subtitle && <Text style={styles.headerSubtitle}>{subtitle}</Text>}
-      </View>
-    </View>
-  );
+  const resetPart2 = () => {
+    if (playbackSoundRef.current) {
+      playbackSoundRef.current.unloadAsync().catch(() => {});
+      playbackSoundRef.current = null;
+    }
+    setIsPlayingPreview(false);
+    setPart2Saved(false);
+    setRecordingUri(null);
+    setUploadError(null);
+    setPrepSecondsLeft(test?.part2_prep_seconds || 60);
+    setSpeakingSecondsLeft(test?.part2_speaking_seconds || 120);
+  };
 
-  if (loading) {
+  const headerTitle = mode === 'drill' ? 'IELTS Speaking Drill' : 'IELTS Speaking Mock';
+  const isFinalizing = isCompleting || waitingPart === 3 || !!completeError;
+
+  const tabs: IeltsTabItem[] = [
+    { id: 1, label: 'Part 1', isCompleted: isPartDone(1) },
+    { id: 2, label: 'Part 2', isCompleted: isPartDone(2) },
+    { id: 3, label: 'Part 3', isCompleted: isPartDone(3) },
+  ];
+
+  if (loading || loadError || !test) {
     return (
       <ScreenBackground>
-        <SafeAreaView style={styles.centerContainer}>
-          <ActivityIndicator size="large" color="#8B5CF6" />
-          <Text style={styles.loadingText}>Loading IELTS Speaking Test...</Text>
-        </SafeAreaView>
-      </ScreenBackground>
-    );
-  }
-
-  if (loadError || !test || !session) {
-    return (
-      <ScreenBackground>
-        <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-          {renderHeader('IELTS Speaking')}
-          <View style={styles.centerContainer}>
-            <Text style={styles.errorText}>
-              {loadError || 'Failed to load the IELTS Speaking test.'}
-            </Text>
-            <TouchableOpacity onPress={loadTest} style={[styles.actionButton, styles.retryButton]}>
-              <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
-              <Text style={styles.actionButtonText}>Retry</Text>
-            </TouchableOpacity>
+        <SafeAreaView style={styles.centerContainer} edges={['top', 'bottom']}>
+          <IeltsHeader title={headerTitle} onBack={() => navigation.goBack()} />
+          <View style={styles.stateCenter}>
+            {loading ? (
+              <>
+                <ActivityIndicator size="large" color="#7856FF" />
+                <Text style={styles.loadingText}>Loading IELTS Speaking Test...</Text>
+              </>
+            ) : (
+              <>
+                <Text style={styles.errorText}>
+                  {loadError || 'No IELTS speaking test is available yet.'}
+                </Text>
+                <View style={styles.errorActions}>
+                  <IeltsButton variant="secondary" onPress={() => navigation.goBack()}>
+                    Back to Home
+                  </IeltsButton>
+                  <IeltsButton variant="primary" onPress={loadTest}>
+                    Retry
+                  </IeltsButton>
+                </View>
+              </>
+            )}
           </View>
         </SafeAreaView>
       </ScreenBackground>
     );
   }
-
-  const subtitle =
-    mode === 'drill' ? 'Speaking drill: Parts 1, 2 and 3' : 'Speaking mock test: Parts 1, 2 and 3';
-  const isFinalizing = isCompleting || waitingPart === 3 || !!completeError;
 
   return (
     <ScreenBackground>
       <SafeAreaView style={styles.container} edges={['top', 'left', 'right']}>
-        {renderHeader(test.title, subtitle)}
+        {/* Top Header */}
+        <IeltsHeader title={headerTitle} onBack={() => navigation.goBack()} />
 
-        {/* Step Indicator (runs Parts 1 → 2 → 3) */}
+        {/* Step Progress Pill Tabs (1 → 2 → 3) */}
         {!isFinalizing && (
-          <View style={styles.stepperContainer}>
-            {([1, 2, 3] as const).map((p, idx) => (
-              <React.Fragment key={p}>
-                {idx > 0 && <View style={styles.stepDivider} />}
-                <View style={styles.stepItem}>
-                  <Text
-                    style={[
-                      styles.stepNum,
-                      (currentPart === p || isPartDone(p)) && styles.stepNumActive,
-                    ]}
-                  >
-                    {isPartDone(p) ? '✓' : p}
-                  </Text>
-                  <Text style={[styles.stepLabel, currentPart === p && styles.stepLabelActive]}>
-                    {p === 1 ? 'Part 1' : p === 2 ? 'Part 2' : 'Part 3'}
-                  </Text>
-                </View>
-              </React.Fragment>
-            ))}
-          </View>
+          <IeltsPillTabs
+            tabs={tabs}
+            activeId={currentPart}
+            onSelect={(id) => setCurrentPart(id as SpeakingPart)}
+          />
         )}
 
-        <ScrollView style={styles.contentScroll} contentContainerStyle={styles.contentBody}>
-          {/* Finalizing / Scoring / Saving Part 3 */}
+        <ScrollView
+          style={styles.contentScroll}
+          contentContainerStyle={styles.contentBody}
+          showsVerticalScrollIndicator={false}
+        >
+          {/* Finalizing / Scoring State */}
           {isFinalizing && (
-            <View style={styles.partCard}>
+            <View style={styles.cardContainer}>
               {isCompleting || waitingPart === 3 ? (
-                <View style={styles.timerDisplayBox}>
-                  <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 12 }} />
-                  <Text style={[styles.partHeading, { fontSize: 16, textAlign: 'center' }]}>
-                    Finalizing Speaking Test
-                  </Text>
-                  <Text style={[styles.timerHint, { textAlign: 'center', marginTop: 4 }]}>
+                <View style={styles.finalizingBox}>
+                  <ActivityIndicator size="large" color="#7856FF" style={{ marginBottom: 14 }} />
+                  <Text style={styles.finalizingHeading}>Finalizing Speaking Test</Text>
+                  <Text style={styles.finalizingSub}>
                     {waitingPart === 3
                       ? 'Uploading conversation audio and saving transcripts…'
                       : 'Scoring your test across Fluency, Vocabulary, Grammar & Pronunciation…'}
                   </Text>
-                  <Text style={[styles.timerHint, { textAlign: 'center', marginTop: 8, opacity: 0.6 }]}>
+                  <Text style={styles.finalizingHint}>
                     You will be automatically redirected to Today's Report momentarily.
                   </Text>
                 </View>
               ) : completeError ? (
-                <View style={styles.timerDisplayBox}>
-                  <Text style={[styles.timerLabel, { color: '#F87171', textAlign: 'center' }]}>
-                    {completeError}
-                  </Text>
-                  <View style={{ flexDirection: 'row', gap: 10, marginTop: 12 }}>
-                    <TouchableOpacity
+                <View style={styles.errorBox}>
+                  <Feather name="alert-circle" size={s(20)} color="#F87171" style={{ marginBottom: 8 }} />
+                  <Text style={styles.errorBoxText}>{completeError}</Text>
+                  <View style={styles.errorButtonRow}>
+                    <IeltsButton
+                      variant="secondary"
                       onPress={() => navigation.goBack()}
-                      style={[styles.prepButton, { flex: 1, backgroundColor: 'rgba(255,255,255,0.1)' }]}
+                      style={{ flex: 1 }}
                     >
-                      <Text style={styles.actionButtonText}>Back to Home</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                      Back to Home
+                    </IeltsButton>
+                    <IeltsButton
+                      variant="secondary"
                       onPress={() => {
                         setCompleteError(null);
                         setCurrentPart(3);
                         void startPart3LiveCall();
                       }}
-                      style={[styles.prepButton, { flex: 1 }]}
+                      style={{ flex: 1 }}
+                      icon={<Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" />}
                     >
-                      <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                      <Text style={styles.actionButtonText}>Retake Part 3</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity
+                      Retake Part 3
+                    </IeltsButton>
+                    <IeltsButton
+                      variant="primary"
                       onPress={() => requestReport(true)}
-                      style={[styles.prepButton, { flex: 1, backgroundColor: '#8B5CF6' }]}
+                      style={{ flex: 1 }}
+                      icon={<Feather name="refresh-cw" size={s(14)} color="#FFFFFF" />}
                     >
-                      <Feather name="refresh-cw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                      <Text style={styles.actionButtonText}>Retry</Text>
-                    </TouchableOpacity>
+                      Retry
+                    </IeltsButton>
                   </View>
                 </View>
               ) : null}
             </View>
           )}
 
-          {/* Part 1 Screen */}
-          {currentPart === 1 && !isFinalizing && (
-            <View style={styles.partCard}>
+          {/* Part 1 Content Card */}
+          {!isFinalizing && currentPart === 1 && (
+            <View style={styles.cardContainer}>
               <View style={styles.badgeRow}>
-                <Feather name="mic" size={s(16)} color="#8B5CF6" />
-                <Text style={styles.partBadgeText}>Part 1: Introduction &amp; Interview</Text>
+                <View style={styles.badgeTag}>
+                  <Feather name="mic" size={s(15)} color="#C55DFE" style={{ marginRight: 6 }} />
+                  <Text style={styles.badgeTagText}>PART 1</Text>
+                </View>
+                <View style={styles.durationPill}>
+                  <Text style={styles.durationPillText}>
+                    ~{Math.round((test.part1_duration_seconds || 240) / 60)} mins
+                  </Text>
+                </View>
               </View>
-              <Text style={styles.partHeading}>Familiar Everyday Topics</Text>
-              <Text style={styles.partDescription}>
-                You will speak with an AI examiner about everyday topics (home, work, studies, interests). Keep your answers natural and direct (2-3 sentences per answer).
+
+              <Text style={styles.partCardHeading}>Familiar Everyday Topics</Text>
+              <Text style={styles.partCardDesc}>
+                You will speak with an AI examiner about everyday topics (work, study, hometown,
+                hobbies). Answer in 2-3 natural sentences per question.
               </Text>
 
-              <View style={styles.topicsPreviewCard}>
-                <Text style={styles.previewTitle}>Example Questions:</Text>
-                {(test.part1_example_questions ?? []).map((q: string, idx: number) => (
-                  <View key={idx} style={styles.bulletRow}>
-                    <Text style={styles.bulletDot}>•</Text>
-                    <Text style={styles.bulletText}>{q}</Text>
-                  </View>
-                ))}
-                {!!test.part1_theme && (
-                  <Text style={[styles.previewTitle, { marginTop: 8 }]}>Theme: {test.part1_theme}</Text>
-                )}
-              </View>
+              {(test.part1_example_questions?.length ?? 0) > 0 && (
+                <View style={styles.sampleQuestionsBox}>
+                  <Text style={styles.sampleQuestionsLabel}>SAMPLE QUESTIONS</Text>
+                  {test.part1_example_questions!.map((q: string, idx: number) => (
+                    <View key={idx} style={styles.sampleBulletRow}>
+                      <Text style={styles.sampleBulletDot}>•</Text>
+                      <Text style={styles.sampleBulletText}>{q}</Text>
+                    </View>
+                  ))}
+                  {!!test.part1_theme && (
+                    <Text style={styles.themeNote}>Theme: {test.part1_theme}</Text>
+                  )}
+                </View>
+              )}
 
               {part1Attempted || ((session as any)?.part1_elapsed_seconds || 0) > 0 ? (
-                <>
-                  <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
-                    <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.actionButtonText}>Retake Part 1</Text>
-                  </TouchableOpacity>
+                <View style={styles.actionBtnGroup}>
+                  <IeltsButton
+                    variant="primary"
+                    onPress={startPart1LiveCall}
+                    icon={<Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" />}
+                  >
+                    Retake Part 1
+                  </IeltsButton>
                   <TouchableOpacity
                     onPress={() => setCurrentPart(2)}
-                    style={[styles.actionButton, { marginTop: 10, backgroundColor: 'transparent', borderWidth: 1, borderColor: '#8B5CF6' }]}
+                    style={styles.continueLink}
+                    activeOpacity={0.7}
                   >
-                    <Text style={[styles.actionButtonText, { color: '#C4B5FD' }]}>Continue to Part 2</Text>
+                    <Text style={styles.continueLinkText}>Continue to Part 2</Text>
                   </TouchableOpacity>
-                </>
+                </View>
               ) : (
-                <TouchableOpacity onPress={startPart1LiveCall} style={styles.actionButton}>
-                  <Text style={styles.actionButtonText}>Start Part 1 Call</Text>
-                </TouchableOpacity>
+                <IeltsButton
+                  variant="primary"
+                  onPress={startPart1LiveCall}
+                  icon={<Feather name="mic" size={s(15)} color="#FFFFFF" />}
+                >
+                  Start Part 1 Call
+                </IeltsButton>
               )}
             </View>
           )}
 
-          {/* Part 2 Cue Card Screen */}
-          {currentPart === 2 && !isFinalizing && (
-            <View style={styles.partCard}>
+          {/* Part 2 Cue Card Content Card */}
+          {!isFinalizing && currentPart === 2 && (
+            <View style={styles.cardContainer}>
               <View style={styles.badgeRow}>
-                <Feather name="file-text" size={s(16)} color="#8B5CF6" />
-                <Text style={styles.partBadgeText}>Part 2: Individual Long Turn</Text>
+                <View style={styles.badgeTag}>
+                  <Feather name="file-text" size={s(15)} color="#C55DFE" style={{ marginRight: 6 }} />
+                  <Text style={styles.badgeTagText}>PART 2</Text>
+                </View>
+                <View style={styles.durationPill}>
+                  <Text style={styles.durationPillText}>1m prep + 2m speech</Text>
+                </View>
               </View>
 
               {/* Cue Card Frame */}
               <View style={styles.cueCardBox}>
-                <Text style={styles.cueCardTopic}>{test.part2_title || 'Cue Card Topic'}</Text>
-                <Text style={styles.cueCardSubtitle}>You should say:</Text>
-                {(test.part2_bullet_points ?? []).map((b: string, idx: number) => (
+                <Text style={styles.cueCardTopic}>
+                  {test.part2_title || test.part2_cue_card?.topic || 'Describe an important decision'}
+                </Text>
+                <Text style={styles.cueCardSub}>You should say:</Text>
+                {(
+                  test.part2_bullet_points ||
+                  test.part2_cue_card?.bullets || [
+                    'What the decision was',
+                    'When you made it',
+                    'Why it was difficult',
+                    'And explain what you learned from it',
+                  ]
+                ).map((b: string, idx: number) => (
                   <View key={idx} style={styles.cueBulletRow}>
-                    <Text style={styles.cueBulletDot}>-</Text>
+                    <Text style={styles.cueBulletDot}>•</Text>
                     <Text style={styles.cueBulletText}>{b}</Text>
                   </View>
                 ))}
                 {!!test.part2_preparation_hint && (
-                  <Text style={[styles.timerHint, { marginTop: 10 }]}>
-                    💡 {test.part2_preparation_hint}
-                  </Text>
+                  <Text style={styles.cueHint}>💡 {test.part2_preparation_hint}</Text>
                 )}
               </View>
 
-              {/* Prep Timer & Monologue Status */}
+              {/* Prep & Monologue Box */}
               <View style={styles.timerSection}>
                 {isPrepping ? (
-                  <View style={styles.timerDisplayBox}>
-                    <Text style={styles.timerLabel}>Preparation Time Remaining:</Text>
-                    <Text style={styles.timerDigits}>{prepSecondsLeft}s</Text>
-                    <Text style={styles.timerHint}>Jot down ideas and keywords in your mind</Text>
+                  <View style={styles.prepDisplayBox}>
+                    <Text style={styles.timerSubLabel}>Preparation Time Remaining</Text>
+                    <Text style={styles.prepDigits}>{prepSecondsLeft}s</Text>
+                    <Text style={styles.timerSubHint}>
+                      Think of key ideas, examples, and linking words
+                    </Text>
                   </View>
                 ) : isRecording ? (
                   <View style={styles.recordingDisplayBox}>
-                    <View style={styles.redRecordingDot} />
-                    <Text style={styles.timerLabel}>Recording Monologue...</Text>
-                    <Text style={styles.timerDigits}>{speakingSecondsLeft}s</Text>
-                    <TouchableOpacity onPress={stopRecording} style={styles.stopButton}>
-                      <Text style={styles.stopButtonText}>Finish Early</Text>
+                    <View style={styles.recStatusRow}>
+                      <View style={styles.redPulsingDot} />
+                      <Text style={styles.recordingStatusText}>Recording Your Monologue...</Text>
+                    </View>
+                    <Text style={styles.recordingDigits}>{speakingSecondsLeft}s</Text>
+                    <TouchableOpacity
+                      onPress={stopRecording}
+                      style={styles.stopRecordingBtn}
+                      activeOpacity={0.8}
+                    >
+                      <Text style={styles.stopRecordingText}>Finish Monologue Early</Text>
                     </TouchableOpacity>
                   </View>
                 ) : isUploading ? (
-                  <View style={styles.timerDisplayBox}>
+                  <View style={styles.uploadingBox}>
                     <ActivityIndicator size="small" color="#8B5CF6" style={{ marginBottom: 8 }} />
-                    <Text style={styles.timerLabel}>Saving your recording...</Text>
+                    <Text style={styles.uploadingText}>Uploading monologue...</Text>
                   </View>
                 ) : uploadError ? (
-                  <View style={styles.timerDisplayBox}>
-                    <Text style={[styles.timerLabel, { color: '#F87171' }]}>{uploadError}</Text>
+                  <View style={styles.uploadErrorBox}>
+                    <Feather name="alert-circle" size={s(16)} color="#F87171" style={{ marginBottom: 6 }} />
+                    <Text style={styles.uploadErrorText}>{uploadError}</Text>
                     {recordingUri ? (
-                      <TouchableOpacity
+                      <IeltsButton
+                        variant="primary"
                         onPress={() => uploadPart2Audio(recordingUri)}
-                        style={[styles.prepButton, { marginTop: 8 }]}
+                        style={{ marginTop: 10 }}
+                        icon={<Feather name="refresh-cw" size={s(14)} color="#FFFFFF" />}
                       >
-                        <Feather name="refresh-cw" size={s(16)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                        <Text style={styles.actionButtonText}>Retry upload</Text>
-                      </TouchableOpacity>
+                        Retry Upload
+                      </IeltsButton>
                     ) : null}
-                    <TouchableOpacity onPress={resetPart2} style={{ marginTop: 10 }}>
-                      <Text style={styles.skipPrepText}>Retake Part 2</Text>
+                    <TouchableOpacity onPress={resetPart2} style={{ marginTop: 12 }}>
+                      <Text style={styles.retakeLinkText}>Retake Part 2</Text>
                     </TouchableOpacity>
                   </View>
                 ) : isPartDone(2) ? (
-                  <View style={styles.timerDisplayBox}>
-                    <Text style={[styles.timerLabel, { color: '#34D399', fontWeight: '700' }]}>
-                      ✓ Part 2 Monologue Recorded &amp; Uploaded
-                    </Text>
-                    <View style={{ flexDirection: 'row', gap: 10, marginTop: 12, width: '100%' }}>
+                  <View style={styles.completedBox}>
+                    <View style={styles.completedBadgePill}>
+                      <Feather name="check-circle" size={s(14)} color="#34D399" style={{ marginRight: 6 }} />
+                      <Text style={styles.completedBadgeText}>
+                        Part 2 Monologue Recorded & Uploaded
+                      </Text>
+                    </View>
+
+                    {recordingUri && (
                       <TouchableOpacity
+                        onPress={togglePreviewAudio}
+                        style={styles.previewAudioCard}
+                        activeOpacity={0.8}
+                      >
+                        <Feather
+                          name={isPlayingPreview ? 'pause' : 'volume-2'}
+                          size={s(16)}
+                          color="#C4B5FD"
+                          style={{ marginRight: 8 }}
+                        />
+                        <Text style={styles.previewAudioText}>
+                          {isPlayingPreview ? 'Pause recording preview' : 'Review your recording'}
+                        </Text>
+                      </TouchableOpacity>
+                    )}
+
+                    <View style={styles.part2DoneActionsRow}>
+                      <IeltsButton
+                        variant="primary"
                         onPress={() => setCurrentPart(3)}
-                        style={[styles.prepButton, { flex: 1.2, backgroundColor: '#8B5CF6' }]}
+                        style={{ flex: 1.2 }}
+                        icon={<Feather name="arrow-right" size={s(16)} color="#FFFFFF" />}
+                        iconPosition="right"
                       >
-                        <Text style={styles.actionButtonText}>Go to Part 3 →</Text>
-                      </TouchableOpacity>
-                      <TouchableOpacity
+                        Go to Part 3
+                      </IeltsButton>
+                      <IeltsButton
+                        variant="secondary"
                         onPress={resetPart2}
-                        style={[styles.prepButton, { flex: 0.8, backgroundColor: 'rgba(255,255,255,0.08)' }]}
+                        style={{ flex: 0.9 }}
+                        icon={<Feather name="rotate-ccw" size={s(14)} color="#C4B5FD" />}
                       >
-                        <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 4 }} />
-                        <Text style={styles.actionButtonText}>Retake Part 2</Text>
-                      </TouchableOpacity>
+                        Retake Part 2
+                      </IeltsButton>
                     </View>
                   </View>
                 ) : (
                   <View style={styles.prepActionRow}>
-                    <TouchableOpacity onPress={startPrep} style={styles.prepButton}>
-                      <Text style={styles.prepButtonText}>Start 1-Min Prep</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={startRecording} style={styles.skipPrepButton}>
-                      <Text style={styles.skipPrepText}>Skip Prep &amp; Record</Text>
-                    </TouchableOpacity>
+                    <IeltsButton
+                      variant="primary"
+                      onPress={startPrep}
+                      style={{ flex: 1 }}
+                    >
+                      Start 1-Min Prep
+                    </IeltsButton>
+                    <IeltsButton
+                      variant="secondary"
+                      onPress={startRecording}
+                      style={{ flex: 1 }}
+                    >
+                      Skip Prep & Record
+                    </IeltsButton>
                   </View>
                 )}
               </View>
-
             </View>
           )}
 
-          {/* Part 3 Screen */}
-          {currentPart === 3 && !isFinalizing && (
-            <View style={styles.partCard}>
+          {/* Part 3 Content Card */}
+          {!isFinalizing && currentPart === 3 && (
+            <View style={styles.cardContainer}>
               <View style={styles.badgeRow}>
-                <Feather name="message-circle" size={s(16)} color="#8B5CF6" />
-                <Text style={styles.partBadgeText}>Part 3: Two-Way Discussion</Text>
+                <View style={styles.badgeTag}>
+                  <Feather
+                    name="message-circle"
+                    size={s(15)}
+                    color="#C55DFE"
+                    style={{ marginRight: 6 }}
+                  />
+                  <Text style={styles.badgeTagText}>PART 3</Text>
+                </View>
+                <View style={styles.durationPill}>
+                  <Text style={styles.durationPillText}>
+                    ~{Math.round((test.part3_duration_seconds || 240) / 60)} mins
+                  </Text>
+                </View>
               </View>
-              <Text style={styles.partHeading}>Abstract &amp; Societal Topics</Text>
-              <Text style={styles.partDescription}>
-                The AI examiner will ask deeper, analytical questions connected to your Part 2 topic. Provide reasons, examples, and consider multiple perspectives.
+
+              <Text style={styles.partCardHeading}>Abstract & Societal Topics</Text>
+              <Text style={styles.partCardDesc}>
+                The AI examiner will explore broader, abstract themes connected to the Part 2
+                topic. State clear opinions with supporting reasons and examples.
               </Text>
 
               {part3Attempted || ((session as any)?.part3_elapsed_seconds || 0) > 0 ? (
-                <View style={{ flexDirection: 'row', gap: 10 }}>
-                  <TouchableOpacity onPress={startPart3LiveCall} style={[styles.actionButton, { flex: 1 }]}>
-                    <Feather name="rotate-ccw" size={s(14)} color="#FFFFFF" style={{ marginRight: 6 }} />
-                    <Text style={styles.actionButtonText}>Retake Part 3</Text>
-                  </TouchableOpacity>
-                  <TouchableOpacity
-                    onPress={() => requestReport(false)}
-                    style={[styles.actionButton, { flex: 0, paddingHorizontal: 16, backgroundColor: '#059669' }]}
+                <View style={styles.part3ActionsRow}>
+                  <IeltsButton
+                    variant="secondary"
+                    onPress={startPart3LiveCall}
+                    style={{ flex: 1 }}
+                    icon={<Feather name="rotate-ccw" size={s(14)} color="#C4B5FD" />}
                   >
-                    <Text style={styles.actionButtonText}>Finish & Score →</Text>
-                  </TouchableOpacity>
+                    Retake Part 3
+                  </IeltsButton>
+                  <IeltsButton
+                    variant="success"
+                    onPress={() => requestReport(false)}
+                    style={{ flex: 1 }}
+                    icon={<Feather name="arrow-right" size={s(16)} color="#FFFFFF" />}
+                    iconPosition="right"
+                  >
+                    Finish & Score
+                  </IeltsButton>
                 </View>
               ) : (
-                <TouchableOpacity onPress={startPart3LiveCall} style={styles.actionButton}>
-                  <Text style={styles.actionButtonText}>Start Part 3 Call</Text>
-                </TouchableOpacity>
+                <IeltsButton
+                  variant="primary"
+                  onPress={startPart3LiveCall}
+                  icon={<Feather name="mic" size={s(15)} color="#FFFFFF" />}
+                >
+                  Start Part 3 Call
+                </IeltsButton>
               )}
             </View>
           )}
@@ -778,339 +890,367 @@ const styles = StyleSheet.create({
   },
   centerContainer: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  stateCenter: {
+    flex: 1,
     alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 24,
   },
   loadingText: {
-    color: '#A0A0A0',
-    marginTop: 12,
-    fontSize: 14,
-  },
-  header: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.1)',
-  },
-  backButton: {
-    padding: 6,
-  },
-  headerTitleContainer: {
-    marginLeft: 10,
-  },
-  headerTitle: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-  },
-  headerSubtitle: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    marginTop: 2,
-  },
-  stepperContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 24,
-    paddingVertical: 12,
-    backgroundColor: 'rgba(0,0,0,0.25)',
-  },
-  stepItem: {
-    alignItems: 'center',
-  },
-  stepNum: {
-    width: 28,
-    height: 28,
-    borderRadius: 14,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    color: '#9CA3AF',
-    textAlign: 'center',
-    lineHeight: 28,
-    fontWeight: '700',
-    fontSize: 12,
-  },
-  stepNumActive: {
-    backgroundColor: '#8B5CF6',
-    color: '#FFFFFF',
-  },
-  stepLabel: {
-    fontSize: 11,
-    color: '#9CA3AF',
-    marginTop: 4,
-  },
-  stepLabelActive: {
-    color: '#FFFFFF',
-    fontWeight: '600',
-  },
-  stepDivider: {
-    flex: 1,
-    height: 2,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    marginHorizontal: 12,
-    marginBottom: 16,
-  },
-  contentScroll: {
-    flex: 1,
-  },
-  contentBody: {
-    padding: 16,
-  },
-  partCard: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
-    borderRadius: 12,
-    padding: 18,
-    borderWidth: 1,
-    borderColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  badgeRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-    marginBottom: 10,
-  },
-  partBadgeText: {
-    color: '#8B5CF6',
-    fontSize: 12,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  partHeading: {
-    fontSize: 18,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 8,
-  },
-  partDescription: {
-    fontSize: 13,
-    color: '#D1D5DB',
-    lineHeight: 20,
-    marginBottom: 16,
-  },
-  topicsPreviewCard: {
-    backgroundColor: 'rgba(0, 0, 0, 0.2)',
-    borderRadius: 8,
-    padding: 12,
-    marginBottom: 20,
-  },
-  previewTitle: {
-    fontSize: 12,
-    fontWeight: '600',
-    color: '#9CA3AF',
-    marginBottom: 6,
-  },
-  bulletRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginTop: 3,
-  },
-  bulletDot: {
-    color: '#8B5CF6',
-    marginRight: 6,
-    fontSize: 14,
-  },
-  bulletText: {
-    color: '#E5E7EB',
-    fontSize: 13,
-  },
-  cueCardBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.08)',
-    borderRadius: 8,
-    padding: 16,
-    borderLeftWidth: 4,
-    borderLeftColor: '#8B5CF6',
-    marginBottom: 20,
-  },
-  cueCardTopic: {
-    fontSize: 16,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    marginBottom: 10,
-  },
-  cueCardSubtitle: {
-    fontSize: 13,
-    color: '#A0A0A0',
-    marginBottom: 6,
-  },
-  cueBulletRow: {
-    flexDirection: 'row',
-    marginTop: 4,
-  },
-  cueBulletDot: {
-    color: '#8B5CF6',
-    marginRight: 8,
-    fontWeight: '700',
-  },
-  cueBulletText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    flex: 1,
-    lineHeight: 18,
-  },
-  timerSection: {
-    marginTop: 8,
-  },
-  timerDisplayBox: {
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'rgba(139, 92, 246, 0.1)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#8B5CF6',
-  },
-  recordingDisplayBox: {
-    alignItems: 'center',
-    padding: 16,
-    backgroundColor: 'rgba(239, 68, 68, 0.1)',
-    borderRadius: 12,
-    borderWidth: 1,
-    borderColor: '#EF4444',
-  },
-  redRecordingDot: {
-    width: 12,
-    height: 12,
-    borderRadius: 6,
-    backgroundColor: '#EF4444',
-    marginBottom: 8,
-  },
-  timerLabel: {
-    fontSize: 12,
-    color: '#D1D5DB',
-  },
-  timerDigits: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: '#FFFFFF',
-    fontFamily: 'monospace',
-    marginVertical: 4,
-  },
-  timerHint: {
-    fontSize: 11,
-    color: '#9CA3AF',
-  },
-  prepActionRow: {
-    flexDirection: 'row',
-    gap: 8,
-    width: '100%',
-  },
-  prepButton: {
-    flex: 1,
-    height: 44,
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#8B5CF6',
-    paddingHorizontal: 8,
-    borderRadius: 8,
-  },
-  prepButtonText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '700',
-  },
-  skipPrepButton: {
-    flex: 1,
-    height: 44,
-    paddingHorizontal: 8,
-    borderRadius: 8,
-    backgroundColor: 'rgba(255, 255, 255, 0.1)',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  skipPrepText: {
-    color: '#FFFFFF',
-    fontSize: 13,
-    fontWeight: '600',
-  },
-  stopButton: {
-    marginTop: 10,
-    backgroundColor: '#EF4444',
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 8,
-  },
-  stopButtonText: {
-    color: '#FFFFFF',
-    fontSize: 12,
-    fontWeight: '600',
-  },
-  actionButton: {
-    height: 44,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    backgroundColor: '#8B5CF6',
-    paddingHorizontal: 16,
-    borderRadius: 8,
-    shadowColor: '#8B5CF6',
-    shadowOpacity: 0.3,
-    shadowRadius: 10,
-    elevation: 4,
-  },
-  actionButtonText: {
-    color: '#FFFFFF',
-    fontWeight: '700',
+    color: 'rgba(255, 255, 255, 0.7)',
+    marginTop: 14,
     fontSize: 14,
   },
   errorText: {
     color: '#F87171',
     fontSize: 14,
     textAlign: 'center',
-    marginHorizontal: 24,
+    lineHeight: 20,
     marginBottom: 16,
   },
-  retryButton: {
-    paddingHorizontal: 24,
+  errorActions: {
+    flexDirection: 'row',
+    gap: 12,
   },
-  drillTabContainer: {
+  contentScroll: {
+    flex: 1,
+  },
+  contentBody: {
+    paddingHorizontal: 16,
+    paddingTop: 12,
+    paddingBottom: 32,
+  },
+  cardContainer: {
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.04)',
+    padding: 18,
+  },
+  badgeRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
+  },
+  badgeTag: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  badgeTagText: {
+    color: '#C55DFE',
+    fontSize: 12,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+  },
+  durationPill: {
+    paddingHorizontal: 10,
+    paddingVertical: 3,
+    borderRadius: 9999,
+    backgroundColor: 'rgba(120, 86, 255, 0.2)',
+  },
+  durationPillText: {
+    color: '#C55DFE',
+    fontSize: 11,
+    fontWeight: '600',
+  },
+  partCardHeading: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: '700',
+    letterSpacing: -0.2,
+    marginBottom: 6,
+  },
+  partCardDesc: {
+    color: 'rgba(255, 255, 255, 0.75)',
+    fontSize: 13,
+    lineHeight: 20,
+    marginBottom: 16,
+  },
+  sampleQuestionsBox: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.03)',
+    padding: 14,
+    marginBottom: 18,
+  },
+  sampleQuestionsLabel: {
+    color: '#9CA3AF',
+    fontSize: 11,
+    fontWeight: '700',
+    letterSpacing: 0.8,
+    marginBottom: 8,
+  },
+  sampleBulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  sampleBulletDot: {
+    color: '#7856FF',
+    fontSize: 14,
+    fontWeight: '700',
+    marginRight: 8,
+    marginTop: -1,
+  },
+  sampleBulletText: {
+    color: '#E5E7EB',
+    fontSize: 13,
+    lineHeight: 18,
+    flex: 1,
+  },
+  themeNote: {
+    color: '#C4B5FD',
+    fontSize: 12,
+    fontWeight: '600',
+    marginTop: 8,
+  },
+  actionBtnGroup: {
+    gap: 10,
+  },
+  continueLink: {
+    alignItems: 'center',
+    paddingVertical: 4,
+  },
+  continueLinkText: {
+    color: '#C4B5FD',
+    fontSize: 13,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  cueCardBox: {
+    borderRadius: 8,
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.08)',
+    backgroundColor: 'rgba(255, 255, 255, 0.06)',
+    padding: 16,
+    marginBottom: 16,
+  },
+  cueCardTopic: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 8,
+    lineHeight: 22,
+  },
+  cueCardSub: {
+    color: '#9CA3AF',
+    fontSize: 12,
+    fontWeight: '500',
+    marginBottom: 6,
+  },
+  cueBulletRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-start',
+    marginBottom: 4,
+  },
+  cueBulletDot: {
+    color: '#7856FF',
+    fontSize: 14,
+    fontWeight: '700',
+    marginRight: 8,
+    marginTop: -1,
+  },
+  cueBulletText: {
+    color: '#E5E7EB',
+    fontSize: 13,
+    lineHeight: 18,
+    flex: 1,
+  },
+  cueHint: {
+    color: 'rgba(255, 255, 255, 0.65)',
+    fontSize: 12,
+    marginTop: 10,
+    lineHeight: 18,
+  },
+  timerSection: {
+    marginTop: 4,
+  },
+  prepDisplayBox: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(120, 86, 255, 0.4)',
+    backgroundColor: 'rgba(120, 86, 255, 0.1)',
+  },
+  timerSubLabel: {
+    color: '#9CA3AF',
+    fontSize: 12,
+  },
+  prepDigits: {
+    color: '#C55DFE',
+    fontSize: 36,
+    fontWeight: '700',
+    fontFamily: 'monospace',
+    marginVertical: 4,
+  },
+  timerSubHint: {
+    color: 'rgba(255, 255, 255, 0.6)',
+    fontSize: 11,
+  },
+  recordingDisplayBox: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: 'rgba(239, 68, 68, 0.4)',
+    backgroundColor: 'rgba(239, 68, 68, 0.1)',
+  },
+  recStatusRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 8,
-    marginHorizontal: 16,
-    marginTop: 8,
-    marginBottom: 4,
-    backgroundColor: 'rgba(255,255,255,0.05)',
-    borderRadius: 10,
-    padding: 4,
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.08)',
   },
-  drillTabItem: {
-    flex: 1,
-    paddingVertical: 9,
-    alignItems: 'center',
-    justifyContent: 'center',
-    borderRadius: 6,
-    backgroundColor: 'transparent',
+  redPulsingDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: '#EF4444',
   },
-  drillTabItemActive: {
-    backgroundColor: '#7c3aed',
-    borderWidth: 1,
-    borderColor: 'rgba(167,139,250,0.6)',
-  },
-  drillTabText: {
-    fontSize: 13,
-    fontWeight: '500',
-    fontFamily: 'Poppins-Medium',
-    color: '#9ca3af',
-  },
-  drillTabTextActive: {
-    color: '#ffffff',
-    fontWeight: '600',
-  },
-  criterionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingVertical: 6,
-    borderBottomWidth: 1,
-    borderBottomColor: 'rgba(255, 255, 255, 0.08)',
-  },
-  criterionBand: {
-    color: '#FFFFFF',
-    fontSize: 15,
+  recordingStatusText: {
+    color: '#F87171',
+    fontSize: 12,
     fontWeight: '700',
   },
+  recordingDigits: {
+    color: '#FFFFFF',
+    fontSize: 36,
+    fontWeight: '700',
+    fontFamily: 'monospace',
+    marginVertical: 4,
+  },
+  stopRecordingBtn: {
+    marginTop: 6,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+    backgroundColor: '#DC2626',
+  },
+  stopRecordingText: {
+    color: '#FFFFFF',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  uploadingBox: {
+    alignItems: 'center',
+    padding: 18,
+  },
+  uploadingText: {
+    color: '#C4B5FD',
+    fontSize: 13,
+    fontWeight: '500',
+  },
+  uploadErrorBox: {
+    alignItems: 'center',
+    padding: 16,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: 'rgba(244, 63, 94, 0.35)',
+    backgroundColor: 'rgba(244, 63, 94, 0.1)',
+  },
+  uploadErrorText: {
+    color: '#FDA4AF',
+    fontSize: 13,
+    textAlign: 'center',
+  },
+  retakeLinkText: {
+    color: '#C4B5FD',
+    fontSize: 12,
+    fontWeight: '600',
+    textDecorationLine: 'underline',
+  },
+  completedBox: {
+    alignItems: 'center',
+    gap: 12,
+  },
+  completedBadgePill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingHorizontal: 14,
+    paddingVertical: 6,
+    borderRadius: 9999,
+    borderWidth: 1,
+    borderColor: 'rgba(52, 211, 153, 0.35)',
+    backgroundColor: 'rgba(16, 185, 129, 0.15)',
+  },
+  completedBadgeText: {
+    color: '#34D399',
+    fontSize: 12,
+    fontWeight: '700',
+  },
+  previewAudioCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    width: '100%',
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    borderWidth: 1,
+    borderColor: 'rgba(255, 255, 255, 0.1)',
+  },
+  previewAudioText: {
+    color: '#E5E7EB',
+    fontSize: 13,
+    fontWeight: '600',
+  },
+  part2DoneActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+    marginTop: 4,
+  },
+  prepActionRow: {
+    flexDirection: 'row',
+    gap: 10,
+    width: '100%',
+  },
+  part3ActionsRow: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  finalizingBox: {
+    alignItems: 'center',
+    paddingVertical: 18,
+    textAlign: 'center',
+  },
+  finalizingHeading: {
+    color: '#FFFFFF',
+    fontSize: 16,
+    fontWeight: '700',
+    marginBottom: 6,
+  },
+  finalizingSub: {
+    color: '#C4B5FD',
+    fontSize: 12,
+    textAlign: 'center',
+    lineHeight: 18,
+  },
+  finalizingHint: {
+    color: 'rgba(255, 255, 255, 0.45)',
+    fontSize: 11,
+    textAlign: 'center',
+    marginTop: 8,
+  },
+  errorBox: {
+    alignItems: 'center',
+    paddingVertical: 12,
+  },
+  errorBoxText: {
+    color: '#F87171',
+    fontSize: 13,
+    textAlign: 'center',
+    lineHeight: 18,
+    marginBottom: 12,
+  },
+  errorButtonRow: {
+    flexDirection: 'row',
+    gap: 8,
+    width: '100%',
+  },
 });
+
 export default IeltsSpeakingScreen;
